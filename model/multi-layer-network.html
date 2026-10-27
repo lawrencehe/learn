@@ -1,0 +1,698 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>多层神经网络的由来</title>
+<style>
+/* Layout: 一栏阅读，中间插入两块“仪器面板”——分步动画 + 自己动手拼曲线；配色沿用《神经网络如何逼近任何函数》 */
+:root{
+  --bg:#F3F5F9; --surface:#FFFFFF; --ink:#131A2C; --muted:#5B6479; --line:#D8DDE7; --grid:#E8EBF2; --chip:#EAEEFB;
+  --accent:#2D4FE6;   /* 第 1 层：w、b */
+  --out:#D98300;      /* 第 2 层：w⁽²⁾、b⁽²⁾，以及目标曲线 */
+  --n1:#2D4FE6; --n2:#0E9384; --n3:#8B3FD9;  /* 三个隐藏神经元 */
+  --neg:#C93A6A; --ok:#1F8F55;
+  --f-body:"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",system-ui,sans-serif;
+  --f-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1120; --surface:#151B2D; --ink:#E5E9F3; --muted:#98A1B8; --line:#283049; --grid:#1D2438; --chip:#1E2742;
+    --accent:#7D95FF; --out:#F2AE38; --n1:#7D95FF; --n2:#3CC7B4; --n3:#B98AF5; --neg:#FF6F9A; --ok:#4CC38A; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1120; --surface:#151B2D; --ink:#E5E9F3; --muted:#98A1B8; --line:#283049; --grid:#1D2438; --chip:#1E2742;
+  --accent:#7D95FF; --out:#F2AE38; --n1:#7D95FF; --n2:#3CC7B4; --n3:#B98AF5; --neg:#FF6F9A; --ok:#4CC38A; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.75;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 24px}
+.wrap{max-width:980px;margin:0 auto}
+.prose{max-width:680px}
+h1,h2,h3{text-wrap:balance;line-height:1.3;margin:0}
+h1{font-size:clamp(1.9rem,5vw,2.8rem);font-weight:800}
+h2{font-size:clamp(1.4rem,3.2vw,1.9rem);font-weight:800}
+h3{font-size:1.05rem}
+p{margin:0}
+a{color:var(--accent)}
+.stack{display:grid;gap:14px}
+section > *{min-width:0}
+header.hero{padding-block:44px 28px;display:grid;gap:16px}
+.tag{justify-self:start;font-family:var(--f-mono);font-size:12px;letter-spacing:.1em;padding:2px 10px;border-radius:999px;background:var(--chip);color:var(--accent)}
+.lede{font-size:1.06rem;color:var(--muted)}
+section{padding-block:40px;border-top:1px solid var(--line);display:grid;gap:22px}
+.t1{color:var(--accent);font-weight:700}
+.t2{color:var(--out);font-weight:700}
+.m{font-family:var(--f-mono);font-size:.92em;white-space:nowrap}
+.eq{font-family:var(--f-mono);font-size:clamp(.95rem,2.4vw,1.1rem);padding:12px 16px;background:var(--chip);border-radius:8px;overflow-x:auto;white-space:nowrap}
+
+.analogy{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--out);border-radius:10px;padding:16px 18px;display:grid;gap:8px}
+.analogy b{color:var(--ink)}
+.analogy p{color:var(--muted)}
+
+.fig{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:12px;min-width:0}
+.fig canvas{display:block;width:100%;aspect-ratio:16/8.5;border-radius:6px}
+#cv-bench{aspect-ratio:16/8}
+@media (max-width:640px){ .fig canvas{aspect-ratio:4/5} #cv-bench{aspect-ratio:4/5} }
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{font:inherit;font-size:14px;border:1px solid var(--line);background:transparent;color:var(--ink);padding:6px 14px;border-radius:8px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.btn:disabled{opacity:.4;cursor:default}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.dots{display:flex;gap:6px;margin-left:auto}
+.dots button{width:26px;height:26px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--muted);font:600 12px var(--f-mono);cursor:pointer;padding:0}
+.dots button[aria-current="step"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.cap{min-height:5.4em;font-size:15px}
+.cap b{color:var(--ink)}
+.cap .muted{color:var(--muted)}
+
+.sliders{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:12px}
+.neuron{border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:grid;gap:6px;border-top:3px solid var(--c)}
+.neuron h3{font-size:14px;color:var(--c)}
+.sl{display:grid;grid-template-columns:auto 1fr 3.6em;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
+.sl output{font-family:var(--f-mono);color:var(--ink);text-align:right;font-variant-numeric:tabular-nums}
+.sl.w2{color:var(--out)}
+input[type=range]{width:100%;accent-color:var(--c,var(--accent))}
+input[type=range]:disabled{opacity:.35}
+.check{display:flex;gap:8px;align-items:center;font-size:14px;cursor:pointer}
+.check input{accent-color:var(--out);width:16px;height:16px;margin:0}
+.readout{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chipv{font-family:var(--f-mono);font-size:13px;background:var(--chip);border-radius:6px;padding:3px 10px;font-variant-numeric:tabular-nums}
+.status{font-size:14px;font-weight:700}
+.status.good{color:var(--ok)}
+.status.meh{color:var(--muted);font-weight:500}
+.hint{font-size:14px;color:var(--neg)}
+
+.cmp{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:15px}
+.cmp-row{display:grid;grid-template-columns:minmax(6.5em,.8fr) 1fr 1.3fr;gap:12px;padding:10px 16px;border-top:1px solid var(--line);align-items:baseline}
+.cmp-row:first-child{border-top:0}
+.cmp-row > span{min-width:0;overflow-wrap:anywhere}
+.cmp-row > span:first-child{color:var(--muted);font-size:13px}
+.cmp-head{font-weight:700;background:var(--chip)}
+.cmp-row.hl{background:color-mix(in srgb,var(--out) 9%,transparent)}
+.cmp-row.diff > span:not(:first-child){color:var(--neg)}
+.cmp .m{white-space:normal}
+.cmp .note{font-family:var(--f-body);font-size:13px;margin-left:4px}
+@media (max-width:560px){ .cmp-row{grid-template-columns:1fr 1fr;gap:4px 12px} .cmp-row > span:first-child{grid-column:1 / -1} .cmp-head > span:first-child{display:none} }
+.myths{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:14px}
+.myth{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:6px;align-content:start}
+.myth .no{color:var(--neg);font-weight:700}
+.myth p{font-size:14px;color:var(--muted)}
+.summary{font-size:1.1rem;font-weight:600;padding:16px 18px;border-radius:10px;background:var(--chip)}
+:root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:var(--ok);--lq-bad:var(--neg);--lq-h2:clamp(1.4rem,3.2vw,1.9rem)}
+/* ---------- 练习题 + 全局重置（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+.lq{display:grid;gap:12px;margin-bottom:56px}
+.lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+.lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
+.lq-sub{margin:0;color:var(--lq-muted);font-size:14px}
+.lq-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--lq-muted);font-variant-numeric:tabular-nums}
+.lq-list{display:grid;gap:10px}
+.lq-item{background:var(--lq-surface);border:1.5px solid var(--lq-line);border-radius:10px;padding:12px 16px;display:grid;gap:10px;min-width:0;color:var(--lq-ink);text-align:left}
+.lq-item.lq-is-ok{border-color:var(--lq-ok)}
+.lq-item.lq-is-bad{border-color:var(--lq-bad)}
+.lq-q{font-size:15px;font-weight:600;line-height:1.6}
+.lq-tag{display:inline-block;font-size:11px;font-weight:500;line-height:1.6;color:var(--lq-muted);border:1px solid var(--lq-line);border-radius:999px;padding:0 8px;margin-right:8px;vertical-align:1px}
+.lq-opts,.lq-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lq .lq-opt,.lq .lq-redo{font:inherit;font-size:14px;line-height:1.4;padding:6px 14px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);cursor:pointer;text-align:left;opacity:1}
+.lq .lq-opt:hover:not(:disabled),.lq .lq-redo:hover{border-color:var(--lq-accent)}
+.lq .lq-opt:disabled{cursor:default;opacity:1}
+.lq .lq-opt.lq-right{border-color:var(--lq-ok);color:var(--lq-ok);font-weight:700}
+.lq .lq-opt.lq-wrong{border-color:var(--lq-bad);color:var(--lq-bad);text-decoration:line-through}
+.lq-fill input{font:inherit;font-size:14px;padding:6px 10px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);width:min(100%,200px)}
+.lq-fill input.lq-right{border-color:var(--lq-ok)}
+.lq-fill input.lq-wrong{border-color:var(--lq-bad)}
+.lq-why{font-size:14px;line-height:1.65;color:var(--lq-muted)}
+.lq-why:empty{display:none}
+.lq-why .lq-ok{color:var(--lq-ok)}
+.lq-why .lq-bad{color:var(--lq-bad)}
+.lq-reset{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:max(16px,env(safe-area-inset-bottom,0px));z-index:100;font:inherit;font-size:14px;font-weight:600;line-height:1;padding:10px 16px;margin:0;border-radius:999px;border:1.5px solid var(--lq-line);background:var(--lq-fab,var(--lq-surface));color:var(--lq-ink);box-shadow:0 4px 16px rgba(0,0,0,.2);cursor:pointer}
+.lq-reset:hover{border-color:var(--lq-accent);color:var(--lq-accent)}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <span class="tag">model</span>
+  <h1>多层神经网络是怎么来的</h1>
+  <p class="lede prose">从一个神经元出发，一个一个地加，一层一层地叠。搭到第二层时你会看到：第二层的参数不是什么新东西，就是<b>第二层神经元自己的 w 和 b</b>。为了分清属于哪一层，本页在参数右上角标层号：第 1 层是 <span class="t1">w⁽¹⁾、b⁽¹⁾</span>，第 2 层是 <span class="t2">w⁽²⁾、b⁽²⁾</span>。</p>
+  <p class="prose" style="font-size:14px;color:var(--muted)">有的教材把第 2 层的 w⁽²⁾、b⁽²⁾ 另起名字叫 v、c，指的是同一样东西。</p>
+  <p class="prose" style="font-size:14px;color:var(--muted)">接着《<a href="neural-approx.html">神经网络如何逼近任何函数</a>》第二步看。</p>
+</header>
+
+<section>
+  <div class="analogy prose">
+    <h3>先打个比方：选秀打分</h3>
+    <p>每位<b>评委</b>（隐藏神经元）只盯着一件事，只能举 0～1 分的牌子。他看什么、多敏感，由他自己的 <span class="t1">w、b</span> 决定。</p>
+    <p><b>主持人</b>（输出神经元）把所有牌子汇总成最终得分。每位评委说话的分量不一样：A 的分 ×2，B 的分 ×(−0.5)……这些“分量”就是主持人的 <span class="t2">w⁽²⁾</span>。主持人本身也是一个神经元，只不过在第 2 层，所以他的 w 标 ⁽²⁾。</p>
+  </div>
+</section>
+
+<section>
+  <div class="stack prose">
+    <h2>一步一步搭出来</h2>
+    <p>点「下一步」往下看，或者「自动播放」。每一步的动画会循环播放。</p>
+  </div>
+  <figure class="fig" style="margin:0">
+    <div class="bar">
+      <button type="button" class="btn" id="st-prev">◀ 上一步</button>
+      <button type="button" class="btn primary" id="st-play">▶ 自动播放</button>
+      <button type="button" class="btn" id="st-next">下一步 ▶</button>
+      <button type="button" class="btn" id="st-reset">↺ 回到第 1 步</button>
+      <div class="dots" id="st-dots"></div>
+    </div>
+    <canvas id="cv-steps" aria-label="分步动画：从一个神经元搭成多层网络"></canvas>
+    <div class="cap" id="st-cap" aria-live="polite"></div>
+  </figure>
+
+  <div class="stack prose">
+    <h3>把两种神经元并排放：其实是同一种</h3>
+    <p>左边是隐藏层里的一个神经元，右边是输出神经元。逐行对比：参数都叫 w 和 b，结构一模一样，只有层号不同。唯一的区别在最后一行。</p>
+  </div>
+  <div class="cmp" role="table" aria-label="隐藏神经元与输出神经元对照">
+    <div class="cmp-row cmp-head" role="row"><span role="columnheader"></span><span role="columnheader" class="t1">隐藏神经元 i（第 1 层）</span><span role="columnheader" class="t2">输出神经元（第 2 层）</span></div>
+    <div class="cmp-row" role="row"><span role="rowheader">输入</span><span>x</span><span>h₁, h₂, h₃</span></div>
+    <div class="cmp-row hl" role="row"><span role="rowheader">每条输入线的权重</span><span><b class="t1">wᵢ⁽¹⁾</b></span><span><b class="t2">w₁⁽²⁾, w₂⁽²⁾, w₃⁽²⁾</b></span></div>
+    <div class="cmp-row hl" role="row"><span role="rowheader">自己的偏置</span><span><b class="t1">bᵢ⁽¹⁾</b></span><span><b class="t2">b⁽²⁾</b></span></div>
+    <div class="cmp-row" role="row"><span role="rowheader">加权求和</span><span class="m">z = wᵢ⁽¹⁾·x + bᵢ⁽¹⁾</span><span class="m">z = w₁⁽²⁾h₁ + w₂⁽²⁾h₂ + w₃⁽²⁾h₃ + b⁽²⁾</span></div>
+    <div class="cmp-row diff" role="row"><span role="rowheader">激活函数（固定，不可调）</span><span class="m">hᵢ = σ(z)</span><span class="m">F = z<span class="note">（不套 σ，可以输出任意数）</span></span></div>
+    <div class="cmp-row hl" role="row"><span role="rowheader">训练时要学的参数</span><span><b class="t1">wᵢ⁽¹⁾、bᵢ⁽¹⁾</b>　共 2 个</span><span><b class="t2">w₁⁽²⁾、w₂⁽²⁾、w₃⁽²⁾、b⁽²⁾</b>　共 4 个</span></div>
+  </div>
+  <p class="prose" style="color:var(--muted);font-size:15px">所以更准确的说法是：<b style="color:var(--ink)">每个神经元都有“w 和 b”</b>，只不过输入有几条，w 就有几个。输出神经元有 3 条输入线，所以有 3 个 w。右上角的层号只是告诉你它属于哪一层。</p>
+  <div class="analogy prose" style="border-left-color:var(--accent)">
+    <h3>模型的“权重”到底指什么？</h3>
+    <p><b>全部的 w 和 b，仅此而已。</b>它们是一个个可以拧的旋钮，训练就是在找这些旋钮的位置；下载一个模型的“权重文件”，里面存的也就是这些数（严格说 w 叫权重、b 叫偏置，合称参数）。</p>
+    <p>激活函数 σ 不在其中。sigmoid、tanh、ReLU、GPT 用的 GELU，都是事先选好、写死的公式，没有要学的数，训练时一直不变。它像流水线上一台固定的机器：负责把直线“掰弯”，但本身不需要调。</p>
+    <p class="m" style="color:var(--ink);line-height:1.9;white-space:normal;overflow-wrap:anywhere">sigmoid：σ(z) = 1 / (1 + e⁻ᶻ)<br>tanh：tanh(z) = (eᶻ − e⁻ᶻ) / (eᶻ + e⁻ᶻ)<br>ReLU：ReLU(z) = max(0, z)<br>GELU：GELU(z) ≈ 0.5·z·(1 + tanh(√(2/π)·(z + 0.044715·z³)))</p>
+    <p>公式里只有 z 和写死的常数。每种激活函数的图像、w 和 b 在图上各管什么，见《<a href="activation-and-wb.html">w、b 和激活函数，在图上长什么样</a>》。</p>
+    <p style="font-size:14px">（少数变体例外，比如 PReLU 的负半轴斜率可以学。它会被当作额外的参数来训练，但主流大模型基本不用。）</p>
+  </div>
+</section>
+
+<section>
+  <div class="stack prose">
+    <h2>自己试试：只调 w、b 能拼出来吗？</h2>
+    <p>橙色是目标曲线。三个隐藏神经元的 <span class="t1">w⁽¹⁾、b⁽¹⁾</span> 决定各自的台阶放在哪、有多陡；第 2 层的 <span class="t2">w⁽²⁾</span> 决定每级台阶多高、朝上还是朝下。先勾上「锁定 w⁽²⁾ = 1」，只用第 1 层的参数试试，再放开 w⁽²⁾。</p>
+  </div>
+  <figure class="fig" style="margin:0">
+    <canvas id="cv-bench" aria-label="1-3-1 网络与它算出的曲线"></canvas>
+    <div class="readout"><span class="chipv" id="b-err"></span><span class="status" id="b-status"></span></div>
+    <p class="hint" id="b-hint" hidden>w⁽²⁾ 被锁成 1：每个神经元只能贡献一级“往上跳 1”的台阶。w⁽¹⁾、b⁽¹⁾ 再怎么调，也只是把台阶左右挪、变陡变缓，高度和方向变不了。</p>
+    <div class="sliders" id="b-sliders"></div>
+    <div class="bar">
+      <label class="check"><input type="checkbox" id="b-lock">锁定第 2 层权重 w⁽²⁾ = 1</label>
+      <button type="button" class="btn" id="b-answer">显示一组答案</button>
+      <button type="button" class="btn" id="b-reset">↺ 重置本实验</button>
+    </div>
+  </figure>
+</section>
+
+<section>
+  <div class="stack prose"><h2>常见误区</h2></div>
+  <div class="myths">
+    <div class="myth"><span class="no">✗ 第 2 层有一种新的参数</span><p>输出神经元和隐藏神经元一样：每条输入线一个权重 w，再加一个偏置 b。w⁽²⁾、b⁽²⁾ 和 w⁽¹⁾、b⁽¹⁾ 是同一种东西，只是属于不同的层。</p></div>
+    <div class="myth"><span class="no">✗ 把第 2 层的权重乘进 σ 里面也一样</span><p>σ(2·z) 只是让曲线更陡，最高还是 1；2·σ(z) 才能把高度变成 2，乘负数还能翻过来。w⁽²⁾ 乘在第 1 层的 σ 之后，起的正是后一种作用。</p></div>
+    <div class="myth"><span class="no">✗ 层数越多，参数种类越多</span><p>不管多少层，每层都只有两种参数：权重矩阵 W 和偏置 b。层号写在右上角：W⁽¹⁾、W⁽²⁾、W⁽³⁾……每一格就是某条连线上的一个 w。</p></div>
+  </div>
+  <p class="summary">一句话：多层网络就是“下一层把上一层的输出当输入”。每层的神经元都有自己的 w 和 b，右上角的层号只说明属于哪层。第 2 层的 w⁽²⁾ 非有不可，是因为 σ 把每个 h 锁在 0～1 之间，只有在 σ 之后再乘一次权重，才能定下每级台阶的高度和方向。</p>
+</section>
+
+<section class="lq" id="lq" aria-label="练习">
+  <div class="lq-head"><h2>练习</h2><span class="lq-score"></span></div>
+  <p class="lq-sub">每题作答后马上看到解析；点「重做练习」清空重来。</p>
+  <div class="lq-list"></div>
+  <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+</section>
+
+</div>
+
+<button type="button" class="lq-reset" id="lq-reset" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+
+<script>
+(() => {
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = id => document.getElementById(id);
+const sig = z => 1 / (1 + Math.exp(-z));
+const lerp = (a, b, k) => a + (b - a) * k;
+const ease = k => k < .5 ? 2 * k * k : 1 - (-2 * k + 2) ** 2 / 2;
+const SUB = ['₁', '₂', '₃'];
+const MONO = 'ui-monospace, Menlo, Consolas, monospace';
+const SANS = '"PingFang SC","Noto Sans SC","Microsoft YaHei",system-ui,sans-serif';
+
+/* ---------- theme colors ---------- */
+const C = {};
+function readColors() {
+  const cs = getComputedStyle(document.documentElement);
+  for (const k of ['bg', 'surface', 'ink', 'muted', 'line', 'grid', 'chip', 'accent', 'out', 'n1', 'n2', 'n3', 'neg', 'ok']) C[k] = cs.getPropertyValue('--' + k).trim();
+  C.n = [C.n1, C.n2, C.n3];
+}
+readColors();
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', readColors);
+
+/* ---------- the story network: 1 input → 3 hidden → 1 output ---------- */
+const SOL = { w: [30, 30, 30], b: [-7.5, -16.5, -24], w2: [0.8, -0.5, -0.7], b2: 0 };   // w, b: layer 1; w2, b2: layer 2
+const hOf = (w, b, x) => sig(w * x + b);
+const target = x => SOL.w2.reduce((s, v, i) => s + v * hOf(SOL.w[i], SOL.b[i], x), SOL.b2);
+
+/* ---------- canvas helpers ---------- */
+function setup(cv) {
+  const dpr = Math.min(2, devicePixelRatio || 1), r = cv.getBoundingClientRect();
+  const w = Math.max(20, r.width), h = Math.max(20, r.height);
+  if (cv.width !== Math.round(w * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+  const ctx = cv.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, h);
+  return { ctx, w, h };
+}
+// split the canvas into two boxes: side by side when wide, stacked when narrow
+function split(w, h, k = 0.46) {
+  return w > 560
+    ? [{ x: 0, y: 0, w: w * k, h }, { x: w * k, y: 0, w: w * (1 - k), h }]
+    : [{ x: 0, y: 0, w, h: h * 0.48 }, { x: 0, y: h * 0.48, w, h: h * 0.52 }];
+}
+function text(ctx, s, x, y, o = {}) {
+  ctx.save();
+  ctx.font = `${o.weight || 600} ${o.size || 12}px ${o.mono ? MONO : SANS}`;
+  ctx.fillStyle = o.color || C.ink; ctx.globalAlpha = o.alpha ?? 1;
+  ctx.textAlign = o.align || 'center'; ctx.textBaseline = o.base || 'middle';
+  ctx.fillText(s, x, y); ctx.restore();
+}
+
+// plot area inside a box; x in [0,1]
+function plotArea(ctx, box, yr, yticks) {
+  const pad = { l: 38, r: 14, t: 16, b: 24 };
+  const f = {
+    X: x => box.x + pad.l + x * (box.w - pad.l - pad.r),
+    Y: y => box.y + pad.t + (yr[1] - y) / (yr[1] - yr[0]) * (box.h - pad.t - pad.b),
+    box, pad, yr,
+  };
+  ctx.save(); ctx.lineWidth = 1; ctx.font = '10.5px ' + MONO; ctx.fillStyle = C.muted;
+  for (const x of [0, 0.25, 0.5, 0.75, 1]) {
+    const px = Math.round(f.X(x)) + .5;
+    ctx.strokeStyle = C.grid; ctx.beginPath(); ctx.moveTo(px, f.Y(yr[1])); ctx.lineTo(px, f.Y(yr[0])); ctx.stroke();
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText(x, px, f.Y(yr[0]) + 5);
+  }
+  for (const y of yticks) {
+    const py = Math.round(f.Y(y)) + .5;
+    ctx.strokeStyle = y === 0 ? C.line : C.grid; ctx.beginPath(); ctx.moveTo(f.X(0), py); ctx.lineTo(f.X(1), py); ctx.stroke();
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillText(y, f.X(0) - 6, py);
+  }
+  ctx.restore();
+  return f;
+}
+function curve(ctx, f, fn, o = {}) {
+  ctx.save();
+  ctx.beginPath(); ctx.rect(f.X(0), f.Y(f.yr[1]) - 2, f.X(1) - f.X(0), f.Y(f.yr[0]) - f.Y(f.yr[1]) + 4); ctx.clip();
+  ctx.strokeStyle = o.color; ctx.lineWidth = o.width || 2.5; ctx.globalAlpha = o.alpha ?? 1;
+  ctx.lineJoin = ctx.lineCap = 'round';
+  if (o.dash) ctx.setLineDash(o.dash);
+  ctx.beginPath();
+  for (let i = 0; i <= 300; i++) { const x = i / 300; i ? ctx.lineTo(f.X(x), f.Y(fn(x))) : ctx.moveTo(f.X(x), f.Y(fn(x))); }
+  ctx.stroke(); ctx.restore();
+}
+function band01(ctx, f, label) {
+  ctx.save(); ctx.fillStyle = C.accent; ctx.globalAlpha = .07;
+  ctx.fillRect(f.X(0), f.Y(1), f.X(1) - f.X(0), f.Y(0) - f.Y(1)); ctx.restore();
+  ctx.save(); ctx.setLineDash([4, 4]); ctx.strokeStyle = C.accent; ctx.globalAlpha = .5;
+  ctx.beginPath(); ctx.moveTo(f.X(0), f.Y(1)); ctx.lineTo(f.X(1), f.Y(1)); ctx.stroke(); ctx.restore();
+  if (label) text(ctx, label, f.X(1) - 4, f.Y(1) - 9, { align: 'right', size: 11, color: C.accent, weight: 500 });
+}
+
+/* network diagram: sizes like [1,3,1]; layer 0 is the input */
+function netNodes(box, sizes) {
+  const L = sizes.length, nodes = [];
+  const R = Math.max(11, Math.min(24, box.h / (Math.max(...sizes) * 3.2), box.w / (L * 5)));
+  sizes.forEach((n, l) => {
+    const x = box.x + box.w * (0.1 + 0.8 * l / (L - 1));
+    nodes.push(Array.from({ length: n }, (_, i) => ({ x, y: box.y + box.h * (0.14 + 0.72 * (i + 1) / (n + 1)) })));
+  });
+  return { nodes, R };
+}
+function drawNet(ctx, box, sizes, o = {}) {
+  const { nodes, R } = netNodes(box, sizes);
+  // edges, layer by layer (edge layer l connects node layer l → l+1)
+  for (let l = 0; l < sizes.length - 1; l++) {
+    const col = o.edgeColor ? o.edgeColor(l) : C.muted;
+    for (const [j, a] of nodes[l].entries()) for (const [i, b] of nodes[l + 1].entries()) {
+      const al = o.edgeAlpha ? o.edgeAlpha(l, i, j) : 1;
+      if (al <= 0) continue;
+      ctx.save(); ctx.globalAlpha = al * .8; ctx.strokeStyle = col; ctx.lineWidth = o.hot && o.hot(l, i, j) ? 4.5 : 2;
+      if (o.dashed && o.dashed(l)) ctx.setLineDash([5, 5]);
+      ctx.beginPath(); ctx.moveTo(a.x + R, a.y); ctx.lineTo(b.x - R, b.y); ctx.stroke(); ctx.restore();
+      const lab = o.edgeLabel && o.edgeLabel(l, i, j);
+      if (lab) {
+        const k = sizes[l] === 1 ? 0.62 : 0.4;
+        const lx = lerp(a.x, b.x, k), ly = lerp(a.y, b.y, k);
+        ctx.save(); ctx.font = `600 ${o.labelSize || 13}px ${MONO}`;
+        const tw = ctx.measureText(lab.text).width + 8;
+        ctx.globalAlpha = al * (lab.alpha ?? 1); ctx.fillStyle = C.surface;
+        ctx.fillRect(lx - tw / 2, ly - 9, tw, 18); ctx.restore();
+        text(ctx, lab.text, lx, ly, { mono: true, size: o.labelSize || 13, color: lab.color || col, alpha: al * (lab.alpha ?? 1) });
+      }
+    }
+    if (o.pulse != null) { // a dot travelling along every edge of the layer the signal is in
+      const seg = o.pulse * (sizes.length - 1);
+      if (Math.floor(seg) === l) for (const a of nodes[l]) for (const b of nodes[l + 1]) {
+        const k = seg - l;
+        ctx.save(); ctx.fillStyle = col; ctx.beginPath(); ctx.arc(lerp(a.x + R, b.x - R, k), lerp(a.y, b.y, k), 3.5, 0, 7); ctx.fill(); ctx.restore();
+      }
+    }
+  }
+  nodes.forEach((layer, l) => layer.forEach((p, i) => {
+    const fill = o.nodeFill ? o.nodeFill(l, i) : null;
+    ctx.save();
+    ctx.globalAlpha = o.nodeAlpha ? o.nodeAlpha(l, i) : 1;
+    ctx.beginPath(); ctx.arc(p.x, p.y, R, 0, 7);
+    ctx.fillStyle = C.surface; ctx.fill();
+    if (fill) { ctx.fillStyle = fill; ctx.globalAlpha *= .9; ctx.fill(); ctx.globalAlpha /= .9; }
+    ctx.lineWidth = 2; ctx.strokeStyle = o.nodeStroke ? o.nodeStroke(l, i) : C.ink;
+    if (o.nodeDashed && o.nodeDashed(l, i)) ctx.setLineDash([4, 3]);
+    ctx.stroke(); ctx.restore();
+    const t = o.nodeText && o.nodeText(l, i);
+    if (t) text(ctx, t, p.x, p.y + 1, { mono: true, size: Math.max(10, R * 0.62), color: fill ? '#fff' : C.ink, alpha: o.nodeAlpha ? o.nodeAlpha(l, i) : 1 });
+    const s = o.nodeSub && o.nodeSub(l, i);
+    // label below the node, or beside it when the nodes in this layer sit too close together
+    const crowded = layer.length > 1 && layer[1].y - layer[0].y < 2 * R + 24;
+    if (s) text(ctx, s, crowded ? p.x + R + 4 : p.x, crowded ? p.y + R * 0.7 : p.y + R + 11,
+      { mono: true, size: 11, color: C.muted, weight: 500, align: crowded ? 'left' : 'center', alpha: o.nodeAlpha ? o.nodeAlpha(l, i) : 1 });
+  }));
+  return { nodes, R };
+}
+
+/* ---------- the stepper ---------- */
+const STEPS = [
+  { // 1
+    cap: '<b>① 一个神经元。</b>输入 x 沿一条线进来，线上有一个权重 <span class="t1">w</span>，神经元自己带一个偏置 <span class="t1">b</span>：先算 z = w·x + b，再过 σ 得到 h。<span class="muted">w 让 S 形变陡或变缓，b 让它左右平移。注意蓝色带子：不管 w、b 怎么变，h 永远在 0～1 之间。</span>',
+    still: 2,
+    draw(ctx, w, h, t) {
+      const [A, B] = split(w, h);
+      const ww = 22 + 14 * Math.sin(t * 0.7 + 1), tt = 0.5 + 0.22 * Math.sin(t * 0.9), bb = -ww * tt;
+      drawNet(ctx, A, [1, 1], {
+        edgeColor: () => C.accent,
+        edgeLabel: () => ({ text: `w = ${ww.toFixed(1)}` }),
+        nodeText: (l) => l ? 'σ' : 'x', nodeSub: l => l ? `b = ${bb.toFixed(1)}` : '输入',
+        nodeStroke: l => l ? C.accent : C.ink,
+      });
+      const f = plotArea(ctx, B, [-0.4, 1.4], [0, 0.5, 1]);
+      band01(ctx, f, 'h 被关在 0～1 之间');
+      curve(ctx, f, x => hOf(ww, bb, x), { color: C.accent, width: 3 });
+      text(ctx, 'h = σ(w·x + b)', f.X(0) + 6, f.Y(1.4) + 10, { align: 'left', mono: true, size: 12, color: C.accent });
+    },
+  },
+  { // 2
+    cap: '<b>② 并排放三个 = 一层。</b>同一个 x 同时送进三个神经元，每条线有自己的权重 <span class="t1">w₁⁽¹⁾ w₂⁽¹⁾ w₃⁽¹⁾</span>，每个神经元有自己的偏置 <span class="t1">b₁⁽¹⁾ b₂⁽¹⁾ b₃⁽¹⁾</span>。右上角的 ⁽¹⁾ 表示“第 1 层”。于是得到三条位置、陡度各不相同的 S 形 h₁、h₂、h₃。<span class="muted">它们都还关在 0～1 之间。这一层叫“隐藏层”。</span>',
+    still: 6,
+    draw(ctx, w, h, t) {
+      const [A, B] = split(w, h);
+      const show = i => RM ? 1 : Math.min(1, Math.max(0, (t % 8 - i * 0.9) / 0.6));
+      drawNet(ctx, A, [1, 3], {
+        edgeColor: () => C.accent, edgeAlpha: (l, i) => show(i),
+        edgeLabel: (l, i) => ({ text: 'w' + SUB[i] + '⁽¹⁾', color: C.n[i] }),
+        nodeAlpha: (l, i) => l ? show(i) : 1,
+        nodeText: (l, i) => l ? 'h' + SUB[i] : 'x', nodeSub: (l, i) => l ? 'b' + SUB[i] + '⁽¹⁾' : '输入',
+        nodeStroke: (l, i) => l ? C.n[i] : C.ink,
+      });
+      const f = plotArea(ctx, B, [-0.4, 1.4], [0, 0.5, 1]);
+      band01(ctx, f);
+      for (let i = 0; i < 3; i++) if (show(i) > 0) curve(ctx, f, x => hOf(SOL.w[i], SOL.b[i], x), { color: C.n[i], alpha: show(i), width: 2.5 });
+      for (let i = 0; i < 3; i++) if (show(i) > 0) text(ctx, 'h' + SUB[i], f.X(-SOL.b[i] / SOL.w[i]) + 10, f.Y(0.5), { color: C.n[i], align: 'left', mono: true, alpha: show(i) });
+    },
+  },
+  { // 3
+    cap: '<b>③ 三个 h 怎么变成一个答案？</b>我们最后只要一个数 F。最自然的办法：<b>再放一个神经元</b>，让它把 h₁、h₂、h₃ 当作自己的输入。<span class="muted">这就是“第二层”的由来：下一层的输入，就是上一层的输出。</span>',
+    still: 1,
+    draw(ctx, w, h, t) {
+      const box = { x: 0, y: 0, w, h };
+      const blink = RM ? 1 : 0.55 + 0.45 * Math.sin(t * 3);
+      drawNet(ctx, box, [1, 3, 1], {
+        edgeColor: l => l ? C.out : C.accent, dashed: l => l === 1, edgeAlpha: (l) => l ? 0.4 + 0.6 * blink : 1,
+        edgeLabel: (l, i) => l ? null : ({ text: 'w' + SUB[i] + '⁽¹⁾', color: C.n[i] }),
+        nodeText: (l, i) => ['x', 'h' + SUB[i], '?'][l],
+        nodeSub: (l, i) => l === 2 ? '新的神经元' : l === 1 ? 'b' + SUB[i] + '⁽¹⁾' : '输入',
+        nodeStroke: (l, i) => l === 1 ? C.n[i] : l === 2 ? C.out : C.ink,
+        nodeDashed: l => l === 2, nodeAlpha: l => l === 2 ? 0.4 + 0.6 * blink : 1,
+      });
+      text(ctx, '第 1 层', box.w * 0.3, 18, { color: C.accent, size: 13 });
+      text(ctx, '第 2 层（待接上）', box.w * 0.7, 18, { color: C.out, size: 13 });
+    },
+  },
+  { // 4
+    cap: '<b>④ 新神经元也有自己的 w 和 b。</b>它和第 1 层的神经元做同样的事：每条输入线一个权重，加权求和，再加自己的偏置。所以它的参数照样叫 w、b，只是层号换成 ⁽²⁾：<span class="m">F = w₁⁽²⁾h₁ + w₂⁽²⁾h₂ + w₃⁽²⁾h₃ + b⁽²⁾</span>。动画里两层轮流亮起，对照两行公式，结构一模一样。<span class="muted">输出神经元一般不套 σ，这样 F 才能是任意数（可以是负的，也可以大于 1）。</span>',
+    still: 5,
+    draw(ctx, w, h, t) {
+      // two formulas take turns lighting up, together with the matching part of the diagram
+      const box = { x: 0, y: 0, w, h: h * 0.72 };
+      const on = RM ? 0 : Math.floor((t % 6) / 3) + 1;   // 0: both, 1: layer 1, 2: layer 2
+      const a1 = on === 2 ? 0.3 : 1, a2 = on === 1 ? 0.3 : 1;
+      drawNet(ctx, box, [1, 3, 1], {
+        edgeColor: l => l ? C.out : C.accent,
+        edgeAlpha: l => l ? a2 : a1,
+        hot: l => on === l + 1,
+        edgeLabel: (l, i, j) => l ? { text: 'w' + SUB[j] + '⁽²⁾' } : { text: 'w' + SUB[i] + '⁽¹⁾', color: C.n[i] },
+        nodeText: (l, i) => ['x', 'h' + SUB[i], 'F'][l],
+        nodeSub: (l, i) => l === 2 ? 'b⁽²⁾' : l === 1 ? 'b' + SUB[i] + '⁽¹⁾' : '输入',
+        nodeStroke: (l, i) => l === 1 ? C.n[i] : l === 2 ? C.out : C.ink,
+      });
+      text(ctx, '第 1 层的 w⁽¹⁾、b⁽¹⁾', box.w * 0.3, 18, { color: C.accent, size: 13, alpha: a1 });
+      text(ctx, '第 2 层的 w⁽²⁾、b⁽²⁾', box.w * 0.7, 18, { color: C.out, size: 13, alpha: a2 });
+      const fs = Math.max(12, Math.min(19, w / 36));
+      text(ctx, '第 1 层：hᵢ = σ( wᵢ⁽¹⁾·x + bᵢ⁽¹⁾ )', w / 2, h * 0.81, { mono: true, size: fs, color: C.accent, alpha: a1 });
+      text(ctx, '第 2 层：F  =   w₁⁽²⁾·h₁ + w₂⁽²⁾·h₂ + w₃⁽²⁾·h₃ + b⁽²⁾', w / 2, h * 0.93, { mono: true, size: fs, color: C.out, alpha: a2 });
+    },
+  },
+  { // 5
+    cap: '<b>⑤ 为什么非要第 2 层的权重不可？</b>第 1 层的 w⁽¹⁾、b⁽¹⁾ 在 σ 里面，只能<b>横向</b>改造曲线（挪位置、调陡度），而 σ 把每个 h 的高度锁死在 0～1。第 2 层的 w⁽²⁾ 在 σ <b>之后</b>乘上去，管的是<b>纵向</b>：台阶多高、朝上还是朝下。<span class="muted">动画里：全部 w⁽²⁾ = 1 时，三级台阶只能各往上跳 1；换成 0.8、−0.5、−0.7 后，加起来正好是橙色目标。</span>',
+    still: 9,
+    draw(ctx, w, h, t) {
+      const ph = t % 9;
+      const p = RM ? 1 : ph < 1.5 ? 0 : ph < 4 ? ease((ph - 1.5) / 2.5) : ph < 7.5 ? 1 : ease(1 - (ph - 7.5) / 1.5);
+      const v = SOL.w2.map(x => lerp(1, x, p));
+      const f = plotArea(ctx, { x: 0, y: 0, w, h }, [-1.2, 3.2], [-1, 0, 1, 2, 3]);
+      curve(ctx, f, target, { color: C.out, width: 6, alpha: .35 });
+      for (let i = 0; i < 3; i++) curve(ctx, f, x => v[i] * hOf(SOL.w[i], SOL.b[i], x), { color: C.n[i], width: 2, alpha: .75, dash: [6, 4] });
+      curve(ctx, f, x => v.reduce((s, vi, i) => s + vi * hOf(SOL.w[i], SOL.b[i], x), 0), { color: C.ink, width: 3 });
+      const fs = Math.max(11, Math.min(13, w / 50));
+      for (let i = 0; i < 3; i++) text(ctx, `w${SUB[i]}⁽²⁾ = ${v[i].toFixed(2)}  →  w${SUB[i]}⁽²⁾·h${SUB[i]}`, f.X(0) + 10, f.Y(3.2) + 12 + i * (fs + 7), { align: 'left', mono: true, size: fs, color: C.n[i] });
+      text(ctx, '黑线 = 三条虚线之和 F　　粗橙线 = 目标', f.X(1) - 4, f.Y(3.2) + 12, { align: 'right', size: fs, color: C.muted, weight: 500 });
+    },
+  },
+  { // 6
+    cap: '<b>⑥ 再往下叠 = 深度网络。</b>把输出神经元换成又一整层（也套 σ），就有了第 3 层，可以一直叠下去。每层都是同一个公式 <span class="m">h⁽ˡ⁾ = σ(W⁽ˡ⁾ · h⁽ˡ⁻¹⁾ + b⁽ˡ⁾)</span>，W⁽ˡ⁾ 是一张“本层神经元数 × 上一层神经元数”的权重表。<span class="muted">前面的 wᵢ⁽¹⁾ 就是表 W⁽¹⁾ 里的一格，wᵢ⁽²⁾ 就是表 W⁽²⁾ 里的一格。GPT 每层里的前馈网络写成 W₁、W₂，下标就是层号，也是这个结构。</span>',
+    still: 1.2,
+    draw(ctx, w, h, t) {
+      const box = { x: 0, y: 0, w, h };
+      const cols = [C.accent, C.n3, C.out];
+      drawNet(ctx, box, [1, 3, 3, 1], {
+        edgeColor: l => cols[l], pulse: RM ? null : (t % 2.4) / 2.4,
+        nodeText: (l) => ['x', 'σ', 'σ', 'F'][l],
+        nodeSub: (l) => l === 0 ? '输入' : l === 3 ? '输出' : '',
+        nodeStroke: l => l === 0 ? C.ink : cols[l - 1],
+      });
+      const { nodes } = netNodes(box, [1, 3, 3, 1]);
+      const tags = ['W⁽¹⁾ 3×1', 'W⁽²⁾ 3×3', 'W⁽³⁾ 1×3'];
+      for (let l = 0; l < 3; l++) text(ctx, tags[l], (nodes[l][0].x + nodes[l + 1][0].x) / 2, 18, { mono: true, size: Math.max(11, Math.min(14, w / 45)), color: cols[l] });
+    },
+  },
+];
+
+const stepper = (() => {
+  const cv = $('cv-steps'), cap = $('st-cap'), dots = $('st-dots'), playBtn = $('st-play');
+  let cur = 0, t0 = performance.now(), timer = null;
+  STEPS.forEach((_, i) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.textContent = i + 1; b.setAttribute('aria-label', `第 ${i + 1} 步`);
+    b.onclick = () => { stop(); go(i); };
+    dots.append(b);
+  });
+  function go(i) {
+    cur = Math.max(0, Math.min(STEPS.length - 1, i)); t0 = performance.now();
+    cap.innerHTML = STEPS[cur].cap;
+    [...dots.children].forEach((d, j) => j === cur ? d.setAttribute('aria-current', 'step') : d.removeAttribute('aria-current'));
+    $('st-prev').disabled = cur === 0; $('st-next').disabled = cur === STEPS.length - 1;
+  }
+  function stop() { clearInterval(timer); timer = null; playBtn.textContent = '▶ 自动播放'; }
+  function play() {
+    if (cur === STEPS.length - 1) go(0);
+    playBtn.textContent = '⏸ 暂停';
+    timer = setInterval(() => { if (cur >= STEPS.length - 1) stop(); else go(cur + 1); }, 9000);
+  }
+  $('st-prev').onclick = () => { stop(); go(cur - 1); };
+  $('st-next').onclick = () => { stop(); go(cur + 1); };
+  playBtn.onclick = () => timer ? stop() : play();
+  const reset = () => { stop(); go(0); };
+  $('st-reset').onclick = reset;
+  go(0);
+  return {
+    reset,
+    draw(now) {
+      const { ctx, w, h } = setup(cv);
+      STEPS[cur].draw(ctx, w, h, RM ? STEPS[cur].still : (now - t0) / 1000);
+    },
+  };
+})();
+
+/* ---------- the bench ---------- */
+const bench = (() => {
+  const INIT = { w: [30, 30, 30], b: [-6, -15, -21], w2: [1, 1, 1], lock: false };
+  const B = JSON.parse(JSON.stringify(INIT));
+  let hot = null, hotT = 0;   // which slider was touched last → highlight its edge
+  const box = $('b-sliders');
+  const spec = [['w', 1, 60, 0.5], ['b', -45, 0, 0.5], ['w2', -1.5, 1.5, 0.05]];
+  const LABEL = { w: i => 'w' + SUB[i] + '⁽¹⁾', b: i => 'b' + SUB[i] + '⁽¹⁾', w2: i => 'w' + SUB[i] + '⁽²⁾' };
+  for (let i = 0; i < 3; i++) {
+    const card = document.createElement('div');
+    card.className = 'neuron'; card.style.setProperty('--c', `var(--n${i + 1})`);
+    card.innerHTML = `<h3>神经元 ${i + 1}</h3>` + spec.map(([k, lo, hi, st]) =>
+      `<label class="sl ${k}">${LABEL[k](i)}<input type="range" id="b-${k}${i}" min="${lo}" max="${hi}" step="${st}"><output id="o-${k}${i}"></output></label>`).join('');
+    box.append(card);
+    for (const [k] of spec) $(`b-${k}${i}`).addEventListener('input', e => { B[k][i] = +e.target.value; hot = [k, i]; hotT = performance.now(); sync(); });
+  }
+  $('b-lock').addEventListener('change', e => { B.lock = e.target.checked; sync(); });
+  $('b-answer').addEventListener('click', () => { Object.assign(B, JSON.parse(JSON.stringify(SOL)), { lock: false }); sync(); });
+  function sync() {
+    for (let i = 0; i < 3; i++) for (const [k] of spec) {
+      $(`b-${k}${i}`).value = B[k][i];
+      $(`o-${k}${i}`).textContent = k === 'w2' && B.lock ? '1' : B[k][i].toFixed(k === 'w2' ? 2 : 1);
+    }
+    for (let i = 0; i < 3; i++) $(`b-w2${i}`).disabled = B.lock;
+    $('b-lock').checked = B.lock;
+    $('b-hint').hidden = !B.lock;
+  }
+  const vEff = i => B.lock ? 1 : B.w2[i];
+  const F = x => [0, 1, 2].reduce((s, i) => s + vEff(i) * hOf(B.w[i], B.b[i], x), 0);
+  function reset() { Object.assign(B, JSON.parse(JSON.stringify(INIT))); hot = null; sync(); }
+  $('b-reset').onclick = reset;
+  sync();
+  return {
+    reset,
+    draw(now) {
+      const { ctx, w, h } = setup($('cv-bench'));
+      const [A, P] = split(w, h, 0.36);
+      const isHot = (k, i) => hot && now - hotT < 1500 && hot[0] === k && hot[1] === i;
+      drawNet(ctx, A, [1, 3, 1], {
+        labelSize: 11,
+        edgeColor: l => l ? C.out : C.accent,
+        hot: (l, i, j) => l ? isHot('w2', j) : (isHot('w', i) || isHot('b', i)),
+        edgeLabel: (l, i, j) => l ? { text: (B.lock ? 1 : B.w2[j]).toFixed(2) } : { text: B.w[i].toFixed(1), color: C.n[i] },
+        nodeText: (l, i) => ['x', 'h' + SUB[i], 'F'][l],
+        nodeSub: (l, i) => l === 1 ? 'b⁽¹⁾=' + B.b[i].toFixed(1) : '',
+        nodeStroke: (l, i) => l === 1 ? C.n[i] : l === 2 ? C.out : C.ink,
+      });
+      const f = plotArea(ctx, P, [-1.2, 3.2], [-1, 0, 1, 2, 3]);
+      curve(ctx, f, target, { color: C.out, width: 6, alpha: .45 });
+      for (let i = 0; i < 3; i++) curve(ctx, f, x => vEff(i) * hOf(B.w[i], B.b[i], x), { color: C.n[i], width: 1.8, alpha: .7, dash: [6, 4] });
+      curve(ctx, f, F, { color: C.ink, width: 3 });
+      let e = 0; for (let k = 0; k <= 200; k++) e += Math.abs(F(k / 200) - target(k / 200)); e /= 201;
+      $('b-err').textContent = `平均误差 ${e.toFixed(3)}`;
+      const st = $('b-status');
+      st.textContent = e < 0.03 ? '✓ 拼上了！' : B.lock ? '锁着 w⁽²⁾，拼不上的' : '还差一点…';
+      st.className = 'status ' + (e < 0.03 ? 'good' : 'meh');
+    },
+  };
+})();
+
+function loop(now) { stepper.draw(now); bench.draw(now); requestAnimationFrame(loop); }
+requestAnimationFrame(loop);
+
+window.pageReset = () => { stepper.reset(); bench.reset(); };
+})();
+</script>
+<script>
+window.LQ_ITEMS = [
+  { type: '判断', q: '第 2 层的权重 w₁⁽²⁾、w₂⁽²⁾、w₃⁽²⁾ 和第 1 层的 wᵢ⁽¹⁾ 是同一种参数。', opts: ['对', '错'], ans: 0,
+    why: '都是“某个神经元某条输入线上的权重”。w⁽¹⁾ 是隐藏神经元输入线上的，w⁽²⁾ 是输出神经元输入线上的，层号不同而已。' },
+  { type: '选择', q: '输出神经元的偏置 b⁽²⁾ 改大一点，输出曲线 F(x) 会怎样？', opts: ['整条往上平移', '整条往左平移', '变得更陡'], ans: 0,
+    why: '它和 b⁽¹⁾ 一样都是偏置，只是位置不同：b⁽¹⁾ 加在 σ 里面，表现为台阶左右挪；b⁽²⁾ 加在最后（不套 σ），表现为整条曲线上下挪。' },
+  { type: '选择', q: '隐藏神经元和输出神经元，真正的区别在哪里？', opts: ['输出神经元多了一种新参数', '输出神经元一般不套激活函数 σ', '输出神经元没有偏置'], ans: 1,
+    why: '两者都是“每条输入线一个权重 w + 一个偏置 b，再加权求和”，参数种类一样，只是层号不同；区别只在最后一步：输出神经元通常不套 σ。' },
+  { type: '选择', q: '训练一个 1 → 3 → 1 的网络时，下面哪些会被梯度下降调整？', opts: ['只有 w', '所有的 w 和 b', 'w、b，以及激活函数 σ 的形状'], ans: 1,
+    why: '模型的参数就是全部的 w 和 b（这里共 10 个）。σ 是事先选好、写死的函数，训练时不变。' },
+  { type: '判断', q: 'σ(2·z) 和 2·σ(z) 效果一样。', opts: ['对', '错'], ans: 1,
+    why: '常见误区。σ(2z) 只是让 S 形更陡，最高还是 1；2σ(z) 才把高度变成 2。所以第 2 层的权重必须乘在 σ 外面，并不进第 1 层的 w、b 里。' },
+  { type: '计算', q: '此刻 h₁ = 0.5、h₂ = 1、h₃ = 0，第 2 层 w₁⁽²⁾ = 2、w₂⁽²⁾ = −0.4、w₃⁽²⁾ = 3、b⁽²⁾ = 0.1。F 等于多少？', ans: ['0.7', '.7', '0.70'], placeholder: '例如 1.2',
+    why: 'F = 2×0.5 + (−0.4)×1 + 3×0 + 0.1 = 1 − 0.4 + 0 + 0.1 = 0.7。' },
+  { type: '计算', q: '想让一个 sigmoid 神经元在 x = 0.5 处“跳起”，w = 20，b 应该取多少？', ans: ['-10', '-10.0'], placeholder: '例如 -3',
+    why: '跳起的位置是 w·x + b = 0 的地方，即 x = −b/w。所以 b = −w × 0.5 = −10。这是 w、b 在“横向”上的作用。' },
+  { type: '选择', q: '1 个输入、3 个隐藏神经元、1 个输出的网络，一共有几个参数？', opts: ['7 个', '9 个', '10 个', '12 个'], ans: 2,
+    why: '第 1 层：w⁽¹⁾ 3 个 + b⁽¹⁾ 3 个；第 2 层：w⁽²⁾ 3 个 + b⁽²⁾ 1 个，共 10 个。' },
+  { type: '选择', q: '网络结构是 1 → 4 → 4 → 1。第 2 层的权重表 W⁽²⁾ 是什么形状？', opts: ['4 × 1', '4 × 4', '1 × 4'], ans: 1,
+    why: '形状是“本层神经元数 × 上一层神经元数”。第 2 层有 4 个神经元，每个都接上一层的 4 个输出，所以是 4 × 4，共 16 个权重。' },
+  { type: '判断', q: '输出神经元一般不套 σ，是为了让 F 能取任意实数（比如负数、或大于 1 的数）。', opts: ['对', '错'], ans: 0,
+    why: '如果最后也套 sigmoid，F 就又被关回 0～1 之间，拟合不了“目标是 −0.4”这样的曲线了。分类任务的输出层会另外接 softmax 等函数，那是另一回事。' },
+];
+</script>
+<script>
+/* ---------- 练习题 + 全局重置（learn 通用组件） ----------
+   题目来自 window.LQ_ITEMS：{type, q, opts, ans: 选项下标, why} 或填空题 {type, q, ans: [可接受答案…], why}
+   全局重置：先调用页面自己的 window.pageReset()，再清空练习、回到顶部 */
+(() => {
+  const box = document.getElementById('lq');
+  const items = window.LQ_ITEMS || [];
+  const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let answered = 0, right = 0;
+
+  function update() {
+    const all = answered === items.length;
+    score.textContent = `已答 ${answered} / ${items.length} · 答对 ${right}` +
+      (all ? (right === items.length ? ' · 全对！' : ' · 看看解析，再重做一次') : '');
+  }
+
+  function render() {
+    answered = 0; right = 0; list.innerHTML = '';
+    items.forEach((it, i) => {
+      const el = document.createElement('div');
+      el.className = 'lq-item';
+      el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
+      const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
+      const judge = (ok, answer) => {
+        answered++; if (ok) right++;
+        el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
+        why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
+        update();
+      };
+      if (it.opts) {
+        a.classList.add('lq-opts');
+        it.opts.forEach((o, j) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'lq-opt'; b.innerHTML = o;
+          b.onclick = () => {
+            a.querySelectorAll('button').forEach(x => x.disabled = true);
+            a.children[it.ans].classList.add('lq-right');
+            if (j !== it.ans) b.classList.add('lq-wrong');
+            judge(j === it.ans, it.opts[it.ans]);
+          };
+          a.append(b);
+        });
+      } else {
+        a.classList.add('lq-fill');
+        a.innerHTML = `<input type="text" autocomplete="off" spellcheck="false" placeholder="${it.placeholder || '输入答案'}" aria-label="第 ${i + 1} 题答案"><button type="button" class="lq-opt">确定</button>`;
+        const inp = a.querySelector('input'), go = a.querySelector('button');
+        const submit = () => {
+          if (!inp.value.trim()) { inp.focus(); return; }
+          inp.disabled = go.disabled = true;
+          const ok = it.ans.some(x => norm(x) === norm(inp.value));
+          inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
+          judge(ok, it.ans[0]);
+        };
+        go.onclick = submit;
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      }
+      list.append(el);
+    });
+    update();
+  }
+
+  box.querySelector('.lq-redo').addEventListener('click', render);
+  document.getElementById('lq-reset').addEventListener('click', () => {
+    if (typeof window.pageReset === 'function') window.pageReset();
+    render();
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  });
+  render();
+})();
+</script>
+</body>
+</html>

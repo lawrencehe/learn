@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>other 与 another</title>
+<style>
+:root {
+  --bg: #f4f5f8;
+  --surface: #ffffff;
+  --surface2: #eef0f5;
+  --ink: #1c2230;
+  --muted: #5f6878;
+  --line: #d8dce5;
+  --said: #2563d4;      --said-soft: #dfe9fc;
+  --another: #1d8a62;   --another-soft: #dcf2e7;
+  --the: #c2412d;       --the-soft: #fbe3de;
+  --key: #a16207;       --key-soft: #fdf1d4;
+  --accent: #6d28d9;
+  --ok: #15803d; --bad: #c2412d;
+  --font: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+  --mono: ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #12151c; --surface: #1b202a; --surface2: #232a36; --ink: #e8ecf3; --muted: #9aa4b5; --line: #2f3746;
+    --said: #7aa7ff; --said-soft: #1c2b4a;
+    --another: #4fd1a0; --another-soft: #173a2c;
+    --the: #ff8a73; --the-soft: #47231d;
+    --key: #f5c451; --key-soft: #3d3218;
+    --accent: #a78bfa; --ok: #4ade80; --bad: #ff8a73;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font);
+  font-size: 16px; line-height: 1.7; padding: 32px 16px 96px;
+}
+main { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 48px; }
+h1, h2, h3, p { margin: 0; }
+h2 { font-size: 1.4rem; margin-bottom: 8px; }
+.tag { display: inline-block; font-family: var(--mono); font-size: 12px; letter-spacing: .1em; padding: 2px 10px; border-radius: 999px; background: var(--surface2); color: var(--muted); }
+.hero h1 { font-size: clamp(28px, 6vw, 44px); line-height: 1.2; margin: 10px 0; }
+.lead { color: var(--muted); }
+.box { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
+.S { color: var(--said); font-weight: 700; }
+.N { color: var(--another); font-weight: 700; }
+.T { color: var(--the); font-weight: 700; }
+.K { color: var(--key); font-weight: 700; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+.card .big { font-size: 1.15rem; font-weight: 700; margin-bottom: 4px; }
+.analogy { background: var(--key-soft); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+small, .note { color: var(--muted); font-size: .88rem; }
+
+/* 分步动画 */
+.stepper { display: flex; flex-direction: column; gap: 12px; }
+.canvas { background: var(--surface2); border-radius: 12px; min-height: 200px; padding: 18px 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.item { width: 72px; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 2px; border-radius: 12px; border: 2px solid transparent; transition: all .6s ease; }
+.item .e { font-size: 38px; line-height: 1.2; }
+.item .l { font-size: .78rem; font-weight: 700; min-height: 1.3em; white-space: nowrap; }
+.item.said { border-color: var(--said); background: var(--said-soft); color: var(--said); }
+.item.another { border-color: var(--another); background: var(--another-soft); color: var(--another); }
+.item.the { border-color: var(--the); background: var(--the-soft); color: var(--the); }
+.item.dim { opacity: .3; }
+.item.gone { opacity: 0; transform: translateY(-24px) scale(.5); }
+.caption { text-align: center; font-size: 1.15rem; min-height: 3.2em; }
+.caption .note { display: block; }
+.ctrl { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: center; }
+button { font: inherit; cursor: pointer; }
+.btn { padding: 6px 14px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); }
+.btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.btn:disabled { opacity: .4; cursor: default; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.stepno { font-family: var(--mono); color: var(--muted); font-size: .9rem; min-width: 60px; text-align: center; }
+
+/* 公式 */
+.formula { font-size: clamp(1.1rem, 4vw, 1.5rem); display: flex; align-items: baseline; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.formula .noun { color: var(--key); transition: all .6s; display: inline-block; max-width: 8em; overflow: hidden; white-space: nowrap; }
+.formula .noun.out { opacity: 0; max-width: 0; }
+.formula .s, .formula .hint { color: var(--the); transition: opacity .6s; opacity: 0; }
+.formula .hint { font-size: .85rem; color: var(--muted); }
+.formula .on { opacity: 1; }
+
+/* 自己试试 */
+.try .row .item { cursor: pointer; user-select: none; }
+.try .item:hover { border-color: var(--line); }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: .9rem; }
+.legend span::before { content: ""; display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; background: var(--c); }
+.result { text-align: center; font-size: 1.2rem; min-height: 3.4em; }
+.result .word { font-size: 1.6rem; }
+input[type=range] { width: 180px; accent-color: var(--accent); }
+
+/* 表 */
+table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: 12px; overflow: hidden; }
+th, td { border: 1px solid var(--line); padding: 10px 8px; text-align: center; line-height: 1.6; }
+th { background: var(--surface2); }
+.summary { font-size: 1.1rem; text-align: center; padding: 16px; border-radius: 12px; background: var(--key-soft); }
+
+/* 练习 */
+.quiz { display: flex; flex-direction: column; gap: 14px; }
+.q { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+.q .type { font-size: .78rem; color: var(--muted); font-family: var(--mono); }
+.q .text { font-size: 1.05rem; margin: 4px 0 10px; }
+.q .opts { display: flex; gap: 8px; flex-wrap: wrap; }
+.q .opt.right { border-color: var(--ok); background: var(--another-soft); color: var(--ok); }
+.q .opt.wrong { border-color: var(--bad); background: var(--the-soft); color: var(--bad); }
+.q input[type=text] { font: inherit; padding: 6px 10px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--bg); color: var(--ink); width: 180px; max-width: 100%; }
+.q .fb { margin-top: 8px; display: none; }
+.q .fb.show { display: block; }
+.q .fb b.ok { color: var(--ok); } .q .fb b.no { color: var(--bad); }
+.scorebar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; font-size: 1.1rem; }
+
+.reset-fab { position: fixed; right: 16px; bottom: 16px; z-index: 100; padding: 10px 18px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); font-weight: 700; box-shadow: 0 4px 16px rgba(0,0,0,.2); }
+.reset-fab:hover { border-color: var(--accent); color: var(--accent); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+</style>
+</head>
+<body>
+<main>
+
+<!-- 标题 + 比喻 -->
+<section class="hero">
+  <span class="tag">english</span>
+  <h1><span class="N">another</span> · <span class="K">other</span> · <span class="T">others</span> · <span class="T">the other</span> · <span class="T">the others</span></h1>
+  <p class="lead">五个词都是「另外的」，区别只在：<b>还有没有剩</b>、<b>是一个还是多个</b>、<b>后面带不带名词</b>。</p>
+  <div class="analogy" style="margin-top:14px">
+    🍬 <b>生活比喻：分糖果</b><br>
+    你手里有一袋糖，已经给了小明一颗。<br>
+    · 再随手给别人一颗（袋里还有很多）→ <span class="N">another</span><br>
+    · 把袋里<b>剩下的全倒出来</b>给别人 → 带 <span class="T">the</span>（the other / the others）<br>
+    · 只再分<b>一些</b>，袋里还有剩 → 不带 the（others）
+  </div>
+</section>
+
+<!-- 三把钥匙 -->
+<section>
+  <h2>先记住三把「钥匙」🔑</h2>
+  <div class="grid">
+    <div class="card"><div class="big">① 有没有 <span class="T">the</span>？</div>有 the = <b>剩下的全部</b><br>没 the = 只是另外一些，<b>还有剩</b></div>
+    <div class="card"><div class="big">② 词尾有没有 <span class="T">s</span>？</div><b>others</b> 是代词，本身就当名词用，后面<b>不再接名词</b></div>
+    <div class="card"><div class="big">③ <span class="N">another</span> = an + other</div>「再一个 / 另一个」，有 an，所以接<b>单数</b></div>
+  </div>
+</section>
+
+<!-- 分步动画 1~5 -->
+<section>
+  <h2>动画 1：<span class="S">one</span> … <span class="T">the other</span>（两个中的另一个）</h2>
+  <p class="note">总共只有两个：说了一个，剩下那个就是确定的。</p>
+  <div class="stepper box" data-scene="twoPens"></div>
+</section>
+
+<section>
+  <h2>动画 2：<span class="N">another</span>（再来一个）</h2>
+  <p class="note">一堆东西里拿了一个，还有很多，再随便来一个。</p>
+  <div class="stepper box" data-scene="cookies"></div>
+</section>
+
+<section>
+  <h2>动画 3：三个东西怎么说</h2>
+  <p class="note">说第二个时还剩不止一个 → another；说到最后一个 → the other。</p>
+  <div class="stepper box" data-scene="three"></div>
+</section>
+
+<section>
+  <h2>动画 4：<span class="T">the others</span>（剩下的全部）</h2>
+  <p class="note">总数确定，挑出一部分后，其余<b>全部</b>。</p>
+  <div class="stepper box" data-scene="balls"></div>
+</section>
+
+<section>
+  <h2>动画 5：<span class="T">others</span>（另外一些，不是全部）</h2>
+  <p class="note">常用句型 <b>Some … others …</b>：还有人没提到，所以不加 the。</p>
+  <div class="stepper box" data-scene="people"></div>
+</section>
+
+<section>
+  <h2>动画 6：<span class="K">other</span> + 名词 → 代词</h2>
+  <p class="note"><span class="K">other</span> 是形容词，后面得跟名词；把复数名词去掉、加 s，就变成代词。</p>
+  <div class="stepper box" data-scene="formula"></div>
+</section>
+
+<!-- 自己试试 -->
+<section class="try">
+  <h2>🧪 自己试试：该用哪个词？</h2>
+  <p class="note">点球切换状态：无 → <span class="S">已经说过</span> → <span class="T">现在要说的</span> → 无。页面会告诉你「现在要说的」该用哪个词。</p>
+  <div class="box stepper">
+    <div class="ctrl">
+      <label>总数：<input type="range" id="tryN" min="2" max="8"> <b id="tryNLabel"></b> 个</label>
+      <button class="btn" id="tryReset">↺ 重置</button>
+    </div>
+    <div class="legend">
+      <span style="--c:var(--said)">已经说过</span>
+      <span style="--c:var(--the)">现在要说的</span>
+      <span style="--c:var(--line)">还没提到</span>
+    </div>
+    <div class="canvas"><div class="row" id="tryRow"></div></div>
+    <div class="result" id="tryResult"></div>
+  </div>
+</section>
+
+<!-- 常见误区 -->
+<section>
+  <h2>⚠️ 常见误区</h2>
+  <div class="grid">
+    <div class="card"><div class="big">❌ another apples</div><span class="N">another</span> 里有 an，只接单数：another apple。<br><small>特例：another three days（再三天，数量当整体）</small></div>
+    <div class="card"><div class="big">❌ others students</div><span class="T">others</span> 已经是代词，不能再接名词：other students = others。</div>
+    <div class="card"><div class="big">❌ 两个里用 another</div>只有两个时，第二个一定是<b>确定</b>的：One … <span class="T">the other</span> …</div>
+  </div>
+</section>
+
+<!-- 总结 -->
+<section>
+  <h2>📋 一张表全搞定</h2>
+  <table>
+    <tr><th></th><th>一个</th><th>多个</th></tr>
+    <tr><th>还有剩<br><small>（不带 the）</small></th>
+      <td><span class="N">another</span> (+ 单数名词)<br><small>再一个 / 另一个</small></td>
+      <td><span class="K">other</span> + 复数名词 = <span class="T">others</span><br><small>另一些</small></td></tr>
+    <tr><th>剩下全部<br><small>（带 the）</small></th>
+      <td><span class="T">the other</span> (+ 单数名词)<br><small>另一个（最后那个）</small></td>
+      <td><span class="K">the other</span> + 复数名词 = <span class="T">the others</span><br><small>其余所有的</small></td></tr>
+  </table>
+  <p class="summary" style="margin-top:14px">一句话：<b>剩下全部就加 the，还有剩就不加；一个用 another / the other，多个用 others / the others；后面有名词就去掉 s。</b></p>
+</section>
+
+<!-- 练习 -->
+<section>
+  <h2>✍️ 练习</h2>
+  <div class="quiz" id="quiz"></div>
+  <div class="scorebar box" style="margin-top:14px">
+    <span>得分：<b id="score">0 / 0</b></span>
+    <button class="btn primary" id="quizRedo">重做练习</button>
+  </div>
+</section>
+
+</main>
+
+<button class="reset-fab" id="globalReset" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+
+<script>
+const $ = id => document.getElementById(id);
+const STEP_MS = 1400;
+
+/* ---------- 分步动画场景数据 ----------
+   每一步是一组操作 [下标, 状态, 标签]，第 k 步的画面 = 依次执行第 1..k 步的操作 */
+const SCENES = {
+  twoPens: {
+    items: ['🖍️', '🖊️'],
+    steps: [
+      { cap: '桌上总共 <b>2</b> 支笔。', ops: [] },
+      { cap: '<span class="S">One</span> is red, …', note: '先说了其中一支。', ops: [[0, 'said', 'One']] },
+      { cap: '<span class="S">One</span> is red, <span class="T">the other</span> is blue.', note: '只剩 1 支 → 是哪支很确定 → 加 the。', ops: [[1, 'the', 'the other']] },
+    ],
+  },
+  cookies: {
+    items: ['🍪', '🍪', '🍪', '🍪', '🍪', '🍪', '🍪'],
+    steps: [
+      { cap: '一罐饼干，有很多块。', ops: [] },
+      { cap: 'I ate <span class="S">one</span> cookie. 😋', ops: [[0, 'said', 'one']] },
+      { cap: '吃掉了……', ops: [[0, 'gone', '']] },
+      { cap: 'Can I have <span class="N">another</span> one?', note: '还剩很多，随便再来一块 → another（不加 the）。', ops: [[4, 'another', 'another']] },
+      { cap: 'And <span class="N">another</span>! 🤤', note: '只要还有剩，就可以一直说 another。', ops: [[4, 'gone', ''], [2, 'another', 'another']] },
+    ],
+  },
+  three: {
+    items: ['🍎', '🍌', '🍇'],
+    steps: [
+      { cap: '总共 <b>3</b> 个水果。', ops: [] },
+      { cap: '<span class="S">One</span> is an apple, …', ops: [[0, 'said', 'One']] },
+      { cap: '<span class="N">another</span> is a banana, …', note: '这时还剩 2 个，说的是其中一个，不确定 → another。', ops: [[1, 'another', 'another']] },
+      { cap: 'and <span class="T">the other</span> is grapes.', note: '只剩最后 1 个 → 确定 → the other。', ops: [[2, 'the', 'the other']] },
+    ],
+  },
+  balls: {
+    items: ['🔴', '⚪', '⚪', '⚪', '⚪', '⚪'],
+    steps: [
+      { cap: '总共 <b>6</b> 个球。', ops: [] },
+      { cap: '<span class="S">One</span> is red, …', ops: [[0, 'said', 'One']] },
+      { cap: '<span class="T">the others</span> are white.', note: '剩下 5 个，全部 → the others（= the other balls）。', ops: [1, 2, 3, 4, 5].map(i => [i, 'the', 'the others']) },
+    ],
+  },
+  people: {
+    items: ['🧑', '👩', '👨', '🧒', '👧', '👴', '👵', '🧔', '👱'],
+    steps: [
+      { cap: '一群人。', ops: [] },
+      { cap: '<span class="S">Some</span> people like tea, …', ops: [0, 1, 2].map(i => [i, 'said', 'Some 🍵']) },
+      { cap: '<span class="T">others</span> like coffee.', ops: [3, 4, 5].map(i => [i, 'the', 'others ☕']) },
+      { cap: '<span class="S">Some</span> like tea, <span class="T">others</span> like coffee.', note: '还有人没提到 → 不是「剩下全部」 → others，不加 the。', ops: [6, 7, 8].map(i => [i, 'dim', '?']) },
+    ],
+  },
+};
+
+/* 通用分步控制器：prev / next / play / reset */
+function makeStepper(root, total, render) {
+  root.insertAdjacentHTML('beforeend', `
+    <div class="ctrl">
+      <button class="btn" data-act="prev">← 上一步</button>
+      <span class="stepno"></span>
+      <button class="btn" data-act="next">下一步 →</button>
+      <button class="btn primary" data-act="play">▶ 播放</button>
+      <button class="btn" data-act="reset">↺ 重置</button>
+    </div>`);
+  const btn = a => root.querySelector(`[data-act="${a}"]`);
+  const s = { step: 0, timer: null };
+  const show = () => {
+    render(s.step);
+    root.querySelector('.stepno').textContent = `${s.step + 1} / ${total}`;
+    btn('prev').disabled = s.step === 0;
+    btn('next').disabled = s.step === total - 1;
+    btn('play').textContent = s.timer ? '⏸ 暂停' : '▶ 播放';
+  };
+  const stop = () => { clearInterval(s.timer); s.timer = null; };
+  const go = k => { s.step = Math.max(0, Math.min(total - 1, k)); show(); };
+  btn('prev').onclick = () => { stop(); go(s.step - 1); };
+  btn('next').onclick = () => { stop(); go(s.step + 1); };
+  btn('play').onclick = () => {
+    if (s.timer) { stop(); show(); return; }
+    if (s.step === total - 1) s.step = 0;
+    s.timer = setInterval(() => {
+      if (s.step >= total - 1) { stop(); show(); return; }
+      go(s.step + 1);
+    }, STEP_MS);
+    show();
+  };
+  const reset = () => { stop(); go(0); };
+  btn('reset').onclick = reset;
+  return { reset };
+}
+
+const modules = [];
+
+/* 物品类场景 */
+for (const [name, sc] of Object.entries(SCENES)) {
+  const root = document.querySelector(`[data-scene="${name}"]`);
+  root.insertAdjacentHTML('beforeend', '<div class="canvas"><div class="row"></div><div class="caption"></div></div>');
+  const row = root.querySelector('.row'), cap = root.querySelector('.caption');
+  const items = sc.items.map(e => {
+    const d = document.createElement('div');
+    d.className = 'item';
+    d.innerHTML = `<div class="e">${e}</div><div class="l"></div>`;
+    row.appendChild(d);
+    return d;
+  });
+  const render = k => {
+    items.forEach(it => { it.className = 'item'; it.querySelector('.l').textContent = ''; });
+    for (let i = 1; i <= k; i++) {
+      for (const [idx, cls, label] of sc.steps[i].ops) {
+        const it = items[idx];
+        if (cls === 'gone' || cls === 'dim') it.classList.add(cls);
+        else { it.classList.remove('said', 'another', 'the'); it.classList.add(cls); }
+        it.querySelector('.l').textContent = label;
+      }
+    }
+    const st = sc.steps[k];
+    cap.innerHTML = st.cap + (st.note ? `<span class="note">${st.note}</span>` : '');
+  };
+  modules.push(makeStepper(root, sc.steps.length, render));
+}
+
+/* 公式场景 */
+{
+  const root = document.querySelector('[data-scene="formula"]');
+  root.insertAdjacentHTML('beforeend', `
+    <div class="canvas">
+      <div class="formula"><span>other</span><span class="noun" data-f="0">&nbsp;students</span><span class="s" data-f="0">s</span><span class="hint" data-f="0">（另一些学生）</span></div>
+      <div class="formula"><span>the other</span><span class="noun" data-f="1">&nbsp;students</span><span class="s" data-f="1">s</span><span class="hint" data-f="1">（其余所有学生）</span></div>
+      <div class="formula"><span>the other</span><span class="noun" data-f="2">&nbsp;student</span><span class="hint" data-f="2">→ 单数：直接说 the other，不加 s</span></div>
+      <div class="caption"></div>
+    </div>`);
+  const caps = [
+    '三个带名词的短语。',
+    '<span class="K">other students</span> → <span class="T">others</span>',
+    '<span class="K">the other students</span> → <span class="T">the others</span>',
+    '<span class="K">the other student</span> → <span class="T">the other</span><span class="note">❌ 没有 "another students"、"others students" 这种说法。</span>',
+  ];
+  const render = k => {
+    root.querySelectorAll('[data-f]').forEach(el => {
+      const done = +el.dataset.f < k;
+      if (el.classList.contains('noun')) el.classList.toggle('out', done);
+      else el.classList.toggle('on', done);
+    });
+    root.querySelector('.caption').innerHTML = caps[k];
+  };
+  modules.push(makeStepper(root, caps.length, render));
+}
+
+/* ---------- 自己试试 ---------- */
+{
+  const INIT_N = 5;
+  const st = { n: INIT_N, marks: [] };   // marks[i]: 0 无, 1 已说, 2 要说
+  const slider = $('tryN'), row = $('tryRow'), out = $('tryResult');
+  const LABEL = ['', '已说过', '要说的'];
+  const CLS = ['', 'said', 'the'];
+
+  function judge() {
+    const said = st.marks.filter(m => m === 1).length;
+    const target = st.marks.filter(m => m === 2).length;
+    const left = st.marks.filter(m => m === 0).length;
+    if (!said && !target) return '先点一个球，标成「已经说过」。';
+    if (!said) return '至少要有一个「已经说过」的，才谈得上「另外的」。';
+    if (!target) return '再点一下某个球，标成「现在要说的」。';
+    if (target === 1 && left === 0) return `<span class="word T">the other</span><br><small>只要说 1 个，而且它就是<b>最后剩下的那个</b> → 确定 → the other</small>`;
+    if (target === 1) return `<span class="word N">another</span><br><small>只要说 1 个，但还有 ${left} 个没提到 → 不确定 → another</small>`;
+    if (left === 0) return `<span class="word T">the others</span> = the other + 复数名词<br><small>要说 ${target} 个，而且是<b>剩下的全部</b> → the others</small>`;
+    return `<span class="word T">others</span> = other + 复数名词<br><small>要说 ${target} 个，但还有 ${left} 个没提到 → 只是一部分 → others</small>`;
+  }
+  function render() {
+    slider.value = st.n; $('tryNLabel').textContent = st.n;
+    row.innerHTML = '';
+    st.marks.forEach((m, i) => {
+      const d = document.createElement('div');
+      d.className = 'item ' + CLS[m];
+      d.innerHTML = `<div class="e">⚽</div><div class="l">${LABEL[m]}</div>`;
+      d.onclick = () => { st.marks[i] = (m + 1) % 3; render(); };
+      row.appendChild(d);
+    });
+    out.innerHTML = judge();
+  }
+  function setN(n) { st.n = n; st.marks = Array(n).fill(0); render(); }
+  slider.oninput = () => setN(+slider.value);
+  const reset = () => setN(INIT_N);
+  $('tryReset').onclick = reset;
+  modules.push({ reset });
+}
+
+/* ---------- 练习 ---------- */
+const QUIZ = [
+  { type: '选择', text: 'I have two brothers. One is a doctor, ___ is a student.', opts: ['the other', 'another', 'other'], ans: 'the other',
+    why: '只有两个，剩下那个是确定的 → the other（见动画 1）。' },
+  { type: '判断', text: '“Can I have another apples?” 这句话对吗？', opts: ['对', '错'], ans: '错',
+    why: 'another = an + other，只接单数：another apple；要说多个用 some more apples。' },
+  { type: '选择', text: 'There are 30 students in our class. 18 are girls, and ___ are boys.', opts: ['others', 'the others', 'another'], ans: 'the others',
+    why: '剩下的 12 人全部是男生 → 剩下全部 → the others（见动画 4）。' },
+  { type: '选择', text: 'Some people like singing, ___ like dancing.', opts: ['the other', 'others', 'another'], ans: 'others',
+    why: 'Some … others …：另一些人，并不是剩下的全部 → others（见动画 5）。' },
+  { type: '改错', text: '“Others students are playing football.” 应改为：', opts: ['Other students are playing football.', 'Another students are playing football.', 'The other student are playing football.'], ans: 'Other students are playing football.',
+    why: '后面有名词 students，要用形容词 other；others 是代词，不能再接名词（常见误区 2）。' },
+  { type: '填空', text: 'This cup is dirty. Could you give me ___ one?（填一个词）', ans: 'another',
+    why: '随便换一个干净的，还有很多杯子 → another。' },
+  { type: '选择（迁移）', text: 'Three books are on the desk. One is mine, ___ is Tom’s, and the other is Lucy’s.', opts: ['the other', 'another', 'others'], ans: 'another',
+    why: '说第二本时还剩 2 本，不确定是哪本 → another；最后一本才是 the other（见动画 3）。' },
+  { type: '判断', text: '“I need another three days to finish it.” 这句话对吗？', opts: ['对', '错'], ans: '对',
+    why: '特例：another + 数词 + 复数名词，表示「再……」，把三天当作一个整体。' },
+  { type: '填空', text: 'The room has two doors. One is open, and ___ is closed.（填两个词）', ans: 'the other',
+    why: '两扇门里剩下的那扇 → the other。' },
+];
+
+const quizState = { answers: {} };   // 题号 → { given, correct }
+const norm = s => s.trim().toLowerCase().replace(/\s+/g, ' ');
+
+function renderQuiz() {
+  const box = $('quiz'); box.innerHTML = '';
+  QUIZ.forEach((q, i) => {
+    const a = quizState.answers[i];
+    const div = document.createElement('div');
+    div.className = 'q';
+    let body;
+    if (q.opts) {
+      body = '<div class="opts">' + q.opts.map(o => {
+        let cls = 'btn opt';
+        if (a) { if (o === q.ans) cls += ' right'; else if (o === a.given) cls += ' wrong'; }
+        return `<button class="${cls}" ${a ? 'disabled' : ''} data-o="${o.replace(/"/g, '&quot;')}">${o}</button>`;
+      }).join('') + '</div>';
+    } else {
+      body = `<div class="opts"><input type="text" ${a ? 'disabled' : ''} value="${a ? a.given.replace(/"/g, '&quot;') : ''}" placeholder="输入答案">
+              <button class="btn" ${a ? 'disabled' : ''} data-submit>提交</button></div>`;
+    }
+    div.innerHTML = `<div class="type">${i + 1}. ${q.type}</div><div class="text">${q.text}</div>${body}
+      <div class="fb ${a ? 'show' : ''}">${a ? (a.correct ? '<b class="ok">✅ 正确！</b>' : `<b class="no">❌ 正确答案：${q.ans}</b>`) + '<br>' + q.why : ''}</div>`;
+    div.querySelectorAll('[data-o]').forEach(b => b.onclick = () => answer(i, b.dataset.o));
+    const sub = div.querySelector('[data-submit]');
+    if (sub) {
+      const inp = div.querySelector('input');
+      sub.onclick = () => { if (inp.value.trim()) answer(i, inp.value); };
+      inp.onkeydown = e => { if (e.key === 'Enter' && inp.value.trim()) answer(i, inp.value); };
+    }
+    box.appendChild(div);
+  });
+  const done = Object.values(quizState.answers);
+  $('score').textContent = `${done.filter(a => a.correct).length} / ${QUIZ.length}`;
+}
+function answer(i, given) {
+  quizState.answers[i] = { given, correct: norm(given) === norm(QUIZ[i].ans) };
+  renderQuiz();
+}
+const resetQuiz = () => { quizState.answers = {}; renderQuiz(); };
+$('quizRedo').onclick = resetQuiz;
+modules.push({ reset: resetQuiz });
+
+/* ---------- 全局重置 ---------- */
+function resetAll() {
+  modules.forEach(m => m.reset());
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+$('globalReset').onclick = resetAll;
+modules.forEach(m => m.reset());
+</script>
+</body>
+</html>

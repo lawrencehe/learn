@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>begin vs start 动画讲解</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    background: linear-gradient(135deg, #1e2a4a, #2d1b3d);
+    color: #fff; min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+    padding: 24px 12px;
+  }
+  h1 { font-size: 2.2rem; margin-bottom: 6px; }
+  h1 .b { color: #7dd3fc; } h1 .s { color: #fca5a5; }
+  .sub { opacity: .75; margin-bottom: 20px; }
+  .tabs { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 18px; }
+  .tab {
+    padding: 8px 16px; border-radius: 20px; border: 1px solid #ffffff44; background: #ffffff11;
+    color: #fff; cursor: pointer; font-size: .95rem; transition: .2s;
+  }
+  .tab.active, .tab:hover { background: #fff; color: #1e2a4a; }
+  .stage {
+    width: min(860px, 100%); background: #ffffff0d; border: 1px solid #ffffff22; border-radius: 18px;
+    padding: 24px; min-height: 480px; position: relative; overflow: hidden;
+  }
+  .scene { display: none; animation: fadeIn .5s; }
+  .scene.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  .scene h2 { font-size: 1.4rem; margin-bottom: 8px; }
+  .explain { line-height: 1.8; opacity: .9; margin-bottom: 14px; }
+  .canvas {
+    height: 220px; background: #0b1224; border-radius: 12px; position: relative; overflow: hidden; margin-bottom: 14px;
+  }
+  .ex { display: flex; gap: 12px; flex-wrap: wrap; }
+  .card {
+    flex: 1 1 240px; padding: 12px 14px; border-radius: 10px; font-size: 1.05rem; line-height: 1.6;
+    opacity: 0; transform: translateY(12px); transition: .5s;
+  }
+  .card.show { opacity: 1; transform: none; }
+  .ok { background: #16a34a33; border-left: 4px solid #22c55e; }
+  .no { background: #dc262633; border-left: 4px solid #ef4444; }
+  .mid { background: #eab30833; border-left: 4px solid #eab308; }
+  .card small { display: block; opacity: .75; font-size: .85rem; }
+  .bw { color: #7dd3fc; font-weight: bold; } .sw { color: #fca5a5; font-weight: bold; }
+  .btn {
+    margin-top: 14px; padding: 8px 18px; border-radius: 8px; border: none; background: #7c3aed; color: #fff;
+    font-size: 1rem; cursor: pointer;
+  }
+  .btn:hover { background: #8b5cf6; }
+
+  /* 场景1：汽车 */
+  .road { position: absolute; bottom: 30px; left: 0; right: 0; height: 6px; background: repeating-linear-gradient(90deg,#fff8 0 30px,transparent 30px 60px); }
+  .car { position: absolute; bottom: 40px; left: 40px; font-size: 70px; transform: scaleX(-1); }
+  .car.go { animation: drive 2.5s ease-in forwards; }
+  @keyframes drive { 0% { left: 40px; } 15% { left: 35px; } 100% { left: 110%; } }
+  .car.shake { animation: shake .1s 8; }
+  @keyframes shake { 50% { transform: scaleX(-1) translateY(-3px); } }
+  .key { position: absolute; top: 20px; left: 30px; font-size: 28px; }
+  .bubble {
+    position: absolute; top: 30px; left: 50%; transform: translateX(-50%); background: #fff; color: #111;
+    padding: 6px 14px; border-radius: 14px; font-weight: bold; opacity: 0; transition: .3s; white-space: nowrap;
+  }
+  .bubble.show { opacity: 1; }
+  .smoke { position: absolute; bottom: 50px; left: 20px; font-size: 26px; opacity: 0; }
+  .smoke.puff { animation: puff 1s ease-out; }
+  @keyframes puff { 0% { opacity: 1; transform: translate(0,0) scale(.5);} 100% { opacity: 0; transform: translate(-30px,-40px) scale(1.5);} }
+
+  /* 场景2：赛跑 */
+  .line { position: absolute; left: 90px; top: 0; bottom: 0; width: 6px; background: repeating-linear-gradient(#fff 0 12px,#000 12px 24px); }
+  .runner { position: absolute; bottom: 40px; left: 40px; font-size: 56px; transform: scaleX(-1); }
+  .runner.go { animation: run 2s ease-in forwards; }
+  @keyframes run { to { left: 105%; } }
+  .gun { position: absolute; top: 20px; left: 20px; font-size: 34px; }
+  .bang { position: absolute; top: 14px; left: 66px; font-size: 26px; font-weight: 900; color: #facc15; opacity: 0; }
+  .bang.show { animation: bang .6s; }
+  @keyframes bang { 0%{opacity:0;transform:scale(.3)} 30%{opacity:1;transform:scale(1.3)} 100%{opacity:0;transform:scale(1)} }
+  .jump { position: absolute; bottom: 40px; right: 80px; font-size: 56px; }
+  .jump.startle { animation: startle .6s; }
+  @keyframes startle { 30% { transform: translateY(-40px) rotate(-10deg); } }
+
+  /* 场景3：幕布 */
+  .curtain { position: absolute; top: 0; bottom: 0; width: 50%; background: repeating-linear-gradient(90deg,#991b1b 0 20px,#7f1d1d 20px 40px); transition: 2.5s ease-in-out; z-index: 2; }
+  .curtain.l { left: 0; } .curtain.r { right: 0; }
+  .canvas.open .curtain.l { transform: translateX(-95%); }
+  .canvas.open .curtain.r { transform: translateX(95%); }
+  .show-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; font-size: 1.3rem; gap: 6px; }
+  .show-text .em { font-size: 54px; }
+  .story { position: absolute; bottom: 12px; left: 0; right: 0; text-align: center; font-style: italic; color: #fde68a; z-index: 3; opacity: 0; transition: 1s; }
+  .canvas.open .story { opacity: 1; transition-delay: 2s; }
+
+  /* 场景4：下雨 */
+  .cloud { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); font-size: 70px; }
+  .drop { position: absolute; top: 70px; font-size: 18px; opacity: 0; }
+  .raining .drop { animation: fall 1s linear infinite; }
+  @keyframes fall { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(140px); } }
+  .swap { position: absolute; bottom: 18px; left: 0; right: 0; text-align: center; font-size: 1.4rem; }
+  .swap span.w { display: inline-block; min-width: 80px; animation: flip 3s infinite; }
+
+  /* 场景5：时间线 */
+  .timeline { position: absolute; left: 40px; right: 40px; top: 110px; height: 4px; background: #ffffff55; }
+  .dot { position: absolute; top: 96px; width: 32px; height: 32px; border-radius: 50%; transform: translateX(-50%); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .lbl { position: absolute; transform: translateX(-50%); text-align: center; font-size: .95rem; width: 160px; }
+  .grow { position: absolute; left: 40px; top: 110px; height: 4px; background: linear-gradient(90deg,#7dd3fc,#fca5a5); width: 0; transition: 3s linear; }
+  .canvas.play .grow { width: calc(100% - 80px); }
+
+  /* 场景6：动词变化 */
+  table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+  td, th { padding: 10px; text-align: center; border-bottom: 1px solid #ffffff22; font-size: 1.1rem; }
+  th { color: #c4b5fd; }
+  .pop { opacity: 0; display: inline-block; }
+  .pop.show { animation: popIn .5s forwards; }
+  @keyframes popIn { 0% { opacity: 0; transform: scale(.3); } 70% { transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
+
+  .nav { display: flex; justify-content: space-between; width: min(860px,100%); margin-top: 14px; }
+
+:root{--lq-surface:#ffffff10;--lq-fab:#2b2442;--lq-ink:#ffffff;--lq-muted:#ffffffbb;--lq-line:#ffffff40;--lq-accent:#c4b5fd;--lq-ok:#4ade80;--lq-bad:#f87171;--lq-h2:1.4rem}
+body{padding-bottom:80px}
+
+/* ---------- 练习题 + 全局重置（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+.lq{display:grid;gap:12px;margin-bottom:56px}
+.lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+.lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
+.lq-sub{margin:0;color:var(--lq-muted);font-size:14px}
+.lq-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--lq-muted);font-variant-numeric:tabular-nums}
+.lq-list{display:grid;gap:10px}
+.lq-item{background:var(--lq-surface);border:1.5px solid var(--lq-line);border-radius:10px;padding:12px 16px;display:grid;gap:10px;min-width:0;color:var(--lq-ink);text-align:left}
+.lq-item.lq-is-ok{border-color:var(--lq-ok)}
+.lq-item.lq-is-bad{border-color:var(--lq-bad)}
+.lq-q{font-size:15px;font-weight:600;line-height:1.6}
+.lq-tag{display:inline-block;font-size:11px;font-weight:500;line-height:1.6;color:var(--lq-muted);border:1px solid var(--lq-line);border-radius:999px;padding:0 8px;margin-right:8px;vertical-align:1px}
+.lq-opts,.lq-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lq .lq-opt,.lq .lq-redo{font:inherit;font-size:14px;line-height:1.4;padding:6px 14px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);cursor:pointer;text-align:left;opacity:1}
+.lq .lq-opt:hover:not(:disabled),.lq .lq-redo:hover{border-color:var(--lq-accent)}
+.lq .lq-opt:disabled{cursor:default;opacity:1}
+.lq .lq-opt.lq-right{border-color:var(--lq-ok);color:var(--lq-ok);font-weight:700}
+.lq .lq-opt.lq-wrong{border-color:var(--lq-bad);color:var(--lq-bad);text-decoration:line-through}
+.lq-fill input{font:inherit;font-size:14px;padding:6px 10px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);width:min(100%,200px)}
+.lq-fill input.lq-right{border-color:var(--lq-ok)}
+.lq-fill input.lq-wrong{border-color:var(--lq-bad)}
+.lq-why{font-size:14px;line-height:1.65;color:var(--lq-muted)}
+.lq-why:empty{display:none}
+.lq-why .lq-ok{color:var(--lq-ok)}
+.lq-why .lq-bad{color:var(--lq-bad)}
+.lq-reset{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:max(16px,env(safe-area-inset-bottom,0px));z-index:100;font:inherit;font-size:14px;font-weight:600;line-height:1;padding:10px 16px;margin:0;border-radius:999px;border:1.5px solid var(--lq-line);background:var(--lq-fab,var(--lq-surface));color:var(--lq-ink);box-shadow:0 4px 16px rgba(0,0,0,.2);cursor:pointer}
+.lq-reset:hover{border-color:var(--lq-accent);color:var(--lq-accent)}
+</style>
+</head>
+<body>
+<h1><span class="b">begin</span> vs <span class="s">start</span></h1>
+<p class="sub">点击标签或「下一页」逐步观看动画</p>
+
+<div class="tabs" id="tabs"></div>
+
+<div class="stage">
+  <!-- 0 总览 -->
+  <section class="scene" data-title="① 共同点">
+    <h2>大多数时候：两者可以互换 ☔</h2>
+    <p class="explain">表示「开始做某事」时，<span class="bw">begin</span> 和 <span class="sw">start</span> 意思几乎一样，后面都能接 <b>to do</b> 或 <b>doing</b>。</p>
+    <div class="canvas" id="rainCanvas">
+      <div class="cloud">☁️</div>
+      <div class="swap">It <span class="w" id="swapWord">began</span> to rain.</div>
+    </div>
+    <div class="ex">
+      <div class="card ok">It <span class="bw">began</span> / <span class="sw">started</span> to rain.<small>开始下雨了</small></div>
+      <div class="card ok">She <span class="bw">began</span> / <span class="sw">started</span> learning English.<small>她开始学英语</small></div>
+    </div>
+  </section>
+
+  <!-- 1 机器 -->
+  <section class="scene" data-title="② 机器启动">
+    <h2>启动机器、发动车 → 只能用 <span class="sw">start</span> 🚗</h2>
+    <p class="explain"><span class="sw">start</span> 有「<b>启动、让…运转</b>」的意思，<span class="bw">begin</span> 没有。</p>
+    <div class="canvas" id="carCanvas">
+      <div class="key">🔑</div>
+      <div class="bubble" id="carBubble"></div>
+      <div class="smoke" id="smoke">💨</div>
+      <div class="car" id="car">🚗</div>
+      <div class="road"></div>
+    </div>
+    <div class="ex">
+      <div class="card ok">✅ <span class="sw">start</span> the car / the engine / the computer<small>发动汽车 / 启动发动机 / 开电脑</small></div>
+      <div class="card no">❌ <span class="bw">begin</span> the car<small>车不会"开始"，只能被"启动"</small></div>
+    </div>
+    <button class="btn" onclick="playCar()">▶ 再播一次</button>
+  </section>
+
+  <!-- 2 起点/突然 -->
+  <section class="scene" data-title="③ 起点与突然">
+    <h2><span class="sw">start</span>：有明确「起点」、动作突然 🏁</h2>
+    <p class="explain">比赛、旅程的出发用 <span class="sw">start</span>；它还能表示「<b>吓一跳、猛地一动</b>」（start = 惊起），这个 <span class="bw">begin</span> 也没有。</p>
+    <div class="canvas" id="raceCanvas">
+      <div class="gun">🔫</div>
+      <div class="bang" id="bang">BANG!</div>
+      <div class="line"></div>
+      <div class="runner" id="runner">🏃</div>
+      <div class="jump" id="cat">🐱</div>
+    </div>
+    <div class="ex">
+      <div class="card ok">The race <span class="sw">starts</span> at the <span class="sw">starting</span> line.<small>比赛从起跑线开始</small></div>
+      <div class="card ok">The cat <span class="sw">started</span> at the noise.<small>猫被声音吓了一跳（只能用 start）</small></div>
+      <div class="card ok">We <span class="sw">started</span> early for the airport.<small>我们一早就出发去机场</small></div>
+    </div>
+    <button class="btn" onclick="playRace()">▶ 再播一次</button>
+  </section>
+
+  <!-- 3 创办/引发 -->
+  <section class="scene" data-title="④ 创办·引发">
+    <h2><span class="sw">start</span>：创办、引发某事 🔥</h2>
+    <p class="explain">「从无到有地<b>弄出</b>一个东西」——开公司、生火、挑起谣言/争吵——习惯用 <span class="sw">start</span>。</p>
+    <div class="canvas" id="bizCanvas">
+      <div class="show-text" id="bizText"><div class="em" id="bizEmoji">💡</div><div id="bizLine"></div></div>
+    </div>
+    <div class="ex">
+      <div class="card ok">✅ <span class="sw">start</span> a company / a business<small>创办公司</small></div>
+      <div class="card ok">✅ <span class="sw">start</span> a fire / a rumor / a fight<small>生火 / 造谣 / 挑起打架</small></div>
+      <div class="card mid">⚠️ <span class="bw">begin</span> a company<small>很不自然，母语者几乎不这么说</small></div>
+    </div>
+    <button class="btn" onclick="playBiz()">▶ 再播一次</button>
+  </section>
+
+  <!-- 4 正式 -->
+  <section class="scene" data-title="⑤ 正式语气">
+    <h2><span class="bw">begin</span>：更正式、更书面 🎭</h2>
+    <p class="explain">典礼、演出、文学叙述中，<span class="bw">begin</span> 听起来更庄重；<span class="sw">start</span> 更口语、更随意。</p>
+    <div class="canvas" id="stageCanvas">
+      <div class="curtain l"></div><div class="curtain r"></div>
+      <div class="show-text"><div class="em">🎻🎤🎻</div><div>Ladies and gentlemen, the concert will now <span class="bw">begin</span>.</div></div>
+      <div class="story">"In the beginning was the Word…"</div>
+    </div>
+    <div class="ex">
+      <div class="card ok">The ceremony will <span class="bw">begin</span> at 10 a.m.<small>典礼将于上午 10 点开始（正式通知）</small></div>
+      <div class="card ok">Let's <span class="sw">start</span>! / Ready? <span class="sw">Start</span>!<small>开始吧！（口语）</small></div>
+    </div>
+    <button class="btn" onclick="playStage()">▶ 再播一次</button>
+  </section>
+
+  <!-- 5 名词 -->
+  <section class="scene" data-title="⑥ 名词用法">
+    <h2>名词：beginning vs start 📍</h2>
+    <p class="explain"><span class="bw">begin</span> 的名词是 <b>beginning</b>（侧重"开头那一段"）；<span class="sw">start</span> 本身就是名词（侧重"起始那一刻/起点"）。</p>
+    <div class="canvas" id="lineCanvas">
+      <div class="timeline"></div>
+      <div class="grow"></div>
+      <div class="dot" style="left:40px;background:#fca5a5">🏁</div>
+      <div class="lbl" style="left:60px;top:140px">a fresh <span class="sw">start</span><br><small>一个新起点</small></div>
+      <div class="lbl" style="left:25%;top:50px">at the <span class="bw">beginning</span> of the film<br><small>电影开头那段</small></div>
+      <div class="dot" style="left:calc(100% - 40px);background:#a78bfa">🏆</div>
+      <div class="lbl" style="left:calc(100% - 90px);top:140px">from <span class="sw">start</span> to finish<br><small>从头到尾</small></div>
+    </div>
+    <div class="ex">
+      <div class="card ok">Let's make a new <span class="sw">start</span>.<small>我们重新开始吧</small></div>
+      <div class="card ok">I was nervous at the <span class="bw">beginning</span>.<small>一开始我很紧张</small></div>
+      <div class="card ok">It's a good <span class="sw">start</span>! <small>开了个好头！</small></div>
+    </div>
+    <button class="btn" onclick="playLine()">▶ 再播一次</button>
+  </section>
+
+  <!-- 6 变形 -->
+  <section class="scene" data-title="⑦ 动词变形">
+    <h2>动词变形：begin 不规则，start 规则 ✍️</h2>
+    <p class="explain">这是考试最常考的点之一！</p>
+    <table>
+      <tr><th>原形</th><th>过去式</th><th>过去分词</th><th>-ing</th></tr>
+      <tr><td class="bw">begin</td><td><span class="pop bw">began</span></td><td><span class="pop bw">begun</span></td><td><span class="pop bw">beginning</span> <small>(双写 n)</small></td></tr>
+      <tr><td class="sw">start</td><td><span class="pop sw">started</span></td><td><span class="pop sw">started</span></td><td><span class="pop sw">starting</span></td></tr>
+    </table>
+    <div class="ex">
+      <div class="card ok">The class has already <span class="bw">begun</span>.<small>已经上课了</small></div>
+      <div class="card no">❌ The class has already began.<small>过去分词是 begun！</small></div>
+    </div>
+    <button class="btn" onclick="playVerb()">▶ 再播一次</button>
+  </section>
+
+  <!-- 7 小测验 -->
+  <section class="scene" data-title="⑧ 练习">
+    <div class="lq" id="lq">
+      <div class="lq-head"><h2>练习 🎯</h2><span class="lq-score"></span></div>
+      <p class="lq-sub">每题作答后马上看到解析。点「重做练习」清空重来。</p>
+      <div class="lq-list"></div>
+      <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+    </div>
+  </section>
+</div>
+
+<div class="nav">
+  <button class="btn" onclick="go(cur-1)">← 上一页</button>
+  <button class="btn" onclick="go(cur+1)">下一页 →</button>
+</div>
+
+<script>
+const scenes = [...document.querySelectorAll('.scene')];
+const tabs = document.getElementById('tabs');
+let cur = 0, timers = [];
+const later = (fn, ms) => timers.push(setTimeout(fn, ms));
+
+scenes.forEach((s, i) => {
+  const b = document.createElement('button');
+  b.className = 'tab'; b.textContent = s.dataset.title; b.onclick = () => go(i);
+  tabs.appendChild(b);
+});
+
+function go(i) {
+  if (i < 0 || i >= scenes.length) return;
+  timers.forEach(clearTimeout); timers = [];
+  cur = i;
+  scenes.forEach((s, j) => s.classList.toggle('active', j === i));
+  [...tabs.children].forEach((t, j) => t.classList.toggle('active', j === i));
+  showCards(scenes[i]);
+  [playRain, playCar, playRace, playBiz, playStage, playLine, playVerb, startQuiz][i]();
+}
+
+function showCards(scene) {
+  const cards = scene.querySelectorAll('.card');
+  cards.forEach(c => c.classList.remove('show'));
+  cards.forEach((c, k) => later(() => c.classList.add('show'), 600 + k * 500));
+}
+
+function restart(el, cls) { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
+
+/* ① 下雨 */
+const rainCanvas = document.getElementById('rainCanvas');
+for (let i = 0; i < 14; i++) {
+  const d = document.createElement('div');
+  d.className = 'drop'; d.textContent = '💧';
+  d.style.left = (35 + Math.random() * 30) + '%';
+  d.style.animationDelay = (Math.random()) + 's';
+  rainCanvas.appendChild(d);
+}
+let swapTimer;
+function playRain() {
+  rainCanvas.classList.remove('raining');
+  later(() => rainCanvas.classList.add('raining'), 500);
+  clearInterval(swapTimer);
+  const w = document.getElementById('swapWord'); let f = false;
+  swapTimer = setInterval(() => {
+    f = !f;
+    w.innerHTML = f ? '<span class="sw">started</span>' : '<span class="bw">began</span>';
+  }, 1500);
+}
+
+/* ② 汽车 */
+function playCar() {
+  const car = document.getElementById('car'), bub = document.getElementById('carBubble');
+  car.className = 'car'; bub.classList.remove('show');
+  later(() => { bub.innerHTML = '"Begin the car!" … 🤔 没反应'; bub.style.color = '#dc2626'; bub.classList.add('show'); }, 300);
+  later(() => { bub.classList.remove('show'); }, 2000);
+  later(() => { bub.innerHTML = '"Start the car!" 🔑 轰——'; bub.style.color = '#16a34a'; bub.classList.add('show'); restart(car, 'shake'); }, 2500);
+  later(() => { restart(document.getElementById('smoke'), 'puff'); car.className = 'car'; void car.offsetWidth; car.classList.add('go'); }, 3400);
+}
+
+/* ③ 赛跑 */
+function playRace() {
+  const r = document.getElementById('runner'), cat = document.getElementById('cat');
+  r.className = 'runner'; cat.className = 'jump';
+  later(() => { restart(document.getElementById('bang'), 'show'); restart(cat, 'startle'); r.classList.add('go'); }, 1000);
+}
+
+/* ④ 创办 */
+function playBiz() {
+  const e = document.getElementById('bizEmoji'), l = document.getElementById('bizLine');
+  const steps = [['💡', 'an idea…'], ['🏢', 'He <span class="sw">started</span> a company.'], ['🔥', 'She <span class="sw">started</span> a fire.'], ['🗣️', 'Who <span class="sw">started</span> the rumor?']];
+  steps.forEach((s, k) => later(() => {
+    e.textContent = s[0]; l.innerHTML = s[1];
+    e.classList.remove('pop', 'show'); void e.offsetWidth; e.classList.add('pop', 'show');
+  }, k * 1400));
+}
+
+/* ⑤ 幕布 */
+function playStage() {
+  const c = document.getElementById('stageCanvas');
+  c.classList.remove('open');
+  later(() => c.classList.add('open'), 400);
+}
+
+/* ⑥ 时间线 */
+function playLine() {
+  const c = document.getElementById('lineCanvas');
+  c.classList.remove('play');
+  later(() => c.classList.add('play'), 300);
+}
+
+/* ⑦ 变形 */
+function playVerb() {
+  const p = scenes[6].querySelectorAll('.pop');
+  p.forEach(x => x.classList.remove('show'));
+  p.forEach((x, k) => later(() => x.classList.add('show'), 300 + k * 350));
+}
+
+/* ⑧ 练习：题目见页面末尾的 LQ_ITEMS，切换标签时保留作答 */
+function startQuiz() {}
+
+/* 全局重置：清掉所有场景的动画状态，回到第 1 页 */
+window.pageReset = () => {
+  clearInterval(swapTimer);
+  document.getElementById('swapWord').innerHTML = 'began';
+  document.getElementById('car').className = 'car';
+  document.getElementById('carBubble').classList.remove('show');
+  document.getElementById('runner').className = 'runner';
+  document.getElementById('cat').className = 'jump';
+  document.getElementById('bizEmoji').textContent = '💡';
+  document.getElementById('bizLine').innerHTML = '';
+  ['stageCanvas', 'lineCanvas'].forEach(id => document.getElementById(id).classList.remove('open', 'play'));
+  scenes.forEach(s => s.querySelectorAll('.card, .pop').forEach(c => c.classList.remove('show')));
+  go(0);
+};
+
+go(0);
+</script>
+<button type="button" class="lq-reset" id="lq-reset" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+<script>
+window.LQ_ITEMS = [
+  { type: '选择', q: "I can't ___ my car. The battery is dead.", opts: ['start', 'begin'], ans: 0,
+    why: '发动汽车、启动机器只能用 start。' },
+  { type: '选择', q: "The ceremony will ___ at 9 o'clock.（正式通知）", opts: ['begin', 'start'], ans: 0,
+    why: '正式场合用 begin 更庄重（start 也不算错，但 begin 更合适）。' },
+  { type: '选择', q: 'The class has already ___.', opts: ['began', 'begun'], ans: 1,
+    why: 'has 后面要过去分词：begin – began – begun。' },
+  { type: '选择', q: 'My uncle ___ his own business last year.', opts: ['started', 'began'], ans: 0,
+    why: '创办公司、生意，习惯用 start。' },
+  { type: '选择', q: 'He ___ when he heard the loud noise.（吓了一跳）', opts: ['started', 'began'], ans: 0,
+    why: 'start 可以表示“惊起、吓一跳”，begin 没有这个意思。' },
+  { type: '选择', q: 'It ___ to snow.', opts: ['began', 'started', '两个都对'], ans: 2,
+    why: '表示“开始做某事”时，began / started 都对。' },
+  { type: '判断', q: '“Please begin the computer.”（请开电脑）这句话对吗？', opts: ['对', '错'], ans: 1,
+    why: '启动机器只能用 start：Please start the computer。' },
+  { type: '填空', q: '写出 begin 的 -ing 形式：', ans: ['beginning'], placeholder: '输入单词',
+    why: 'begin 重读在最后一个音节，结尾是“辅音 + 元音 + 辅音”，要双写 n：beginning。' },
+  { type: '判断', q: 'begin 和 start 在任何场合都可以互换。', opts: ['对', '错'], ans: 1,
+    why: '常见误区。“开始做某事”可以互换，但启动机器、出发、吓一跳、创办公司只能（或习惯）用 start。' },
+];
+</script>
+<script>
+/* ---------- 练习题 + 全局重置（learn 通用组件） ----------
+   题目来自 window.LQ_ITEMS：{type, q, opts, ans: 选项下标, why} 或填空题 {type, q, ans: [可接受答案…], why}
+   全局重置：先调用页面自己的 window.pageReset()，再清空练习、回到顶部 */
+(() => {
+  const box = document.getElementById('lq');
+  const items = window.LQ_ITEMS || [];
+  const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let answered = 0, right = 0;
+
+  function update() {
+    const all = answered === items.length;
+    score.textContent = `已答 ${answered} / ${items.length} · 答对 ${right}` +
+      (all ? (right === items.length ? ' · 全对！' : ' · 看看解析，再重做一次') : '');
+  }
+
+  function render() {
+    answered = 0; right = 0; list.innerHTML = '';
+    items.forEach((it, i) => {
+      const el = document.createElement('div');
+      el.className = 'lq-item';
+      el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
+      const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
+      const judge = (ok, answer) => {
+        answered++; if (ok) right++;
+        el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
+        why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
+        update();
+      };
+      if (it.opts) {
+        a.classList.add('lq-opts');
+        it.opts.forEach((o, j) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'lq-opt'; b.innerHTML = o;
+          b.onclick = () => {
+            a.querySelectorAll('button').forEach(x => x.disabled = true);
+            a.children[it.ans].classList.add('lq-right');
+            if (j !== it.ans) b.classList.add('lq-wrong');
+            judge(j === it.ans, it.opts[it.ans]);
+          };
+          a.append(b);
+        });
+      } else {
+        a.classList.add('lq-fill');
+        a.innerHTML = `<input type="text" autocomplete="off" spellcheck="false" placeholder="${it.placeholder || '输入答案'}" aria-label="第 ${i + 1} 题答案"><button type="button" class="lq-opt">确定</button>`;
+        const inp = a.querySelector('input'), go = a.querySelector('button');
+        const submit = () => {
+          if (!inp.value.trim()) { inp.focus(); return; }
+          inp.disabled = go.disabled = true;
+          const ok = it.ans.some(x => norm(x) === norm(inp.value));
+          inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
+          judge(ok, it.ans[0]);
+        };
+        go.onclick = submit;
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      }
+      list.append(el);
+    });
+    update();
+  }
+
+  box.querySelector('.lq-redo').addEventListener('click', render);
+  document.getElementById('lq-reset').addEventListener('click', () => {
+    if (typeof window.pageReset === 'function') window.pageReset();
+    render();
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  });
+  render();
+})();
+</script>
+</body>
+</html>

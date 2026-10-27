@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>few 与 little</title>
+<style>
+:root {
+  --bg: #f4f5f8;
+  --surface: #ffffff;
+  --surface2: #eef0f5;
+  --ink: #1c2230;
+  --muted: #5f6878;
+  --line: #d8dce5;
+  --count: #2563d4;   --count-soft: #dfe9fc;
+  --uncount: #b45309; --uncount-soft: #fdecd4;
+  --pos: #1d8a62;     --pos-soft: #dcf2e7;
+  --neg: #c2412d;     --neg-soft: #fbe3de;
+  --water: #38bdf8;
+  --accent: #6d28d9;
+  --ok: #15803d; --bad: #c2412d;
+  --font: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+  --mono: ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #12151c; --surface: #1b202a; --surface2: #232a36; --ink: #e8ecf3; --muted: #9aa4b5; --line: #2f3746;
+    --count: #7aa7ff; --count-soft: #1c2b4a;
+    --uncount: #f5b056; --uncount-soft: #3d2c14;
+    --pos: #4fd1a0; --pos-soft: #173a2c;
+    --neg: #ff8a73; --neg-soft: #47231d;
+    --water: #38bdf8;
+    --accent: #a78bfa; --ok: #4ade80; --bad: #ff8a73;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font);
+  font-size: 16px; line-height: 1.7; padding: 32px 16px 96px;
+}
+main { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 48px; }
+h1, h2, h3, p { margin: 0; }
+h2 { font-size: 1.4rem; margin-bottom: 8px; }
+.tag { display: inline-block; font-family: var(--mono); font-size: 12px; letter-spacing: .1em; padding: 2px 10px; border-radius: 999px; background: var(--surface2); color: var(--muted); }
+.hero h1 { font-size: clamp(28px, 6vw, 44px); line-height: 1.2; margin: 10px 0; }
+.lead { color: var(--muted); }
+.box { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
+.C { color: var(--count); font-weight: 700; }
+.U { color: var(--uncount); font-weight: 700; }
+.P { color: var(--pos); font-weight: 700; }
+.Ng { color: var(--neg); font-weight: 700; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+.card .big { font-size: 1.15rem; font-weight: 700; margin-bottom: 4px; }
+.analogy { background: var(--uncount-soft); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+small, .note { color: var(--muted); font-size: .88rem; }
+
+/* 2×2 核心表 */
+.matrix { display: grid; grid-template-columns: auto 1fr 1fr; gap: 6px; text-align: center; }
+.matrix > div { padding: 10px 6px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); }
+.matrix .h { background: var(--surface2); font-weight: 700; }
+.matrix .w { font-size: 1.3rem; font-weight: 800; }
+
+/* 分步动画通用 */
+.stepper { display: flex; flex-direction: column; gap: 12px; }
+.canvas { background: var(--surface2); border-radius: 12px; min-height: 220px; padding: 18px 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; }
+.caption { text-align: center; font-size: 1.15rem; min-height: 3.2em; }
+.caption .note { display: block; }
+.ctrl { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: center; }
+button { font: inherit; cursor: pointer; }
+.btn { padding: 6px 14px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); }
+.btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.btn:disabled { opacity: .4; cursor: default; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.stepno { font-family: var(--mono); color: var(--muted); font-size: .9rem; min-width: 60px; text-align: center; }
+
+/* 动画 1：分类 */
+.row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.item { width: 84px; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 2px; border-radius: 12px; border: 2px solid transparent; transition: all .6s ease; }
+.item .e { font-size: 34px; line-height: 1.2; }
+.item .n { font-size: .85rem; }
+.item .l { font-size: .74rem; font-weight: 700; min-height: 1.3em; opacity: 0; transition: opacity .6s; white-space: nowrap; }
+.sort.s1 .item.cnt { border-color: var(--count); background: var(--count-soft); color: var(--count); }
+.sort.s1 .item.cnt .l { opacity: 1; }
+.sort.s2 .item.unc { border-color: var(--uncount); background: var(--uncount-soft); color: var(--uncount); }
+.sort.s2 .item.unc .l { opacity: 1; }
+.sort.s3 .item.trap { box-shadow: 0 0 0 4px var(--neg); }
+
+/* 动画 2/3：同样多，两种心情 */
+.mood { display: flex; gap: 18px; flex-wrap: wrap; justify-content: center; align-items: flex-end; }
+.glass { width: 70px; height: 110px; border: 3px solid var(--muted); border-top: none; border-radius: 0 0 14px 14px; position: relative; overflow: hidden; }
+.glass .fill { position: absolute; left: 0; right: 0; bottom: 0; height: 0; background: var(--water); opacity: .75; transition: height 1s ease; }
+.mood.s1 .glass .fill { height: 18%; }
+.person { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 200px; opacity: 0; transform: translateY(10px); transition: all .6s; }
+.person .face { font-size: 40px; }
+.person .say { padding: 8px 12px; border-radius: 12px; font-size: .95rem; text-align: center; }
+.person.p .say { background: var(--pos-soft); border: 1.5px solid var(--pos); }
+.person.n .say { background: var(--neg-soft); border: 1.5px solid var(--neg); }
+.mood.s2 .person.p, .mood.s3 .person.n { opacity: 1; transform: none; }
+.guests { display: flex; gap: 4px; font-size: 34px; }
+.guests span { opacity: 0; transition: opacity .6s; }
+.mood.s1 .guests span { opacity: 1; }
+.chairs { font-size: 22px; letter-spacing: 2px; opacity: .55; }
+
+/* 动画 4：感觉刻度 */
+.scale { width: 100%; max-width: 640px; position: relative; padding: 46px 0 10px; }
+.bar { height: 10px; border-radius: 999px; background: linear-gradient(90deg, var(--neg), var(--surface), var(--pos)); border: 1px solid var(--line); }
+.tick { position: absolute; top: 0; transform: translateX(-50%); text-align: center; font-weight: 700; white-space: nowrap; font-size: .95rem; opacity: .18; transition: opacity .6s; }
+.tick small { display: block; font-weight: 400; }
+.tick.show { opacity: 1; }
+.pin { position: absolute; top: 40px; width: 4px; height: 22px; background: var(--accent); border-radius: 2px; transform: translateX(-50%); transition: left .8s ease; }
+
+/* 自己试试 */
+.pick { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.result { text-align: center; font-size: 1.2rem; min-height: 4.6em; }
+.result .sent { font-size: 1.35rem; }
+.result .big { font-size: 1.5rem; }
+.vis { font-size: 34px; min-height: 48px; }
+
+/* 练习 */
+.quiz { display: flex; flex-direction: column; gap: 14px; }
+.q { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+.q .type { font-size: .78rem; color: var(--muted); font-family: var(--mono); }
+.q .text { font-size: 1.05rem; margin: 4px 0 10px; }
+.q .opts { display: flex; gap: 8px; flex-wrap: wrap; }
+.q .opt.right { border-color: var(--ok); background: var(--pos-soft); color: var(--ok); }
+.q .opt.wrong { border-color: var(--bad); background: var(--neg-soft); color: var(--bad); }
+.q input[type=text] { font: inherit; padding: 6px 10px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--bg); color: var(--ink); width: 180px; max-width: 100%; }
+.q .fb { margin-top: 8px; display: none; }
+.q .fb.show { display: block; }
+.q .fb b.ok { color: var(--ok); } .q .fb b.no { color: var(--bad); }
+.scorebar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; font-size: 1.1rem; }
+.summary { font-size: 1.1rem; text-align: center; padding: 16px; border-radius: 12px; background: var(--uncount-soft); }
+
+.reset-fab { position: fixed; right: 16px; bottom: 16px; z-index: 100; padding: 10px 18px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); font-weight: 700; box-shadow: 0 4px 16px rgba(0,0,0,.2); }
+.reset-fab:hover { border-color: var(--accent); color: var(--accent); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+</style>
+</head>
+<body>
+<main>
+
+<section class="hero">
+  <span class="tag">english</span>
+  <h1><span class="C">few</span> · <span class="C">a few</span> · <span class="U">little</span> · <span class="U">a little</span></h1>
+  <p class="lead">四个词都表示「少量」。只要回答两个问题就能选对：<b>能不能数？</b> <b>说话人觉得够不够？</b></p>
+  <div class="analogy" style="margin-top:14px">
+    🥛 <b>生活比喻：半杯水</b><br>
+    同一杯水，乐观的人说「<b>还有一点</b>」，悲观的人说「<b>几乎没了</b>」。<br>
+    英语里的 <b>a</b> 就是这个开关：有 a = 「还有一点」😊，没有 a = 「几乎没有」😟。
+  </div>
+</section>
+
+<section>
+  <h2>核心：一张 2×2 表 🔑</h2>
+  <div class="matrix">
+    <div class="h"></div><div class="h">能数（可数名词复数）<br><small>apples, friends, books</small></div><div class="h">不能数（不可数名词）<br><small>water, time, money</small></div>
+    <div class="h">😊 有一点<br><small>肯定</small></div><div><span class="w P">a few</span><br><small>几个</small></div><div><span class="w P">a little</span><br><small>一点</small></div>
+    <div class="h">😟 几乎没有<br><small>否定</small></div><div><span class="w Ng">few</span><br><small>没几个</small></div><div><span class="w Ng">little</span><br><small>没多少</small></div>
+  </div>
+  <p class="note" style="margin-top:8px">「可数名词」= 能一个一个数的东西；「不可数名词」= 只能量多少、不能说 1 个 2 个的东西。</p>
+</section>
+
+<section>
+  <h2>动画 1：先分一分——能不能数？</h2>
+  <p class="note">能数的配 few 家族，不能数的配 little 家族。</p>
+  <div class="stepper box" data-scene="sort">
+    <div class="canvas sort">
+      <div class="row">
+        <div class="item cnt"><div class="e">🍎</div><div class="n">apples</div><div class="l">few / a few</div></div>
+        <div class="item unc"><div class="e">💧</div><div class="n">water</div><div class="l">little / a little</div></div>
+        <div class="item cnt"><div class="e">🧑‍🤝‍🧑</div><div class="n">friends</div><div class="l">few / a few</div></div>
+        <div class="item unc"><div class="e">⏰</div><div class="n">time</div><div class="l">little / a little</div></div>
+        <div class="item cnt"><div class="e">📚</div><div class="n">books</div><div class="l">few / a few</div></div>
+        <div class="item unc trap"><div class="e">💰</div><div class="n">money</div><div class="l">little / a little</div></div>
+        <div class="item unc trap"><div class="e">📝</div><div class="n">homework</div><div class="l">little / a little</div></div>
+      </div>
+      <div class="caption"></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>动画 2：同一杯水，两种说法（不可数）</h2>
+  <p class="note">水的量完全一样，变的只是说话人的心情。</p>
+  <div class="stepper box" data-scene="glass">
+    <div class="canvas mood">
+      <div class="person p"><div class="face">😊</div><div class="say">There is <b>a little</b> water.<br><small>还有一点，够喝！</small></div></div>
+      <div class="glass"><div class="fill"></div></div>
+      <div class="person n"><div class="face">😟</div><div class="say">There is <b>little</b> water.<br><small>几乎没水了……</small></div></div>
+      <div class="caption" style="width:100%"></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>动画 3：派对来了 3 个人（可数）</h2>
+  <p class="note">来了几个人是事实，用 few 还是 a few 取决于你的期待。</p>
+  <div class="stepper box" data-scene="party">
+    <div class="canvas mood">
+      <div class="person p"><div class="face">😊</div><div class="say"><b>A few</b> friends came.<br><small>来了几个朋友，挺热闹！</small></div></div>
+      <div style="text-align:center"><div class="guests"><span>🧑</span><span>👩</span><span>👦</span></div><div class="chairs">🪑🪑🪑🪑🪑🪑🪑🪑🪑🪑</div></div>
+      <div class="person n"><div class="face">😢</div><div class="say"><b>Few</b> friends came.<br><small>没几个人来，好冷清……</small></div></div>
+      <div class="caption" style="width:100%"></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>动画 4：感觉上的「多少」</h2>
+  <p class="note">这条刻度表示<b>说话人的感觉</b>，不是精确数字。</p>
+  <div class="stepper box" data-scene="scale">
+    <div class="canvas">
+      <div class="scale">
+        <div class="tick" style="left:4%">no<small>没有</small></div>
+        <div class="tick" style="left:24%"><span class="Ng">few</span><small>几乎没有</small></div>
+        <div class="tick" style="left:46%"><span class="P">a few</span><small>有几个</small></div>
+        <div class="tick" style="left:70%">quite a few<small>相当多</small></div>
+        <div class="tick" style="left:94%">many<small>很多</small></div>
+        <div class="bar"></div>
+        <div class="pin"></div>
+      </div>
+      <div class="caption"></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>🧪 自己试试：造个句子</h2>
+  <p class="note">选一个名词，再选你的心情，看看该用哪个词。</p>
+  <div class="box stepper">
+    <div class="pick" id="nounPick"></div>
+    <div class="pick" id="moodPick">
+      <button class="btn" data-mood="pos">😊 还有一点，够用</button>
+      <button class="btn" data-mood="neg">😟 几乎没有，不够</button>
+    </div>
+    <div class="ctrl"><button class="btn" id="tryReset">↺ 重置</button></div>
+    <div class="canvas" style="min-height:160px">
+      <div class="vis" id="tryVis"></div>
+      <div class="result" id="tryResult"></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>📌 几个固定搭配</h2>
+  <div class="grid">
+    <div class="card"><div class="big">quite a few = 相当多</div>Quite a few people came.<br><small>来了不少人（不是"几个"！）</small></div>
+    <div class="card"><div class="big">only a few / only a little</div>I have only a little money.<br><small>只有一点点（强调少）</small></div>
+    <div class="card"><div class="big">very few / very little</div>Very few students passed.<br><small>极少数人及格</small></div>
+  </div>
+</section>
+
+<section>
+  <h2>⚠️ 常见误区</h2>
+  <div class="grid">
+    <div class="card"><div class="big">❌ a few money</div><b>money</b> 是不可数名词（只能说多少钱，不能说"一个钱"），要用 <span class="U">a little</span> money。<br><small>但 coins / dollars 可数：a few dollars ✅</small></div>
+    <div class="card"><div class="big">❌ 以为 few 比 a few 少很多</div>两者数量可能一样，<b>区别在态度</b>：few 偏否定（不够），a few 偏肯定（还有）。</div>
+    <div class="card"><div class="big">❌ a little apples</div>apples 能数，要用 <span class="C">a few</span> apples。<br><small>a little 也可修饰形容词：I'm a little tired. 我有点累。</small></div>
+  </div>
+  <p class="summary" style="margin-top:18px">一句话：<b>能数用 few，不能数用 little；有 a 是"还有一点"，没 a 是"几乎没有"。</b></p>
+</section>
+
+<section>
+  <h2>✍️ 练习</h2>
+  <div class="quiz" id="quiz"></div>
+  <div class="scorebar box" style="margin-top:14px">
+    <span>得分：<b id="score">0 / 0</b></span>
+    <button class="btn primary" id="quizRedo">重做练习</button>
+  </div>
+</section>
+
+</main>
+
+<button class="reset-fab" id="globalReset" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+
+<script>
+const $ = id => document.getElementById(id);
+const STEP_MS = 1600;
+const modules = [];
+
+/* 通用分步控制器：画布按步数获得累计 class（s1、s2…），并显示当前说明 */
+function makeStepper(root, caps, onStep) {
+  const canvas = root.querySelector('.canvas');
+  const cap = root.querySelector('.caption');
+  root.insertAdjacentHTML('beforeend', `
+    <div class="ctrl">
+      <button class="btn" data-act="prev">← 上一步</button>
+      <span class="stepno"></span>
+      <button class="btn" data-act="next">下一步 →</button>
+      <button class="btn primary" data-act="play">▶ 播放</button>
+      <button class="btn" data-act="reset">↺ 重置</button>
+    </div>`);
+  const btn = a => root.querySelector(`[data-act="${a}"]`);
+  const total = caps.length;
+  const s = { step: 0, timer: null };
+  const show = () => {
+    for (let i = 1; i < total; i++) canvas.classList.toggle('s' + i, s.step >= i);
+    cap.innerHTML = caps[s.step];
+    if (onStep) onStep(s.step);
+    root.querySelector('.stepno').textContent = `${s.step + 1} / ${total}`;
+    btn('prev').disabled = s.step === 0;
+    btn('next').disabled = s.step === total - 1;
+    btn('play').textContent = s.timer ? '⏸ 暂停' : '▶ 播放';
+  };
+  const stop = () => { clearInterval(s.timer); s.timer = null; };
+  const go = k => { s.step = Math.max(0, Math.min(total - 1, k)); show(); };
+  btn('prev').onclick = () => { stop(); go(s.step - 1); };
+  btn('next').onclick = () => { stop(); go(s.step + 1); };
+  btn('play').onclick = () => {
+    if (s.timer) { stop(); show(); return; }
+    if (s.step === total - 1) s.step = 0;
+    s.timer = setInterval(() => {
+      if (s.step >= total - 1) { stop(); show(); return; }
+      go(s.step + 1);
+    }, STEP_MS);
+    show();
+  };
+  const reset = () => { stop(); go(0); };
+  btn('reset').onclick = reset;
+  modules.push({ reset });
+}
+const scene = name => document.querySelector(`[data-scene="${name}"]`);
+const note = t => `<span class="note">${t}</span>`;
+
+makeStepper(scene('sort'), [
+  '这些东西，哪些能一个一个数？',
+  '<span class="C">能数</span>：apples、friends、books → 用 <span class="C">few / a few</span>' + note('它们能说 one apple, two apples…'),
+  '<span class="U">不能数</span>：water、time、money、homework → 用 <span class="U">little / a little</span>' + note('不能说 one water, two waters'),
+  '⚠️ 注意 <b>money</b> 和 <b>homework</b>：中文能说"一笔钱""一项作业"，英语里却是不可数！',
+]);
+
+makeStepper(scene('glass'), [
+  '一个空杯子。',
+  '倒进一点点水。' + note('量是固定的：大约 1/5 杯'),
+  '😊 乐观的人：There is <span class="P">a little</span> water.' + note('有 a → 强调「还有」'),
+  '😟 悲观的人：There is <span class="Ng">little</span> water.' + note('没 a → 强调「几乎没有」'),
+  '同样的水，<b>a</b> 决定了语气：<span class="P">a little</span> 偏肯定，<span class="Ng">little</span> 偏否定。',
+]);
+
+makeStepper(scene('party'), [
+  '准备了 10 把椅子的派对……',
+  '结果只来了 3 个人。',
+  '😊 本来以为没人来：<span class="P">A few</span> friends came.' + note('有人来了，不错'),
+  '😢 本来以为能坐满：<span class="Ng">Few</span> friends came.' + note('没几个人来，很失望'),
+  'friends 能数 → 用 few 家族；有没有 a，看你觉得多还是少。',
+]);
+
+{
+  const root = scene('scale');
+  const ticks = root.querySelectorAll('.tick');
+  const pin = root.querySelector('.pin');
+  const pos = ['4%', '24%', '46%', '70%', '94%'];
+  makeStepper(root, [
+    '<b>no</b>：一个都没有。',
+    '<span class="Ng">few</span>：有，但少得可以忽略 ≈ "几乎没有"。',
+    '<span class="P">a few</span>：有几个，值得一提 ≈ "有一些"。',
+    '<b>quite a few</b>：相当多！这是固定搭配，别理解成"几个"。',
+    '<b>many</b>：很多。' + note('little / a little 同理，只是用于不可数名词；"很多"那头对应 much'),
+  ], k => {
+    ticks.forEach((t, i) => t.classList.toggle('show', i <= k));
+    pin.style.left = pos[k];
+  });
+}
+
+/* ---------- 自己试试 ---------- */
+{
+  const NOUNS = [
+    { w: 'apples', e: '🍎', c: true, tpl: x => `I have ${x} apples.` },
+    { w: 'friends', e: '🧑', c: true, tpl: x => `She has ${x} friends here.` },
+    { w: 'books', e: '📚', c: true, tpl: x => `There are ${x} books on the shelf.` },
+    { w: 'water', e: '💧', c: false, tpl: x => `There is ${x} water in the bottle.` },
+    { w: 'time', e: '⏰', c: false, tpl: x => `We have ${x} time left.` },
+    { w: 'money', e: '💰', c: false, tpl: x => `He has ${x} money.` },
+    { w: 'homework', e: '📝', c: false, tpl: x => `I have ${x} homework today.` },
+  ];
+  const INIT = { noun: 0, mood: 'pos' };
+  const st = { ...INIT };
+  const nounBox = $('nounPick');
+  nounBox.innerHTML = NOUNS.map((n, i) => `<button class="btn" data-n="${i}">${n.e} ${n.w}</button>`).join('');
+  nounBox.querySelectorAll('[data-n]').forEach(b => b.onclick = () => { st.noun = +b.dataset.n; render(); });
+  $('moodPick').querySelectorAll('[data-mood]').forEach(b => b.onclick = () => { st.mood = b.dataset.mood; render(); });
+  function render() {
+    nounBox.querySelectorAll('[data-n]').forEach(b => b.classList.toggle('on', +b.dataset.n === st.noun));
+    $('moodPick').querySelectorAll('[data-mood]').forEach(b => b.classList.toggle('on', b.dataset.mood === st.mood));
+    const n = NOUNS[st.noun], pos = st.mood === 'pos';
+    const word = (pos ? 'a ' : '') + (n.c ? 'few' : 'little');
+    const cls = pos ? 'P' : 'Ng';
+    $('tryVis').textContent = n.e.repeat(n.c ? 3 : 1) + (pos ? ' 😊' : ' 😟');
+    const s = n.tpl(`<span class="${cls}">${word}</span>`);
+    $('tryResult').innerHTML = `<div class="big ${cls}">${word}</div><div class="sent">${s.charAt(0).toUpperCase() + s.slice(1)}</div>
+      <small>${n.w} ${n.c ? '<span class="C">能数</span> → few 家族' : '<span class="U">不能数</span> → little 家族'}；
+      ${pos ? '觉得还有一点 → 加 a' : '觉得几乎没有 → 不加 a'}</small>`;
+  }
+  const reset = () => { Object.assign(st, INIT); render(); };
+  $('tryReset').onclick = reset;
+  modules.push({ reset });
+}
+
+/* ---------- 练习 ---------- */
+const QUIZ = [
+  { type: '选择', text: 'There is ___ milk in the fridge. Let’s go and buy some.', opts: ['few', 'a few', 'little', 'a little'], ans: 'little',
+    why: 'milk 不可数 → little 家族；要去买了，说明「几乎没有」→ 不加 a。' },
+  { type: '选择', text: 'Don’t hurry. We still have ___ time before the train leaves.', opts: ['a little', 'little', 'a few', 'few'], ans: 'a little',
+    why: 'time 不可数；still 表示「还有」，语气肯定 → a little。' },
+  { type: '选择', text: 'He is very shy, so he has ___ friends.', opts: ['a few', 'few', 'a little', 'little'], ans: 'few',
+    why: 'friends 可数；害羞 → 朋友少得可怜，语气否定 → few。' },
+  { type: '判断', text: '“There are a little apples in the box.” 这句话对吗？', opts: ['对', '错'], ans: '错',
+    why: 'apples 能数，应该用 a few apples（常见误区 3）。' },
+  { type: '改错', text: '“She has a few money, so she can buy a coffee.” 应改为：', opts: ['She has a little money, …', 'She has few money, …', 'She has a few moneys, …'], ans: 'She has a little money, …',
+    why: 'money 不可数 → little 家族；能买咖啡说明「还有一点」→ a little（常见误区 1）。' },
+  { type: '情景（迁移）', text: '考试特别难，全班 40 人只有 2 人及格。老师叹气说：“___ students passed the exam.”', opts: ['Few', 'A few', 'Little', 'A little'], ans: 'Few',
+    why: 'students 可数；老师在叹气，语气否定 → Few。' },
+  { type: '填空', text: 'The room was full. Quite ___ people came to the party.（填两个词）', ans: 'a few',
+    why: 'quite a few = 相当多，和「房间满了」吻合（见动画 4）。' },
+  { type: '判断', text: '“few” 和 “a few” 可以描述同样多的数量，区别主要在说话人的态度。', opts: ['对', '错'], ans: '对',
+    why: '见动画 3：同样来了 3 个人，失望的人说 few，满意的人说 a few（常见误区 2）。' },
+  { type: '填空', text: 'I can speak ___ Japanese, so I can order food in Tokyo.（填两个词）', ans: 'a little',
+    why: 'Japanese（日语）不可数；能点餐 → 还会一点 → a little。' },
+];
+const quizState = { answers: {} };
+const norm = s => s.trim().toLowerCase().replace(/\s+/g, ' ');
+const esc = s => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+
+function renderQuiz() {
+  const box = $('quiz'); box.innerHTML = '';
+  QUIZ.forEach((q, i) => {
+    const a = quizState.answers[i];
+    const div = document.createElement('div');
+    div.className = 'q';
+    let body;
+    if (q.opts) {
+      body = '<div class="opts">' + q.opts.map((o, j) => {
+        let cls = 'btn opt';
+        if (a) { if (o === q.ans) cls += ' right'; else if (o === a.given) cls += ' wrong'; }
+        return `<button class="${cls}" ${a ? 'disabled' : ''} data-o="${j}">${esc(o)}</button>`;
+      }).join('') + '</div>';
+    } else {
+      body = `<div class="opts"><input type="text" ${a ? 'disabled' : ''} value="${a ? esc(a.given) : ''}" placeholder="输入答案">
+              <button class="btn" ${a ? 'disabled' : ''} data-submit>提交</button></div>`;
+    }
+    div.innerHTML = `<div class="type">${i + 1}. ${q.type}</div><div class="text">${q.text}</div>${body}
+      <div class="fb ${a ? 'show' : ''}">${a ? (a.correct ? '<b class="ok">✅ 正确！</b>' : `<b class="no">❌ 正确答案：${esc(q.ans)}</b>`) + '<br>' + q.why : ''}</div>`;
+    div.querySelectorAll('[data-o]').forEach(b => b.onclick = () => answer(i, q.opts[+b.dataset.o]));
+    const sub = div.querySelector('[data-submit]');
+    if (sub) {
+      const inp = div.querySelector('input');
+      sub.onclick = () => { if (inp.value.trim()) answer(i, inp.value); };
+      inp.onkeydown = e => { if (e.key === 'Enter' && inp.value.trim()) answer(i, inp.value); };
+    }
+    box.appendChild(div);
+  });
+  $('score').textContent = `${Object.values(quizState.answers).filter(a => a.correct).length} / ${QUIZ.length}`;
+}
+function answer(i, given) {
+  quizState.answers[i] = { given, correct: norm(given) === norm(QUIZ[i].ans) };
+  renderQuiz();
+}
+const resetQuiz = () => { quizState.answers = {}; renderQuiz(); };
+$('quizRedo').onclick = resetQuiz;
+modules.push({ reset: resetQuiz });
+
+/* ---------- 全局重置 ---------- */
+$('globalReset').onclick = () => {
+  modules.forEach(m => m.reset());
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+modules.forEach(m => m.reset());
+</script>
+</body>
+</html>

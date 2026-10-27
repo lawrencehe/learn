@@ -1,0 +1,455 @@
+<title>红黑树插入演示</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* 布局：上方控制条 + 中间树画布 + 下方步骤说明与规则检查 */
+:root{
+  --bg:#f6f7f9; --panel:#ffffff; --fg:#1d2330; --muted:#667085; --line:#c9ced8;
+  --red:#d63a3a; --black:#262b36; --nodetext:#ffffff;
+  --hl:#f5a524; --new:#2f80ed; --ok:#1e9e5a; --bad:#d63a3a;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#14171d; --panel:#1d2129; --fg:#e6e9ef; --muted:#9aa3b2; --line:#3a4150;
+  --red:#e5534b; --black:#0a0c10; --hl:#f5b84a; --new:#5a9cf5; --ok:#3fb27f; --bad:#e5534b; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#14171d; --panel:#1d2129; --fg:#e6e9ef; --muted:#9aa3b2; --line:#3a4150;
+  --red:#e5534b; --black:#0a0c10; --hl:#f5b84a; --new:#5a9cf5; --ok:#3fb27f; --bad:#e5534b; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-size:15px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px}
+.wrap{max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+h1{font-size:22px;margin:0}
+.sub{color:var(--muted);margin:0}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--panel);padding:10px 12px;border-radius:10px;border:1px solid var(--line)}
+input[type=number]{width:80px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg);font:inherit}
+button{padding:6px 12px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg);font:inherit;cursor:pointer}
+button:hover{border-color:var(--fg)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--new);outline-offset:1px}
+button.primary{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.sep{width:1px;height:24px;background:var(--line)}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow-x:auto}
+svg{display:block;width:100%;min-height:340px}
+.grid{display:grid;grid-template-columns:1.6fr 1fr;gap:14px}
+@media (max-width:760px){.grid{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;min-width:0}
+.card h2{font-size:13px;letter-spacing:.06em;color:var(--muted);margin:0 0 6px;font-weight:600}
+#tag{display:inline-block;font-size:12px;padding:1px 8px;border-radius:999px;background:var(--hl);color:#1d2330;margin-bottom:4px}
+#tag:empty{display:none}
+#msg{font-size:16px;min-height:3em}
+#stepno{color:var(--muted);font-family:var(--mono);font-size:12px}
+.rules{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.rules li{display:flex;gap:8px;align-items:baseline}
+.rules .st{font-family:var(--mono);width:1.2em;font-weight:700}
+.rules .ok{color:var(--ok)} .rules .bad{color:var(--bad)}
+.note{color:var(--muted);font-size:14px}
+.note b{color:var(--fg)}
+.edge{stroke:var(--line);stroke-width:2}
+.node circle{stroke-width:3;transition:fill .35s}
+.node text{fill:var(--nodetext);font-family:var(--mono);font-weight:700;font-size:15px;text-anchor:middle;dominant-baseline:central}
+.node .ring{fill:none;stroke-width:3}
+.bh{fill:var(--muted);font-family:var(--mono);font-size:11px;text-anchor:middle}
+@media (prefers-reduced-motion:reduce){.node circle{transition:none}}
+
+:root{--lq-surface:var(--panel);--lq-ink:var(--fg);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--new);--lq-ok:var(--ok);--lq-bad:var(--bad)}
+
+/* ---------- 练习题 + 全局重置（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+.lq{display:grid;gap:12px;margin-bottom:56px}
+.lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+.lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
+.lq-sub{margin:0;color:var(--lq-muted);font-size:14px}
+.lq-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--lq-muted);font-variant-numeric:tabular-nums}
+.lq-list{display:grid;gap:10px}
+.lq-item{background:var(--lq-surface);border:1.5px solid var(--lq-line);border-radius:10px;padding:12px 16px;display:grid;gap:10px;min-width:0;color:var(--lq-ink);text-align:left}
+.lq-item.lq-is-ok{border-color:var(--lq-ok)}
+.lq-item.lq-is-bad{border-color:var(--lq-bad)}
+.lq-q{font-size:15px;font-weight:600;line-height:1.6}
+.lq-tag{display:inline-block;font-size:11px;font-weight:500;line-height:1.6;color:var(--lq-muted);border:1px solid var(--lq-line);border-radius:999px;padding:0 8px;margin-right:8px;vertical-align:1px}
+.lq-opts,.lq-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lq .lq-opt,.lq .lq-redo{font:inherit;font-size:14px;line-height:1.4;padding:6px 14px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);cursor:pointer;text-align:left;opacity:1}
+.lq .lq-opt:hover:not(:disabled),.lq .lq-redo:hover{border-color:var(--lq-accent)}
+.lq .lq-opt:disabled{cursor:default;opacity:1}
+.lq .lq-opt.lq-right{border-color:var(--lq-ok);color:var(--lq-ok);font-weight:700}
+.lq .lq-opt.lq-wrong{border-color:var(--lq-bad);color:var(--lq-bad);text-decoration:line-through}
+.lq-fill input{font:inherit;font-size:14px;padding:6px 10px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);width:min(100%,200px)}
+.lq-fill input.lq-right{border-color:var(--lq-ok)}
+.lq-fill input.lq-wrong{border-color:var(--lq-bad)}
+.lq-why{font-size:14px;line-height:1.65;color:var(--lq-muted)}
+.lq-why:empty{display:none}
+.lq-why .lq-ok{color:var(--lq-ok)}
+.lq-why .lq-bad{color:var(--lq-bad)}
+.lq-reset{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:max(16px,env(safe-area-inset-bottom,0px));z-index:100;font:inherit;font-size:14px;font-weight:600;line-height:1;padding:10px 16px;margin:0;border-radius:999px;border:1.5px solid var(--lq-line);background:var(--lq-fab,var(--lq-surface));color:var(--lq-ink);box-shadow:0 4px 16px rgba(0,0,0,.2);cursor:pointer}
+.lq-reset:hover{border-color:var(--lq-accent);color:var(--lq-accent)}
+</style>
+
+<div class="wrap">
+  <div>
+    <h1>红黑树插入，一步一步看</h1>
+    <p class="sub">输入数字插入，或点预设序列。每一步都会停下来告诉你：发生了什么、为什么这样做。</p>
+  </div>
+
+  <div class="bar">
+    <input id="val" type="number" value="15" aria-label="要插入的数字">
+    <button id="ins" class="primary">插入</button>
+    <button id="rnd">随机插入</button>
+    <span class="sep"></span>
+    <button id="p1">预设：1~10 顺序插入</button>
+    <button id="p2">预设：触发全部情况</button>
+    <button id="clr">清空</button>
+    <span class="sep"></span>
+    <button id="prev">◀ 上一步</button>
+    <button id="play">▶ 自动播放</button>
+    <button id="next">下一步 ▶</button>
+  </div>
+
+  <div class="stage"><svg id="svg" viewBox="0 0 800 340" role="img" aria-label="红黑树"></svg></div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>当前步骤 <span id="stepno"></span></h2>
+      <span id="tag"></span>
+      <div id="msg">点击「插入」开始。</div>
+    </div>
+    <div class="card">
+      <h2>五条规则实时检查</h2>
+      <ul class="rules" id="rules"></ul>
+    </div>
+  </div>
+
+  <div class="card note">
+    <h2>看懂红黑树的关键一句话</h2>
+    <p style="margin:0">把每个<b>红节点</b>想象成“粘”在它黑色父亲身上，和父亲合成一个大节点，红黑树就变成了一棵<b>所有叶子都在同一层</b>的 2-3-4 树。所以：</p>
+    <p style="margin:.4em 0 0">· 新节点总是<b>红色</b>：等于往已有的大节点里塞一个键，不增加层数，黑高不变。<br>
+    · <b>叔叔是红色</b> → 大节点已经塞满 4 个键，只能“分裂”：父亲和叔叔变黑、祖父变红（祖父被挤到上一层），问题向上传递。<br>
+    · <b>叔叔是黑色</b> → 大节点还有空位，只是排列歪了：旋转一下再换个色，局部摆正，结束。<br>
+    · 节点下方的小数字是<b>黑高</b>（从该节点到叶子路径上的黑节点数），可以观察它在每一步是否保持一致。</p>
+  </div>
+<section class="lq" id="lq" aria-label="练习">
+  <div class="lq-head"><h2>练习</h2><span class="lq-score"></span></div>
+  <p class="lq-sub">学完上面的内容，来检验一下。每题作答后马上看到解析；点「重做练习」清空重来。</p>
+  <div class="lq-list"></div>
+  <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+</section>
+</div>
+
+<script>
+// ---------- 红黑树（带步骤录制） ----------
+let N = {}, root = null, nid = 0;
+const hist = []; let cur = -1;
+
+function snap(msg, hl = {}, tag = '') {
+  hist.push({ nodes: JSON.parse(JSON.stringify(N)), root, msg, hl, tag });
+}
+const col = id => id == null ? 'B' : N[id].c;   // NIL 视为黑色
+
+function rotL(x) {
+  const y = N[x].r;
+  N[x].r = N[y].l; if (N[y].l != null) N[N[y].l].p = x;
+  N[y].p = N[x].p;
+  if (N[x].p == null) root = y;
+  else if (N[N[x].p].l === x) N[N[x].p].l = y; else N[N[x].p].r = y;
+  N[y].l = x; N[x].p = y;
+}
+function rotR(x) {
+  const y = N[x].l;
+  N[x].l = N[y].r; if (N[y].r != null) N[N[y].r].p = x;
+  N[y].p = N[x].p;
+  if (N[x].p == null) root = y;
+  else if (N[N[x].p].r === x) N[N[x].p].r = y; else N[N[x].p].l = y;
+  N[y].r = x; N[x].p = y;
+}
+
+function insert(k) {
+  // 1. 普通二叉搜索树查找
+  let p = null, x = root;
+  while (x != null) {
+    if (k === N[x].k) { snap(`${k} 已经在树里了，不重复插入。`, { [x]: 'hl' }); return; }
+    p = x;
+    const goL = k < N[x].k;
+    snap(`和 ${N[x].k} 比较：${k} ${goL ? '<' : '>'} ${N[x].k}，往${goL ? '左' : '右'}走。`, { [x]: 'hl' }, '查找位置');
+    x = goL ? N[x].l : N[x].r;
+  }
+  const z = nid++;
+  N[z] = { k, c: 'R', l: null, r: null, p };
+  if (p == null) root = z; else if (k < N[p].k) N[p].l = z; else N[p].r = z;
+  snap(`把 ${k} 作为<b>红色</b>新节点挂上去。用红色是因为它不会改变任何路径上的黑节点数（规则 5 自动满足），最多只可能破坏规则 4（红红相连）。`, { [z]: 'new' }, '插入红节点');
+
+  // 2. 修复
+  fix(z);
+}
+
+function fix(z) {
+  while (true) {
+    const p = N[z].p;
+    if (p == null) {
+      if (N[z].c === 'R') { N[z].c = 'B'; snap(`${N[z].k} 是根节点，根必须是黑色，直接涂黑。完成！`, { [z]: 'hl' }, '根涂黑'); }
+      else snap('根已是黑色，插入完成。', {}, '完成');
+      return;
+    }
+    if (N[p].c === 'B') {
+      snap(`父节点 ${N[p].k} 是黑色，没有红红冲突，五条规则全部满足。完成！`, { [z]: 'new', [p]: 'hl' }, '父黑：无需调整');
+      return;
+    }
+    const g = N[p].p;               // 父红 ⇒ 父不是根 ⇒ 祖父一定存在
+    const pIsL = N[g].l === p;
+    const u = pIsL ? N[g].r : N[g].l;
+    snap(`冲突！${N[z].k} 和父节点 ${N[p].k} 都是红色（违反规则 4）。看<b>叔叔</b>（父亲的兄弟）${u == null ? 'NIL（空，算黑色）' : N[u].k + (col(u) === 'R' ? '（红）' : '（黑）')}来决定怎么办。`,
+      { [z]: 'new', [p]: 'hl', ...(u != null ? { [u]: 'uncle' } : {}), [g]: 'focus' }, '红红冲突');
+
+    if (col(u) === 'R') {
+      N[p].c = 'B'; N[u].c = 'B'; N[g].c = 'R';
+      snap(`<b>情况 1：叔叔是红色 → 变色</b>。父 ${N[p].k}、叔 ${N[u].k} 变黑，祖父 ${N[g].k} 变红。每条路径经过的黑节点数不变，但祖父变红后可能又和它的父亲冲突，于是把祖父当作新的“问题节点”继续向上检查。`,
+        { [p]: 'hl', [u]: 'uncle', [g]: 'focus' }, '情况1：叔红变色');
+      z = g;
+      continue;
+    }
+    // 叔叔黑
+    const zIsL = N[p].l === z;
+    if (zIsL !== pIsL) {
+      const dir = pIsL ? '左' : '右';
+      if (pIsL) rotL(p); else rotR(p);
+      snap(`<b>情况 2：叔叔黑，且“祖-父-子”是折线</b>（父在${dir}，子在${dir === '左' ? '右' : '左'}）。先以父节点 ${N[p].k} 为轴${pIsL ? '左' : '右'}旋，把折线拉成直线，变成情况 3。`,
+        { [p]: 'hl', [z]: 'new', [g]: 'focus' }, '情况2：折线→直线');
+      z = p;   // 原父节点现在是下方的子
+    }
+    const p2 = N[z].p;
+    N[p2].c = 'B'; N[g].c = 'R';
+    if (pIsL) rotR(g); else rotL(g);
+    snap(`<b>情况 3：叔叔黑，且是直线</b>。以祖父 ${N[g].k} 为轴${pIsL ? '右' : '左'}旋，${N[p2].k} 升上来当这个局部的根并涂黑，${N[g].k} 降下去涂红。局部根仍是黑色，往上不会再有冲突。完成！`,
+      { [p2]: 'hl', [z]: 'new', [g]: 'focus' }, '情况3：旋转+换色');
+    if (N[root].c === 'R') { N[root].c = 'B'; snap('根涂黑。', {}, '完成'); }
+    return;
+  }
+}
+
+// ---------- 规则检查 ----------
+function check(s) {
+  const nd = s.nodes; let rootBlack = s.root == null || nd[s.root].c === 'B';
+  let noRR = true, bhOK = true; const bh = {};
+  function walk(id) {
+    if (id == null) return 1;
+    const n = nd[id];
+    if (n.c === 'R' && ((n.l != null && nd[n.l].c === 'R') || (n.r != null && nd[n.r].c === 'R'))) noRR = false;
+    const a = walk(n.l), b = walk(n.r);
+    if (a !== b) bhOK = false;
+    bh[id] = Math.max(a, b) + (n.c === 'B' ? 1 : 0) - 1; // 不计自身之下的 NIL 偏移：显示为该节点往下的黑节点数
+    return Math.max(a, b) + (n.c === 'B' ? 1 : 0);
+  }
+  walk(s.root);
+  return { rootBlack, noRR, bhOK, bh };
+}
+
+// ---------- 布局与渲染 ----------
+const svg = document.getElementById('svg');
+const R = 20, GX = 50, GY = 70, PAD = 40;
+let shown = {};     // id -> {x,y}，当前屏幕上的位置
+let anim = null;
+
+function layout(s) {
+  const pos = {}; let i = 0, maxD = 0;
+  (function go(id, d) {
+    if (id == null) return;
+    go(s.nodes[id].l, d + 1);
+    pos[id] = { x: PAD + i++ * GX, y: PAD + d * GY };
+    maxD = Math.max(maxD, d);
+    go(s.nodes[id].r, d + 1);
+  })(s.root, 0);
+  return { pos, w: Math.max(800, PAD * 2 + (i - 1) * GX), h: Math.max(340, PAD * 2 + maxD * GY + 20) };
+}
+
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+function draw(s, P, w, h) {
+  const st = check(s);
+  svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+  svg.style.minWidth = w > 800 ? (w * 0.8) + 'px' : '';
+  let html = '';
+  for (const id in s.nodes) {
+    const n = s.nodes[id];
+    if (!P[id]) continue;
+    for (const c of [n.l, n.r]) if (c != null && P[c])
+      html += `<line class="edge" x1="${P[id].x}" y1="${P[id].y}" x2="${P[c].x}" y2="${P[c].y}"/>`;
+  }
+  const ring = { hl: '--hl', new: '--new', uncle: '--hl', focus: '--hl' };
+  for (const id in s.nodes) {
+    const n = s.nodes[id], p = P[id]; if (!p) continue;
+    const fill = n.c === 'R' ? 'var(--red)' : 'var(--black)';
+    const h0 = s.hl[id];
+    html += `<g class="node" transform="translate(${p.x},${p.y})">
+      <circle r="${R}" fill="${fill}" stroke="${h0 ? `var(${ring[h0]})` : 'transparent'}" ${h0 === 'uncle' ? 'stroke-dasharray="5 4"' : ''}/>
+      <text>${n.k}</text>
+      ${h0 === 'focus' ? `<circle class="ring" r="${R + 6}" stroke="var(--hl)" stroke-dasharray="3 3"/>` : ''}
+      <text class="bh" y="${R + 13}">${st.bh[id]}</text>
+    </g>`;
+  }
+  svg.innerHTML = html;
+}
+
+function show(i) {
+  if (i < 0 || i >= hist.length) return;
+  cur = i;
+  const s = hist[i];
+  const { pos, w, h } = layout(s);
+  const from = {};
+  for (const id in pos) from[id] = shown[id] || { x: pos[id].x, y: pos[id].y - 30 };
+  cancelAnimationFrame(anim);
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const t0 = performance.now(), D = reduce ? 0 : 550;
+  const step = t => {
+    let k = D ? Math.min(1, (t - t0) / D) : 1;
+    const e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+    const P = {};
+    for (const id in pos) P[id] = { x: from[id].x + (pos[id].x - from[id].x) * e, y: from[id].y + (pos[id].y - from[id].y) * e };
+    draw(s, P, w, h);
+    if (k < 1) anim = requestAnimationFrame(step); else shown = pos;
+  };
+  anim = requestAnimationFrame(step);
+
+  document.getElementById('msg').innerHTML = s.msg;
+  document.getElementById('tag').textContent = s.tag;
+  document.getElementById('stepno').textContent = `${i + 1} / ${hist.length}`;
+  const c = check(s);
+  const rows = [
+    [true, '每个节点非红即黑'],
+    [c.rootBlack, '根节点是黑色'],
+    [true, '叶子（NIL 空节点）都是黑色'],
+    [c.noRR, '红节点的孩子必须是黑色（不能红红相连）'],
+    [c.bhOK, '任一节点到其所有叶子的路径，黑节点数相同'],
+  ];
+  document.getElementById('rules').innerHTML = rows.map(([ok, t], j) =>
+    `<li><span class="st ${ok ? 'ok' : 'bad'}">${ok ? '✓' : '✗'}</span><span>${j + 1}. ${t}</span></li>`).join('');
+}
+
+// ---------- 播放控制 ----------
+let timer = null;
+function stop() { clearInterval(timer); timer = null; document.getElementById('play').textContent = '▶ 自动播放'; }
+function play() {
+  if (cur >= hist.length - 1) return;
+  document.getElementById('play').textContent = '❚❚ 暂停';
+  timer = setInterval(() => { if (cur >= hist.length - 1) stop(); else show(cur + 1); }, 1500);
+}
+function doInsert(keys) {
+  stop();
+  const start = hist.length;
+  for (const k of keys) insert(k);
+  if (cur < start - 1) show(start - 1);
+  show(start); play();
+}
+function reset() { stop(); N = {}; root = null; nid = 0; hist.length = 0; shown = {}; snap('空树。输入一个数字点「插入」开始。'); show(0); }
+
+document.getElementById('ins').onclick = () => {
+  const v = parseInt(document.getElementById('val').value, 10);
+  if (!Number.isNaN(v)) doInsert([v]);
+};
+document.getElementById('val').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('ins').click(); });
+document.getElementById('rnd').onclick = () => {
+  let v; do v = 1 + Math.floor(Math.random() * 99); while (Object.values(N).some(n => n.k === v) && Object.keys(N).length < 99);
+  document.getElementById('val').value = v; doInsert([v]);
+};
+document.getElementById('p1').onclick = () => { reset(); doInsert([1,2,3,4,5,6,7,8,9,10]); };
+document.getElementById('p2').onclick = () => { reset(); doInsert([10, 20, 30, 15, 25, 5, 1, 12, 13]); };
+document.getElementById('clr').onclick = reset;
+document.getElementById('prev').onclick = () => { stop(); show(cur - 1); };
+document.getElementById('next').onclick = () => { stop(); show(cur + 1); };
+document.getElementById('play').onclick = () => timer ? stop() : play();
+
+// 初始示例：预先插入几个节点，停在最终状态
+function initDemo() {
+  reset();
+  [10, 20, 30, 15].forEach(insert);
+  show(hist.length - 1);
+}
+initDemo();
+window.pageReset = () => { document.getElementById('val').value = 15; initDemo(); };
+</script>
+<button type="button" class="lq-reset" id="lq-reset" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+<script>
+window.LQ_ITEMS = [
+  { type: '选择', q: '新插入的节点一开始涂成什么颜色？', opts: ['红色', '黑色', '看父节点的颜色决定'], ans: 0,
+    why: '涂红不会改变任何路径上的黑节点数，规则 5 自动满足；最多只会破坏规则 4（红红相连），修起来容易得多。' },
+  { type: '判断', q: '红节点的孩子也可以是红色。', opts: ['对', '错'], ans: 1,
+    why: '规则 4：红节点的孩子必须是黑色，不能红红相连。插入后的所有调整，就是为了消除红红相连。' },
+  { type: '选择', q: '插入后出现红红冲突，并且<b>叔叔也是红色</b>，应该怎么做？',
+    opts: ['以祖父为轴旋转', '父亲和叔叔变黑、祖父变红，再从祖父继续向上检查', '直接把新节点改成黑色'], ans: 1,
+    why: '这是情况 1（变色）。对应 2-3-4 树里“大节点塞满了要分裂”，祖父被挤到上一层，问题可能向上传递。直接把新节点涂黑会让这条路径多一个黑节点，破坏规则 5。' },
+  { type: '选择', q: '叔叔是黑色，父亲是祖父的<b>左</b>孩子，新节点是父亲的<b>右</b>孩子（折线）。第一步做什么？',
+    opts: ['以父节点为轴左旋', '以祖父为轴右旋', '父亲和叔叔变色'], ans: 0,
+    why: '这是情况 2：先以父节点为轴左旋，把折线拉成直线，变成情况 3；再以祖父为轴右旋并换色。' },
+  { type: '填空', q: '向一棵空的红黑树依次插入 10、20、30，最后<b>根节点</b>是几？', ans: ['20'], placeholder: '填一个数字',
+    why: '10 成为根（黑）；20 挂在右边（红）；30 挂在 20 右边，红红冲突，叔叔是 NIL（黑）且是直线 → 以 10 为轴左旋，20 升上来涂黑，10、30 为红。可以在上面的输入框里亲手插一遍验证。' },
+  { type: '判断', q: '红黑树和 AVL 树一样严格平衡：任意节点的左右子树高度差不超过 1。', opts: ['对', '错'], ans: 1,
+    why: '常见误区。红黑树只保证“最长路径不超过最短路径的 2 倍”，平衡得更宽松，换来的是插入、删除时旋转次数更少。' },
+  { type: '计算', q: '一棵红黑树从根到每个叶子的路径上都有 3 个黑节点（不算 NIL）。根到叶子的<b>最长</b>路径最多有几个节点？',
+    opts: ['3 个', '5 个', '6 个', '9 个'], ans: 2,
+    why: '红节点不能相连，最多在每个黑节点下面夹一个红节点：黑红黑红黑红，共 6 个；最短路径全是黑的，只有 3 个，正好 2 倍。' },
+];
+</script>
+<script>
+/* ---------- 练习题 + 全局重置（learn 通用组件） ----------
+   题目来自 window.LQ_ITEMS：{type, q, opts, ans: 选项下标, why} 或填空题 {type, q, ans: [可接受答案…], why}
+   全局重置：先调用页面自己的 window.pageReset()，再清空练习、回到顶部 */
+(() => {
+  const box = document.getElementById('lq');
+  const items = window.LQ_ITEMS || [];
+  const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let answered = 0, right = 0;
+
+  function update() {
+    const all = answered === items.length;
+    score.textContent = `已答 ${answered} / ${items.length} · 答对 ${right}` +
+      (all ? (right === items.length ? ' · 全对！' : ' · 看看解析，再重做一次') : '');
+  }
+
+  function render() {
+    answered = 0; right = 0; list.innerHTML = '';
+    items.forEach((it, i) => {
+      const el = document.createElement('div');
+      el.className = 'lq-item';
+      el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
+      const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
+      const judge = (ok, answer) => {
+        answered++; if (ok) right++;
+        el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
+        why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
+        update();
+      };
+      if (it.opts) {
+        a.classList.add('lq-opts');
+        it.opts.forEach((o, j) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'lq-opt'; b.innerHTML = o;
+          b.onclick = () => {
+            a.querySelectorAll('button').forEach(x => x.disabled = true);
+            a.children[it.ans].classList.add('lq-right');
+            if (j !== it.ans) b.classList.add('lq-wrong');
+            judge(j === it.ans, it.opts[it.ans]);
+          };
+          a.append(b);
+        });
+      } else {
+        a.classList.add('lq-fill');
+        a.innerHTML = `<input type="text" autocomplete="off" spellcheck="false" placeholder="${it.placeholder || '输入答案'}" aria-label="第 ${i + 1} 题答案"><button type="button" class="lq-opt">确定</button>`;
+        const inp = a.querySelector('input'), go = a.querySelector('button');
+        const submit = () => {
+          if (!inp.value.trim()) { inp.focus(); return; }
+          inp.disabled = go.disabled = true;
+          const ok = it.ans.some(x => norm(x) === norm(inp.value));
+          inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
+          judge(ok, it.ans[0]);
+        };
+        go.onclick = submit;
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      }
+      list.append(el);
+    });
+    update();
+  }
+
+  box.querySelector('.lq-redo').addEventListener('click', render);
+  document.getElementById('lq-reset').addEventListener('click', () => {
+    if (typeof window.pageReset === 'function') window.pageReset();
+    render();
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  });
+  render();
+})();
+</script>

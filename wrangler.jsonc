@@ -1,0 +1,12 @@
+{
+  // 纯静态站点：只托管 dist/，没有 Worker 脚本
+  "name": "up-learn",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist",
+    "html_handling": "drop-trailing-slash",
+    "not_found_handling": "404-page"
+  },
+  "routes": [{ "pattern": "up.yiwei.love", "custom_domain": true }],
+  "workers_dev": false
+}

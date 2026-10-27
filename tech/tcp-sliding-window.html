@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="TCP 滑动窗口动画：发送方与接收方、累计确认、快速重传与超时重传">
+<title>TCP 滑动窗口</title>
+<style>
+/* Layout: 实验台 —— 左侧大画布是“网线”两端，右侧是仪表（状态 / 日志 / 图例） */
+:root{
+  --bg:#ECEFF3; --surface:#FFFFFF; --ink:#18202B; --muted:#5B6777; --line:#D4DAE2;
+  --acked:#6E9E7B; --unacked:#E2A133; --usable:#DCE8FB; --usable-edge:#3A76D6;
+  --out:#E2E6EB; --out-ink:#98A2AF; --buffered:#9466CC;
+  --data:#2E5EA8; --ack:#13857A; --retx:#D1503A; --frame:#18202B;
+  --font-body:"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",system-ui,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F141B; --surface:#161D26; --ink:#E3E8EE; --muted:#93A0B0; --line:#29333F;
+    --acked:#5A8C67; --unacked:#D6992C; --usable:#1C3354; --usable-edge:#6E9FEF;
+    --out:#1E2630; --out-ink:#596574; --buffered:#8A5FC4;
+    --data:#4F84D9; --ack:#26AE9E; --retx:#E2654B; --frame:#E3E8EE; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F141B; --surface:#161D26; --ink:#E3E8EE; --muted:#93A0B0; --line:#29333F;
+  --acked:#5A8C67; --unacked:#D6992C; --usable:#1C3354; --usable-edge:#6E9FEF;
+  --out:#1E2630; --out-ink:#596574; --buffered:#8A5FC4;
+  --data:#4F84D9; --ack:#26AE9E; --retx:#E2654B; --frame:#E3E8EE; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:14px;line-height:1.6}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.wrap{padding-block:28px 16px;display:flex;flex-direction:column;gap:6px}
+h1{margin:0;font-size:26px;font-weight:700;letter-spacing:.01em;text-wrap:balance}
+h1 small{font-family:var(--font-mono);font-size:13px;font-weight:400;color:var(--muted);margin-left:10px;letter-spacing:.04em}
+.lede{margin:0;color:var(--muted);max-width:62ch}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;padding-block:0 24px}
+@media (max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.stage{display:flex;flex-direction:column;min-width:0}
+.controls{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line)}
+button{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:7px;padding:6px 12px;cursor:pointer}
+button:hover{border-color:var(--muted)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--usable-edge);outline-offset:2px}
+button.primary{background:var(--ink);color:var(--surface);border-color:var(--ink);min-width:76px}
+.ctl{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.ctl output{font-family:var(--font-mono);color:var(--ink);min-width:3.2em}
+input[type=range]{width:96px;accent-color:var(--usable-edge)}
+.caption{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;min-height:50px;font-size:15px;font-weight:500;border-bottom:1px solid var(--line)}
+.chip{flex:none;margin-top:6px;width:10px;height:10px;border-radius:50%;background:var(--muted)}
+.host{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;padding:10px 14px 2px;font-weight:700}
+.host.bottom{padding:2px 14px 10px}
+.host span{font-family:var(--font-mono);font-weight:400;font-size:12px;color:var(--muted)}
+.host em{font-style:normal;font-family:var(--font-mono);font-weight:400;font-size:11px;letter-spacing:.08em;color:var(--muted);margin-left:6px;text-transform:uppercase}
+canvas{display:block;width:100%;cursor:crosshair;touch-action:manipulation}
+.hint{margin:0;padding:10px 14px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+aside{display:flex;flex-direction:column;gap:16px;min-width:0}
+aside .card{padding:14px}
+h2{margin:0 0 10px;font-size:12px;font-weight:700;letter-spacing:.12em;color:var(--muted)}
+.legend{display:grid;grid-template-columns:1fr;gap:12px}
+.legend ul{list-style:none;margin:0;padding:0;display:grid;gap:5px}
+.legend li{display:flex;align-items:center;gap:8px;font-size:13px}
+.legend h3{margin:0 0 4px;font-size:13px;font-weight:700}
+.sw{flex:none;width:18px;height:14px;border-radius:3px;border:1.5px solid transparent}
+.sw.acked{background:var(--acked)} .sw.unacked{background:var(--unacked)}
+.sw.usable{background:var(--usable);border-color:var(--usable-edge)} .sw.out{background:var(--out)}
+.sw.buffered{background:var(--buffered)} .sw.data{background:var(--data)} .sw.retx{background:var(--retx)}
+.sw.ack{background:var(--ack);border-radius:7px}
+.sw.sacked{background:var(--buffered)} .sw.gap{background:var(--usable);border:1.5px dashed var(--retx)}
+button.demo{border-color:var(--retx);color:var(--retx);font-weight:500}
+.controls.demos{padding-block:10px;gap:8px 10px}
+.caption.hold{box-shadow:inset 4px 0 0 var(--retx);background:var(--bg)}
+.k-pause{background:var(--retx)}
+.log li.pause span{font-weight:700}
+.ctl input[type=checkbox]{accent-color:var(--usable-edge);width:15px;height:15px;margin:0}
+dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13px}
+dt{color:var(--muted)} dd{margin:0;font-family:var(--font-mono);font-variant-numeric:tabular-nums;text-align:right}
+.log ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto;font-size:12.5px}
+.log li{display:flex;gap:8px;line-height:1.45}
+.log li time{flex:none;font-family:var(--font-mono);color:var(--muted);font-size:11px;padding-top:1px;width:3.6em;text-align:right}
+.log li i{flex:none;width:7px;height:7px;border-radius:50%;margin-top:6px}
+.k-send{background:var(--data)} .k-ack{background:var(--ack)} .k-loss{background:var(--retx)} .k-retx{background:var(--unacked)} .k-recv{background:var(--buffered)} .k-info{background:var(--muted)}
+.notes{padding-block:0 40px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.notes div{min-width:0}
+.notes h3{margin:0 0 4px;font-size:15px}
+.notes p{margin:0;color:var(--muted);font-size:13.5px;max-width:60ch}
+code{font-family:var(--font-mono);font-size:.92em}
+
+:root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--usable-edge);--lq-ok:var(--ack);--lq-bad:var(--retx);--lq-h2:22px}
+
+/* ---------- 练习题 + 全局重置（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+.lq{display:grid;gap:12px;margin-bottom:56px}
+.lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+.lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
+.lq-sub{margin:0;color:var(--lq-muted);font-size:14px}
+.lq-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--lq-muted);font-variant-numeric:tabular-nums}
+.lq-list{display:grid;gap:10px}
+.lq-item{background:var(--lq-surface);border:1.5px solid var(--lq-line);border-radius:10px;padding:12px 16px;display:grid;gap:10px;min-width:0;color:var(--lq-ink);text-align:left}
+.lq-item.lq-is-ok{border-color:var(--lq-ok)}
+.lq-item.lq-is-bad{border-color:var(--lq-bad)}
+.lq-q{font-size:15px;font-weight:600;line-height:1.6}
+.lq-tag{display:inline-block;font-size:11px;font-weight:500;line-height:1.6;color:var(--lq-muted);border:1px solid var(--lq-line);border-radius:999px;padding:0 8px;margin-right:8px;vertical-align:1px}
+.lq-opts,.lq-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lq .lq-opt,.lq .lq-redo{font:inherit;font-size:14px;line-height:1.4;padding:6px 14px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);cursor:pointer;text-align:left;opacity:1}
+.lq .lq-opt:hover:not(:disabled),.lq .lq-redo:hover{border-color:var(--lq-accent)}
+.lq .lq-opt:disabled{cursor:default;opacity:1}
+.lq .lq-opt.lq-right{border-color:var(--lq-ok);color:var(--lq-ok);font-weight:700}
+.lq .lq-opt.lq-wrong{border-color:var(--lq-bad);color:var(--lq-bad);text-decoration:line-through}
+.lq-fill input{font:inherit;font-size:14px;padding:6px 10px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);width:min(100%,200px)}
+.lq-fill input.lq-right{border-color:var(--lq-ok)}
+.lq-fill input.lq-wrong{border-color:var(--lq-bad)}
+.lq-why{font-size:14px;line-height:1.65;color:var(--lq-muted)}
+.lq-why:empty{display:none}
+.lq-why .lq-ok{color:var(--lq-ok)}
+.lq-why .lq-bad{color:var(--lq-bad)}
+.lq-reset{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:max(16px,env(safe-area-inset-bottom,0px));z-index:100;font:inherit;font-size:14px;font-weight:600;line-height:1;padding:10px 16px;margin:0;border-radius:999px;border:1.5px solid var(--lq-line);background:var(--lq-fab,var(--lq-surface));color:var(--lq-ink);box-shadow:0 4px 16px rgba(0,0,0,.2);cursor:pointer}
+.lq-reset:hover{border-color:var(--lq-accent);color:var(--lq-accent)}
+</style>
+</head>
+<body>
+<header class="wrap">
+  <h1>TCP 滑动窗口<small>Sliding Window · Cumulative ACK</small></h1>
+  <p class="lede">下方是发送方的发送缓冲区，上方是接收方的接收缓冲区，数据段从下往上发，ACK 从上往下回。每一格是一个报文段。看窗口怎样随着 ACK 向右滑动，丢包后又怎样靠重传把空缺补上。</p>
+</header>
+
+<main class="wrap grid">
+  <section class="card stage" aria-label="动画">
+    <div class="controls">
+      <button id="btnPlay" class="primary">暂停</button>
+      <button id="btnReset">重新开始</button>
+      <button id="btnDrop">丢弃下一个数据段</button>
+      <label class="ctl" for="chkSack"><input id="chkSack" type="checkbox">SACK 选择确认</label>
+      <label class="ctl" for="rngW">窗口 W <input id="rngW" type="range" min="1" max="8" step="1" value="5"><output id="outW">5</output></label>
+      <label class="ctl" for="rngGap">发送间隔 <input id="rngGap" type="range" min="0.4" max="2" step="0.1" value="0.42"><output id="outGap">0.4s</output></label>
+      <label class="ctl" for="rngSpeed">速度 <input id="rngSpeed" type="range" min="0.25" max="2" step="0.25" value="1"><output id="outSpeed">1×</output></label>
+      <label class="ctl" for="rngLoss">随机丢包 <input id="rngLoss" type="range" min="0" max="0.4" step="0.05" value="0"><output id="outLoss">0%</output></label>
+    </div>
+    <div class="controls demos">
+      <span class="ctl">情景演示</span>
+      <button id="demoFast" class="demo">5 号丢失 · 快速重传</button>
+      <button id="demoTimeout" class="demo">5 号丢失 · 超时重传</button>
+      <button id="demoIdle" class="demo">窗口未满</button>
+    </div>
+    <div class="caption" id="caption" aria-live="polite"><span class="chip" id="capChip"></span><span id="capText">准备开始</span></div>
+    <div class="host">接收方<em>Receiver</em><span id="rcvInfo"></span></div>
+    <canvas id="cv" aria-label="发送方与接收方之间报文段与 ACK 的传输动画"></canvas>
+    <div class="host bottom">发送方<em>Sender</em><span id="sndInfo"></span></div>
+    <p class="hint">情景演示会在关键时刻自动暂停，按“继续”或空格键往下看。自由运行时，点击飞行中的数据段或 ACK 可以把它丢弃。调大“发送间隔”可以看到窗口没有发满的情况。</p>
+  </section>
+
+  <aside>
+    <div class="card legend">
+      <h2>图例</h2>
+      <div>
+        <h3>发送方</h3>
+        <ul>
+          <li><span class="sw acked"></span>已发送，已确认</li>
+          <li><span class="sw unacked"></span>已发送，未确认</li>
+          <li><span class="sw usable"></span>未发送，窗口内允许发送</li>
+          <li><span class="sw out"></span>未发送，窗口外不允许发送</li>
+          <li><span class="sw sacked"></span>已被 SACK 告知到达，但窗口仍不能越过</li>
+        </ul>
+      </div>
+      <div>
+        <h3>接收方</h3>
+        <ul>
+          <li><span class="sw acked"></span>已按序接收并确认</li>
+          <li><span class="sw buffered"></span>乱序到达，先缓存</li>
+          <li><span class="sw gap"></span>缺口：没到的段，ACK 卡在这里</li>
+          <li><span class="sw usable"></span>窗口内，等待接收</li>
+          <li><span class="sw out"></span>窗口外，不接收</li>
+        </ul>
+      </div>
+      <div>
+        <h3>网络中</h3>
+        <ul>
+          <li><span class="sw data"></span>数据段</li>
+          <li><span class="sw retx"></span>重传的数据段</li>
+          <li><span class="sw ack"></span>ACK（期待的下一个序号）</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>当前状态</h2>
+      <dl>
+        <dt>SND.UNA 最早未确认</dt><dd id="stUna">1</dd>
+        <dt>SND.NXT 下一个要发</dt><dd id="stNxt">1</dd>
+        <dt>已发送未确认</dt><dd id="stInflight">0</dd>
+        <dt>可用窗口（可发未发）</dt><dd id="stAvail">5</dd>
+        <dt>RCV.NXT 期待接收</dt><dd id="stRcv">1</dd>
+        <dt>重复 ACK 计数</dt><dd id="stDup">0</dd>
+        <dt>重传计时器</dt><dd id="stRto">未启动</dd>
+        <dt>重传次数</dt><dd id="stRetx">0</dd>
+      </dl>
+    </div>
+
+    <div class="card log">
+      <h2>事件日志</h2>
+      <ul id="log"></ul>
+    </div>
+  </aside>
+</main>
+
+<section class="wrap notes">
+  <div><h3>累计确认</h3><p><code>ACK=n</code> 的意思是：n 之前的字节都收到了，下一个期待 n。中间某个 ACK 丢了也不要紧，后面更大的 ACK 会把它覆盖。</p></div>
+  <div><h3>确认必须连续</h3><p>5 没到时，即使 6、7、8 已经到了，接收方的 ACK 也只能是 5，发送窗口左沿就卡在 5。可用窗口用完后发送方只能停下等待。5 补上后，ACK 一次跳过所有已缓存的段。SACK 能告诉发送方 6–8 已到、不必重传，但左沿同样要等 5。</p></div>
+  <div><h3>窗口不一定是满的</h3><p>窗口只是上限。应用层数据来得慢时，一个往返时间内发不满窗口，窗口里同时有“已发送未确认”和“可发送未发送”两部分。可用窗口 = W − 已发送未确认。</p></div>
+  <div><h3>窗口滑动</h3><p>窗口左沿是 SND.UNA，收到新的 ACK 就右移；发送方最多同时有 W 个“已发送未确认”的报文段，不必发一个等一个。</p></div>
+  <div><h3>两种重传</h3><p>收到 3 个重复 ACK 说明后面的段到了、只缺这一个，立即快速重传。如果连重复 ACK 也收不到，就只能等重传计时器超时。</p></div>
+  <div><h3>这里做了简化</h3><p>每格代表一个报文段，序号按段计数而不是按字节；窗口大小固定，没有模拟拥塞控制和延迟确认；超时只重传最早未确认的那一段。</p></div>
+</section>
+<section class="lq wrap" id="lq" aria-label="练习">
+  <div class="lq-head"><h2>练习</h2><span class="lq-score"></span></div>
+  <p class="lq-sub">学完上面的内容，来检验一下。每题作答后马上看到解析；点「重做练习」清空重来。</p>
+  <div class="lq-list"></div>
+  <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+</section>
+
+<script>
+(() => {
+  const N = 30;                 // 总报文段数
+  const FLIGHT = 1800;          // 单程传输时间（模拟毫秒）
+  const RTO = FLIGHT * 2 + 1400;
+  const CH = 40;                // 格子高度
+  const MONO = 'ui-monospace, Menlo, Consolas, monospace';
+  const SANS = 'PingFang SC, Microsoft YaHei, system-ui, sans-serif';
+  const STEPS = '①②③④⑤⑥⑦⑧';
+
+  const cfg = { W: 5, speed: 1, loss: 0, sack: false, gap: 420 };
+  let running = true;
+  let S;
+
+  const $ = id => document.getElementById(id);
+  const cv = $('cv'), ctx = cv.getContext('2d');
+  const view = { w: 600, h: 400, cw: 48, dpr: 1 };
+  let C = {};
+
+  function readColors() {
+    const cs = getComputedStyle(document.documentElement);
+    ['bg','surface','ink','muted','line','acked','unacked','usable','usable-edge','out','out-ink','buffered','data','ack','retx','frame']
+      .forEach(k => C[k] = cs.getPropertyValue('--' + k).trim());
+  }
+  readColors();
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', readColors);
+  new MutationObserver(readColors).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class', 'style'] });
+
+  function resize() {
+    view.dpr = window.devicePixelRatio || 1;
+    view.w = cv.clientWidth || 600;
+    view.h = view.w < 520 ? 360 : 400;
+    view.cw = Math.max(34, Math.min(56, view.w / 14));
+    cv.style.height = view.h + 'px';
+    cv.width = Math.round(view.w * view.dpr);
+    cv.height = Math.round(view.h * view.dpr);
+  }
+  new ResizeObserver(resize).observe(cv);
+  resize();
+
+  function reset() {
+    S = {
+      t: 0, base: 1, next: 1, rcvNext: 1, buf: new Set(), packets: [],
+      lastSend: -1e9, timerStart: null, dup: 0, fastDone: false, retxCount: 0, retxOf: [],
+      dropNext: false, done: false, camX: 0, fx: 1, rfx: 1,
+      sacked: new Set(), stallLogged: 0,
+      demo: null, demoDrop: 0, seen: new Set(), stage: 0, slides: 0, hold: false,
+      sState: [], rState: [], sChanged: [], rChanged: []
+    };
+    $('log').innerHTML = '';
+    $('caption').classList.remove('hold');
+    $('btnDrop').textContent = '丢弃下一个数据段';
+    addLog('发送方开始在窗口内连续发送，不必每发一个就停下来等确认', 'info');
+  }
+
+  // ---------- 日志 ----------
+  function addLog(text, kind) {
+    const li = document.createElement('li');
+    if (kind === 'pause') li.className = 'pause';
+    const tm = document.createElement('time');
+    tm.textContent = (S.t / 1000).toFixed(1) + 's';
+    const dot = document.createElement('i');
+    dot.className = 'k-' + kind;
+    const span = document.createElement('span');
+    span.textContent = text;
+    li.append(tm, dot, span);
+    const ul = $('log');
+    ul.prepend(li);
+    while (ul.children.length > 80) ul.lastChild.remove();
+    if (S.hold) return;           // 演示暂停时保留讲解文字
+    $('capText').textContent = text;
+    $('capChip').className = 'chip k-' + kind;
+  }
+
+  // [6,7,8,10] -> "6-8,10"
+  function ranges(list) {
+    const out = [];
+    for (let i = 0; i < list.length; i++) {
+      let j = i;
+      while (j + 1 < list.length && list[j + 1] === list[j] + 1) j++;
+      if (j >= i + 2) { out.push(`${list[i]}–${list[j]}`); i = j; }
+      else out.push(`${list[i]}`);
+    }
+    return out.join('、');
+  }
+  const span = (a, b) => b > a + 1 ? `${a}–${b}` : b === a + 1 ? `${a}、${b}` : `${a}`;
+  const bufList = () => [...S.buf].sort((x, y) => x - y);
+
+  // ---------- 情景演示 ----------
+  const DEMOS = {
+    fast: { W: 5, gap: 420, drop: 5, intro: '演示：快速重传。5 号段第一次发送时会丢失，动画会在关键时刻自动暂停，按“继续”往下看' },
+    timeout: { W: 3, gap: 420, drop: 5, intro: '演示：超时重传。窗口只有 3，5 号段会丢失。后面最多只能到 2 个段，凑不够 3 个重复 ACK' },
+    idle: { W: 6, gap: 1300, drop: 0, intro: '演示：窗口未满。发送间隔调到 1.3 秒（好比应用层产生数据很慢），一个往返时间内发不满窗口' }
+  };
+
+  function startDemo(name) {
+    const d = DEMOS[name];
+    setCfg({ W: d.W, gap: d.gap, loss: 0 });
+    reset();
+    S.demo = name; S.demoDrop = d.drop;
+    addLog(d.intro, 'info');
+    setRunning(true);
+  }
+
+  // 每个演示事件只暂停一次
+  function demoPause(key, text) {
+    if (!S.demo || S.seen.has(key)) return;
+    S.seen.add(key);
+    addLog(`${STEPS[S.stage++] || '·'} ${text}`, 'pause');
+    S.hold = true;
+    $('caption').classList.add('hold');
+    setRunning(false);
+  }
+
+  // ---------- 协议逻辑 ----------
+  function sendData(seq, retx) {
+    let willDrop = false;
+    if (!retx && seq === S.demoDrop) willDrop = true;
+    else if (S.dropNext) { willDrop = true; S.dropNext = false; $('btnDrop').textContent = '丢弃下一个数据段'; }
+    else if (Math.random() < cfg.loss) willDrop = true;
+    S.packets.push({ kind: 'data', seq, retx, t0: S.t, prog: 0, willDrop, dropAt: 0.3 + Math.random() * 0.4 });
+    if (S.timerStart === null) S.timerStart = S.t;
+    S.lastSend = S.t;
+    if (retx) { S.retxCount++; S.retxOf[seq] = (S.retxOf[seq] || 0) + 1; S.sChanged[seq] = S.t; }
+  }
+
+  function sendAck(a, from) {
+    const willDrop = Math.random() < cfg.loss;
+    const sack = cfg.sack ? bufList() : [];
+    S.packets.push({ kind: 'ack', ack: a, sack, from, t0: S.t, prog: 0, willDrop, dropAt: 0.3 + Math.random() * 0.4 });
+  }
+
+  function onDataArrive(s, retx) {
+    if (s === S.rcvNext) {
+      S.rcvNext++;
+      const joined = [];
+      while (S.buf.has(S.rcvNext)) { S.buf.delete(S.rcvNext); joined.push(S.rcvNext); S.rcvNext++; }
+      if (joined.length) {
+        addLog(`接收方收到${retx ? '重传的 ' : ' '}${s}，缺口补上，连同缓存的 ${ranges(joined)} 一起交付，ACK 从 ${s} 直接跳到 ${S.rcvNext}`, 'ack');
+        demoPause('filled', `重传的 ${s} 到达，缺口补上了。接收方把 ${s} 和缓存的 ${ranges(joined)} 一起按顺序交给应用，ACK 从 ${s} 一下跳到 ${S.rcvNext}`);
+      } else {
+        addLog(`接收方按序收到 ${s}，回复 ACK=${S.rcvNext}`, 'ack');
+      }
+    } else if (s > S.rcvNext && s < S.rcvNext + cfg.W) {
+      S.buf.add(s);
+      const sackNote = cfg.sack ? `（附带 SACK ${ranges(bufList())}）` : '';
+      addLog(`接收方收到 ${s}，但 ${S.rcvNext} 还没到，先缓存，ACK 仍只能是 ${S.rcvNext}${sackNote}`, 'recv');
+      if (S.demoDrop && S.buf.size >= Math.min(3, cfg.W - 1)) {
+        demoPause('buffered', `${ranges(bufList())} 都已到达，但 ${S.rcvNext} 没到。确认必须连续，ACK 只能停在 ${S.rcvNext}，发送窗口左沿也卡在 ${S.rcvNext}`);
+      }
+    } else if (s < S.rcvNext) {
+      addLog(`接收方收到已有的 ${s}，丢弃，再次回复 ACK=${S.rcvNext}`, 'recv');
+    } else {
+      addLog(`${s} 超出接收窗口，丢弃`, 'loss');
+    }
+    sendAck(S.rcvNext, s);
+  }
+
+  function onAckArrive(a, sack) {
+    for (const s of sack) if (s >= Math.max(a, S.base)) S.sacked.add(s);
+    if (a > S.base) {
+      const old = S.base;
+      const wasRetx = S.retxOf[old] > 0;
+      S.base = a; S.dup = 0; S.fastDone = false; S.slides++;
+      for (const s of [...S.sacked]) if (s < a) S.sacked.delete(s);
+      S.timerStart = S.base < S.next ? S.t : null;
+      addLog(`发送方收到 ACK=${a}：${span(old, a - 1)} 已确认，窗口右移 ${a - old} 格`, 'ack');
+      if (S.base > N && !S.done) { S.done = true; addLog(`全部 ${N} 个报文段都已确认，传输完成`, 'info'); }
+      if (wasRetx && a - old > 1) {
+        demoPause('jump', `发送方收到 ACK=${a}，${span(old, a - 1)} 全部确认，窗口一次右移 ${a - old} 格，恢复正常发送。演示到此结束，可以继续观看`);
+      }
+      if (S.demo === 'idle') idleCheck();
+    } else if (a === S.base && S.base < S.next) {
+      S.dup++;
+      const sackNote = sack.length ? `，SACK 告知 ${ranges(sack)} 已到` : '';
+      if (S.dup >= 3 && !S.fastDone) {
+        S.fastDone = true;
+        addLog(`第 ${S.dup} 个重复 ACK=${a}：快速重传 ${a}`, 'retx');
+        sendData(a, true);
+        S.timerStart = S.t;
+        demoPause('fast', `发送方收到第 3 个重复 ACK=${a}${sackNote}。后面的段都到了偏偏缺 ${a}，说明 ${a} 丢了。不等计时器超时，立即快速重传 ${a}（红色）。只重传 ${a}，后面已经到达的段不用重发`);
+      } else {
+        addLog(`发送方收到重复 ACK=${a}（第 ${S.dup} 次）${sackNote}，窗口左沿仍是 ${a}`, 'recv');
+        if (S.demo === 'timeout' && S.dup === cfg.W - 1 && S.dup < 3) {
+          demoPause('nodup', `只收到 ${S.dup} 个重复 ACK，不够 3 个，触发不了快速重传。窗口也用完了，发送方只能干等 ${a} 的重传计时器（${a} 号格子顶部的红条）走完`);
+        }
+      }
+    }
+  }
+
+  function idleCheck() {
+    const unacked = S.next - S.base, usable = Math.min(S.base + cfg.W, N + 1) - S.next;
+    if (unacked <= 0 || usable <= 0) return;
+    if (!S.seen.has('idle1')) {
+      demoPause('idle1', `窗口没有被填满：${span(S.base, S.next - 1)} 已发送、等待确认（橙色），${span(S.next, S.next + usable - 1)} 窗口允许发送、但还没发（蓝框）。发送方不是被窗口挡住，而是数据来得慢`);
+    } else if (S.slides >= 3) {
+      demoPause('idle2', `又收到一个 ACK，左沿右移一格，右沿也跟着右移一格。窗口里始终同时有“已发送未确认 ${unacked} 个”和“可发送未发送 ${usable} 个”。可用窗口 = W − 已发送未确认 = ${cfg.W} − ${unacked} = ${usable}。演示到此结束`);
+    }
+  }
+
+  function dropPacket(p) {
+    if (p.dropped) return;
+    p.dropped = true; p.dropT = S.t;
+    const what = p.kind === 'data' ? `${p.retx ? '重传的 ' : ''}${p.seq} 号段` : `ACK=${p.ack}`;
+    addLog(`${what}在网络中丢失`, 'loss');
+  }
+
+  // 接收方在 base 处有缺口、后面已有段到达
+  const hasGapAtBase = () => S.buf.size > 0 && S.rcvNext === S.base;
+  const isStuck = () => hasGapAtBase() && S.next <= N && S.next >= S.base + cfg.W;
+
+  function step(dt) {
+    S.t += dt;
+    if (S.next <= N && S.next < S.base + cfg.W && S.t - S.lastSend >= cfg.gap) {
+      addLog(`发出 ${S.next} 号段`, 'send');
+      sendData(S.next, false);
+      S.next++;
+    }
+    if (isStuck() && S.stallLogged !== S.base) {
+      S.stallLogged = S.base;
+      addLog(`可用窗口为 0：${ranges(bufList())} 已在接收方，但 ${S.base} 没被确认，左沿过不去，发送方只能停下等待`, 'retx');
+    }
+    if (S.timerStart !== null && S.t - S.timerStart >= RTO) {
+      addLog(`超时！${S.base} 号段一直没被确认，重传 ${S.base}`, 'retx');
+      S.dup = 0; S.fastDone = false;
+      sendData(S.base, true);
+      S.timerStart = S.t;
+      demoPause('timeout', `重传计时器到期，超时重传 ${S.base}（红色）。比起快速重传，这里多等了好几秒，窗口一直卡着，这就是快速重传存在的意义`);
+    }
+    for (const p of S.packets) {
+      if (!running) break;
+      if (p.dropped) { if (S.t - p.dropT > 900) p.gone = true; continue; }
+      p.prog = (S.t - p.t0) / FLIGHT;
+      if (p.willDrop && p.prog >= p.dropAt) { p.prog = p.dropAt; dropPacket(p); }
+      else if (p.prog >= 1) {
+        p.gone = true;
+        if (p.kind === 'data') onDataArrive(p.seq, p.retx); else onAckArrive(p.ack, p.sack);
+      }
+    }
+    S.packets = S.packets.filter(p => !p.gone);
+  }
+
+  // ---------- 绘制 ----------
+  function rr(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  const sendStateOf = i => i < S.base ? 'acked' : i < S.next ? (S.sacked.has(i) ? 'sacked' : 'unacked') : i < S.base + cfg.W ? 'usable' : 'out';
+  const rcvStateOf = i => {
+    if (i < S.rcvNext) return 'acked';
+    if (S.buf.has(i)) return 'buffered';
+    if (S.buf.size && i < Math.max(...S.buf)) return 'gap';
+    return i < S.rcvNext + cfg.W ? 'usable' : 'out';
+  };
+  const fillOf = st => st === 'sacked' ? C.buffered : st === 'gap' ? C.usable : C[st];
+  const inkFor = st => st === 'unacked' ? '#2A1C04' : st === 'usable' ? C['usable-edge'] : st === 'gap' ? C.retx : st === 'out' ? C['out-ink'] : '#FFFFFF';
+
+  function drawCell(x, y, cw, i, st, changedAt, note) {
+    const age = S.t - (changedAt ?? -1e9);
+    if (age < 600) {
+      const k = age / 600;
+      ctx.globalAlpha = 0.45 * (1 - k);
+      ctx.fillStyle = fillOf(st) || C.ink;
+      rr(x + 2 - 6 * k, y - 6 * k, cw - 4 + 12 * k, CH + 12 * k, 8);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+    rr(x + 2, y, cw - 4, CH, 6);
+    ctx.fillStyle = fillOf(st);
+    ctx.fill();
+    if (st === 'usable') { ctx.lineWidth = 1.5; ctx.strokeStyle = C['usable-edge']; ctx.stroke(); }
+    if (st === 'gap') {
+      ctx.lineWidth = 2; ctx.strokeStyle = C.retx; ctx.setLineDash([4, 3]);
+      ctx.stroke(); ctx.setLineDash([]);
+    }
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = inkFor(st);
+    ctx.font = '600 13px ' + MONO;
+    ctx.fillText(String(i), x + cw / 2, note ? y + CH / 2 - 5 : y + CH / 2 + 1);
+    if (note) {
+      ctx.font = '600 10px ' + SANS;
+      ctx.fillStyle = st === 'unacked' ? '#A3321E' : st === 'gap' ? C.retx : inkFor(st);
+      ctx.fillText(note, x + cw / 2, y + CH - 8);
+    }
+  }
+
+  function drawFrame(xl, xr, y, label, tabBelow, color = C.frame) {
+    ctx.lineWidth = 2; ctx.strokeStyle = color;
+    rr(xl - 1, y - 5, xr - xl + 2, CH + 10, 9);
+    ctx.stroke();
+    ctx.font = '500 11px ' + SANS;
+    const tw = ctx.measureText(label).width + 14;
+    const ty = tabBelow ? y + CH + 5 : y - 5 - 19;
+    ctx.fillStyle = color;
+    rr(xl - 1, ty, tw, 19, 5);
+    ctx.fill();
+    ctx.fillStyle = C.surface;
+    ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.fillText(label, xl + 6, ty + 10);
+  }
+
+  // 发送窗口下方的分段括号：已发送未确认 | 可发送未发送
+  function bracket(x1, x2, y, color, long, short) {
+    if (x2 - x1 < 8) return;
+    ctx.strokeStyle = color; ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(x1 + 3, y + 4); ctx.lineTo(x1 + 3, y); ctx.lineTo(x2 - 3, y); ctx.lineTo(x2 - 3, y + 4);
+    ctx.stroke();
+    ctx.font = '500 10px ' + SANS;
+    const text = ctx.measureText(long).width + 4 <= x2 - x1 ? long : short;
+    ctx.fillStyle = C.ink; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(text, (x1 + x2) / 2, y - 10);
+  }
+
+  function pointer(x, y, label) {
+    ctx.fillStyle = C.muted;
+    ctx.beginPath();
+    ctx.moveTo(x, y); ctx.lineTo(x - 5, y + 7); ctx.lineTo(x + 5, y + 7);
+    ctx.fill();
+    ctx.font = '10px ' + MONO;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(label, x, y + 16);
+  }
+
+  function draw(rdt) {
+    const { w, h, cw, dpr } = view;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    const RY = 34, SY = h - 34 - CH;
+    const k = 1 - Math.exp(-rdt / 220);
+
+    const target = Math.max(0, Math.min((S.base - 1) * cw - w * 0.18, N * cw + 32 - w));
+    S.camX += (target - S.camX) * k;
+    S.fx += (S.base - S.fx) * k;
+    S.rfx += (S.rcvNext - S.rfx) * k;
+    const X = i => 16 + (i - 1) * cw - S.camX;
+
+    // 网络通道
+    ctx.fillStyle = C.bg;
+    ctx.globalAlpha = 0.55;
+    ctx.fillRect(0, RY + CH + 30, w, SY - RY - CH - 56);
+    ctx.globalAlpha = 1;
+    ctx.font = '11px ' + SANS;
+    ctx.fillStyle = C.muted; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    ctx.fillText(`网络 · 单程约 ${(FLIGHT / 1000).toFixed(1)} 秒`, w - 12, (RY + CH + SY) / 2);
+
+    // 格子
+    for (let i = 1; i <= N; i++) {
+      const x = X(i);
+      if (x + cw < 0 || x > w) continue;
+      const ss = sendStateOf(i), rs = rcvStateOf(i);
+      if (S.sState[i] !== ss) { if (S.sState[i]) S.sChanged[i] = S.t; S.sState[i] = ss; }
+      if (S.rState[i] !== rs) { if (S.rState[i]) S.rChanged[i] = S.t; S.rState[i] = rs; }
+      const sNote = (ss === 'unacked' || ss === 'sacked') && S.retxOf[i] ? '重传' : '';
+      drawCell(x, SY, cw, i, ss, S.sChanged[i], sNote);
+      drawCell(x, RY, cw, i, rs, S.rChanged[i], rs === 'gap' ? '缺' : '');
+    }
+
+    // 重传计时器（画在最早未确认段底部）
+    if (S.timerStart !== null && S.base <= N) {
+      const f = Math.min(1, (S.t - S.timerStart) / RTO);
+      const x = X(S.base) + 6;
+      ctx.fillStyle = C.retx;
+      ctx.fillRect(x, SY + 2, (cw - 12) * f, 3);
+    }
+
+    // 窗口框
+    if (hasGapAtBase()) {
+      drawFrame(X(S.fx), X(S.fx + cfg.W), SY, `发送窗口 W=${cfg.W} · 左沿卡在 ${S.base}`, true, C.retx);
+      drawFrame(X(S.rfx), X(S.rfx + cfg.W), RY, `接收窗口 ${cfg.W} · 等 ${S.rcvNext} 补齐`, false, C.retx);
+    } else {
+      drawFrame(X(S.fx), X(S.fx + cfg.W), SY, `发送窗口 W=${cfg.W}`, true);
+      drawFrame(X(S.rfx), X(S.rfx + cfg.W), RY, `接收窗口 ${cfg.W}`, false);
+    }
+
+    // 发送窗口内部分区
+    if (S.base <= N) {
+      const by = SY - 11;
+      const unacked = S.next - S.base;
+      const right = Math.min(S.base + cfg.W, N + 1);
+      const usable = Math.max(0, right - S.next);
+      if (unacked > 0) bracket(X(S.fx), X(S.next), by, C.unacked, `已发送未确认 ${unacked}`, `${unacked}`);
+      if (usable > 0) bracket(X(S.next), X(S.fx + cfg.W) - (S.base + cfg.W - right) * cw, by, C['usable-edge'], `可用窗口 ${usable}`, `${usable}`);
+    }
+    pointer(X(S.rcvNext), RY + CH + 6, 'RCV.NXT');
+
+    // 报文
+    const y0 = SY - 4, y1 = RY + CH + 4;
+    for (const p of S.packets) {
+      let sx, sy, ex, ey;
+      if (p.kind === 'data') { sx = ex = X(p.seq) + cw / 2; sy = y0; ey = y1; }
+      else { sx = X(p.from) + cw / 2; sy = y1; ex = X(p.ack); ey = y0; }
+      let x = sx + (ex - sx) * p.prog, y = sy + (ey - sy) * p.prog;
+      let alpha = 1;
+      if (p.dropped) { const a = (S.t - p.dropT) / 900; alpha = Math.max(0, 1 - a); y += a * 26; }
+      const col = p.kind === 'ack' ? C.ack : p.retx ? C.retx : C.data;
+
+      // 轨迹
+      ctx.globalAlpha = 0.28 * alpha;
+      ctx.strokeStyle = col; ctx.lineWidth = 1.5; ctx.setLineDash([3, 4]);
+      ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(x, y); ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.globalAlpha = alpha;
+      ctx.font = '600 11px ' + MONO;
+      const label = p.kind === 'ack' ? `ACK ${p.ack}` + (p.sack.length ? ` S${ranges(p.sack).replace(/、/g, ',')}` : '') : String(p.seq);
+      const pw = p.kind === 'ack' ? ctx.measureText(label).width + 14 : Math.min(cw - 10, 34);
+      const ph = p.kind === 'ack' ? 20 : 24;
+      p.hx = x - pw / 2 - 6; p.hy = y - ph / 2 - 6; p.hw = pw + 12; p.hh = ph + 12;
+      rr(x - pw / 2, y - ph / 2, pw, ph, p.kind === 'ack' ? 10 : 5);
+      ctx.fillStyle = col; ctx.fill();
+      ctx.fillStyle = '#FFFFFF'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(label, x, y + 1);
+      if (p.retx) {
+        ctx.font = '600 11px ' + SANS;
+        ctx.fillStyle = C.retx; ctx.textAlign = 'left';
+        ctx.fillText('重传', x + pw / 2 + 5, y + 1);
+      }
+      if (p.dropped) {
+        ctx.strokeStyle = C.retx; ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(x - 11, y - 11); ctx.lineTo(x + 11, y + 11);
+        ctx.moveTo(x + 11, y - 11); ctx.lineTo(x - 11, y + 11);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  function updatePanel() {
+    const una = Math.min(S.base, N + 1);
+    $('stUna').textContent = una;
+    $('stNxt').textContent = S.next;
+    $('stInflight').textContent = S.next - una;
+    $('stAvail').textContent = Math.max(0, Math.min(S.base + cfg.W, N + 1) - S.next);
+    $('stRcv').textContent = S.rcvNext;
+    $('stDup').textContent = S.dup;
+    $('stRto').textContent = S.timerStart === null ? '未启动' : ((RTO - (S.t - S.timerStart)) / 1000).toFixed(1) + 's';
+    $('stRetx').textContent = S.retxCount;
+    $('sndInfo').textContent = `SND.UNA=${una} · SND.NXT=${S.next}`;
+    $('rcvInfo').textContent = `RCV.NXT=${S.rcvNext}` + (S.buf.size ? ` · 缓存 ${ranges(bufList())}` : '');
+  }
+
+  // ---------- 交互 ----------
+  function setRunning(v) {
+    running = v;
+    $('btnPlay').textContent = v ? '暂停' : '继续';
+    if (v && S && S.hold) { S.hold = false; $('caption').classList.remove('hold'); }
+  }
+  function setCfg(o) {
+    if (o.W != null) { cfg.W = o.W; $('rngW').value = o.W; $('outW').textContent = o.W; }
+    if (o.gap != null) { cfg.gap = o.gap; $('rngGap').value = o.gap / 1000; $('outGap').textContent = (o.gap / 1000).toFixed(1) + 's'; }
+    if (o.loss != null) { cfg.loss = o.loss; $('rngLoss').value = o.loss; $('outLoss').textContent = Math.round(o.loss * 100) + '%'; }
+  }
+  $('btnPlay').onclick = () => setRunning(!running);
+  $('btnReset').onclick = () => { reset(); setRunning(true); };
+  $('demoFast').onclick = () => startDemo('fast');
+  $('demoTimeout').onclick = () => startDemo('timeout');
+  $('demoIdle').onclick = () => startDemo('idle');
+  $('btnDrop').onclick = () => {
+    S.dropNext = !S.dropNext;
+    $('btnDrop').textContent = S.dropNext ? '已标记：下一个会丢' : '丢弃下一个数据段';
+  };
+  $('chkSack').onchange = e => { cfg.sack = e.target.checked; if (!cfg.sack) S.sacked.clear(); };
+  $('rngW').oninput = e => setCfg({ W: +e.target.value });
+  $('rngGap').oninput = e => setCfg({ gap: Math.round(+e.target.value * 1000) });
+  $('rngSpeed').oninput = e => { cfg.speed = +e.target.value; $('outSpeed').textContent = cfg.speed + '×'; };
+  $('rngLoss').oninput = e => setCfg({ loss: +e.target.value });
+  document.addEventListener('keydown', e => {
+    if (e.code === 'Space' && !/INPUT|BUTTON/.test(document.activeElement.tagName)) { e.preventDefault(); setRunning(!running); }
+  });
+  cv.addEventListener('pointerdown', e => {
+    const r = cv.getBoundingClientRect();
+    const x = e.clientX - r.left, y = e.clientY - r.top;
+    for (let i = S.packets.length - 1; i >= 0; i--) {
+      const p = S.packets[i];
+      if (!p.dropped && x >= p.hx && x <= p.hx + p.hw && y >= p.hy && y <= p.hy + p.hh) { dropPacket(p); return; }
+    }
+  });
+
+  // 全局重置：所有参数回到默认值，重新开始
+  window.pageReset = () => {
+    setCfg({ W: 5, gap: 420, loss: 0 });
+    cfg.speed = 1; $('rngSpeed').value = 1; $('outSpeed').textContent = '1×';
+    cfg.sack = false; $('chkSack').checked = false;
+    reset();
+    setRunning(true);
+  };
+
+  reset();
+  let last = performance.now();
+  function frame(now) {
+    const rdt = Math.min(now - last, 100); last = now;
+    if (running) step(rdt * cfg.speed);
+    draw(rdt);
+    updatePanel();
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+<button type="button" class="lq-reset" id="lq-reset" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+<script>
+window.LQ_ITEMS = [
+  { type: '选择', q: '发送窗口 W = 5 是什么意思？',
+    opts: ['发送方最多同时有 5 个“已发送但未确认”的报文段', '每发 5 个段，就必须停下来等一个 ACK', '接收方每收到 5 个段才回一个 ACK'], ans: 0,
+    why: '窗口是“在路上、还没被确认”的上限。只要没到上限就可以连续发，不必发一个等一个。' },
+  { type: '判断', q: 'ACK = 7 的意思是“7 号段收到了”。', opts: ['对', '错'], ans: 1,
+    why: '累计确认：ACK = 7 表示 7 之前（1–6）都收到了，下一个期待的是 7。' },
+  { type: '选择', q: '5 号段丢了，6、7、8 都已到达接收方（没开 SACK）。接收方回的 ACK 是？',
+    opts: ['ACK = 9', 'ACK = 5', 'ACK = 6'], ans: 1,
+    why: '确认必须连续。5 没到，ACK 只能停在 5；6–8 先缓存起来，等 5 补上后 ACK 一下跳到 9。' },
+  { type: '选择', q: '发送方连续收到 3 个重复的 ACK = 5，会怎么做？',
+    opts: ['立即重传 5 号段（快速重传）', '继续等重传计时器超时', '把 5 号之后的所有段全部重传'], ans: 0,
+    why: '3 个重复 ACK 说明后面的段都到了、偏偏缺 5，不必干等超时；而且只重传 5，后面已到达的段不用重发。' },
+  { type: '计算', q: '窗口 W = 6，当前“已发送未确认”有 4 个段。可用窗口还有几个？', ans: ['2'], placeholder: '填一个数字',
+    why: '可用窗口 = W − 已发送未确认 = 6 − 4 = 2。' },
+  { type: '选择', q: '窗口只有 W = 3 时 1 号段丢了。为什么这时通常触发不了快速重传？',
+    opts: ['后面最多只有 2 个段能到达，凑不够 3 个重复 ACK', '窗口太小，协议不允许重传', '接收方会直接丢弃 2、3 号段'], ans: 0,
+    why: '窗口里除了丢失的那个，只剩 2 个段能发出去，最多换来 2 个重复 ACK，只能等超时重传。点上面的“超时重传”演示可以看到这个过程。' },
+  { type: '判断', q: '开启 SACK 后，发送方知道 6–8 已到达，所以发送窗口左沿可以越过还没确认的 5 号段。', opts: ['对', '错'], ans: 1,
+    why: '常见误区。SACK 只告诉发送方哪些段不必重传；左沿是 SND.UNA，必须等 5 被累计确认后才能右移。' },
+];
+</script>
+<script>
+/* ---------- 练习题 + 全局重置（learn 通用组件） ----------
+   题目来自 window.LQ_ITEMS：{type, q, opts, ans: 选项下标, why} 或填空题 {type, q, ans: [可接受答案…], why}
+   全局重置：先调用页面自己的 window.pageReset()，再清空练习、回到顶部 */
+(() => {
+  const box = document.getElementById('lq');
+  const items = window.LQ_ITEMS || [];
+  const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let answered = 0, right = 0;
+
+  function update() {
+    const all = answered === items.length;
+    score.textContent = `已答 ${answered} / ${items.length} · 答对 ${right}` +
+      (all ? (right === items.length ? ' · 全对！' : ' · 看看解析，再重做一次') : '');
+  }
+
+  function render() {
+    answered = 0; right = 0; list.innerHTML = '';
+    items.forEach((it, i) => {
+      const el = document.createElement('div');
+      el.className = 'lq-item';
+      el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
+      const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
+      const judge = (ok, answer) => {
+        answered++; if (ok) right++;
+        el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
+        why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
+        update();
+      };
+      if (it.opts) {
+        a.classList.add('lq-opts');
+        it.opts.forEach((o, j) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'lq-opt'; b.innerHTML = o;
+          b.onclick = () => {
+            a.querySelectorAll('button').forEach(x => x.disabled = true);
+            a.children[it.ans].classList.add('lq-right');
+            if (j !== it.ans) b.classList.add('lq-wrong');
+            judge(j === it.ans, it.opts[it.ans]);
+          };
+          a.append(b);
+        });
+      } else {
+        a.classList.add('lq-fill');
+        a.innerHTML = `<input type="text" autocomplete="off" spellcheck="false" placeholder="${it.placeholder || '输入答案'}" aria-label="第 ${i + 1} 题答案"><button type="button" class="lq-opt">确定</button>`;
+        const inp = a.querySelector('input'), go = a.querySelector('button');
+        const submit = () => {
+          if (!inp.value.trim()) { inp.focus(); return; }
+          inp.disabled = go.disabled = true;
+          const ok = it.ans.some(x => norm(x) === norm(inp.value));
+          inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
+          judge(ok, it.ans[0]);
+        };
+        go.onclick = submit;
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      }
+      list.append(el);
+    });
+    update();
+  }
+
+  box.querySelector('.lq-redo').addEventListener('click', render);
+  document.getElementById('lq-reset').addEventListener('click', () => {
+    if (typeof window.pageReset === 'function') window.pageReset();
+    render();
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  });
+  render();
+})();
+</script>
+</body>
+</html>

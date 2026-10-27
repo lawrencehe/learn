@@ -1,0 +1,979 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>通用逼近实验台</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@600;900&family=Noto+Serif:ital,wght@0,400;1,400&display=swap">
+<style>
+html{color-scheme:light}
+body{margin:0}
+[hidden]{display:none!important}
+/* Layout: a single reading column of prose, punctuated by wide "instrument" panels where the math moves. */
+:root{
+  --bg:#F3F5F9; --surface:#FFFFFF; --ink:#131A2C; --muted:#5B6479; --line:#D8DDE7; --grid:#E8EBF2;
+  --accent:#2D4FE6;   /* the network's output F(x) */
+  --target:#D98300;   /* the function we want f(x) */
+  --neg:#C93A6A;      /* negative weights / error */
+  --chip:#EAEEFB;
+  --f-display:"Noto Serif SC","Songti SC","STSong",serif;
+  --f-body:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --f-math:"Noto Serif",Georgia,"Times New Roman",serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1120; --surface:#151B2D; --ink:#E5E9F3; --muted:#98A1B8; --line:#283049; --grid:#1D2438;
+    --accent:#7D95FF; --target:#F2AE38; --neg:#FF6F9A; --chip:#1E2742; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1120; --surface:#151B2D; --ink:#E5E9F3; --muted:#98A1B8; --line:#283049; --grid:#1D2438;
+  --accent:#7D95FF; --target:#F2AE38; --neg:#FF6F9A; --chip:#1E2742; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.75;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:0 64px}
+.wrap{max-width:1040px;margin:0 auto}
+.prose{max-width:680px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.25;margin:0}
+h1{font-size:clamp(2rem,5.4vw,3.4rem);font-weight:900;letter-spacing:.01em}
+h2{font-size:clamp(1.5rem,3.4vw,2.1rem);font-weight:900}
+h3{font-size:1.15rem;font-weight:600}
+p{margin:0}
+.stack{display:grid;gap:18px}
+.eyebrow{font-family:var(--f-mono);font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.lede{font-size:1.1rem;color:var(--muted)}
+header.hero{padding-block:56px 32px;display:grid;gap:22px}
+section{padding-block:56px;border-top:1px solid var(--line);display:grid;gap:26px}
+i.v,.m i{font-family:var(--f-math);font-style:italic;font-size:1.06em}
+.m{font-family:var(--f-math);white-space:nowrap}
+.eq{font-family:var(--f-math);font-size:clamp(1.05rem,2.6vw,1.35rem);padding:14px 18px;background:var(--chip);border-radius:8px;overflow-x:auto;white-space:nowrap}
+.eq i{font-style:italic}
+.eq .note{font-family:var(--f-body);font-size:.8rem;color:var(--muted);margin-left:12px;white-space:normal}
+sub,sup{font-size:.7em;line-height:0}
+strong{font-weight:700}
+.t-target{color:var(--target);font-weight:700}
+.t-accent{color:var(--accent);font-weight:700}
+.t-neg{color:var(--neg);font-weight:700}
+
+/* Instrument panels */
+.fig{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:grid;gap:14px;min-width:0}
+.fig canvas{display:block;width:100%;max-width:100%;border-radius:6px}
+.fig figcaption{font-size:.85rem;color:var(--muted);line-height:1.6}
+.ar-wide{aspect-ratio:16/8}
+.ar-main{aspect-ratio:16/9}
+.ar-sq{aspect-ratio:5/4}
+.ar-strip{aspect-ratio:16/5}
+.ar-hero{aspect-ratio:21/8}
+@media (max-width:640px){ .ar-main,.ar-wide{aspect-ratio:4/3} .ar-strip{aspect-ratio:16/7} .ar-hero{aspect-ratio:16/9} }
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:14px}
+.panel{display:grid;gap:8px;min-width:0}
+.panel h3{font-size:1rem}
+.panel p{font-size:.85rem;color:var(--muted);line-height:1.6}
+
+.controls{display:flex;flex-wrap:wrap;gap:12px 22px;align-items:end}
+.ctl{display:grid;gap:6px;min-width:0}
+.ctl > .lab{font-size:.75rem;color:var(--muted);letter-spacing:.06em}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex-wrap:wrap}
+.seg button{font:inherit;font-size:.85rem;background:transparent;color:var(--ink);border:0;padding:6px 12px;cursor:pointer;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--surface)}
+.seg button:hover:not([aria-pressed="true"]){background:var(--chip)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn{font:inherit;font-size:.85rem;border:1px solid var(--accent);background:transparent;color:var(--accent);padding:6px 14px;border-radius:8px;cursor:pointer}
+.btn.primary{background:var(--accent);color:var(--surface)}
+.btn:hover{filter:brightness(1.08)}
+.slider{display:grid;gap:4px;width:min(100%,220px)}
+.slider .lab{display:flex;justify-content:space-between;font-size:.75rem;color:var(--muted);letter-spacing:.04em}
+.slider output{font-family:var(--f-mono);color:var(--ink)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.check{display:flex;gap:8px;align-items:center;font-size:.85rem;color:var(--muted);cursor:pointer}
+.check input{accent-color:var(--accent)}
+
+.readout{display:flex;flex-wrap:wrap;gap:8px}
+.chipv{font-family:var(--f-mono);font-size:.8rem;background:var(--chip);border-radius:6px;padding:4px 10px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.chipv b{font-weight:600;color:var(--accent)}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;font-family:var(--f-mono);font-size:.82rem;font-variant-numeric:tabular-nums}
+.flow .arr{color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:.8rem;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:18px;height:3px;border-radius:2px;display:inline-block}
+.sw.target{background:var(--target)} .sw.model{background:var(--accent)} .sw.part{background:var(--accent);opacity:.35}
+.sw.err{background:var(--neg);opacity:.4;height:8px}
+.sw.neg{background:var(--neg)}
+canvas.drawing{cursor:crosshair;touch-action:none}
+.hint{font-size:.8rem;color:var(--target)}
+
+.theorem{border-left:3px solid var(--accent);padding:6px 0 6px 18px;display:grid;gap:10px;max-width:760px}
+.theorem .eyebrow{color:var(--muted)}
+.limits{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:20px}
+.limits div{display:grid;gap:6px;align-content:start}
+.limits h3{font-size:1rem}
+.limits p{font-size:.9rem;color:var(--muted)}
+.mono{font-family:var(--f-mono);font-size:.88em}
+/* keep long formulas and readouts from widening the column on phones */
+section > *, header.hero > *{min-width:0}
+@media (max-width:640px){ .m, .chipv{white-space:normal} }
+footer{padding-block:32px 0;border-top:1px solid var(--line);font-size:.85rem;color:var(--muted)}
+
+:root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:#1F8F55;--lq-bad:var(--neg);--lq-h2:clamp(1.5rem,3.4vw,2.1rem)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--lq-ok:#4CC38A}}
+:root[data-theme="dark"]{--lq-ok:#4CC38A}
+
+/* ---------- 练习题 + 全局重置（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+.lq{display:grid;gap:12px;margin-bottom:56px}
+.lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+.lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
+.lq-sub{margin:0;color:var(--lq-muted);font-size:14px}
+.lq-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--lq-muted);font-variant-numeric:tabular-nums}
+.lq-list{display:grid;gap:10px}
+.lq-item{background:var(--lq-surface);border:1.5px solid var(--lq-line);border-radius:10px;padding:12px 16px;display:grid;gap:10px;min-width:0;color:var(--lq-ink);text-align:left}
+.lq-item.lq-is-ok{border-color:var(--lq-ok)}
+.lq-item.lq-is-bad{border-color:var(--lq-bad)}
+.lq-q{font-size:15px;font-weight:600;line-height:1.6}
+.lq-tag{display:inline-block;font-size:11px;font-weight:500;line-height:1.6;color:var(--lq-muted);border:1px solid var(--lq-line);border-radius:999px;padding:0 8px;margin-right:8px;vertical-align:1px}
+.lq-opts,.lq-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lq .lq-opt,.lq .lq-redo{font:inherit;font-size:14px;line-height:1.4;padding:6px 14px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);cursor:pointer;text-align:left;opacity:1}
+.lq .lq-opt:hover:not(:disabled),.lq .lq-redo:hover{border-color:var(--lq-accent)}
+.lq .lq-opt:disabled{cursor:default;opacity:1}
+.lq .lq-opt.lq-right{border-color:var(--lq-ok);color:var(--lq-ok);font-weight:700}
+.lq .lq-opt.lq-wrong{border-color:var(--lq-bad);color:var(--lq-bad);text-decoration:line-through}
+.lq-fill input{font:inherit;font-size:14px;padding:6px 10px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);width:min(100%,200px)}
+.lq-fill input.lq-right{border-color:var(--lq-ok)}
+.lq-fill input.lq-wrong{border-color:var(--lq-bad)}
+.lq-why{font-size:14px;line-height:1.65;color:var(--lq-muted)}
+.lq-why:empty{display:none}
+.lq-why .lq-ok{color:var(--lq-ok)}
+.lq-why .lq-bad{color:var(--lq-bad)}
+.lq-reset{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:max(16px,env(safe-area-inset-bottom,0px));z-index:100;font:inherit;font-size:14px;font-weight:600;line-height:1;padding:10px 16px;margin:0;border-radius:999px;border:1.5px solid var(--lq-line);background:var(--lq-fab,var(--lq-surface));color:var(--lq-ink);box-shadow:0 4px 16px rgba(0,0,0,.2);cursor:pointer}
+.lq-reset:hover{border-color:var(--lq-accent);color:var(--lq-accent)}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<header class="hero">
+  <p class="eyebrow">大模型原理 · 基石</p>
+  <h1>神经网络如何逼近任何函数</h1>
+  <p class="lede prose">大语言模型的每一层里都藏着一个结构很简单的网络：乘一个数，加一个数，过一道弯曲的函数，再把结果加起来。这一页从单个神经元讲起，一步步走到<strong>通用逼近定理</strong>：为什么这样简单的零件，只要数量够多，就能拟合几乎任何曲线。</p>
+  <figure class="fig" style="margin:0">
+    <canvas id="cv-hero" class="ar-hero" aria-label="神经元数量逐渐增加时，网络输出逐渐贴合目标曲线的动画"></canvas>
+    <div class="legend"><span><i class="sw target"></i>目标函数 f(x)</span><span><i class="sw model"></i>网络输出 F(x)</span><span id="hero-n" class="mono"></span></div>
+  </figure>
+</header>
+
+<!-- 1 -->
+<section id="neuron">
+  <div class="stack prose">
+    <p class="eyebrow">第一步</p>
+    <h2>一个神经元</h2>
+    <p>一个神经元只做两件事。先做一次线性运算 <span class="m"><i>z</i> = <i>w</i>·<i>x</i> + <i>b</i></span>：权重 <i class="v">w</i> 决定灵敏度（斜率），偏置 <i class="v">b</i> 决定平移。再把 <i class="v">z</i> 送进一个非线性的<strong>激活函数</strong> σ，得到输出 <span class="m"><i>y</i> = σ(<i>z</i>)</span>。</p>
+    <p><strong>谁是“参数”？</strong>只有 <i class="v">w</i> 和 <i class="v">b</i>。它们是可以调的旋钮，训练就是在找它们的值；平时说的“模型权重”，指的就是全部 w 和 b 的集合（严格说 w 叫权重、b 叫偏置）。σ 则是事先选好、写死的公式（sigmoid、tanh、ReLU……），里面没有要学的数，训练时一直不变。下面的滑块里，你调的也只有 w 和 b；切换 σ 相当于换了一种固定零件。</p>
+    <div class="eq" style="font-size:.95rem;line-height:1.9">三种 σ 的固定公式（只有 z 和常数，没有要学的数）：<br>sigmoid：σ(<i>z</i>) = 1 / (1 + <i>e</i><sup>−<i>z</i></sup>)　输出 0～1<br>tanh：tanh(<i>z</i>) = (<i>e</i><sup><i>z</i></sup> − <i>e</i><sup>−<i>z</i></sup>) / (<i>e</i><sup><i>z</i></sup> + <i>e</i><sup>−<i>z</i></sup>)　输出 −1～1<br>ReLU：ReLU(<i>z</i>) = max(0, <i>z</i>)　负数变 0，正数原样</div>
+    <p style="font-size:.9rem;color:var(--muted)">w、b 各自把曲线怎么变、每种激活函数长什么样，见《<a href="activation-and-wb.html" style="color:var(--accent)">w、b 和激活函数，在图上长什么样</a>》。</p>
+  </div>
+  <div class="eq"><i>y</i> = σ( <i>w</i> · <i>x</i> + <i>b</i> )</div>
+  <figure class="fig" style="margin:0">
+    <div class="controls">
+      <div class="ctl"><span class="lab">激活函数 σ</span>
+        <div class="seg" data-group="act1">
+          <button type="button" data-v="sigmoid" aria-pressed="true">Sigmoid</button>
+          <button type="button" data-v="tanh" aria-pressed="false">tanh</button>
+          <button type="button" data-v="relu" aria-pressed="false">ReLU</button>
+        </div>
+      </div>
+      <label class="slider"><span class="lab">权重 w <output id="o-w1">3.0</output></span><input id="s-w1" type="range" min="-10" max="10" step="0.1" value="3"></label>
+      <label class="slider"><span class="lab">偏置 b <output id="o-b1">0.0</output></span><input id="s-b1" type="range" min="-10" max="10" step="0.1" value="0"></label>
+    </div>
+    <canvas id="cv-neuron" class="ar-wide" aria-label="单个神经元的输入输出曲线"></canvas>
+    <div class="flow" id="flow1"></div>
+    <div class="legend"><span><i class="sw model"></i>y = σ(z)</span><span><i class="sw" style="background:var(--muted)"></i>z = w·x + b（激活之前）</span></div>
+    <figcaption>拖动 w，曲线变陡或翻转；拖动 b，曲线左右平移。S 形的中点（或 ReLU 的拐点）在 x = −b/w。</figcaption>
+  </figure>
+  <div class="stack prose">
+    <p><strong>为什么一定要有 σ？</strong> 如果去掉激活函数，叠多少层都只是一条直线：<span class="m"><i>w</i><sup>(2)</sup>(<i>w</i><sup>(1)</sup><i>x</i> + <i>b</i><sup>(1)</sup>) + <i>b</i><sup>(2)</sup> = (<i>w</i><sup>(2)</sup><i>w</i><sup>(1)</sup>)<i>x</i> + (<i>w</i><sup>(2)</sup><i>b</i><sup>(1)</sup> + <i>b</i><sup>(2)</sup>)</span>（右上角数字是层号）。网络能表达的所有“弯曲”，全部来自激活函数。</p>
+  </div>
+</section>
+
+<!-- 2 -->
+<section id="layer">
+  <div class="stack prose">
+    <p class="eyebrow">第二步</p>
+    <h2>一层神经元，加在一起</h2>
+    <p>把多个神经元并排放就是一个<strong>隐藏层</strong>。同一个输入 <i class="v">x</i> 同时送进每个神经元，每个神经元各自画出一条被拉伸、平移过的 S 形曲线 <span class="m"><i>h</i><sub>i</sub>(<i>x</i>)</span>。从这里开始，参数右上角的 <sup>(1)</sup>、<sup>(2)</sup> 表示它属于第几层：第 1 层的权重、偏置记作 <i>w</i><sub>i</sub><sup>(1)</sup>、<i>b</i><sub>i</sub><sup>(1)</sup>。</p>
+    <p>最后再放<strong>一个输出神经元</strong>，把 h<sub>1</sub>…h<sub>5</sub> 当作它的输入。它和第 1 层的神经元做的事一样：每条输入线一个权重，加权求和，再加一个偏置。所以它的参数也叫 w 和 b，只是右上角标 <sup>(2)</sup>：权重 <i>w</i><sub>i</sub><sup>(2)</sup>，偏置 <i>b</i><sup>(2)</sup>。唯一的区别是它不套激活函数，直接输出加权和。</p>
+  </div>
+  <div class="eq">第 1 层（隐藏神经元 i）：<i>h</i><sub>i</sub> = σ( <i>w</i><sub>i</sub><sup>(1)</sup> · <i>x</i> + <i>b</i><sub>i</sub><sup>(1)</sup> )<br>第 2 层（输出神经元）：<i>F</i> = <i>w</i><sub>1</sub><sup>(2)</sup>·<i>h</i><sub>1</sub> + … + <i>w</i><sub>5</sub><sup>(2)</sup>·<i>h</i><sub>5</sub> + <i>b</i><sup>(2)</sup><span class="note">同样是“权重 × 输入 + 偏置”，只是不套 σ</span><br>合起来：<i>F</i>(<i>x</i>) = Σ<sub>i</sub> <i>w</i><sub>i</sub><sup>(2)</sup> · σ( <i>w</i><sub>i</sub><sup>(1)</sup> <i>x</i> + <i>b</i><sub>i</sub><sup>(1)</sup> ) + <i>b</i><sup>(2)</sup><span class="note">矩阵写法：<i>h</i> = σ(<i>W</i><sup>(1)</sup><i>x</i> + <i>b</i><sup>(1)</sup>)，<i>F</i> = <i>W</i><sup>(2)</sup><i>h</i> + <i>b</i><sup>(2)</sup></span></div>
+  <p class="prose" style="font-size:.9rem;color:var(--muted)">有的教材把第 2 层的 w<sup>(2)</sup>、b<sup>(2)</sup> 另起名字叫 v、c，指的是同一样东西。</p>
+  <p class="prose" style="font-size:.9rem;color:var(--muted)">想看这个输出神经元是怎么一步步“长”出来的，以及为什么它的权重 w<sup>(2)</sup> 非有不可，见《<a href="multi-layer-network.html" style="color:var(--accent)">多层神经网络是怎么来的</a>》。</p>
+  <figure class="fig" style="margin:0">
+    <div class="grid2">
+      <canvas id="cv-net" class="ar-sq" aria-label="一个输入、五个隐藏神经元、一个输出的网络示意，信号沿连线流动"></canvas>
+      <canvas id="cv-netplot" class="ar-sq" aria-label="每个神经元的贡献曲线及其总和"></canvas>
+    </div>
+    <div class="controls">
+      <button type="button" class="btn" id="btn-rand">换一组随机权重</button>
+      <div class="flow" id="flow2"></div>
+    </div>
+    <div class="legend"><span><i class="sw model"></i>正权重</span><span><i class="sw neg"></i>负权重</span><span>线越粗 = |权重| 越大，节点越亮 = 激活值越大</span><span><i class="sw part"></i>各神经元贡献 wᵢ⁽²⁾·hᵢ(x)</span><span><i class="sw model" style="height:4px"></i>总和 F(x)</span></div>
+    <figcaption>左边是网络，右边是它计算的函数。竖线就是左图此刻送进去的 x。每换一组权重，就得到一条不同的曲线。问题来了：只靠调这些数字，能拼出<em>任意</em>想要的曲线吗？</figcaption>
+  </figure>
+</section>
+
+<!-- 3 -->
+<section id="uat">
+  <div class="stack prose">
+    <p class="eyebrow">第三步 · 核心</p>
+    <h2>通用逼近：用台阶拼出任何曲线</h2>
+    <p>答案是可以，而且证明的思路非常直观。只需要三个观察：</p>
+  </div>
+  <figure class="fig" style="margin:0">
+    <div class="controls">
+      <label class="slider" style="width:min(100%,320px)"><span class="lab">权重 w（越大越陡） <output id="o-wb">30</output></span><input id="s-wb" type="range" min="1" max="150" step="1" value="30"></label>
+    </div>
+    <div class="grid3">
+      <div class="panel"><canvas id="cv-b1" class="ar-sq"></canvas><h3>① 一个神经元 ≈ 一个台阶</h3><p>w 很大时，σ(w(x − t)) 在 t 处几乎垂直跳起。t 由偏置决定：b = −w·t。</p></div>
+      <div class="panel"><canvas id="cv-b2" class="ar-sq"></canvas><h3>② 两个台阶相减 = 一个凸起</h3><p>σ(w(x − t₁)) − σ(w(x − t₂)) 只在 t₁ 到 t₂ 之间为 1，其余地方为 0。</p></div>
+      <div class="panel"><canvas id="cv-b3" class="ar-sq"></canvas><h3>③ 凸起乘上高度，再相加</h3><p>每个凸起乘以目标函数在这一段的值，加起来就是一条贴着目标走的阶梯。</p></div>
+    </div>
+    <figcaption>相邻两个凸起交界处的那一对台阶可以合并成一个。所以把区间切成 N+1 段，只需要 N 个神经元，每个神经元负责一个“台阶”，它在第 2 层的权重 wᵢ⁽²⁾ 就是相邻两段的高度差。</figcaption>
+  </figure>
+
+  <div class="stack prose">
+    <h3>实验台</h3>
+    <p>下面按这个方法直接计算出每个神经元的参数，不做任何训练。增加神经元数量 N，看阶梯怎样越来越细。<span class="t-neg">浅红色区域</span>是误差。选“手绘”后可以直接在图上拖动，改画目标曲线。</p>
+  </div>
+  <figure class="fig" style="margin:0">
+    <div class="controls">
+      <div class="ctl"><span class="lab">目标函数</span>
+        <div class="seg target-pick" data-group="target">
+          <button type="button" data-v="wave" aria-pressed="true">波浪</button>
+          <button type="button" data-v="peaks" aria-pressed="false">双峰</button>
+          <button type="button" data-v="zig" aria-pressed="false">折线</button>
+          <button type="button" data-v="draw" aria-pressed="false">✎ 手绘</button>
+        </div>
+      </div>
+      <div class="ctl"><span class="lab">激活函数</span>
+        <div class="seg" data-group="mode">
+          <button type="button" data-v="sig" aria-pressed="true">Sigmoid（台阶）</button>
+          <button type="button" data-v="relu" aria-pressed="false">ReLU（折线）</button>
+        </div>
+      </div>
+    </div>
+    <div class="controls">
+      <label class="slider"><span class="lab">神经元数 N <output id="o-n">6</output></span><input id="s-n" type="range" min="1" max="80" step="1" value="6"></label>
+      <label class="slider" id="wrap-k"><span class="lab">陡峭度 <output id="o-k">8</output></span><input id="s-k" type="range" min="1" max="40" step="1" value="8"></label>
+      <button type="button" class="btn primary" id="btn-play">▶ 从 1 个神经元播放</button>
+      <label class="check"><input type="checkbox" id="c-parts" checked>显示每个神经元</label>
+    </div>
+    <canvas id="cv-ua" class="ar-main" aria-label="网络输出逼近目标函数"></canvas>
+    <p class="hint" id="draw-hint" hidden>手绘模式：在图上按住拖动来改画橙色曲线。</p>
+    <div class="readout" id="ro-ua"></div>
+    <div class="legend"><span><i class="sw target"></i>目标 f(x)</span><span><i class="sw model"></i>网络 F(x)</span><span><i class="sw part"></i>单个神经元的贡献</span><span><i class="sw err"></i>误差</span></div>
+    <canvas id="cv-err" class="ar-strip" aria-label="最大误差随神经元数量变化，对数坐标"></canvas>
+    <figcaption>下图：最大误差 max|F(x) − f(x)| 随 N 的变化（纵轴是对数刻度）。圆点是当前的 N。切到 ReLU 时，每个神经元贡献一个拐点，网络变成连接采样点的折线，误差下降得快得多。</figcaption>
+  </figure>
+
+  <div class="theorem">
+    <p class="eyebrow">定理 · Cybenko 1989，Hornik 1991，Leshno 等 1993</p>
+    <p>设激活函数 σ 连续且不是多项式。对于有界闭集 <i class="v">K</i> ⊂ ℝ<sup>n</sup> 上的<strong>任意连续函数</strong> <i class="v">f</i>，以及<strong>任意小</strong>的误差 ε &gt; 0，都存在一个宽度 <i class="v">N</i> 和一组参数，使单隐藏层网络</p>
+    <div class="eq"><i>F</i>(<i>x</i>) = Σ<sub>i=1…N</sub> <i>w</i><sub>i</sub><sup>(2)</sup> σ( <i>w</i><sub>i</sub><sup>(1)</sup> · <i>x</i> + <i>b</i><sub>i</sub><sup>(1)</sup> )　满足　|<i>F</i>(<i>x</i>) − <i>f</i>(<i>x</i>)| &lt; ε　对所有 <i>x</i> ∈ <i>K</i></div>
+    <p>上面的实验台就是一维情形下的构造证明：想要更小的 ε，就切更多段、用更多神经元。</p>
+  </div>
+
+  <div class="stack prose"><h3>定理没有说的三件事</h3></div>
+  <div class="limits">
+    <div><h3>不告诉你参数怎么找</h3><p>它只保证这样的参数<strong>存在</strong>。我们在实验台里是照着 f 直接算出参数的，可真实任务里 f 是未知的，只有一堆样本。找参数要靠训练，见下一节。</p></div>
+    <div><h3>不保证网络小</h3><p>台阶构造在 n 维输入下要把空间切成小格子，需要大约 (1/ε)<sup>n</sup> 个神经元，维度一高就爆炸，这叫维数灾难。实践中，把网络加深往往比单纯加宽省得多。</p></div>
+    <div><h3>不保证能泛化</h3><p>定理只管在 K 上贴合 f，不管网络在没见过的数据上表现如何。训练数据外的行为，取决于数据、结构和训练方法。</p></div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section id="train">
+  <div class="stack prose">
+    <p class="eyebrow">第四步</p>
+    <h2>训练：让网络自己找参数</h2>
+    <p>真实的网络不会有人替它算参数。它从<strong>随机初始值</strong>出发，反复做三件事：计算损失 <span class="m"><i>L</i> = 平均( <i>F</i>(<i>x</i><sub>j</sub>) − <i>f</i>(<i>x</i><sub>j</sub>) )<sup>2</sup></span>；用<strong>反向传播</strong>算出 <span class="m">∂<i>L</i>/∂<i>w</i><sub>i</sub><sup>(1)</sup>、∂<i>L</i>/∂<i>b</i><sub>i</sub><sup>(1)</sup>、∂<i>L</i>/∂<i>w</i><sub>i</sub><sup>(2)</sup>、∂<i>L</i>/∂<i>b</i><sup>(2)</sup></span>；把每个参数往让损失变小的方向挪一小步。这就是<strong>梯度下降</strong>。被调整的只有这些 w 和 b，激活函数（这里用 tanh）从头到尾不变。</p>
+  </div>
+  <figure class="fig" style="margin:0">
+    <div class="controls">
+      <div class="ctl"><span class="lab">目标函数</span>
+        <div class="seg target-pick" data-group="target">
+          <button type="button" data-v="wave" aria-pressed="true">波浪</button>
+          <button type="button" data-v="peaks" aria-pressed="false">双峰</button>
+          <button type="button" data-v="zig" aria-pressed="false">折线</button>
+          <button type="button" data-v="draw" aria-pressed="false">✎ 手绘</button>
+        </div>
+      </div>
+      <label class="slider"><span class="lab">隐藏神经元数 <output id="o-h">10</output></span><input id="s-h" type="range" min="2" max="40" step="1" value="10"></label>
+      <button type="button" class="btn primary" id="btn-train">⏸ 暂停</button>
+      <button type="button" class="btn" id="btn-reset">重新随机初始化</button>
+    </div>
+    <canvas id="cv-train" class="ar-main" aria-label="训练过程中网络输出逐步贴合目标"></canvas>
+    <div class="readout" id="ro-train"></div>
+    <canvas id="cv-loss" class="ar-strip" aria-label="损失随迭代次数下降，对数坐标"></canvas>
+    <figcaption>上图：灰点是训练样本，细蓝线是每个神经元的贡献（激活函数用 tanh，优化器用 Adam）。下图：损失随迭代下降（对数刻度）。训练出来的神经元不会排成整齐的台阶，它们会自己找到一种更省的分工。训练中途换目标函数，网络会跟着重新调整。</figcaption>
+  </figure>
+</section>
+
+<!-- 5 -->
+<section id="llm">
+  <div class="stack prose">
+    <p class="eyebrow">回到大模型</p>
+    <h2>这和 GPT 有什么关系</h2>
+    <p>Transformer 的每一层都有一个<strong>前馈网络（FFN）</strong>，公式和第二步里的一模一样，只是输入输出从一个数变成了一个向量：</p>
+  </div>
+  <div class="eq">FFN(<i>x</i>) = <i>W</i><sub>2</sub> · σ( <i>W</i><sub>1</sub> <i>x</i> + <i>b</i><sub>1</sub> ) + <i>b</i><sub>2</sub><span class="note">下标 1、2 就是本页的 (1)、(2)：第 1 层、第 2 层。σ 通常是 GELU，一种平滑版的 ReLU</span></div>
+  <div class="stack prose">
+    <p>以 GPT-3 为例：共 96 层，每层的 FFN 把一个 12288 维的向量送进 49152 个隐藏神经元，再映射回 12288 维。每层里 FFN 的参数量约是注意力部分的两倍，也就是说模型大约三分之二的参数都在这些“隐藏层”里。</p>
+    <p>可以粗略地这样分工理解：<strong>注意力</strong>负责在词与词之间搬运信息，<strong>FFN</strong> 负责对每个位置的向量做一次“任意函数”式的加工。通用逼近定理保证了这种零件原则上什么函数都能表达；梯度下降负责在海量文本上找到那组具体的参数。</p>
+    <p>下一步值得学的是<strong>反向传播</strong>（梯度到底怎么算出来）和<strong>注意力机制</strong>（信息怎样在词之间流动）。</p>
+  </div>
+</section>
+
+<section class="lq" id="lq" aria-label="练习">
+  <div class="lq-head"><h2>练习</h2><span class="lq-score"></span></div>
+  <p class="lq-sub">学完上面的内容，来检验一下。每题作答后马上看到解析；点「重做练习」清空重来。</p>
+  <div class="lq-list"></div>
+  <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+</section>
+<footer>所有动画都在你的浏览器里实时计算：第三步的参数由构造公式直接算出，第四步是真实的梯度下降训练。</footer>
+</div>
+
+<script>
+(() => {
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sig = z => 1 / (1 + Math.exp(-z));
+const ACT = { sigmoid: sig, tanh: Math.tanh, relu: z => z > 0 ? z : 0 };
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const fmt = (v, d = 2) => (v >= 0 ? ' ' : '') + v.toFixed(d);
+
+/* ---------- theme colors ---------- */
+const COL = {};
+function readColors() {
+  const cs = getComputedStyle(document.documentElement);
+  for (const k of ['bg','surface','ink','muted','line','grid','accent','target','neg','chip']) COL[k] = cs.getPropertyValue('--' + k).trim();
+}
+readColors();
+
+/* ---------- canvas helpers ---------- */
+function setup(cv) {
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const r = cv.getBoundingClientRect();
+  const w = Math.max(20, r.width), h = Math.max(20, r.height);
+  const W = Math.round(w * dpr), H = Math.round(h * dpr);
+  if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+  const ctx = cv.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, w, h);
+  return { ctx, w, h };
+}
+function frame(w, h, xr, yr, pad) {
+  pad = Object.assign({ l: 40, r: 12, t: 12, b: 26 }, pad || {});
+  const pw = w - pad.l - pad.r, ph = h - pad.t - pad.b;
+  return {
+    w, h, xr, yr, pad,
+    X: x => pad.l + (x - xr[0]) / (xr[1] - xr[0]) * pw,
+    Y: y => clamp(pad.t + (yr[1] - y) / (yr[1] - yr[0]) * ph, -1e4, 1e4),
+    iX: px => xr[0] + (px - pad.l) / pw * (xr[1] - xr[0]),
+    iY: py => yr[1] - (py - pad.t) / ph * (yr[1] - yr[0]),
+  };
+}
+const MONO = '"JetBrains Mono", ui-monospace, monospace';
+function axes(ctx, f, xt, yt, fx = v => v, fy = v => v) {
+  ctx.save();
+  ctx.lineWidth = 1; ctx.font = '10.5px ' + MONO; ctx.fillStyle = COL.muted;
+  for (const x of xt) {
+    const px = Math.round(f.X(x)) + .5;
+    ctx.strokeStyle = COL.grid; ctx.beginPath(); ctx.moveTo(px, f.pad.t); ctx.lineTo(px, f.h - f.pad.b); ctx.stroke();
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText(fx(x), px, f.h - f.pad.b + 6);
+  }
+  for (const y of yt) {
+    const py = Math.round(f.Y(y)) + .5;
+    ctx.strokeStyle = y === 0 ? COL.line : COL.grid;
+    ctx.beginPath(); ctx.moveTo(f.pad.l, py); ctx.lineTo(f.w - f.pad.r, py); ctx.stroke();
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillText(fy(y), f.pad.l - 6, py);
+  }
+  ctx.restore();
+}
+function clip(ctx, f) {
+  ctx.beginPath(); ctx.rect(f.pad.l, f.pad.t - 3, f.w - f.pad.l - f.pad.r, f.h - f.pad.t - f.pad.b + 6); ctx.clip();
+}
+function plot(ctx, f, fn, o = {}) {
+  const n = o.n || 300, x0 = o.x0 ?? f.xr[0], x1 = o.x1 ?? f.xr[1];
+  ctx.save(); clip(ctx, f);
+  ctx.globalAlpha = o.alpha ?? 1; ctx.strokeStyle = o.color; ctx.lineWidth = o.width || 2;
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  if (o.dash) ctx.setLineDash(o.dash);
+  ctx.beginPath();
+  for (let i = 0; i <= n; i++) {
+    const x = x0 + (x1 - x0) * i / n, px = f.X(x), py = f.Y(fn(x));
+    i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+  }
+  ctx.stroke(); ctx.restore();
+}
+function fillBetween(ctx, f, a, b, color, alpha, n = 300) {
+  ctx.save(); clip(ctx, f); ctx.globalAlpha = alpha; ctx.fillStyle = color; ctx.beginPath();
+  for (let i = 0; i <= n; i++) { const x = f.xr[0] + (f.xr[1] - f.xr[0]) * i / n; const px = f.X(x), py = f.Y(a(x)); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }
+  for (let i = n; i >= 0; i--) { const x = f.xr[0] + (f.xr[1] - f.xr[0]) * i / n; ctx.lineTo(f.X(x), f.Y(b(x))); }
+  ctx.closePath(); ctx.fill(); ctx.restore();
+}
+function dot(ctx, x, y, r, color, ring) {
+  ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fillStyle = color; ctx.fill();
+  if (ring) { ctx.lineWidth = 2; ctx.strokeStyle = ring; ctx.stroke(); }
+}
+function label(ctx, text, x, y, color, align = 'left', size = 12) {
+  ctx.save(); ctx.font = `600 ${size}px ` + MONO; ctx.fillStyle = color; ctx.textAlign = align; ctx.textBaseline = 'top'; ctx.fillText(text, x, y); ctx.restore();
+}
+
+/* ---------- module loop ---------- */
+const modules = [];
+function addModule(m) {
+  m.dirty = true; m.visible = true; modules.push(m);
+  const io = new IntersectionObserver(es => { for (const e of es) { m.visible = e.isIntersecting; if (m.visible) m.dirty = true; } });
+  io.observe(m.el);
+  const ro = new ResizeObserver(() => { m.dirty = true; });
+  m.canvases.forEach(c => ro.observe(c));
+  return m;
+}
+function loop(ts) {
+  const t = ts / 1000;
+  for (const m of modules) if (m.visible && (m.dirty || m.animating())) { m.dirty = false; m.draw(t); }
+  requestAnimationFrame(loop);
+}
+const markAll = () => modules.forEach(m => m.dirty = true);
+const onTheme = () => { readColors(); markAll(); };
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', onTheme);
+new MutationObserver(onTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class', 'style'] });
+document.fonts && document.fonts.ready.then(markAll);
+
+/* segmented buttons */
+const segHandlers = {};
+document.querySelectorAll('.seg').forEach(seg => {
+  seg.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    const g = seg.dataset.group;
+    document.querySelectorAll(`.seg[data-group="${g}"] button`).forEach(x => x.setAttribute('aria-pressed', String(x.dataset.v === b.dataset.v)));
+    segHandlers[g] && segHandlers[g](b.dataset.v);
+  });
+});
+function bindRange(id, fmtv, cb) {
+  const el = document.getElementById('s-' + id), out = document.getElementById('o-' + id);
+  const up = () => { const v = +el.value; out.textContent = fmtv(v); cb(v); };
+  el.addEventListener('input', up); up();
+  return el;
+}
+/* global reset: each module pushes a function that restores its initial state */
+const resets = [];
+const setRange = (id, v) => { const el = document.getElementById('s-' + id); el.value = v; el.dispatchEvent(new Event('input')); };
+const setSeg = (g, v) => document.querySelector(`.seg[data-group="${g}"] button[data-v="${v}"]`).click();
+window.pageReset = () => resets.forEach(f => f());
+
+/* ---------- target functions (shared) ---------- */
+const TARGETS = {
+  wave: x => 0.7 * Math.sin(2 * Math.PI * 1.3 * x) + 0.25 * Math.sin(2 * Math.PI * 4.2 * x),
+  peaks: x => 0.95 * Math.exp(-(((x - 0.3) / 0.07) ** 2)) - 0.6 * Math.exp(-(((x - 0.72) / 0.13) ** 2)),
+  zig: x => Math.max(-0.6, 0.9 - 4 * Math.abs(x - 0.3)) + 0.9 * Math.max(0, 1 - 10 * Math.abs(x - 0.78)),
+};
+const DN = 200;
+const drawn = new Float64Array(DN + 1);
+let targetKey = 'wave', targetVer = 0;
+function target(x) {
+  if (targetKey !== 'draw') return TARGETS[targetKey](x);
+  const u = clamp(x, 0, 1) * DN, i = Math.min(DN - 1, Math.floor(u)), t = u - i;
+  return drawn[i] * (1 - t) + drawn[i + 1] * t;
+}
+const drawCanvases = [];
+function setTarget(k) {
+  if (k === 'draw' && targetKey !== 'draw') for (let i = 0; i <= DN; i++) drawn[i] = target(i / DN);
+  targetKey = k; targetVer++;
+  document.querySelectorAll('.seg[data-group="target"] button').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.v === k)));
+  drawCanvases.forEach(c => c.classList.toggle('drawing', k === 'draw'));
+  document.getElementById('draw-hint').hidden = k !== 'draw';
+  markAll();
+}
+segHandlers.target = setTarget;
+function enableDraw(cv, getFrame) {
+  drawCanvases.push(cv);
+  let down = false, last = null;
+  const paint = e => {
+    const f = getFrame(); if (!f) return;
+    const r = cv.getBoundingClientRect();
+    const x = clamp(f.iX(e.clientX - r.left), 0, 1), y = clamp(f.iY(e.clientY - r.top), -1.3, 1.3);
+    const i = Math.round(x * DN);
+    if (last && last.i !== i) {
+      const s = Math.sign(i - last.i);
+      for (let j = last.i; j !== i; j += s) drawn[j] = last.y + (y - last.y) * (j - last.i) / (i - last.i);
+    }
+    drawn[i] = y; last = { i, y }; targetVer++; markAll();
+  };
+  cv.addEventListener('pointerdown', e => { if (targetKey !== 'draw') return; down = true; last = null; cv.setPointerCapture(e.pointerId); paint(e); e.preventDefault(); });
+  cv.addEventListener('pointermove', e => { if (down) paint(e); });
+  const end = () => { down = false; last = null; };
+  cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
+}
+
+/* ---------- constructive approximation ---------- */
+function build(N, mode, k, f) {
+  const ns = [];
+  let c0;
+  if (mode === 'sig') {
+    const M = N + 1, w = k * M;
+    const c = i => f((i + 0.5) / M);
+    c0 = c(0);
+    for (let i = 1; i <= N; i++) ns.push({ w, b: -w * i / M, v: c(i) - c(i - 1) });
+  } else {
+    const xs = j => j / N;
+    let prev = 0; c0 = f(0);
+    for (let j = 0; j < N; j++) {
+      const s = (f(xs(j + 1)) - f(xs(j))) * N;
+      ns.push({ w: 1, b: -xs(j), v: s - prev }); prev = s;
+    }
+  }
+  const act = mode === 'sig' ? sig : ACT.relu;
+  const F = x => { let y = c0; for (const n of ns) y += n.v * act(n.w * x + n.b); return y; };
+  return { ns, c0, F, act };
+}
+function maxErr(F, f, n = 300) { let e = 0; for (let i = 0; i <= n; i++) { const x = i / n; e = Math.max(e, Math.abs(F(x) - f(x))); } return e; }
+
+/* ---------- HERO ---------- */
+{
+  const cv = document.getElementById('cv-hero'), lab = document.getElementById('hero-n');
+  const f = TARGETS.wave;
+  let lastN = -1, cache = null;
+  addModule({ el: cv, canvases: [cv], animating: () => !RM, draw(t) {
+    const { ctx, w, h } = setup(cv);
+    const fr = frame(w, h, [0, 1], [-1.25, 1.25], { l: 8, r: 8, t: 10, b: 10 });
+    const cyc = 9, p = (t % cyc) / cyc;
+    const N = RM ? 14 : Math.max(1, Math.round(1 + 39 * Math.min(1, p / 0.8) ** 1.7));
+    if (N !== lastN) { cache = build(N, 'sig', 7, f); lastN = N; lab.textContent = `N = ${N} 个神经元`; }
+    ctx.save(); ctx.strokeStyle = COL.grid; ctx.lineWidth = 1;
+    for (let i = 0; i <= 10; i++) { const px = Math.round(fr.X(i / 10)) + .5; ctx.beginPath(); ctx.moveTo(px, fr.pad.t); ctx.lineTo(px, h - fr.pad.b); ctx.stroke(); }
+    ctx.strokeStyle = COL.line; const py = Math.round(fr.Y(0)) + .5; ctx.beginPath(); ctx.moveTo(fr.pad.l, py); ctx.lineTo(w - fr.pad.r, py); ctx.stroke(); ctx.restore();
+    fillBetween(ctx, fr, cache.F, f, COL.neg, .12);
+    plot(ctx, fr, f, { color: COL.target, width: 2.5 });
+    plot(ctx, fr, cache.F, { color: COL.accent, width: 2.5, n: 500 });
+  }});
+}
+
+/* ---------- 1: NEURON ---------- */
+{
+  const cv = document.getElementById('cv-neuron'), flow = document.getElementById('flow1');
+  const S = { act: 'sigmoid', w: 3, b: 0 };
+  const m = addModule({ el: cv, canvases: [cv], animating: () => !RM, draw(t) {
+    const { ctx, w, h } = setup(cv);
+    const fr = frame(w, h, [-3, 3], [-1.25, 1.75]);
+    axes(ctx, fr, [-3, -2, -1, 0, 1, 2, 3], [-1, -0.5, 0, 0.5, 1, 1.5], v => v, v => v.toFixed(1));
+    const a = ACT[S.act];
+    const z = x => S.w * x + S.b;
+    plot(ctx, fr, z, { color: COL.muted, width: 1.5, dash: [5, 5] });
+    plot(ctx, fr, x => a(z(x)), { color: COL.accent, width: 3, n: 600 });
+    if (S.w !== 0) {
+      const t0 = -S.b / S.w;
+      if (t0 > -3 && t0 < 3) {
+        const px = fr.X(t0);
+        ctx.save(); ctx.setLineDash([2, 4]); ctx.strokeStyle = COL.target; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(px, fr.pad.t); ctx.lineTo(px, h - fr.pad.b); ctx.stroke(); ctx.restore();
+        label(ctx, 'x = −b/w', px + 5, fr.pad.t + 2, COL.target, 'left', 11);
+      }
+    }
+    const x = RM ? 0.8 : 2.6 * Math.sin(t * 0.55);
+    const zz = z(x), yy = a(zz);
+    const px = fr.X(x);
+    ctx.save(); ctx.strokeStyle = COL.ink; ctx.globalAlpha = .25; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(px, fr.pad.t); ctx.lineTo(px, h - fr.pad.b); ctx.stroke(); ctx.restore();
+    if (zz > -1.25 && zz < 1.75) dot(ctx, px, fr.Y(zz), 4, COL.muted);
+    dot(ctx, px, fr.Y(yy), 6, COL.accent, COL.surface);
+    const nm = { sigmoid: 'sigmoid', tanh: 'tanh', relu: 'ReLU' }[S.act];
+    flow.innerHTML = `<span class="chipv">x = <b>${fmt(x)}</b></span><span class="arr">→ ×${S.w.toFixed(1)} + ${S.b.toFixed(1)} →</span><span class="chipv">z = <b>${fmt(zz)}</b></span><span class="arr">→ ${nm} →</span><span class="chipv">y = <b>${fmt(yy, 3)}</b></span>`;
+  }});
+  segHandlers.act1 = v => { S.act = v; m.dirty = true; };
+  bindRange('w1', v => v.toFixed(1), v => { S.w = v; m.dirty = true; });
+  bindRange('b1', v => v.toFixed(1), v => { S.b = v; m.dirty = true; });
+  resets.push(() => { setSeg('act1', 'sigmoid'); setRange('w1', 3); setRange('b1', 0); });
+}
+
+/* ---------- 2: LAYER ---------- */
+{
+  const cvN = document.getElementById('cv-net'), cvP = document.getElementById('cv-netplot'), flow = document.getElementById('flow2');
+  const H = 5, net = { w: [], b: [], v: [], c: 0 };
+  function rand() {
+    const ts = Array.from({ length: H }, (_, i) => 0.12 + 0.76 * (i + Math.random() * 0.8) / H);
+    for (let i = 0; i < H; i++) {
+      const w = (Math.random() < .5 ? -1 : 1) * (5 + Math.random() * 12);
+      net.w[i] = w; net.b[i] = -w * ts[i]; net.v[i] = (Math.random() < .5 ? -1 : 1) * (0.3 + Math.random() * 0.9);
+    }
+    net.c = (Math.random() * 2 - 1) * 0.3;
+  }
+  rand();
+  const net0 = JSON.parse(JSON.stringify(net));
+  const h = (i, x) => sig(net.w[i] * x + net.b[i]);
+  const F = x => { let y = net.c; for (let i = 0; i < H; i++) y += net.v[i] * h(i, x); return y; };
+  const m = addModule({ el: cvN, canvases: [cvN, cvP], animating: () => !RM, draw(t) {
+    const x = RM ? 0.62 : 0.5 + 0.46 * Math.sin(t * 0.5);
+    const hs = net.w.map((_, i) => h(i, x)), y = F(x);
+    // network
+    {
+      const { ctx, w, h: H2 } = setup(cvN);
+      const inP = [w * 0.12, H2 / 2], outP = [w * 0.88, H2 / 2];
+      const hid = hs.map((_, i) => [w * 0.5, H2 * (i + 1) / (H + 1)]);
+      const R = Math.min(H2 / (H + 1) * 0.34, 24, w * 0.07);
+      const phase = RM ? -1 : (t * 0.6) % 1;
+      const edge = (a, b, wt, scale, p) => {
+        ctx.save(); ctx.strokeStyle = wt >= 0 ? COL.accent : COL.neg; ctx.globalAlpha = .55;
+        ctx.lineWidth = Math.min(7, 0.8 + Math.abs(wt) * scale);
+        ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke(); ctx.restore();
+        if (p >= 0 && p <= 1) dot(ctx, a[0] + (b[0] - a[0]) * p, a[1] + (b[1] - a[1]) * p, 3, wt >= 0 ? COL.accent : COL.neg);
+      };
+      for (let i = 0; i < H; i++) edge(inP, hid[i], net.w[i], 0.35, phase < 0.5 && phase >= 0 ? phase * 2 : -1);
+      for (let i = 0; i < H; i++) edge(hid[i], outP, net.v[i], 4, phase >= 0.5 ? (phase - 0.5) * 2 : -1);
+      const node = (p, fillA, txt, sub) => {
+        dot(ctx, p[0], p[1], R, COL.surface);
+        ctx.save(); ctx.globalAlpha = fillA; dot(ctx, p[0], p[1], R, COL.accent); ctx.restore();
+        ctx.beginPath(); ctx.arc(p[0], p[1], R, 0, Math.PI * 2); ctx.lineWidth = 1.5; ctx.strokeStyle = COL.accent; ctx.stroke();
+        ctx.save(); ctx.font = `600 ${Math.max(9, R * 0.5)}px ` + MONO; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillStyle = fillA > 0.55 ? COL.surface : COL.ink; ctx.fillText(txt, p[0], p[1]); ctx.restore();
+        if (sub) { ctx.save(); ctx.font = '11px ' + MONO; ctx.fillStyle = COL.muted; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText(sub, p[0], p[1] + R + 5); ctx.restore(); }
+      };
+      node(inP, 0.08, x.toFixed(2), '输入 x');
+      hs.forEach((v, i) => node(hid[i], 0.08 + 0.85 * v, v.toFixed(2)));
+      node(outP, 0.08, y.toFixed(2), '输出神经元 F');
+      ctx.save(); ctx.font = '11px ' + MONO; ctx.fillStyle = COL.muted; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      ctx.fillText('第 1 层 hᵢ = σ(wᵢ⁽¹⁾x + bᵢ⁽¹⁾)', w * 0.5, 4);
+      ctx.textBaseline = 'bottom';
+      ctx.fillText('左边的线：第 1 层的权重 w⁽¹⁾', w * 0.5, H2 - 18);
+      ctx.fillText('右边的线：第 2 层的权重 w⁽²⁾', w * 0.5, H2 - 3); ctx.restore();
+    }
+    // plot
+    {
+      const { ctx, w, h: H2 } = setup(cvP);
+      let ymax = 0.5;
+      for (let k = 0; k <= 100; k++) { const xx = k / 100; ymax = Math.max(ymax, Math.abs(F(xx))); for (let i = 0; i < H; i++) ymax = Math.max(ymax, Math.abs(net.v[i] * h(i, xx))); }
+      ymax = Math.ceil(ymax * 1.15 * 2) / 2;
+      const fr = frame(w, H2, [0, 1], [-ymax, ymax], { l: 36 });
+      const step = ymax > 2 ? 1 : 0.5, yt = [];
+      for (let v = -Math.floor(ymax / step) * step; v <= ymax + 1e-9; v += step) yt.push(+v.toFixed(2));
+      axes(ctx, fr, [0, 0.25, 0.5, 0.75, 1], yt);
+      for (let i = 0; i < H; i++) plot(ctx, fr, xx => net.v[i] * h(i, xx), { color: net.v[i] >= 0 ? COL.accent : COL.neg, width: 1.5, alpha: .45 });
+      plot(ctx, fr, F, { color: COL.accent, width: 3, n: 400 });
+      const px = fr.X(x);
+      ctx.save(); ctx.strokeStyle = COL.ink; ctx.globalAlpha = .25; ctx.beginPath(); ctx.moveTo(px, fr.pad.t); ctx.lineTo(px, H2 - fr.pad.b); ctx.stroke(); ctx.restore();
+      for (let i = 0; i < H; i++) dot(ctx, px, fr.Y(net.v[i] * hs[i]), 3, net.v[i] >= 0 ? COL.accent : COL.neg);
+      dot(ctx, px, fr.Y(y), 6, COL.accent, COL.surface);
+    }
+    flow.innerHTML = `<span class="chipv">x = <b>${x.toFixed(2)}</b></span><span class="arr">→</span><span class="chipv">h = (${hs.map(v => v.toFixed(2)).join(', ')})</span><span class="arr">→</span><span class="chipv">F = <b>${fmt(y)}</b></span>`;
+  }});
+  document.getElementById('btn-rand').addEventListener('click', () => { rand(); m.dirty = true; });
+  resets.push(() => { Object.assign(net, JSON.parse(JSON.stringify(net0))); m.dirty = true; });
+}
+
+/* ---------- 3a: BUILDING BLOCKS ---------- */
+{
+  const c1 = document.getElementById('cv-b1'), c2 = document.getElementById('cv-b2'), c3 = document.getElementById('cv-b3');
+  let W = 30, ver = -1;
+  const m = addModule({ el: c1, canvases: [c1, c2, c3], animating: () => ver !== targetVer, draw() {
+    ver = targetVer;
+    const pad = { l: 30, r: 8, t: 10, b: 22 };
+    { // step
+      const { ctx, w, h } = setup(c1); const fr = frame(w, h, [0, 1], [-0.25, 1.25], pad);
+      axes(ctx, fr, [0, 0.5, 1], [0, 0.5, 1]);
+      plot(ctx, fr, x => x < 0.5 ? 0 : 1, { color: COL.target, width: 1.5, dash: [4, 4], n: 1000 });
+      plot(ctx, fr, x => sig(W * (x - 0.5)), { color: COL.accent, width: 3, n: 400 });
+      label(ctx, 't', fr.X(0.5) + 4, fr.Y(-0.12), COL.muted, 'left', 11);
+    }
+    { // bump
+      const { ctx, w, h } = setup(c2); const fr = frame(w, h, [0, 1], [-0.25, 1.25], pad);
+      axes(ctx, fr, [0, 0.35, 0.65, 1], [0, 0.5, 1]);
+      plot(ctx, fr, x => sig(W * (x - 0.35)), { color: COL.accent, width: 1.5, alpha: .4, n: 400 });
+      plot(ctx, fr, x => -sig(W * (x - 0.65)) + 1, { color: COL.neg, width: 1.5, alpha: .5, dash: [4, 3], n: 400 });
+      plot(ctx, fr, x => sig(W * (x - 0.35)) - sig(W * (x - 0.65)), { color: COL.accent, width: 3, n: 400 });
+    }
+    { // staircase from bumps
+      const { ctx, w, h } = setup(c3); const fr = frame(w, h, [0, 1], [-1.3, 1.3], pad);
+      axes(ctx, fr, [0, 0.5, 1], [-1, 0, 1]);
+      const P = 7, hts = Array.from({ length: P }, (_, i) => target((i + 0.5) / P));
+      const bump = (i, x) => hts[i] * (sig(W * (x - i / P)) - sig(W * (x - (i + 1) / P)));
+      plot(ctx, fr, target, { color: COL.target, width: 2 });
+      for (let i = 0; i < P; i++) plot(ctx, fr, x => bump(i, x), { color: COL.accent, width: 1.2, alpha: .35, n: 300 });
+      plot(ctx, fr, x => { let s = 0; for (let i = 0; i < P; i++) s += bump(i, x); return s; }, { color: COL.accent, width: 3, n: 500 });
+    }
+  }});
+  bindRange('wb', v => String(v), v => { W = v; m.dirty = true; });
+  resets.push(() => setRange('wb', 30));
+}
+
+/* ---------- 3b: APPROXIMATION BENCH ---------- */
+{
+  const cv = document.getElementById('cv-ua'), cvE = document.getElementById('cv-err'), ro = document.getElementById('ro-ua');
+  const S = { N: 6, mode: 'sig', k: 8, parts: true, playing: false, t0: 0 };
+  let fr = null, errs = null, errKey = '', bVer = -1, model = null, modelKey = '';
+  const nEl = document.getElementById('s-n'), nOut = document.getElementById('o-n');
+  const playBtn = document.getElementById('btn-play');
+  const m = addModule({ el: cv, canvases: [cv, cvE], animating: () => S.playing || bVer !== targetVer, draw(t) {
+    bVer = targetVer;
+    if (S.playing) {
+      if (!S.t0) S.t0 = t;
+      const p = Math.min(1, (t - S.t0) / 9);
+      const N = Math.max(1, Math.round(1 + 79 * p ** 1.8));
+      if (N !== S.N) { S.N = N; nEl.value = N; nOut.textContent = N; }
+      if (p >= 1) { S.playing = false; playBtn.textContent = '▶ 从 1 个神经元播放'; }
+    }
+    const key = [S.N, S.mode, S.k, targetVer].join('|');
+    if (key !== modelKey) { model = build(S.N, S.mode, S.k, target); modelKey = key; }
+    const ek = [S.mode, S.k, targetVer].join('|');
+    if (ek !== errKey) { errs = []; for (let n = 1; n <= 80; n++) errs[n] = maxErr(build(n, S.mode, S.k, target).F, target, 240); errKey = ek; }
+    // main plot
+    const { ctx, w, h } = setup(cv);
+    fr = frame(w, h, [0, 1], [-1.4, 1.4]);
+    axes(ctx, fr, [0, 0.2, 0.4, 0.6, 0.8, 1], [-1, -0.5, 0, 0.5, 1], v => v, v => v.toFixed(1));
+    fillBetween(ctx, fr, model.F, target, COL.neg, .16, 500);
+    if (S.parts) {
+      const a = model.act;
+      const al = Math.max(0.12, Math.min(0.45, 3 / Math.sqrt(model.ns.length)));
+      for (const n of model.ns) plot(ctx, fr, x => n.v * a(n.w * x + n.b), { color: COL.accent, width: 1, alpha: al, n: S.mode === 'sig' ? 200 : 2 });
+      if (S.mode === 'sig') model.ns.forEach(n => dot(ctx, fr.X(-n.b / n.w), fr.Y(0), 2, COL.accent));
+    }
+    plot(ctx, fr, target, { color: COL.target, width: 2.5, n: 400 });
+    plot(ctx, fr, model.F, { color: COL.accent, width: 3, n: 800 });
+    label(ctx, `N = ${S.N}`, w - 14, 14, COL.ink, 'right', 15);
+    const e = maxErr(model.F, target, 400);
+    const ex = model.ns[0];
+    ro.innerHTML = `<span class="chipv">隐藏神经元 <b>${S.N}</b></span><span class="chipv">参数个数（w、b）<b>${3 * S.N + 1}</b></span><span class="chipv">最大误差 <b>${e.toFixed(4)}</b></span>` +
+      (ex ? `<span class="chipv">第 1 个神经元：w⁽¹⁾ = ${ex.w.toFixed(1)}, b⁽¹⁾ = ${ex.b.toFixed(2)}, w⁽²⁾ = ${ex.v.toFixed(3)}</span>` : '');
+    // error chart (log)
+    {
+      const g = setup(cvE);
+      const vals = errs.slice(1).filter(v => v > 0);
+      const lo = Math.floor(Math.log10(Math.max(1e-5, Math.min(...vals)))), hi = Math.ceil(Math.log10(Math.max(...vals)) + 0.05);
+      const ef = frame(g.w, g.h, [1, 80], [lo, Math.max(hi, lo + 1)], { l: 48, b: 24, t: 10 });
+      const yt = []; for (let k = lo; k <= Math.max(hi, lo + 1); k++) yt.push(k);
+      axes(g.ctx, ef, [1, 10, 20, 30, 40, 50, 60, 70, 80], yt, v => v, v => (10 ** v) >= 1 ? String(10 ** v) : (10 ** v).toPrecision(1));
+      g.ctx.save(); clip(g.ctx, ef); g.ctx.strokeStyle = COL.neg; g.ctx.lineWidth = 2; g.ctx.beginPath();
+      for (let n = 1; n <= 80; n++) { const px = ef.X(n), py = ef.Y(Math.log10(Math.max(1e-6, errs[n]))); n > 1 ? g.ctx.lineTo(px, py) : g.ctx.moveTo(px, py); }
+      g.ctx.stroke(); g.ctx.restore();
+      dot(g.ctx, ef.X(S.N), ef.Y(Math.log10(Math.max(1e-6, errs[S.N]))), 5, COL.neg, COL.surface);
+      label(g.ctx, '最大误差', ef.pad.l + 8, ef.pad.t + 2, COL.muted, 'left', 11);
+      label(g.ctx, 'N →', g.w - 14, ef.pad.t + 2, COL.muted, 'right', 11);
+    }
+  }});
+  enableDraw(cv, () => fr);
+  nEl.addEventListener('input', () => { S.N = +nEl.value; nOut.textContent = S.N; S.playing = false; playBtn.textContent = '▶ 从 1 个神经元播放'; m.dirty = true; });
+  bindRange('k', v => String(v), v => { S.k = v; m.dirty = true; });
+  segHandlers.mode = v => { S.mode = v; document.getElementById('wrap-k').style.opacity = v === 'sig' ? 1 : .4; document.getElementById('s-k').disabled = v !== 'sig'; m.dirty = true; };
+  document.getElementById('c-parts').addEventListener('change', e => { S.parts = e.target.checked; m.dirty = true; });
+  playBtn.addEventListener('click', () => {
+    if (S.playing) { S.playing = false; playBtn.textContent = '▶ 从 1 个神经元播放'; return; }
+    S.playing = true; S.t0 = 0; playBtn.textContent = '⏸ 暂停'; m.dirty = true;
+  });
+  resets.push(() => {
+    setTarget('wave');
+    setSeg('mode', 'sig');
+    setRange('n', 6); setRange('k', 8);
+    const parts = document.getElementById('c-parts'); parts.checked = true; S.parts = true;
+    m.dirty = true;
+  });
+}
+
+/* ---------- 4: TRAINING ---------- */
+{
+  const cv = document.getElementById('cv-train'), cvL = document.getElementById('cv-loss'), ro = document.getElementById('ro-train');
+  const btn = document.getElementById('btn-train');
+  const XS = Array.from({ length: 100 }, (_, j) => j / 99);
+  const T = { limit: 40000, H: 10, P: null, G: null, M: null, V: null, t: 0, iter: 0, losses: [], stride: 1, acc: 0, run: !RM, loss: NaN };
+  const randn = () => { let u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
+  function init() {
+    const H = T.H, n = 3 * H + 1;
+    T.P = new Float64Array(n); T.G = new Float64Array(n); T.M = new Float64Array(n); T.V = new Float64Array(n);
+    for (let i = 0; i < H; i++) { T.P[i] = randn() * 2.5; T.P[H + i] = randn() * 1.5; T.P[2 * H + i] = randn() * 0.3; }
+    T.t = 0; T.iter = 0; T.limit = 40000; T.losses = []; T.stride = 1; T.acc = 0; T.loss = NaN;
+  }
+  init();
+  const hb = new Float64Array(64);
+  function step() {
+    const H = T.H, P = T.P, G = T.G, n = XS.length;
+    G.fill(0); let L = 0;
+    for (let j = 0; j < n; j++) {
+      const x = XS[j], u = 2 * x - 1;
+      let F = P[3 * H];
+      for (let i = 0; i < H; i++) { hb[i] = Math.tanh(P[i] * u + P[H + i]); F += P[2 * H + i] * hb[i]; }
+      const e = F - target(x); L += e * e;
+      const d = 2 * e / n;
+      G[3 * H] += d;
+      for (let i = 0; i < H; i++) {
+        G[2 * H + i] += d * hb[i];
+        const dz = d * P[2 * H + i] * (1 - hb[i] * hb[i]);
+        G[i] += dz * u; G[H + i] += dz;
+      }
+    }
+    T.t++;
+    const lr = 0.01, b1 = 0.9, b2 = 0.999, c1 = 1 - b1 ** T.t, c2 = 1 - b2 ** T.t;
+    for (let k = 0; k < P.length; k++) {
+      T.M[k] = b1 * T.M[k] + (1 - b1) * G[k];
+      T.V[k] = b2 * T.V[k] + (1 - b2) * G[k] * G[k];
+      P[k] -= lr * (T.M[k] / c1) / (Math.sqrt(T.V[k] / c2) + 1e-8);
+    }
+    T.iter++;
+    return L / n;
+  }
+  const out = x => { const H = T.H, u = 2 * x - 1; let F = T.P[3 * H]; for (let i = 0; i < H; i++) F += T.P[2 * H + i] * Math.tanh(T.P[i] * u + T.P[H + i]); return F; };
+    const setBtn = () => { btn.textContent = T.run ? '⏸ 暂停' : (T.iter >= T.limit ? '▶ 继续训练' : '▶ 开始训练'); };
+  setBtn();
+  let tVer = -1;
+  const m = addModule({ el: cv, canvases: [cv, cvL], animating: () => T.run || tVer !== targetVer, draw() {
+    tVer = targetVer;
+    if (T.run) {
+      for (let s = 0; s < 25; s++) {
+        T.loss = step();
+        if (T.iter % T.stride === 0) {
+          T.losses.push([T.iter, T.loss]);
+          if (T.losses.length > 800) { T.losses = T.losses.filter((_, i) => i % 2 === 0); T.stride *= 2; }
+        }
+      }
+      if (T.iter >= T.limit) { T.run = false; setBtn(); }
+    } else if (isNaN(T.loss)) {
+      let L = 0; for (const x of XS) L += (out(x) - target(x)) ** 2; T.loss = L / XS.length;
+    }
+    const { ctx, w, h } = setup(cv);
+    trainFrame = frame(w, h, [0, 1], [-1.4, 1.4]);
+    const fr = trainFrame;
+    axes(ctx, fr, [0, 0.2, 0.4, 0.6, 0.8, 1], [-1, -0.5, 0, 0.5, 1], v => v, v => v.toFixed(1));
+    const H = T.H;
+    for (let i = 0; i < H; i++) { const wi = T.P[i], bi = T.P[H + i], vi = T.P[2 * H + i]; plot(ctx, fr, x => vi * Math.tanh(wi * (2 * x - 1) + bi), { color: COL.accent, width: 1, alpha: .3, n: 150 }); }
+    plot(ctx, fr, target, { color: COL.target, width: 2.5, n: 400 });
+    ctx.save(); ctx.globalAlpha = .55; for (let j = 0; j < XS.length; j += 3) dot(ctx, fr.X(XS[j]), fr.Y(target(XS[j])), 2, COL.muted); ctx.restore();
+    plot(ctx, fr, out, { color: COL.accent, width: 3, n: 400 });
+    label(ctx, `第 ${T.iter} 步`, w - 14, 14, COL.ink, 'right', 15);
+    ro.innerHTML = `<span class="chipv">迭代 <b>${T.iter}</b></span><span class="chipv">损失 MSE <b>${T.loss.toExponential(2)}</b></span><span class="chipv">参数个数（w、b）<b>${3 * H + 1}</b></span>`;
+    // loss
+    const g = setup(cvL);
+    const pts = T.losses;
+    const maxI = Math.max(1000, pts.length ? pts[pts.length - 1][0] : 1);
+    const ls = pts.map(p => Math.log10(Math.max(1e-7, p[1])));
+    const lo = ls.length ? Math.floor(Math.min(...ls)) : -3, hi = ls.length ? Math.ceil(Math.max(...ls)) : 0;
+    const top = Math.max(hi, lo + 1);
+    const lf = frame(g.w, g.h, [0, maxI], [lo, top], { l: 48, b: 24, t: 10 });
+    const yt = []; for (let k = lo; k <= top; k++) yt.push(k);
+    const xt = []; const xs = maxI / 4; for (let k = 0; k <= 4; k++) xt.push(Math.round(k * xs));
+    axes(g.ctx, lf, xt, yt, v => v >= 1000 ? (v / 1000).toFixed(v % 1000 ? 1 : 0) + 'k' : v, v => (10 ** v).toPrecision(1));
+    if (pts.length > 1) {
+      g.ctx.save(); clip(g.ctx, lf); g.ctx.strokeStyle = COL.accent; g.ctx.lineWidth = 2; g.ctx.beginPath();
+      pts.forEach((p, i) => { const px = lf.X(p[0]), py = lf.Y(ls[i]); i ? g.ctx.lineTo(px, py) : g.ctx.moveTo(px, py); });
+      g.ctx.stroke(); g.ctx.restore();
+    }
+    label(g.ctx, '损失', lf.pad.l + 8, lf.pad.t + 2, COL.muted, 'left', 11);
+    label(g.ctx, '迭代 →', g.w - 14, lf.pad.t + 2, COL.muted, 'right', 11);
+  }});
+  let trainFrame = null;
+  enableDraw(cv, () => trainFrame);
+  btn.addEventListener('click', () => { if (!T.run && T.iter >= T.limit) T.limit = T.iter + 20000; T.run = !T.run; setBtn(); m.dirty = true; });
+  document.getElementById('btn-reset').addEventListener('click', () => { init(); if (!RM) T.run = true; setBtn(); m.dirty = true; });
+  bindRange('h', v => String(v), v => { if (v !== T.H) { T.H = v; init(); if (!RM) T.run = true; setBtn(); m.dirty = true; } });
+  resets.push(() => { setRange('h', 10); init(); T.run = !RM; setBtn(); m.dirty = true; });
+}
+
+requestAnimationFrame(loop);
+})();
+</script>
+<button type="button" class="lq-reset" id="lq-reset" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+<script>
+window.LQ_ITEMS = [
+  { type: '选择', q: '一个神经元计算的是什么？', opts: ['y = σ(w·x + b)', 'y = w·x + b', 'y = σ(w)·σ(x)'], ans: 0,
+    why: '先做线性运算 z = w·x + b，再过激活函数 σ。' },
+  { type: '判断', q: '去掉激活函数，只要层数足够多，网络照样能拟合弯曲的曲线。', opts: ['对', '错'], ans: 1,
+    why: '常见误区。线性套线性还是线性：w₂(w₁x + b₁) + b₂ 仍是一条直线。网络所有的“弯”都来自激活函数。' },
+  { type: '选择', q: 'Sigmoid 神经元 σ(w·x + b) 的 S 形中点在哪里？', opts: ['x = −b/w', 'x = b/w', 'x = w·b'], ans: 0,
+    why: '中点是 z = 0 的地方：w·x + b = 0，所以 x = −b/w。第一步的图里虚线标的就是它。' },
+  { type: '计算', q: '想让一个 sigmoid 神经元的台阶出现在 x = 0.4，权重 w = 50，偏置 b 应该取多少？', ans: ['-20', '-20.0'], placeholder: '例如 -3',
+    why: '台阶位置 t = −b/w，所以 b = −w·t = −50 × 0.4 = −20。' },
+  { type: '选择', q: '用 sigmoid 台阶法把区间 [0, 1] 切成 N + 1 段，需要几个隐藏神经元？', opts: ['N 个', 'N + 1 个', '2N 个'], ans: 0,
+    why: '每个凸起要两个台阶，但相邻凸起交界处的一对台阶可以合并成一个，所以 N 个台阶就够了，每个神经元在第 2 层的权重 w⁽²⁾ 是相邻两段的高度差。' },
+  { type: '判断', q: '通用逼近定理告诉了我们怎样通过训练找到这些参数。', opts: ['对', '错'], ans: 1,
+    why: '定理只保证这样的参数<b>存在</b>，不告诉你怎么找，也不保证网络小、不保证泛化。找参数要靠梯度下降训练。' },
+  { type: '选择', q: '如果输入从 1 维变成 n 维，用“切格子拼台阶”的构造，需要的神经元数会怎样变化？',
+    opts: ['大约按 (1/ε)ⁿ 指数增长', '线性增长为 n 倍', '不变'], ans: 0,
+    why: '每一维都要切成小格，格子数随维度指数爆炸，这叫维数灾难。实践中把网络加深往往比单纯加宽省得多。' },
+  { type: '选择', q: 'GPT 里的前馈网络 FFN(x) = W₂·σ(W₁x + b₁) + b₂，和本页哪个结构是同一回事？',
+    opts: ['第二步的单隐藏层网络（一层神经元加在一起）', '注意力机制', '损失函数'], ans: 0,
+    why: '公式完全一样，只是输入输出从一个数变成了向量。注意力负责在词之间搬运信息，FFN 负责对每个位置做函数式加工。' },
+];
+</script>
+<script>
+/* ---------- 练习题 + 全局重置（learn 通用组件） ----------
+   题目来自 window.LQ_ITEMS：{type, q, opts, ans: 选项下标, why} 或填空题 {type, q, ans: [可接受答案…], why}
+   全局重置：先调用页面自己的 window.pageReset()，再清空练习、回到顶部 */
+(() => {
+  const box = document.getElementById('lq');
+  const items = window.LQ_ITEMS || [];
+  const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let answered = 0, right = 0;
+
+  function update() {
+    const all = answered === items.length;
+    score.textContent = `已答 ${answered} / ${items.length} · 答对 ${right}` +
+      (all ? (right === items.length ? ' · 全对！' : ' · 看看解析，再重做一次') : '');
+  }
+
+  function render() {
+    answered = 0; right = 0; list.innerHTML = '';
+    items.forEach((it, i) => {
+      const el = document.createElement('div');
+      el.className = 'lq-item';
+      el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
+      const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
+      const judge = (ok, answer) => {
+        answered++; if (ok) right++;
+        el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
+        why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
+        update();
+      };
+      if (it.opts) {
+        a.classList.add('lq-opts');
+        it.opts.forEach((o, j) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'lq-opt'; b.innerHTML = o;
+          b.onclick = () => {
+            a.querySelectorAll('button').forEach(x => x.disabled = true);
+            a.children[it.ans].classList.add('lq-right');
+            if (j !== it.ans) b.classList.add('lq-wrong');
+            judge(j === it.ans, it.opts[it.ans]);
+          };
+          a.append(b);
+        });
+      } else {
+        a.classList.add('lq-fill');
+        a.innerHTML = `<input type="text" autocomplete="off" spellcheck="false" placeholder="${it.placeholder || '输入答案'}" aria-label="第 ${i + 1} 题答案"><button type="button" class="lq-opt">确定</button>`;
+        const inp = a.querySelector('input'), go = a.querySelector('button');
+        const submit = () => {
+          if (!inp.value.trim()) { inp.focus(); return; }
+          inp.disabled = go.disabled = true;
+          const ok = it.ans.some(x => norm(x) === norm(inp.value));
+          inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
+          judge(ok, it.ans[0]);
+        };
+        go.onclick = submit;
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      }
+      list.append(el);
+    });
+    update();
+  }
+
+  box.querySelector('.lq-redo').addEventListener('click', render);
+  document.getElementById('lq-reset').addEventListener('click', () => {
+    if (typeof window.pageReset === 'function') window.pageReset();
+    render();
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  });
+  render();
+})();
+</script>
+</body>
+</html>

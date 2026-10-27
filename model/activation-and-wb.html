@@ -1,0 +1,609 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>w、b 与激活函数</title>
+<style>
+/* Layout: 一栏阅读；激活函数图鉴（四宫格）→ w、b 分步动画 → 自由实验台；配色沿用 model 类其他页面 */
+:root{
+  --bg:#F3F5F9; --surface:#FFFFFF; --ink:#131A2C; --muted:#5B6479; --line:#D8DDE7; --grid:#E8EBF2; --chip:#EAEEFB;
+  --accent:#2D4FE6; --out:#D98300; --teal:#0E9384; --purple:#8B3FD9; --neg:#C93A6A; --ok:#1F8F55;
+  --f-body:"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",system-ui,sans-serif;
+  --f-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1120; --surface:#151B2D; --ink:#E5E9F3; --muted:#98A1B8; --line:#283049; --grid:#1D2438; --chip:#1E2742;
+    --accent:#7D95FF; --out:#F2AE38; --teal:#3CC7B4; --purple:#B98AF5; --neg:#FF6F9A; --ok:#4CC38A; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1120; --surface:#151B2D; --ink:#E5E9F3; --muted:#98A1B8; --line:#283049; --grid:#1D2438; --chip:#1E2742;
+  --accent:#7D95FF; --out:#F2AE38; --teal:#3CC7B4; --purple:#B98AF5; --neg:#FF6F9A; --ok:#4CC38A; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.75;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 24px}
+.wrap{max-width:980px;margin:0 auto}
+.prose{max-width:680px}
+h1,h2,h3{text-wrap:balance;line-height:1.3;margin:0}
+h1{font-size:clamp(1.9rem,5vw,2.8rem);font-weight:800}
+h2{font-size:clamp(1.4rem,3.2vw,1.9rem);font-weight:800}
+h3{font-size:1.05rem}
+p{margin:0}
+a{color:var(--accent)}
+.stack{display:grid;gap:14px}
+header.hero{padding-block:44px 28px;display:grid;gap:16px}
+.tag{justify-self:start;font-family:var(--f-mono);font-size:12px;letter-spacing:.1em;padding:2px 10px;border-radius:999px;background:var(--chip);color:var(--accent)}
+.lede{font-size:1.06rem;color:var(--muted)}
+section{padding-block:40px;border-top:1px solid var(--line);display:grid;gap:22px}
+section > *{min-width:0}
+.m{font-family:var(--f-mono);font-size:.92em}
+.tw{color:var(--accent);font-weight:700}
+.tb{color:var(--out);font-weight:700}
+
+.analogy{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--out);border-radius:10px;padding:16px 18px;display:grid;gap:8px}
+.analogy p{color:var(--muted)}
+.analogy b{color:var(--ink)}
+
+.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:14px}
+.act{background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--c);border-radius:12px;padding:14px;display:grid;gap:8px;min-width:0}
+.act h3{color:var(--c);display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.act h3 small{font-family:var(--f-mono);font-weight:500;font-size:12px;color:var(--muted)}
+.act canvas{display:block;width:100%;aspect-ratio:16/9}
+.formula{font-family:var(--f-mono);font-size:14px;background:var(--chip);border-radius:6px;padding:6px 10px;overflow-x:auto;white-space:nowrap}
+.act p{font-size:14px;color:var(--muted)}
+.act p b{color:var(--ink)}
+.note{font-size:14px;color:var(--muted);padding:12px 16px;border:1px dashed var(--line);border-radius:10px}
+.note b{color:var(--ink)}
+
+.fig{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:12px;min-width:0}
+.fig canvas{display:block;width:100%;aspect-ratio:16/8}
+@media (max-width:640px){ .fig canvas{aspect-ratio:4/3.4} .act canvas{aspect-ratio:4/3} }
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:18px;height:3px;border-radius:2px;display:inline-block}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{font:inherit;font-size:14px;border:1px solid var(--line);background:transparent;color:var(--ink);padding:6px 14px;border-radius:8px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.btn:disabled{opacity:.4;cursor:default}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.dots{display:flex;gap:6px;margin-left:auto}
+.dots button{width:26px;height:26px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--muted);font:600 12px var(--f-mono);cursor:pointer;padding:0}
+.dots button[aria-current="step"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.cap{min-height:4.6em;font-size:15px}
+.cap .muted{color:var(--muted)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex-wrap:wrap}
+.seg button{font:inherit;font-size:14px;background:transparent;color:var(--ink);border:0;border-right:1px solid var(--line);padding:6px 12px;cursor:pointer}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--surface)}
+.sliders{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:10px 18px}
+.sl{display:grid;grid-template-columns:4.5em 1fr 3.4em;gap:8px;align-items:center;font-size:14px}
+.sl output{font-family:var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
+.sl.w{color:var(--accent)} .sl.b{color:var(--out)} .sl.x{color:var(--muted)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.sl.b input{accent-color:var(--out)}
+.flow{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;font-family:var(--f-mono);font-size:13px}
+.chipv{background:var(--chip);border-radius:6px;padding:3px 10px;font-variant-numeric:tabular-nums}
+.chipv b{color:var(--accent)}
+.arr{color:var(--muted)}
+
+.myths{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:14px}
+.myth{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:6px;align-content:start}
+.myth .no{color:var(--neg);font-weight:700}
+.myth p{font-size:14px;color:var(--muted)}
+.summary{font-size:1.1rem;font-weight:600;padding:16px 18px;border-radius:10px;background:var(--chip)}
+:root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:var(--ok);--lq-bad:var(--neg);--lq-h2:clamp(1.4rem,3.2vw,1.9rem)}
+/* ---------- 练习题 + 全局重置（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+.lq{display:grid;gap:12px;margin-bottom:56px}
+.lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+.lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
+.lq-sub{margin:0;color:var(--lq-muted);font-size:14px}
+.lq-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--lq-muted);font-variant-numeric:tabular-nums}
+.lq-list{display:grid;gap:10px}
+.lq-item{background:var(--lq-surface);border:1.5px solid var(--lq-line);border-radius:10px;padding:12px 16px;display:grid;gap:10px;min-width:0;color:var(--lq-ink);text-align:left}
+.lq-item.lq-is-ok{border-color:var(--lq-ok)}
+.lq-item.lq-is-bad{border-color:var(--lq-bad)}
+.lq-q{font-size:15px;font-weight:600;line-height:1.6}
+.lq-tag{display:inline-block;font-size:11px;font-weight:500;line-height:1.6;color:var(--lq-muted);border:1px solid var(--lq-line);border-radius:999px;padding:0 8px;margin-right:8px;vertical-align:1px}
+.lq-opts,.lq-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lq .lq-opt,.lq .lq-redo{font:inherit;font-size:14px;line-height:1.4;padding:6px 14px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);cursor:pointer;text-align:left;opacity:1}
+.lq .lq-opt:hover:not(:disabled),.lq .lq-redo:hover{border-color:var(--lq-accent)}
+.lq .lq-opt:disabled{cursor:default;opacity:1}
+.lq .lq-opt.lq-right{border-color:var(--lq-ok);color:var(--lq-ok);font-weight:700}
+.lq .lq-opt.lq-wrong{border-color:var(--lq-bad);color:var(--lq-bad);text-decoration:line-through}
+.lq-fill input{font:inherit;font-size:14px;padding:6px 10px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);width:min(100%,200px)}
+.lq-fill input.lq-right{border-color:var(--lq-ok)}
+.lq-fill input.lq-wrong{border-color:var(--lq-bad)}
+.lq-why{font-size:14px;line-height:1.65;color:var(--lq-muted)}
+.lq-why:empty{display:none}
+.lq-why .lq-ok{color:var(--lq-ok)}
+.lq-why .lq-bad{color:var(--lq-bad)}
+.lq-reset{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:max(16px,env(safe-area-inset-bottom,0px));z-index:100;font:inherit;font-size:14px;font-weight:600;line-height:1;padding:10px 16px;margin:0;border-radius:999px;border:1.5px solid var(--lq-line);background:var(--lq-fab,var(--lq-surface));color:var(--lq-ink);box-shadow:0 4px 16px rgba(0,0,0,.2);cursor:pointer}
+.lq-reset:hover{border-color:var(--lq-accent);color:var(--lq-accent)}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <span class="tag">model</span>
+  <h1>w、b 和激活函数，在图上长什么样</h1>
+  <p class="lede prose">一个神经元算的是 <span class="m">σ(<span class="tw">w</span>·x + <span class="tb">b</span>)</span>。这一页把三样东西拆开看：激活函数 σ 是一个<b>写死的形状</b>；<span class="tw">w</span> 决定这个形状<b>多陡、朝哪边</b>；<span class="tb">b</span> 决定它<b>在哪里“开关”</b>。</p>
+  <p class="prose" style="font-size:14px;color:var(--muted)">相关页面：《<a href="neural-approx.html">神经网络如何逼近任何函数</a>》《<a href="multi-layer-network.html">多层神经网络是怎么来的</a>》</p>
+</header>
+
+<section>
+  <div class="analogy prose">
+    <h3>先打个比方：一个感应灯</h3>
+    <p><b>激活函数 σ</b> 是灯的<b>类型</b>：有的是渐亮的调光灯（sigmoid），有的是只在有人时才亮、越靠近越亮的灯（ReLU）。类型出厂就定了，用的时候不能改。</p>
+    <p><b class="tb">b</b> 是<b>门槛</b>：人走到哪里灯开始亮。<b class="tw">w</b> 是<b>灵敏度</b>：一靠近就全亮（w 大），还是慢慢亮起来（w 小）；w 为负，就变成“越靠近越暗”。</p>
+  </div>
+</section>
+
+<section>
+  <div class="stack prose">
+    <h2>激活函数图鉴：四种写死的形状</h2>
+    <p>横轴是神经元算出来的 z（也就是 w·x + b），纵轴是输出。小圆点在曲线上来回走，演示“输入 z，吐出多少”。</p>
+  </div>
+  <div class="gallery" id="gallery"></div>
+  <p class="note"><b>注意看公式：</b>里面只有 z，以及 e、π、0.044715 这样<b>写死的常数</b>，没有任何要训练的数。所以激活函数不算模型参数；训练调的只有每个神经元的 w 和 b。</p>
+  <figure class="fig" style="margin:0">
+    <canvas id="cv-compare" aria-label="四种激活函数画在同一张图上比较"></canvas>
+    <div class="legend" id="cmp-legend"></div>
+  </figure>
+</section>
+
+<section>
+  <div class="stack prose">
+    <h2>w 和 b 对曲线做了什么</h2>
+    <p>同一个 sigmoid，看 w、b 分别动起来时曲线怎么变。横轴现在是神经元的输入 x。</p>
+  </div>
+  <figure class="fig" style="margin:0">
+    <div class="bar">
+      <button type="button" class="btn" id="st-prev">◀ 上一步</button>
+      <button type="button" class="btn primary" id="st-play">▶ 自动播放</button>
+      <button type="button" class="btn" id="st-next">下一步 ▶</button>
+      <button type="button" class="btn" id="st-reset">↺ 回到第 1 步</button>
+      <div class="dots" id="st-dots"></div>
+    </div>
+    <canvas id="cv-steps" aria-label="分步动画：w 和 b 如何改变激活函数曲线"></canvas>
+    <div class="cap" id="st-cap" aria-live="polite"></div>
+  </figure>
+</section>
+
+<section>
+  <div class="stack prose">
+    <h2>自己试试</h2>
+    <p>选一个激活函数，拖动 <span class="tw">w</span>、<span class="tb">b</span>，看曲线和“开关点”怎么动；拖动 x，看一个具体的输入是怎么一步步算出输出的。可以试着做到：<b>开关点落在 x = 1，而且切换得很急</b>。</p>
+  </div>
+  <figure class="fig" style="margin:0">
+    <div class="bar"><div class="seg" id="pg-act"></div></div>
+    <canvas id="cv-play" aria-label="可调 w、b 的单个神经元曲线"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--accent)"></i>彩色实线：输出 = 激活函数(z)</span><span><i class="sw" style="background:var(--muted)"></i>灰色虚线：z = w·x + b</span><span><i class="sw" style="background:var(--out)"></i>橙色竖线：开关点 / 拐点 x = −b/w</span></div>
+    <div class="flow" id="pg-flow"></div>
+    <div class="sliders">
+      <label class="sl w">权重 w<input type="range" id="pg-w" min="-6" max="6" step="0.1"><output id="pg-ow"></output></label>
+      <label class="sl b">偏置 b<input type="range" id="pg-b" min="-6" max="6" step="0.1"><output id="pg-ob"></output></label>
+      <label class="sl x">输入 x<input type="range" id="pg-x" min="-4" max="4" step="0.1"><output id="pg-ox"></output></label>
+    </div>
+    <div class="formula" id="pg-formula"></div>
+    <div class="bar"><button type="button" class="btn" id="pg-reset">↺ 重置本实验</button></div>
+  </figure>
+</section>
+
+<section>
+  <div class="stack prose"><h2>常见误区</h2></div>
+  <div class="myths">
+    <div class="myth"><span class="no">✗ b 决定曲线有多高</span><p>放在 σ 里面的 b 只会把曲线左右挪，决定开关点在哪。曲线的高度由激活函数本身（sigmoid 最高 1）和下一层的权重决定。</p></div>
+    <div class="myth"><span class="no">✗ w 只管陡峭程度</span><p>w 还管方向（负数会把曲线左右翻转），也会影响开关点：开关点在 x = −b/w，b 不变时改 w，开关点也会跟着动（除非 b = 0）。</p></div>
+    <div class="myth"><span class="no">✗ 激活函数也有要学的参数</span><p>sigmoid、tanh、ReLU、GELU 都是写死的公式，训练时不变。要学的只有 w 和 b。（少数变体如 PReLU 例外，主流大模型基本不用。）</p></div>
+  </div>
+  <p class="summary">一句话：激活函数是一个写死的形状；w 把它拉陡、压缓或翻转，b 把它左右挪，开关点在 x = −b/w。训练调的只有 w 和 b。</p>
+</section>
+
+<section class="lq" id="lq" aria-label="练习">
+  <div class="lq-head"><h2>练习</h2><span class="lq-score"></span></div>
+  <p class="lq-sub">每题作答后马上看到解析；点「重做练习」清空重来。</p>
+  <div class="lq-list"></div>
+  <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+</section>
+
+</div>
+
+<button type="button" class="lq-reset" id="lq-reset" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+
+<script>
+(() => {
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = id => document.getElementById(id);
+const MONO = 'ui-monospace, Menlo, Consolas, monospace';
+const SANS = '"PingFang SC","Noto Sans SC","Microsoft YaHei",system-ui,sans-serif';
+
+/* ---------- theme colors ---------- */
+const C = {};
+function readColors() {
+  const cs = getComputedStyle(document.documentElement);
+  for (const k of ['bg', 'surface', 'ink', 'muted', 'line', 'grid', 'chip', 'accent', 'out', 'teal', 'purple', 'neg', 'ok']) C[k] = cs.getPropertyValue('--' + k).trim();
+}
+readColors();
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', readColors);
+
+/* ---------- the four activation functions (fixed formulas, nothing to learn) ---------- */
+const sigmoid = z => 1 / (1 + Math.exp(-z));
+const ACTS = {
+  sigmoid: { name: 'Sigmoid', color: 'accent', f: sigmoid, zr: [-6, 6], yr: [-0.25, 1.25], yt: [0, 0.5, 1], range: '输出 0 ～ 1',
+    formula: 'σ(z) = 1 / (1 + e⁻ᶻ)',
+    gist: '<b>柔和的开关。</b>z 很负 → 接近 0（关）；z 很正 → 接近 1（开）；z = 0 时正好一半 0.5。',
+    mark: { z: 0, label: '中点 (0, 0.5)' } },
+  tanh: { name: 'tanh', color: 'teal', f: Math.tanh, zr: [-6, 6], yr: [-1.3, 1.3], yt: [-1, 0, 1], range: '输出 −1 ～ 1',
+    formula: 'tanh(z) = (eᶻ − e⁻ᶻ) / (eᶻ + e⁻ᶻ)',
+    gist: '<b>两头对称的开关。</b>形状和 sigmoid 一样是 S 形，但从 −1（反对）到 +1（赞成），z = 0 时输出 0。',
+    mark: { z: 0, label: '中点 (0, 0)' } },
+  relu: { name: 'ReLU', color: 'out', f: z => Math.max(0, z), zr: [-4, 4], yr: [-1, 4], yt: [0, 2, 4], range: '输出 0 ～ +∞',
+    formula: 'ReLU(z) = max(0, z)',
+    gist: '<b>单向阀。</b>负的全部挡掉、变成 0；正的原样放行。在 z = 0 处有一个“拐点”。',
+    mark: { z: 0, label: '拐点 (0, 0)' } },
+  gelu: { name: 'GELU', color: 'purple', f: z => 0.5 * z * (1 + Math.tanh(Math.sqrt(2 / Math.PI) * (z + 0.044715 * z ** 3))), zr: [-4, 4], yr: [-1, 4], yt: [0, 2, 4], range: '输出约 −0.17 ～ +∞',
+    formula: 'GELU(z) ≈ 0.5·z·(1 + tanh(√(2/π)·(z + 0.044715·z³)))',
+    gist: '<b>圆滑版的 ReLU，GPT 等大模型常用。</b>负数不是一刀切成 0，而是平滑地压下去，在 z ≈ −0.75 处还有个小凹陷。',
+    mark: { z: -0.75, label: '小凹陷 ≈ (−0.75, −0.17)' } },
+};
+const KEYS = Object.keys(ACTS);
+
+/* ---------- canvas helpers ---------- */
+function setup(cv) {
+  const dpr = Math.min(2, devicePixelRatio || 1), r = cv.getBoundingClientRect();
+  const w = Math.max(20, r.width), h = Math.max(20, r.height);
+  if (cv.width !== Math.round(w * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+  const ctx = cv.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, h);
+  return { ctx, w, h };
+}
+function text(ctx, s, x, y, o = {}) {
+  ctx.save();
+  ctx.font = `${o.weight || 600} ${o.size || 12}px ${o.mono ? MONO : SANS}`;
+  ctx.fillStyle = o.color || C.ink; ctx.globalAlpha = o.alpha ?? 1;
+  ctx.textAlign = o.align || 'left'; ctx.textBaseline = o.base || 'middle';
+  ctx.fillText(s, x, y); ctx.restore();
+}
+// axes + grid for a plot; returns coordinate mappers
+function plotArea(ctx, w, h, xr, yr, yt, xlabel) {
+  const pad = { l: 34, r: 12, t: 12, b: 26 };
+  const f = {
+    xr, yr,
+    X: x => pad.l + (x - xr[0]) / (xr[1] - xr[0]) * (w - pad.l - pad.r),
+    Y: y => pad.t + (yr[1] - y) / (yr[1] - yr[0]) * (h - pad.t - pad.b),
+  };
+  ctx.save(); ctx.lineWidth = 1; ctx.font = '10.5px ' + MONO; ctx.fillStyle = C.muted;
+  for (let x = Math.ceil(xr[0]); x <= xr[1]; x += xr[1] - xr[0] > 8 ? 2 : 1) {
+    const px = Math.round(f.X(x)) + .5;
+    ctx.strokeStyle = x === 0 ? C.line : C.grid; ctx.beginPath(); ctx.moveTo(px, f.Y(yr[1])); ctx.lineTo(px, f.Y(yr[0])); ctx.stroke();
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText(x, px, f.Y(yr[0]) + 5);
+  }
+  for (const y of yt) {
+    const py = Math.round(f.Y(y)) + .5;
+    ctx.strokeStyle = y === 0 ? C.line : C.grid; ctx.beginPath(); ctx.moveTo(f.X(xr[0]), py); ctx.lineTo(f.X(xr[1]), py); ctx.stroke();
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillText(y, f.X(xr[0]) - 6, py);
+  }
+  if (xlabel) { ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.fillText(xlabel, f.X(xr[1]) - 2, f.Y(yr[0]) - 3); }
+  ctx.restore();
+  return f;
+}
+function curve(ctx, f, fn, o = {}) {
+  ctx.save();
+  ctx.beginPath(); ctx.rect(f.X(f.xr[0]), f.Y(f.yr[1]) - 2, f.X(f.xr[1]) - f.X(f.xr[0]), f.Y(f.yr[0]) - f.Y(f.yr[1]) + 4); ctx.clip();
+  ctx.strokeStyle = o.color; ctx.lineWidth = o.width || 2.5; ctx.globalAlpha = o.alpha ?? 1;
+  ctx.lineJoin = ctx.lineCap = 'round';
+  if (o.dash) ctx.setLineDash(o.dash);
+  ctx.beginPath();
+  for (let i = 0; i <= 400; i++) {
+    const x = f.xr[0] + (f.xr[1] - f.xr[0]) * i / 400, y = fn(x);
+    i ? ctx.lineTo(f.X(x), f.Y(y)) : ctx.moveTo(f.X(x), f.Y(y));
+  }
+  ctx.stroke(); ctx.restore();
+}
+function dot(ctx, x, y, r, color, ring) {
+  ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fillStyle = color; ctx.fill();
+  if (ring) { ctx.lineWidth = 2; ctx.strokeStyle = ring; ctx.stroke(); }
+}
+function vline(ctx, f, x, color, label) {
+  if (x < f.xr[0] || x > f.xr[1]) return;
+  ctx.save(); ctx.setLineDash([3, 4]); ctx.strokeStyle = color; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(f.X(x), f.Y(f.yr[1])); ctx.lineTo(f.X(x), f.Y(f.yr[0])); ctx.stroke(); ctx.restore();
+  if (label) {
+    const right = f.X(x) < (f.X(f.xr[0]) + f.X(f.xr[1])) / 2 + 40;
+    text(ctx, label, f.X(x) + (right ? 6 : -6), f.Y(f.yr[1]) + 10, { color, size: 12, align: right ? 'left' : 'right' });
+  }
+}
+const fmt = (v, d = 2) => (Math.abs(v) < 0.005 ? 0 : v).toFixed(d);
+
+/* ---------- gallery: one animated card per activation ---------- */
+const gallery = (() => {
+  const cards = KEYS.map(k => {
+    const a = ACTS[k];
+    const el = document.createElement('div');
+    el.className = 'act'; el.style.setProperty('--c', `var(--${a.color})`);
+    el.innerHTML = `<h3>${a.name}<small>${a.range}</small></h3><canvas aria-label="${a.name} 的图像"></canvas><div class="formula">${a.formula}</div><p>${a.gist}</p>`;
+    $('gallery').append(el);
+    return { a, cv: el.querySelector('canvas') };
+  });
+  $('cmp-legend').innerHTML = KEYS.map(k => `<span><i class="sw" style="background:var(--${ACTS[k].color})"></i>${ACTS[k].name}</span>`).join('') + '<span>四条曲线画在同一张图上，横轴 z</span>';
+  return {
+    draw(t) {
+      for (const { a, cv } of cards) {
+        const { ctx, w, h } = setup(cv);
+        const col = C[a.color];
+        const f = plotArea(ctx, w, h, a.zr, a.yr, a.yt, 'z');
+        curve(ctx, f, a.f, { color: col, width: 3 });
+        const m = a.mark;
+        dot(ctx, f.X(m.z), f.Y(a.f(m.z)), 4, C.surface, col);
+        text(ctx, m.label, f.X(m.z) + 8, f.Y(a.f(m.z)) + 14, { color: C.muted, size: 11, weight: 500 });
+        const z = RM ? a.zr[1] * 0.4 : a.zr[1] * 0.85 * Math.sin(t * 0.6);
+        const y = a.f(z);
+        ctx.save(); ctx.strokeStyle = col; ctx.globalAlpha = .35; ctx.setLineDash([2, 3]);
+        ctx.beginPath(); ctx.moveTo(f.X(z), f.Y(0)); ctx.lineTo(f.X(z), f.Y(y)); ctx.lineTo(f.X(a.zr[0]), f.Y(y)); ctx.stroke(); ctx.restore();
+        dot(ctx, f.X(z), f.Y(y), 6, col, C.surface);
+        text(ctx, `z = ${fmt(z)}  →  ${fmt(y)}`, f.X(a.zr[0]) + 8, f.Y(a.yr[1]) + 10, { mono: true, size: 12, color: col });
+      }
+      const { ctx, w, h } = setup($('cv-compare'));
+      const f = plotArea(ctx, w, h, [-4, 4], [-1.2, 3.2], [-1, 0, 1, 2, 3], 'z');
+      for (const k of KEYS) curve(ctx, f, ACTS[k].f, { color: C[ACTS[k].color], width: 2.5 });
+    },
+  };
+})();
+
+/* ---------- stepper: what w and b do ---------- */
+const XR = [-4, 4];
+const STEPS = [
+  {
+    cap: '<b>① 只动 b：整条曲线左右平移。</b>w 固定为 2，b 在变。开关点（输出正好一半的地方）在 <span class="m">w·x + b = 0</span> 处，也就是 <span class="m">x = −b/w</span>。<span class="muted">所以 b 像一道门槛：w 为正时，b 越大，开关点越往左，灯越早亮。曲线的形状和高度完全不变。</span>',
+    still: 1.2,
+    draw(ctx, w, h, t) {
+      const W = 2, B = RM ? 2.5 : 5 * Math.sin(t * 0.8);
+      const f = plotArea(ctx, w, h, XR, [-0.25, 1.3], [0, 0.5, 1], 'x');
+      curve(ctx, f, x => sigmoid(W * x), { color: C.muted, width: 1.5, dash: [5, 5], alpha: .6 });
+      curve(ctx, f, x => sigmoid(W * x + B), { color: C.accent, width: 3 });
+      vline(ctx, f, -B / W, C.out, `开关点 x = −b/w = ${fmt(-B / W)}`);
+      dot(ctx, f.X(-B / W), f.Y(0.5), 5, C.out, C.surface);
+      text(ctx, `w = 2（固定）   b = ${fmt(B, 1)}`, f.X(XR[0]) + 8, f.Y(1.3) + 12, { mono: true, size: 13, color: C.out });
+      text(ctx, '虚线：b = 0 时的位置', f.X(XR[0]) + 8, f.Y(1.3) + 30, { size: 11, color: C.muted, weight: 500 });
+    },
+  },
+  {
+    cap: '<b>② 只动 w（b = 0）：绕着开关点变陡、变缓。</b>w 越大，从“关”到“开”切换得越急，接近一个台阶；w 越小，过渡越平缓，接近一条斜线。<span class="muted">b = 0 时开关点一直在 x = 0，所以这里只看得到陡峭程度在变。</span>',
+    still: 2,
+    draw(ctx, w, h, t) {
+      const W = RM ? 2 : 3.2 + 2.8 * Math.sin(t * 0.8);
+      const f = plotArea(ctx, w, h, XR, [-0.25, 1.3], [0, 0.5, 1], 'x');
+      curve(ctx, f, x => sigmoid(0.5 * x), { color: C.muted, width: 1.5, dash: [5, 5], alpha: .5 });
+      curve(ctx, f, x => sigmoid(6 * x), { color: C.muted, width: 1.5, dash: [5, 5], alpha: .5 });
+      curve(ctx, f, x => sigmoid(W * x), { color: C.accent, width: 3 });
+      vline(ctx, f, 0, C.out, '开关点 x = 0');
+      text(ctx, `w = ${fmt(W, 1)}   b = 0（固定）`, f.X(XR[0]) + 8, f.Y(1.3) + 12, { mono: true, size: 13, color: C.accent });
+      text(ctx, '虚线：w = 0.5（缓）和 w = 6（陡）', f.X(XR[0]) + 8, f.Y(1.3) + 30, { size: 11, color: C.muted, weight: 500 });
+    },
+  },
+  {
+    cap: '<b>③ w 变成负数：开关反过来。</b>w 从 +3 慢慢变到 −3。w 为正时，x 越大输出越接近 1（越推越开）；w 为负时，x 越大输出越接近 0（越推越关）。<span class="muted">w 正好是 0 时，神经元完全不看输入，永远输出 0.5。</span>',
+    still: 0,
+    draw(ctx, w, h, t) {
+      const W = RM ? -2 : 3 * Math.cos(t * 0.7);
+      const f = plotArea(ctx, w, h, XR, [-0.25, 1.3], [0, 0.5, 1], 'x');
+      curve(ctx, f, x => sigmoid(W * x), { color: W >= 0 ? C.accent : C.neg, width: 3 });
+      const msg = Math.abs(W) < 0.15 ? 'w ≈ 0：一条水平线，不看输入' : W > 0 ? 'w > 0：x 越大越“开”' : 'w < 0：x 越大越“关”';
+      text(ctx, `w = ${fmt(W, 1)}   b = 0`, f.X(XR[0]) + 8, f.Y(1.3) + 12, { mono: true, size: 13, color: W >= 0 ? C.accent : C.neg });
+      text(ctx, msg, f.X(XR[0]) + 8, f.Y(1.3) + 30, { size: 12, color: W >= 0 ? C.accent : C.neg });
+    },
+  },
+  {
+    cap: '<b>④ w、b 都不为 0 时：开关点 = 直线 z 穿过 0 的地方。</b>灰色虚线是 σ 的输入 <span class="m">z = w·x + b</span>，它是一条直线：w 是斜率，b 是它在 x = 0 处的高度。直线穿过 0 的地方，σ 正好输出一半。<span class="muted">这里 b = 2 固定、w 在变，开关点 −b/w 也跟着移动：所以只改 w 时，位置也会变。</span>',
+    still: 1,
+    draw(ctx, w, h, t) {
+      const B = 2, W = RM ? 2 : 2.35 + 1.65 * Math.sin(t * 0.8);
+      const f = plotArea(ctx, w, h, XR, [-1.5, 1.5], [-1, 0, 0.5, 1], 'x');
+      curve(ctx, f, x => W * x + B, { color: C.muted, width: 2, dash: [6, 4] });
+      curve(ctx, f, x => sigmoid(W * x + B), { color: C.accent, width: 3 });
+      vline(ctx, f, -B / W, C.out, `开关点 x = −b/w = ${fmt(-B / W)}`);
+      dot(ctx, f.X(-B / W), f.Y(0), 4, C.muted);
+      dot(ctx, f.X(-B / W), f.Y(0.5), 5, C.out, C.surface);
+      text(ctx, `w = ${fmt(W, 1)}   b = 2（固定）`, f.X(XR[0]) + 8, f.Y(1.5) + 12, { mono: true, size: 13, color: C.accent });
+      text(ctx, '灰色虚线：z = w·x + b（σ 的输入）', f.X(XR[0]) + 8, f.Y(1.5) + 30, { size: 11, color: C.muted, weight: 500 });
+    },
+  },
+  {
+    cap: '<b>⑤ 换成 ReLU，w、b 的作用不变。</b>前 4 秒只动 b：拐点左右平移；后 4 秒只动 w：拐点右边那段斜坡变陡变缓。拐点同样在 <span class="m">x = −b/w</span>。<span class="muted">激活函数换了，形状变了，但 w、b 的分工一样：b 管位置，w 管陡度和方向。</span>',
+    still: 2,
+    draw(ctx, w, h, t) {
+      const ph = t % 8, byB = RM || ph < 4;
+      const B = byB ? (RM ? -1 : 2.5 * Math.sin(ph / 4 * Math.PI * 2)) : -1;
+      const W = byB ? 1 : 1 + 0.8 * Math.sin((ph - 4) / 4 * Math.PI * 2);
+      const f = plotArea(ctx, w, h, XR, [-0.5, 4], [0, 1, 2, 3, 4], 'x');
+      curve(ctx, f, x => Math.max(0, x), { color: C.muted, width: 1.5, dash: [5, 5], alpha: .6 });
+      curve(ctx, f, x => Math.max(0, W * x + B), { color: C.out, width: 3 });
+      vline(ctx, f, -B / W, C.accent, `拐点 x = −b/w = ${fmt(-B / W)}`);
+      text(ctx, `w = ${fmt(W, 1)}${byB ? '（固定）' : ''}   b = ${fmt(B, 1)}${byB ? '' : '（固定）'}`, f.X(XR[0]) + 8, f.Y(4) + 12, { mono: true, size: 13, color: C.out });
+      text(ctx, byB ? '正在动 b：拐点左右平移' : '正在动 w：斜坡变陡变缓', f.X(XR[0]) + 8, f.Y(4) + 30, { size: 12, color: C.muted });
+    },
+  },
+];
+
+const stepper = (() => {
+  const cv = $('cv-steps'), cap = $('st-cap'), dots = $('st-dots'), playBtn = $('st-play');
+  let cur = 0, t0 = performance.now(), timer = null;
+  STEPS.forEach((_, i) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.textContent = i + 1; b.setAttribute('aria-label', `第 ${i + 1} 步`);
+    b.onclick = () => { stop(); go(i); };
+    dots.append(b);
+  });
+  function go(i) {
+    cur = Math.max(0, Math.min(STEPS.length - 1, i)); t0 = performance.now();
+    cap.innerHTML = STEPS[cur].cap;
+    [...dots.children].forEach((d, j) => j === cur ? d.setAttribute('aria-current', 'step') : d.removeAttribute('aria-current'));
+    $('st-prev').disabled = cur === 0; $('st-next').disabled = cur === STEPS.length - 1;
+  }
+  function stop() { clearInterval(timer); timer = null; playBtn.textContent = '▶ 自动播放'; }
+  function play() {
+    if (cur === STEPS.length - 1) go(0);
+    playBtn.textContent = '⏸ 暂停';
+    timer = setInterval(() => { if (cur >= STEPS.length - 1) stop(); else go(cur + 1); }, 9000);
+  }
+  $('st-prev').onclick = () => { stop(); go(cur - 1); };
+  $('st-next').onclick = () => { stop(); go(cur + 1); };
+  playBtn.onclick = () => timer ? stop() : play();
+  const reset = () => { stop(); go(0); };
+  $('st-reset').onclick = reset;
+  go(0);
+  return {
+    reset,
+    draw(now) {
+      const { ctx, w, h } = setup(cv);
+      STEPS[cur].draw(ctx, w, h, RM ? STEPS[cur].still : (now - t0) / 1000);
+    },
+  };
+})();
+
+/* ---------- playground ---------- */
+const playground = (() => {
+  const INIT = { act: 'sigmoid', w: 2, b: 0, x: 1 };
+  const P = { ...INIT };
+  const seg = $('pg-act');
+  for (const k of KEYS) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.dataset.v = k; b.textContent = ACTS[k].name;
+    b.onclick = () => { P.act = k; sync(); };
+    seg.append(b);
+  }
+  for (const k of ['w', 'b', 'x']) $('pg-' + k).addEventListener('input', e => { P[k] = +e.target.value; sync(); });
+  function sync() {
+    for (const k of ['w', 'b', 'x']) { $('pg-' + k).value = P[k]; $('pg-o' + k).textContent = P[k].toFixed(1); }
+    [...seg.children].forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === P.act)));
+    $('pg-formula').textContent = `这个激活函数的固定公式：${ACTS[P.act].formula}`;
+  }
+  function reset() { Object.assign(P, INIT); sync(); }
+  $('pg-reset').onclick = reset;
+  sync();
+  return {
+    reset,
+    draw() {
+      const a = ACTS[P.act], col = C[a.color];
+      const yr = P.act === 'tanh' ? [-1.5, 1.5] : P.act === 'sigmoid' ? [-1.5, 1.5] : [-1.5, 4];
+      const yt = P.act === 'tanh' || P.act === 'sigmoid' ? [-1, 0, 0.5, 1] : [-1, 0, 1, 2, 3, 4];
+      const { ctx, w, h } = setup($('cv-play'));
+      const f = plotArea(ctx, w, h, XR, yr, yt, 'x');
+      curve(ctx, f, x => P.w * x + P.b, { color: C.muted, width: 1.8, dash: [6, 4] });
+      curve(ctx, f, x => a.f(P.w * x + P.b), { color: col, width: 3 });
+      const sw = Math.abs(P.w) > 1e-9 ? -P.b / P.w : null, pt = P.act === 'relu' || P.act === 'gelu' ? '拐点' : '开关点';
+      if (sw !== null) vline(ctx, f, sw, C.out, `${pt} x = ${fmt(sw)}`);
+      const z = P.w * P.x + P.b, y = a.f(z);
+      dot(ctx, f.X(P.x), f.Y(Math.max(yr[0], Math.min(yr[1], z))), 4, C.muted);
+      dot(ctx, f.X(P.x), f.Y(Math.max(yr[0], Math.min(yr[1], y))), 6, col, C.surface);
+      $('pg-flow').innerHTML = `<span class="chipv">x = <b>${fmt(P.x, 1)}</b></span><span class="arr">→ z = ${fmt(P.w, 1)}×${fmt(P.x, 1)} + ${fmt(P.b, 1)} →</span><span class="chipv">z = <b>${fmt(z)}</b></span><span class="arr">→ ${a.name} →</span><span class="chipv">输出 <b>${fmt(y, 3)}</b></span>` +
+        `<span class="chipv">${sw === null ? `w = 0：没有${pt}，输出恒定` : `${pt} x = −b/w = <b>${fmt(sw)}</b>`}</span>`;
+    },
+  };
+})();
+
+function loop(now) { const t = now / 1000; gallery.draw(t); stepper.draw(now); playground.draw(); requestAnimationFrame(loop); }
+requestAnimationFrame(loop);
+
+window.pageReset = () => { stepper.reset(); playground.reset(); };
+})();
+</script>
+<script>
+window.LQ_ITEMS = [
+  { type: '选择', q: '神经元 σ(w·x + b) 里，b 主要起什么作用？', opts: ['把曲线左右平移，决定开关点（门槛）在哪', '决定曲线最高有多高', '决定曲线有多陡'], ans: 0,
+    why: 'b 加在 σ 里面，只改变“在哪里切换”，不改变形状和高度。开关点在 x = −b/w。' },
+  { type: '计算', q: '一个 sigmoid 神经元 w = 4、b = −8，开关点（输出正好 0.5）在 x = ?', ans: ['2', '2.0'], placeholder: '填一个数字',
+    why: '开关点在 w·x + b = 0：4x − 8 = 0，x = 2。也就是 x = −b/w = 8/4 = 2。' },
+  { type: '判断', q: '只改 w、不改 b，开关点的位置一定不变。', opts: ['对', '错'], ans: 1,
+    why: '常见误区。开关点是 −b/w，w 变了它也会变；只有 b = 0 时，开关点才一直在 x = 0。' },
+  { type: '选择', q: '一个 w = −3、b = 0 的 sigmoid 神经元，输入 x 越大，输出会？', opts: ['越接近 0', '越接近 1', '一直是 0.5'], ans: 0,
+    why: 'w 为负，曲线左右翻转：x 越大，z = −3x 越负，σ(z) 越接近 0。' },
+  { type: '选择', q: '哪个激活函数的输出范围是 −1 到 1？', opts: ['Sigmoid', 'tanh', 'ReLU', 'GELU'], ans: 1,
+    why: 'tanh 是两头对称的 S 形，从 −1 到 1；sigmoid 是 0 到 1；ReLU、GELU 右边没有上限。' },
+  { type: '计算', q: '算一算：ReLU(−3) + ReLU(2) = ?', ans: ['2', '2.0'], placeholder: '填一个数字',
+    why: 'ReLU(z) = max(0, z)：负数挡掉变 0，正数原样放行。0 + 2 = 2。' },
+  { type: '计算', q: '一个 ReLU 神经元 w = 2、b = −4，输入 x = 3 时输出多少？', ans: ['2', '2.0'], placeholder: '填一个数字',
+    why: '先算 z = 2×3 − 4 = 2，再过 ReLU：max(0, 2) = 2。拐点在 x = −b/w = 2，x = 3 已经在拐点右边。' },
+  { type: '判断', q: 'GELU 公式里的 0.044715 是训练时学出来的。', opts: ['对', '错'], ans: 1,
+    why: '它是写死在公式里的常数，和 e、π 一样，训练时不变。激活函数没有要学的参数，训练只调 w 和 b。' },
+];
+</script>
+<script>
+/* ---------- 练习题 + 全局重置（learn 通用组件） ----------
+   题目来自 window.LQ_ITEMS：{type, q, opts, ans: 选项下标, why} 或填空题 {type, q, ans: [可接受答案…], why}
+   全局重置：先调用页面自己的 window.pageReset()，再清空练习、回到顶部 */
+(() => {
+  const box = document.getElementById('lq');
+  const items = window.LQ_ITEMS || [];
+  const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let answered = 0, right = 0;
+
+  function update() {
+    const all = answered === items.length;
+    score.textContent = `已答 ${answered} / ${items.length} · 答对 ${right}` +
+      (all ? (right === items.length ? ' · 全对！' : ' · 看看解析，再重做一次') : '');
+  }
+
+  function render() {
+    answered = 0; right = 0; list.innerHTML = '';
+    items.forEach((it, i) => {
+      const el = document.createElement('div');
+      el.className = 'lq-item';
+      el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
+      const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
+      const judge = (ok, answer) => {
+        answered++; if (ok) right++;
+        el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
+        why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
+        update();
+      };
+      if (it.opts) {
+        a.classList.add('lq-opts');
+        it.opts.forEach((o, j) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'lq-opt'; b.innerHTML = o;
+          b.onclick = () => {
+            a.querySelectorAll('button').forEach(x => x.disabled = true);
+            a.children[it.ans].classList.add('lq-right');
+            if (j !== it.ans) b.classList.add('lq-wrong');
+            judge(j === it.ans, it.opts[it.ans]);
+          };
+          a.append(b);
+        });
+      } else {
+        a.classList.add('lq-fill');
+        a.innerHTML = `<input type="text" autocomplete="off" spellcheck="false" placeholder="${it.placeholder || '输入答案'}" aria-label="第 ${i + 1} 题答案"><button type="button" class="lq-opt">确定</button>`;
+        const inp = a.querySelector('input'), go = a.querySelector('button');
+        const submit = () => {
+          if (!inp.value.trim()) { inp.focus(); return; }
+          inp.disabled = go.disabled = true;
+          const ok = it.ans.some(x => norm(x) === norm(inp.value));
+          inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
+          judge(ok, it.ans[0]);
+        };
+        go.onclick = submit;
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      }
+      list.append(el);
+    });
+    update();
+  }
+
+  box.querySelector('.lq-redo').addEventListener('click', render);
+  document.getElementById('lq-reset').addEventListener('click', () => {
+    if (typeof window.pageReset === 'function') window.pageReset();
+    render();
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  });
+  render();
+})();
+</script>
+</body>
+</html>
