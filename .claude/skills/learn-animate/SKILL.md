@@ -1,6 +1,6 @@
 ---
 name: learn-animate
-description: 当用户想弄懂某个知识时使用——"我要学习XXX""帮我解释XXX""我不理解XXX""XXX是什么""XXX和YYY的区别""XXX的原理"等任何不懂/想学的表达。按类目（math/english/model/tech）在 /home/opc/learn/<类目>/ 下生成一个用动画浅显讲解该知识点、带全局重置按钮和练习题的自包含 HTML 文件，并把本地链接交给用户。
+description: 当用户想弄懂某个知识时使用——"我要学习XXX""帮我解释XXX""我不理解XXX""XXX是什么""XXX和YYY的区别""XXX的原理"等任何不懂/想学的表达。按类目（math/english/model/tech）在 /home/opc/learn/<类目>/ 下从统一骨架生成一个用动画浅显讲解该知识点、接入全站导航条与重置约定、带练习题的自包含 HTML 文件，发布后把线上和本地链接交给用户。
 ---
 
 # learn-animate：生成动画学习页
@@ -18,10 +18,11 @@ description: 当用户想弄懂某个知识时使用——"我要学习XXX""帮�
    - 一句话总结
    - 至少 5 道练习题（含答案与解析）
    - 列出页面所有可变状态及其初始值，供重置使用
-5. **编写 HTML**：写入 `/home/opc/learn/<类目>/<英文-kebab-case>.html`（目录不存在就先创建），严格遵守 `.claude/rules/learn-html.md`，尤其是：
-   - 全局「重置」按钮 + 每个动画模块的局部重置
-   - 页面末尾的「练习」区（即时反馈、解析、得分、重做）
-6. **自查**：按规则文件的「收尾自查」逐项检查，重点验证"操作后点重置能回到初始状态"和"习题答案正确"。
+5. **编写 HTML**：复制骨架 `.claude/skills/learn-animate/template.html` 到 `/home/opc/learn/<类目>/<英文-kebab-case>.html`（目录不存在就先创建），在骨架上替换内容，严格遵守 `.claude/rules/learn-html.md`，尤其是：
+   - 不写顶栏/返回按钮/全局重置按钮，它们由导航条统一提供；页面定义 `window.pageReset()`（或直接定义 `window.resetPage()`）
+   - 中性色和字体用 `--up-*` 变量，UI 强调色用 `--up-accent`，只为内容语义另加颜色（带深色值）
+   - 每个动画模块有局部重置；页面末尾的「练习」区用通用组件，题目写进 `window.LQ_ITEMS`
+6. **自查**：先 `npm run build`（把导航条写进页面，确认没有 ⚠），再按规则文件的「收尾自查」逐项检查，重点验证"操作后点导航条的重置能回到初始状态"和"习题答案正确"。
 7. **归类 + 发布**：不用询问用户，按 `CLAUDE.md` 的「页面完成后：归类 + 发布」执行：归类检查 → `npm run build` → `npm run deploy` → 线上验证返回 200 → `git commit` + `git push`。部署失败时把报错告诉用户，本地交付照常进行。
 8. **交付**：回复用户，内容简短：
    - 线上链接：`https://up.yiwei.website/<类目>/<文件名>`（不带 `.html`）

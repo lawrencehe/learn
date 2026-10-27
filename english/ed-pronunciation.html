@@ -7,29 +7,27 @@
 <meta name="description" content="过去式 -ed 什么时候读 /t/、什么时候读 /d/、什么时候读 /ɪd/：看原形最后一个「音」，摸喉咙辨清浊，三步判断">
 <style>
 :root {
-  --bg: #f4f5f8;
-  --surface: #ffffff;
-  --surface2: #eef0f5;
-  --ink: #1c2230;
-  --muted: #5f6878;
-  --line: #d8dce5;
+  --bg: var(--up-bg);
+  --surface: var(--up-surface);
+  --surface2: var(--up-surface-2);
+  --ink: var(--up-ink);
+  --muted: var(--up-muted);
+  --line: var(--up-line);
   --t: #2563d4;   --t-soft: #dfe9fc;
   --d: #c2560c;   --d-soft: #fdebd8;
   --id: #7c3aed;  --id-soft: #ede4fd;
-  --accent: #0f766e;
+  --accent: var(--up-accent);
   --ok: #15803d; --ok-soft: #dcf2e7;
   --bad: #c2412d; --bad-soft: #fbe3de;
-  --font: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
-  --mono: ui-monospace, Menlo, Consolas, monospace;
+  --font: var(--up-font);
+  --mono: var(--up-mono);
   --ipa: "Charis SIL", "Doulos SIL", "Lucida Sans Unicode", "Segoe UI", "Arial Unicode MS", sans-serif;
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #12151c; --surface: #1b202a; --surface2: #232a36; --ink: #e8ecf3; --muted: #9aa4b5; --line: #2f3746;
     --t: #7aa7ff; --t-soft: #1c2b4a;
     --d: #f5a35c; --d-soft: #3d2a17;
     --id: #b79cff; --id-soft: #2e2347;
-    --accent: #2dd4bf;
     --ok: #4ade80; --ok-soft: #163a26;
     --bad: #ff8a73; --bad-soft: #47231d;
     color-scheme: dark;
@@ -38,12 +36,11 @@
 * { box-sizing: border-box; }
 body {
   margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font);
-  font-size: 16px; line-height: 1.7; padding: 72px 16px 96px;
+  font-size: 16px; line-height: 1.7; padding: 24px 16px 96px;
 }
 main { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 48px; }
 h1, h2, h3, p { margin: 0; }
 h2 { font-size: 1.4rem; margin-bottom: 8px; }
-.topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 10; display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); }
 .tag { display: inline-block; font-family: var(--mono); font-size: 12px; letter-spacing: .1em; padding: 2px 10px; border-radius: 999px; background: var(--surface2); color: var(--muted); }
 .hero h1 { font-size: clamp(28px, 6vw, 44px); line-height: 1.2; margin: 10px 0; }
 .lead { color: var(--muted); }
@@ -62,13 +59,13 @@ button { font: inherit; cursor: pointer; }
 .btn { padding: 6px 14px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); }
 .btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
 .btn:disabled { opacity: .4; cursor: default; }
-.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-.btn.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--up-surface); }
+.btn.on { background: var(--accent); border-color: var(--accent); color: var(--up-surface); }
 .ctrl { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: center; }
 .stepno { font-family: var(--mono); color: var(--muted); font-size: .9rem; min-width: 56px; text-align: center; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
 .chip { padding: 3px 12px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); }
-.chip.on { border-color: var(--accent); background: var(--accent); color: #fff; }
+.chip.on { border-color: var(--accent); background: var(--accent); color: var(--up-surface); }
 .mod-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
 
 /* 动画 1：三步判断 */
@@ -78,7 +75,7 @@ button { font: inherit; cursor: pointer; }
 .word .ed.gone { opacity: 0; transform: translateX(30px); }
 .word .base-e { color: var(--muted); }
 .ipa-line { font-family: var(--ipa); font-size: 1.6rem; min-height: 2.2rem; transition: opacity .6s; }
-.ipa-line .last { display: inline-block; padding: 0 4px; border-radius: 6px; background: var(--accent); color: #fff; animation: pop .7s; }
+.ipa-line .last { display: inline-block; padding: 0 4px; border-radius: 6px; background: var(--accent); color: var(--up-surface); animation: pop .7s; }
 @keyframes pop { 0% { transform: scale(.6); } 60% { transform: scale(1.25); } 100% { transform: scale(1); } }
 .tree { display: grid; grid-template-columns: 1fr; gap: 8px; width: 100%; max-width: 520px; }
 .q { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 10px; border: 1.5px dashed var(--line); background: var(--surface); opacity: .45; transition: all .6s; }
@@ -158,14 +155,47 @@ table.cmp th { color: var(--muted); font-weight: 600; }
 </style>
 </head>
 <body>
-<div class="topbar">
-  <span class="tag">english</span>
-  <button class="btn primary" id="globalReset">↺ 重置</button>
-</div>
-
+<!-- up-shell:begin（由 scripts/shell.mjs 自动生成，勿手改） -->
+<nav id="up-nav" aria-label="网站导航">
+<a class="up-home" href="/" title="Up 学习站首页"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="up-nav-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c6ef5"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#up-nav-g)"/><path d="M12 52V42a2 2 0 0 1 2-2h10V32a2 2 0 0 1 2-2h10v-8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v30z" fill="#fff"/><circle cx="43" cy="13" r="5.5" fill="#ffa94d"/></svg><span>Up 学习站</span></a>
+<span class="up-sep" aria-hidden="true">›</span><a class="up-cat" href="/english">英语</a>
+<span class="up-sep" aria-hidden="true">›</span><span class="up-title">-ed 的三种读音</span>
+<button id="up-reset" type="button" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+</nav>
+<style>
+:root{--up-bg:#f5f6f8;--up-surface:#ffffff;--up-surface-2:#eef0f4;--up-ink:#1d2127;--up-muted:#626b78;--up-line:#dfe2e8;--up-ok:#2b8a3e;--up-bad:#d6336c;--up-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);--up-font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif;--up-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;--up-radius:12px;--up-accent:#2f9e44;--up-accent-soft:#ebfbee}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#69db7c;--up-accent-soft:#1b3222;color-scheme:dark}}
+:root[data-theme="dark"]{--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#69db7c;--up-accent-soft:#1b3222;color-scheme:dark}
+html{padding-top:52px;scroll-padding-top:64px}
+#up-nav{position:fixed;top:0;left:0;right:0;z-index:2147483000;height:52px;box-sizing:border-box;display:flex;align-items:center;gap:8px;
+padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));border-top:3px solid var(--up-accent);
+border-bottom:1px solid var(--up-line);background:color-mix(in srgb,var(--up-surface) 88%,transparent);
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:500 14px/1.2 var(--up-font);color:var(--up-ink);text-align:left}
+#up-nav a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none}
+#up-nav a:hover{color:var(--up-accent)}
+#up-nav svg{width:24px;height:24px;flex:none;display:block}
+#up-nav .up-home span{font-weight:700}
+#up-nav .up-cat{color:var(--up-accent);font-weight:600}
+#up-nav .up-sep{color:var(--up-muted);flex:none}
+#up-nav .up-title{color:var(--up-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#up-reset{margin:0 0 0 auto;flex:none;font:600 14px/1 var(--up-font);padding:8px 14px;border-radius:999px;cursor:pointer;
+border:1.5px solid var(--up-accent);background:transparent;color:var(--up-accent);transition:background .2s,color .2s}
+#up-reset:hover,#up-reset:focus-visible{background:var(--up-accent);color:var(--up-surface)}
+#up-reset:focus-visible,#up-nav a:focus-visible{outline:2px solid var(--up-accent);outline-offset:2px}
+@media (max-width:560px){#up-nav .up-home span{display:none}}
+@media print{#up-nav{display:none}html{padding-top:0}}
+</style>
+<script>
+document.getElementById('up-reset').addEventListener('click', function () {
+  if (typeof window.resetPage === 'function') window.resetPage();
+  else console.warn('本页没有定义 window.resetPage()，重置按钮无效');
+  window.scrollTo({ top: 0, behavior: 'auto' });
+});
+</script>
+<!-- up-shell:end -->
 <main>
   <section class="hero">
-    <span class="tag">english · 发音</span>
+    <span class="tag">发音</span>
     <h1>过去式 -ed 怎么读？</h1>
     <p class="lead">同样是加 -ed：<button class="sw" data-say="looked">looked</button> 末尾像 /t/，<button class="sw" data-say="played">played</button> 末尾像 /d/，<button class="sw" data-say="wanted">wanted</button> 却多出一个 /ɪd/。<br>决定读法的只有一件事：<b>原形最后一个「音」</b>。</p>
   </section>
@@ -680,11 +710,11 @@ function qReset() { Q = Q_INIT(); qRender(); }
 $('q-redo').onclick = qReset;
 
 // ============ 全局重置 ============
+// 导航条的「重置」按钮调用它
 function resetAll() {
   aReset(); sReset(); vReset(); gReset(); qReset();
-  window.scrollTo({ top: 0, behavior: 'auto' });
 }
-$('globalReset').onclick = resetAll;
+window.resetPage = resetAll;
 resetAll();
 </script>
 </body>

@@ -1,12 +1,15 @@
 // 构建网站到 dist/：
 //   /            首页：学科分类卡片 + 搜索 + 最近更新
 //   /<类目>      类目页：该学科下的全部学习条目
-//   /<类目>/<文件名>  学习页本身（复制时注入网站图标和左下角「返回目录」按钮，源文件不动）
+//   /<类目>/<文件名>  学习页本身（复制时注入网站图标）
+// 每个学习页 <body> 开头的统一导航条 + 设计变量由 scripts/shell.mjs 生成，构建时同步写回源文件
+// （内容不变就不写；写回时保留原修改时间，不影响「最近更新」排序）。
 //   site/ 下的文件（logo、favicon 等）原样复制到网站根目录
 // 只发布上面这些，.claude/、CLAUDE.md 等不会进入 dist/。
-import { readdirSync, readFileSync, statSync, rmSync, mkdirSync, writeFileSync, existsSync, cpSync } from 'node:fs';
+import { readdirSync, readFileSync, statSync, rmSync, mkdirSync, writeFileSync, existsSync, cpSync, utimesSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { ACCENTS, tokens, applyShell } from './shell.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = join(ROOT, 'dist');
@@ -21,20 +24,6 @@ const CATEGORIES = [
 const esc = (s) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const text = (s) => s.replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
 const fmt = (d) => d.toISOString().slice(0, 10);
-
-// 学习页左下角的「返回目录」按钮（重置按钮都在右下角，互不遮挡）
-const backLink = (cat) => `
-<a id="up-back" href="/${cat.id}" aria-label="返回${cat.name}目录">← ${cat.name}</a>
-<style>
-#up-back{position:fixed;left:max(16px,env(safe-area-inset-left,0px));bottom:max(16px,env(safe-area-inset-bottom,0px));z-index:2147483000;
-padding:8px 14px;border-radius:999px;font:500 14px/1.2 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
-background:rgba(255,255,255,.92);color:#1f2328;border:1px solid rgba(0,0,0,.12);box-shadow:0 2px 8px rgba(0,0,0,.08);text-decoration:none;
--webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
-#up-back:hover{border-color:rgba(0,0,0,.3)}
-@media (prefers-color-scheme:dark){#up-back{background:rgba(30,33,40,.92);color:#e6e8eb;border-color:rgba(255,255,255,.15)}}
-@media print{#up-back{display:none}}
-</style>
-`;
 
 const ICONS = '<link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/apple-touch-icon.png">';
 
@@ -64,20 +53,29 @@ for (const cat of CATEGORIES) {
   for (const file of readdirSync(src)) {
     if (!file.endsWith('.html')) continue;
     const path = join(src, file);
-    const html = readFileSync(path, 'utf8');
+    const raw = readFileSync(path, 'utf8');
     const slug = file.replace(/\.html$/, '');
-    const title = text(html.match(/<title>([\s\S]*?)<\/title>/i)?.[1] || slug);
-    const meta = html.match(/<meta\s+name=["']description["']\s+content=["']([^"']*)["']/i)?.[1];
-    const h1 = text(html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1] || '');
+    const title = text(raw.match(/<title>([\s\S]*?)<\/title>/i)?.[1] || slug);
+    const meta = raw.match(/<meta\s+name=["']description["']\s+content=["']([^"']*)["']/i)?.[1];
+    const h1 = text(raw.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1] || '');
     const desc = meta || (h1 && h1 !== title ? h1 : '');
     if (!meta) warnings.push(`${cat.id}/${file} 缺少 <meta name="description">`);
+    if (!/<!doctype html>/i.test(raw) || !/<\/head>\s*<body[^>]*>/i.test(raw)) warnings.push(`${cat.id}/${file} 不是完整的 HTML 文档（缺少 <!doctype html> 或 <body>），导航条没有插入`);
+    if (!/window\.resetPage\s*=/.test(raw)) warnings.push(`${cat.id}/${file} 没有定义 window.resetPage()，导航条的「重置」按钮无效`);
+    const { mtime, atime } = statSync(path);
+    const html = applyShell(raw, { site: SITE, cat, title });
+    if (html !== raw) {
+      writeFileSync(path, html);
+      utimesSync(path, atime, mtime);
+      console.log(`↻ 已同步导航条：${cat.id}/${file}`);
+    }
     mkdirSync(join(DIST, cat.id), { recursive: true });
-    let out = html.includes('</body>') ? html.replace(/<\/body>(?![\s\S]*<\/body>)/i, `${backLink(cat)}</body>`) : html + backLink(cat);
+    let out = html;
     if (!/rel=["']icon["']/i.test(out)) {
       out = /<\/head>/i.test(out) ? out.replace(/<\/head>/i, `${ICONS}\n</head>`) : out.replace(/<\/title>/i, `</title>\n${ICONS}`);
     }
     writeFileSync(join(DIST, cat.id, file), out);
-    const page = { cat, href: `/${cat.id}/${slug}`, title, desc, mtime: statSync(path).mtime };
+    const page = { cat, href: `/${cat.id}/${slug}`, title, desc, mtime };
     cat.pages.push(page);
     all.push(page);
   }
@@ -86,22 +84,16 @@ for (const cat of CATEGORIES) {
 all.sort((a, b) => b.mtime - a.mtime);
 
 const style = `
-  :root {
-    --bg:#f6f5f2; --card:#ffffff; --fg:#1d2127; --muted:#6b7280; --line:#e6e4df; --shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);
-    --math:#d9480f; --math-bg:#fff1e8; --english:#2f9e44; --english-bg:#ebfbee;
-    --model:#7048e8; --model-bg:#f3f0ff; --tech:#1c7ed6; --tech-bg:#e7f5ff;
-  }
+  ${tokens()}
+  :root { --bg:var(--up-bg); --card:var(--up-surface); --fg:var(--up-ink); --muted:var(--up-muted); --line:var(--up-line); --shadow:var(--up-shadow);
+    ${Object.entries(ACCENTS).map(([id, a]) => `--${id}:${a.light[0]}; --${id}-bg:${a.light[1]};`).join(' ')} }
   @media (prefers-color-scheme: dark) {
-    :root {
-      --bg:#121418; --card:#1b1e24; --fg:#e7e9ec; --muted:#9aa3af; --line:#2a2e36; --shadow:0 1px 2px rgba(0,0,0,.3);
-      --math:#ff8a50; --math-bg:#3a2218; --english:#69db7c; --english-bg:#1b3222;
-      --model:#b197fc; --model-bg:#2a2445; --tech:#74c0fc; --tech-bg:#17304a;
-    }
+    :root { ${Object.entries(ACCENTS).map(([id, a]) => `--${id}:${a.dark[0]}; --${id}-bg:${a.dark[1]};`).join(' ')} }
   }
   * { box-sizing:border-box; }
   html { -webkit-text-size-adjust:100%; }
   body { margin:0; background:var(--bg); color:var(--fg);
-    font:16px/1.6 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif; }
+    font:16px/1.6 var(--up-font); }
   main { max-width:880px; margin:0 auto; padding:48px 16px 72px; }
   a { color:inherit; text-decoration:none; }
   header.hero h1 { font-size:32px; line-height:1.2; margin:0 0 8px; letter-spacing:.5px; }

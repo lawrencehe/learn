@@ -1,21 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>红黑树插入演示</title>
 <meta name="description" content="红黑树插入一步一步看：每次插入后如何变色、旋转，五条规则实时检查">
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
 /* 布局：上方控制条 + 中间树画布 + 下方步骤说明与规则检查 */
 :root{
-  --bg:#f6f7f9; --panel:#ffffff; --fg:#1d2330; --muted:#667085; --line:#c9ced8;
+  --bg:var(--up-bg); --panel:var(--up-surface); --fg:var(--up-ink); --muted:var(--up-muted); --line:var(--up-line);
   --red:#d63a3a; --black:#262b36; --nodetext:#ffffff;
   --hl:#f5a524; --new:#2f80ed; --ok:#1e9e5a; --bad:#d63a3a;
-  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --mono: var(--up-mono);
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#14171d; --panel:#1d2129; --fg:#e6e9ef; --muted:#9aa3b2; --line:#3a4150;
   --red:#e5534b; --black:#0a0c10; --hl:#f5b84a; --new:#5a9cf5; --ok:#3fb27f; --bad:#e5534b; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#14171d; --panel:#1d2129; --fg:#e6e9ef; --muted:#9aa3b2; --line:#3a4150;
   --red:#e5534b; --black:#0a0c10; --hl:#f5b84a; --new:#5a9cf5; --ok:#3fb27f; --bad:#e5534b; color-scheme:dark}
-body{background:var(--bg);color:var(--fg);font-size:15px;line-height:1.6;
+body{background:var(--bg);color:var(--fg);font-family:var(--up-font);font-size:15px;line-height:1.6;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px}
 .wrap{max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
 h1{font-size:22px;margin:0}
@@ -43,16 +46,16 @@ svg{display:block;width:100%;min-height:340px}
 .rules .ok{color:var(--ok)} .rules .bad{color:var(--bad)}
 .note{color:var(--muted);font-size:14px}
 .note b{color:var(--fg)}
-.edge{stroke:var(--line);stroke-width:2}
+.edge{stroke:var(--muted);stroke-opacity:.55;stroke-width:2}
 .node circle{stroke-width:3;transition:fill .35s}
 .node text{fill:var(--nodetext);font-family:var(--mono);font-weight:700;font-size:15px;text-anchor:middle;dominant-baseline:central}
 .node .ring{fill:none;stroke-width:3}
 .bh{fill:var(--muted);font-family:var(--mono);font-size:11px;text-anchor:middle}
 @media (prefers-reduced-motion:reduce){.node circle{transition:none}}
 
-:root{--lq-surface:var(--panel);--lq-ink:var(--fg);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--new);--lq-ok:var(--ok);--lq-bad:var(--bad)}
+:root{--lq-surface:var(--panel);--lq-ink:var(--fg);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--up-accent);--lq-ok:var(--ok);--lq-bad:var(--bad)}
 
-/* ---------- 练习题 + 全局重置（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+/* ---------- 练习题（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
 .lq{display:grid;gap:12px;margin-bottom:56px}
 .lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
 .lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
@@ -77,9 +80,47 @@ svg{display:block;width:100%;min-height:340px}
 .lq-why:empty{display:none}
 .lq-why .lq-ok{color:var(--lq-ok)}
 .lq-why .lq-bad{color:var(--lq-bad)}
-.lq-reset{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:max(16px,env(safe-area-inset-bottom,0px));z-index:100;font:inherit;font-size:14px;font-weight:600;line-height:1;padding:10px 16px;margin:0;border-radius:999px;border:1.5px solid var(--lq-line);background:var(--lq-fab,var(--lq-surface));color:var(--lq-ink);box-shadow:0 4px 16px rgba(0,0,0,.2);cursor:pointer}
-.lq-reset:hover{border-color:var(--lq-accent);color:var(--lq-accent)}
 </style>
+</head>
+<body>
+<!-- up-shell:begin（由 scripts/shell.mjs 自动生成，勿手改） -->
+<nav id="up-nav" aria-label="网站导航">
+<a class="up-home" href="/" title="Up 学习站首页"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="up-nav-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c6ef5"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#up-nav-g)"/><path d="M12 52V42a2 2 0 0 1 2-2h10V32a2 2 0 0 1 2-2h10v-8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v30z" fill="#fff"/><circle cx="43" cy="13" r="5.5" fill="#ffa94d"/></svg><span>Up 学习站</span></a>
+<span class="up-sep" aria-hidden="true">›</span><a class="up-cat" href="/tech">计算机技术</a>
+<span class="up-sep" aria-hidden="true">›</span><span class="up-title">红黑树插入演示</span>
+<button id="up-reset" type="button" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+</nav>
+<style>
+:root{--up-bg:#f5f6f8;--up-surface:#ffffff;--up-surface-2:#eef0f4;--up-ink:#1d2127;--up-muted:#626b78;--up-line:#dfe2e8;--up-ok:#2b8a3e;--up-bad:#d6336c;--up-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);--up-font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif;--up-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;--up-radius:12px;--up-accent:#1c7ed6;--up-accent-soft:#e7f5ff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#74c0fc;--up-accent-soft:#17304a;color-scheme:dark}}
+:root[data-theme="dark"]{--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#74c0fc;--up-accent-soft:#17304a;color-scheme:dark}
+html{padding-top:52px;scroll-padding-top:64px}
+#up-nav{position:fixed;top:0;left:0;right:0;z-index:2147483000;height:52px;box-sizing:border-box;display:flex;align-items:center;gap:8px;
+padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));border-top:3px solid var(--up-accent);
+border-bottom:1px solid var(--up-line);background:color-mix(in srgb,var(--up-surface) 88%,transparent);
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:500 14px/1.2 var(--up-font);color:var(--up-ink);text-align:left}
+#up-nav a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none}
+#up-nav a:hover{color:var(--up-accent)}
+#up-nav svg{width:24px;height:24px;flex:none;display:block}
+#up-nav .up-home span{font-weight:700}
+#up-nav .up-cat{color:var(--up-accent);font-weight:600}
+#up-nav .up-sep{color:var(--up-muted);flex:none}
+#up-nav .up-title{color:var(--up-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#up-reset{margin:0 0 0 auto;flex:none;font:600 14px/1 var(--up-font);padding:8px 14px;border-radius:999px;cursor:pointer;
+border:1.5px solid var(--up-accent);background:transparent;color:var(--up-accent);transition:background .2s,color .2s}
+#up-reset:hover,#up-reset:focus-visible{background:var(--up-accent);color:var(--up-surface)}
+#up-reset:focus-visible,#up-nav a:focus-visible{outline:2px solid var(--up-accent);outline-offset:2px}
+@media (max-width:560px){#up-nav .up-home span{display:none}}
+@media print{#up-nav{display:none}html{padding-top:0}}
+</style>
+<script>
+document.getElementById('up-reset').addEventListener('click', function () {
+  if (typeof window.resetPage === 'function') window.resetPage();
+  else console.warn('本页没有定义 window.resetPage()，重置按钮无效');
+  window.scrollTo({ top: 0, behavior: 'auto' });
+});
+</script>
+<!-- up-shell:end -->
 
 <div class="wrap">
   <div>
@@ -361,7 +402,6 @@ function initDemo() {
 initDemo();
 window.pageReset = () => { document.getElementById('val').value = 15; initDemo(); };
 </script>
-<button type="button" class="lq-reset" id="lq-reset" title="把整页恢复到刚打开时的样子">↺ 重置</button>
 <script>
 window.LQ_ITEMS = [
   { type: '选择', q: '新插入的节点一开始涂成什么颜色？', opts: ['红色', '黑色', '看父节点的颜色决定'], ans: 0,
@@ -384,9 +424,9 @@ window.LQ_ITEMS = [
 ];
 </script>
 <script>
-/* ---------- 练习题 + 全局重置（learn 通用组件） ----------
+/* ---------- 练习题（learn 通用组件） ----------
    题目来自 window.LQ_ITEMS：{type, q, opts, ans: 选项下标, why} 或填空题 {type, q, ans: [可接受答案…], why}
-   全局重置：先调用页面自己的 window.pageReset()，再清空练习、回到顶部 */
+   定义 window.resetPage()（导航条「重置」按钮调用）：先调用页面自己的 window.pageReset()，再清空练习 */
 (() => {
   const box = document.getElementById('lq');
   const items = window.LQ_ITEMS || [];
@@ -446,11 +486,13 @@ window.LQ_ITEMS = [
   }
 
   box.querySelector('.lq-redo').addEventListener('click', render);
-  document.getElementById('lq-reset').addEventListener('click', () => {
+  // 导航条的「重置」按钮调用它：页面各模块 + 练习题一起恢复初始状态
+  window.resetPage = () => {
     if (typeof window.pageReset === 'function') window.pageReset();
     render();
-    window.scrollTo({ top: 0, behavior: 'auto' });
-  });
+  };
   render();
 })();
 </script>
+</body>
+</html>

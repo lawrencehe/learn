@@ -7,29 +7,28 @@
 <meta name="description" content="another、other、others、the other、the others 的区别：用动画看清各自指代的是哪一部分">
 <style>
 :root {
-  --bg: #f4f5f8;
-  --surface: #ffffff;
-  --surface2: #eef0f5;
-  --ink: #1c2230;
-  --muted: #5f6878;
-  --line: #d8dce5;
+  --bg: var(--up-bg);
+  --surface: var(--up-surface);
+  --surface2: var(--up-surface-2);
+  --ink: var(--up-ink);
+  --muted: var(--up-muted);
+  --line: var(--up-line);
   --said: #2563d4;      --said-soft: #dfe9fc;
   --another: #1d8a62;   --another-soft: #dcf2e7;
   --the: #c2412d;       --the-soft: #fbe3de;
   --key: #a16207;       --key-soft: #fdf1d4;
-  --accent: #6d28d9;
+  --accent: var(--up-accent);
   --ok: #15803d; --bad: #c2412d;
-  --font: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
-  --mono: ui-monospace, Menlo, Consolas, monospace;
+  --font: var(--up-font);
+  --mono: var(--up-mono);
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #12151c; --surface: #1b202a; --surface2: #232a36; --ink: #e8ecf3; --muted: #9aa4b5; --line: #2f3746;
     --said: #7aa7ff; --said-soft: #1c2b4a;
     --another: #4fd1a0; --another-soft: #173a2c;
     --the: #ff8a73; --the-soft: #47231d;
     --key: #f5c451; --key-soft: #3d3218;
-    --accent: #a78bfa; --ok: #4ade80; --bad: #ff8a73;
+    --ok: #4ade80; --bad: #ff8a73;
     color-scheme: dark;
   }
 }
@@ -41,7 +40,6 @@ body {
 main { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 48px; }
 h1, h2, h3, p { margin: 0; }
 h2 { font-size: 1.4rem; margin-bottom: 8px; }
-.tag { display: inline-block; font-family: var(--mono); font-size: 12px; letter-spacing: .1em; padding: 2px 10px; border-radius: 999px; background: var(--surface2); color: var(--muted); }
 .hero h1 { font-size: clamp(28px, 6vw, 44px); line-height: 1.2; margin: 10px 0; }
 .lead { color: var(--muted); }
 .box { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
@@ -74,7 +72,7 @@ button { font: inherit; cursor: pointer; }
 .btn { padding: 6px 14px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); }
 .btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
 .btn:disabled { opacity: .4; cursor: default; }
-.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--up-surface); }
 .stepno { font-family: var(--mono); color: var(--muted); font-size: .9rem; min-width: 60px; text-align: center; }
 
 /* 公式 */
@@ -114,8 +112,6 @@ th { background: var(--surface2); }
 .q .fb b.ok { color: var(--ok); } .q .fb b.no { color: var(--bad); }
 .scorebar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; font-size: 1.1rem; }
 
-.reset-fab { position: fixed; right: 16px; bottom: 16px; z-index: 100; padding: 10px 18px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); font-weight: 700; box-shadow: 0 4px 16px rgba(0,0,0,.2); }
-.reset-fab:hover { border-color: var(--accent); color: var(--accent); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }
@@ -123,11 +119,48 @@ th { background: var(--surface2); }
 </style>
 </head>
 <body>
+<!-- up-shell:begin（由 scripts/shell.mjs 自动生成，勿手改） -->
+<nav id="up-nav" aria-label="网站导航">
+<a class="up-home" href="/" title="Up 学习站首页"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="up-nav-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c6ef5"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#up-nav-g)"/><path d="M12 52V42a2 2 0 0 1 2-2h10V32a2 2 0 0 1 2-2h10v-8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v30z" fill="#fff"/><circle cx="43" cy="13" r="5.5" fill="#ffa94d"/></svg><span>Up 学习站</span></a>
+<span class="up-sep" aria-hidden="true">›</span><a class="up-cat" href="/english">英语</a>
+<span class="up-sep" aria-hidden="true">›</span><span class="up-title">other 与 another</span>
+<button id="up-reset" type="button" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+</nav>
+<style>
+:root{--up-bg:#f5f6f8;--up-surface:#ffffff;--up-surface-2:#eef0f4;--up-ink:#1d2127;--up-muted:#626b78;--up-line:#dfe2e8;--up-ok:#2b8a3e;--up-bad:#d6336c;--up-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);--up-font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif;--up-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;--up-radius:12px;--up-accent:#2f9e44;--up-accent-soft:#ebfbee}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#69db7c;--up-accent-soft:#1b3222;color-scheme:dark}}
+:root[data-theme="dark"]{--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#69db7c;--up-accent-soft:#1b3222;color-scheme:dark}
+html{padding-top:52px;scroll-padding-top:64px}
+#up-nav{position:fixed;top:0;left:0;right:0;z-index:2147483000;height:52px;box-sizing:border-box;display:flex;align-items:center;gap:8px;
+padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));border-top:3px solid var(--up-accent);
+border-bottom:1px solid var(--up-line);background:color-mix(in srgb,var(--up-surface) 88%,transparent);
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:500 14px/1.2 var(--up-font);color:var(--up-ink);text-align:left}
+#up-nav a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none}
+#up-nav a:hover{color:var(--up-accent)}
+#up-nav svg{width:24px;height:24px;flex:none;display:block}
+#up-nav .up-home span{font-weight:700}
+#up-nav .up-cat{color:var(--up-accent);font-weight:600}
+#up-nav .up-sep{color:var(--up-muted);flex:none}
+#up-nav .up-title{color:var(--up-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#up-reset{margin:0 0 0 auto;flex:none;font:600 14px/1 var(--up-font);padding:8px 14px;border-radius:999px;cursor:pointer;
+border:1.5px solid var(--up-accent);background:transparent;color:var(--up-accent);transition:background .2s,color .2s}
+#up-reset:hover,#up-reset:focus-visible{background:var(--up-accent);color:var(--up-surface)}
+#up-reset:focus-visible,#up-nav a:focus-visible{outline:2px solid var(--up-accent);outline-offset:2px}
+@media (max-width:560px){#up-nav .up-home span{display:none}}
+@media print{#up-nav{display:none}html{padding-top:0}}
+</style>
+<script>
+document.getElementById('up-reset').addEventListener('click', function () {
+  if (typeof window.resetPage === 'function') window.resetPage();
+  else console.warn('本页没有定义 window.resetPage()，重置按钮无效');
+  window.scrollTo({ top: 0, behavior: 'auto' });
+});
+</script>
+<!-- up-shell:end -->
 <main>
 
 <!-- 标题 + 比喻 -->
 <section class="hero">
-  <span class="tag">english</span>
   <h1><span class="N">another</span> · <span class="K">other</span> · <span class="T">others</span> · <span class="T">the other</span> · <span class="T">the others</span></h1>
   <p class="lead">五个词都是「另外的」，区别只在：<b>还有没有剩</b>、<b>是一个还是多个</b>、<b>后面带不带名词</b>。</p>
   <div class="analogy" style="margin-top:14px">
@@ -242,7 +275,6 @@ th { background: var(--surface2); }
 
 </main>
 
-<button class="reset-fab" id="globalReset" title="把整页恢复到刚打开时的样子">↺ 重置</button>
 
 <script>
 const $ = id => document.getElementById(id);
@@ -495,11 +527,11 @@ $('quizRedo').onclick = resetQuiz;
 modules.push({ reset: resetQuiz });
 
 /* ---------- 全局重置 ---------- */
+// 导航条的「重置」按钮调用它
 function resetAll() {
   modules.forEach(m => m.reset());
-  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-$('globalReset').onclick = resetAll;
+window.resetPage = resetAll;
 modules.forEach(m => m.reset());
 </script>
 </body>

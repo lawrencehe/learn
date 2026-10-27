@@ -3,27 +3,37 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>begin vs start 动画讲解</title>
+<title>begin vs start</title>
 <meta name="description" content="begin 和 start 的区别：用分步动画对比这两个「开始」各在什么场景用，附练习题">
 <style>
+  :root {
+    --bg: var(--up-bg); --surface: var(--up-surface); --ink: var(--up-ink); --muted: var(--up-muted); --line: var(--up-line);
+    --b: #0b7bbf; --s: #d6455d;            /* begin 蓝 / start 红 */
+    --scene: #e9eef8; --scene-line: #9aa6b8; /* 动画画布 */
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --b: #7dd3fc; --s: #fca5a5; --scene: #0b1224; --scene-line: #ffffff88; }
+  }
+  :root[data-theme="dark"] { --b: #7dd3fc; --s: #fca5a5; --scene: #0b1224; --scene-line: #ffffff88; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
-    background: linear-gradient(135deg, #1e2a4a, #2d1b3d);
-    color: #fff; min-height: 100vh; display: flex; flex-direction: column; align-items: center;
-    padding: 24px 12px;
+    font-family: var(--up-font);
+    background: var(--bg);
+    color: var(--ink); min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+    padding: 24px 16px 96px;
   }
   h1 { font-size: 2.2rem; margin-bottom: 6px; }
-  h1 .b { color: #7dd3fc; } h1 .s { color: #fca5a5; }
+  h1 .b { color: var(--b); } h1 .s { color: var(--s); }
   .sub { opacity: .75; margin-bottom: 20px; }
   .tabs { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 18px; }
   .tab {
-    padding: 8px 16px; border-radius: 20px; border: 1px solid #ffffff44; background: #ffffff11;
-    color: #fff; cursor: pointer; font-size: .95rem; transition: .2s;
+    padding: 8px 16px; border-radius: 20px; border: 1px solid var(--line); background: var(--surface);
+    color: var(--ink); cursor: pointer; font-size: .95rem; transition: .2s;
   }
-  .tab.active, .tab:hover { background: #fff; color: #1e2a4a; }
+  .tab:hover { border-color: var(--up-accent); color: var(--up-accent); }
+  .tab.active { background: var(--up-accent); border-color: var(--up-accent); color: var(--up-surface); }
   .stage {
-    width: min(860px, 100%); background: #ffffff0d; border: 1px solid #ffffff22; border-radius: 18px;
+    width: min(860px, 100%); background: var(--surface); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--up-shadow);
     padding: 24px; min-height: 480px; position: relative; overflow: hidden;
   }
   .scene { display: none; animation: fadeIn .5s; }
@@ -32,7 +42,7 @@
   .scene h2 { font-size: 1.4rem; margin-bottom: 8px; }
   .explain { line-height: 1.8; opacity: .9; margin-bottom: 14px; }
   .canvas {
-    height: 220px; background: #0b1224; border-radius: 12px; position: relative; overflow: hidden; margin-bottom: 14px;
+    height: 220px; background: var(--scene); border-radius: 12px; position: relative; overflow: hidden; margin-bottom: 14px;
   }
   .ex { display: flex; gap: 12px; flex-wrap: wrap; }
   .card {
@@ -44,15 +54,15 @@
   .no { background: #dc262633; border-left: 4px solid #ef4444; }
   .mid { background: #eab30833; border-left: 4px solid #eab308; }
   .card small { display: block; opacity: .75; font-size: .85rem; }
-  .bw { color: #7dd3fc; font-weight: bold; } .sw { color: #fca5a5; font-weight: bold; }
+  .bw { color: var(--b); font-weight: bold; } .sw { color: var(--s); font-weight: bold; }
   .btn {
-    margin-top: 14px; padding: 8px 18px; border-radius: 8px; border: none; background: #7c3aed; color: #fff;
+    margin-top: 14px; padding: 8px 18px; border-radius: 8px; border: none; background: var(--up-accent); color: var(--up-surface);
     font-size: 1rem; cursor: pointer;
   }
-  .btn:hover { background: #8b5cf6; }
+  .btn:hover { filter: brightness(1.1); }
 
   /* 场景1：汽车 */
-  .road { position: absolute; bottom: 30px; left: 0; right: 0; height: 6px; background: repeating-linear-gradient(90deg,#fff8 0 30px,transparent 30px 60px); }
+  .road { position: absolute; bottom: 30px; left: 0; right: 0; height: 6px; background: repeating-linear-gradient(90deg,var(--scene-line) 0 30px,transparent 30px 60px); }
   .car { position: absolute; bottom: 40px; left: 40px; font-size: 70px; transform: scaleX(-1); }
   .car.go { animation: drive 2.5s ease-in forwards; }
   @keyframes drive { 0% { left: 40px; } 15% { left: 35px; } 100% { left: 110%; } }
@@ -60,7 +70,7 @@
   @keyframes shake { 50% { transform: scaleX(-1) translateY(-3px); } }
   .key { position: absolute; top: 20px; left: 30px; font-size: 28px; }
   .bubble {
-    position: absolute; top: 30px; left: 50%; transform: translateX(-50%); background: #fff; color: #111;
+    position: absolute; top: 30px; left: 50%; transform: translateX(-50%); background: #fff; color: #111; box-shadow: 0 2px 8px rgba(0,0,0,.15);
     padding: 6px 14px; border-radius: 14px; font-weight: bold; opacity: 0; transition: .3s; white-space: nowrap;
   }
   .bubble.show { opacity: 1; }
@@ -88,7 +98,7 @@
   .canvas.open .curtain.r { transform: translateX(95%); }
   .show-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; font-size: 1.3rem; gap: 6px; }
   .show-text .em { font-size: 54px; }
-  .story { position: absolute; bottom: 12px; left: 0; right: 0; text-align: center; font-style: italic; color: #fde68a; z-index: 3; opacity: 0; transition: 1s; }
+  .story { position: absolute; bottom: 12px; left: 0; right: 0; text-align: center; font-style: italic; color: var(--muted); z-index: 3; opacity: 0; transition: 1s; }
   .canvas.open .story { opacity: 1; transition-delay: 2s; }
 
   /* 场景4：下雨 */
@@ -100,26 +110,25 @@
   .swap span.w { display: inline-block; min-width: 80px; animation: flip 3s infinite; }
 
   /* 场景5：时间线 */
-  .timeline { position: absolute; left: 40px; right: 40px; top: 110px; height: 4px; background: #ffffff55; }
+  .timeline { position: absolute; left: 40px; right: 40px; top: 110px; height: 4px; background: var(--line); }
   .dot { position: absolute; top: 96px; width: 32px; height: 32px; border-radius: 50%; transform: translateX(-50%); display: flex; align-items: center; justify-content: center; font-size: 18px; }
   .lbl { position: absolute; transform: translateX(-50%); text-align: center; font-size: .95rem; width: 160px; }
-  .grow { position: absolute; left: 40px; top: 110px; height: 4px; background: linear-gradient(90deg,#7dd3fc,#fca5a5); width: 0; transition: 3s linear; }
+  .grow { position: absolute; left: 40px; top: 110px; height: 4px; background: linear-gradient(90deg,var(--b),var(--s)); width: 0; transition: 3s linear; }
   .canvas.play .grow { width: calc(100% - 80px); }
 
   /* 场景6：动词变化 */
   table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
-  td, th { padding: 10px; text-align: center; border-bottom: 1px solid #ffffff22; font-size: 1.1rem; }
-  th { color: #c4b5fd; }
+  td, th { padding: 10px; text-align: center; border-bottom: 1px solid var(--line); font-size: 1.1rem; }
+  th { color: var(--up-accent); }
   .pop { opacity: 0; display: inline-block; }
   .pop.show { animation: popIn .5s forwards; }
   @keyframes popIn { 0% { opacity: 0; transform: scale(.3); } 70% { transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
 
   .nav { display: flex; justify-content: space-between; width: min(860px,100%); margin-top: 14px; }
 
-:root{--lq-surface:#ffffff10;--lq-fab:#2b2442;--lq-ink:#ffffff;--lq-muted:#ffffffbb;--lq-line:#ffffff40;--lq-accent:#c4b5fd;--lq-ok:#4ade80;--lq-bad:#f87171;--lq-h2:1.4rem}
-body{padding-bottom:80px}
+:root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--up-accent);--lq-ok:var(--up-ok);--lq-bad:var(--up-bad);--lq-h2:1.4rem}
 
-/* ---------- 练习题 + 全局重置（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+/* ---------- 练习题（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
 .lq{display:grid;gap:12px;margin-bottom:56px}
 .lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
 .lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
@@ -144,11 +153,47 @@ body{padding-bottom:80px}
 .lq-why:empty{display:none}
 .lq-why .lq-ok{color:var(--lq-ok)}
 .lq-why .lq-bad{color:var(--lq-bad)}
-.lq-reset{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:max(16px,env(safe-area-inset-bottom,0px));z-index:100;font:inherit;font-size:14px;font-weight:600;line-height:1;padding:10px 16px;margin:0;border-radius:999px;border:1.5px solid var(--lq-line);background:var(--lq-fab,var(--lq-surface));color:var(--lq-ink);box-shadow:0 4px 16px rgba(0,0,0,.2);cursor:pointer}
-.lq-reset:hover{border-color:var(--lq-accent);color:var(--lq-accent)}
 </style>
 </head>
 <body>
+<!-- up-shell:begin（由 scripts/shell.mjs 自动生成，勿手改） -->
+<nav id="up-nav" aria-label="网站导航">
+<a class="up-home" href="/" title="Up 学习站首页"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="up-nav-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c6ef5"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#up-nav-g)"/><path d="M12 52V42a2 2 0 0 1 2-2h10V32a2 2 0 0 1 2-2h10v-8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v30z" fill="#fff"/><circle cx="43" cy="13" r="5.5" fill="#ffa94d"/></svg><span>Up 学习站</span></a>
+<span class="up-sep" aria-hidden="true">›</span><a class="up-cat" href="/english">英语</a>
+<span class="up-sep" aria-hidden="true">›</span><span class="up-title">begin vs start</span>
+<button id="up-reset" type="button" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+</nav>
+<style>
+:root{--up-bg:#f5f6f8;--up-surface:#ffffff;--up-surface-2:#eef0f4;--up-ink:#1d2127;--up-muted:#626b78;--up-line:#dfe2e8;--up-ok:#2b8a3e;--up-bad:#d6336c;--up-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);--up-font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif;--up-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;--up-radius:12px;--up-accent:#2f9e44;--up-accent-soft:#ebfbee}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#69db7c;--up-accent-soft:#1b3222;color-scheme:dark}}
+:root[data-theme="dark"]{--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#69db7c;--up-accent-soft:#1b3222;color-scheme:dark}
+html{padding-top:52px;scroll-padding-top:64px}
+#up-nav{position:fixed;top:0;left:0;right:0;z-index:2147483000;height:52px;box-sizing:border-box;display:flex;align-items:center;gap:8px;
+padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));border-top:3px solid var(--up-accent);
+border-bottom:1px solid var(--up-line);background:color-mix(in srgb,var(--up-surface) 88%,transparent);
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:500 14px/1.2 var(--up-font);color:var(--up-ink);text-align:left}
+#up-nav a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none}
+#up-nav a:hover{color:var(--up-accent)}
+#up-nav svg{width:24px;height:24px;flex:none;display:block}
+#up-nav .up-home span{font-weight:700}
+#up-nav .up-cat{color:var(--up-accent);font-weight:600}
+#up-nav .up-sep{color:var(--up-muted);flex:none}
+#up-nav .up-title{color:var(--up-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#up-reset{margin:0 0 0 auto;flex:none;font:600 14px/1 var(--up-font);padding:8px 14px;border-radius:999px;cursor:pointer;
+border:1.5px solid var(--up-accent);background:transparent;color:var(--up-accent);transition:background .2s,color .2s}
+#up-reset:hover,#up-reset:focus-visible{background:var(--up-accent);color:var(--up-surface)}
+#up-reset:focus-visible,#up-nav a:focus-visible{outline:2px solid var(--up-accent);outline-offset:2px}
+@media (max-width:560px){#up-nav .up-home span{display:none}}
+@media print{#up-nav{display:none}html{padding-top:0}}
+</style>
+<script>
+document.getElementById('up-reset').addEventListener('click', function () {
+  if (typeof window.resetPage === 'function') window.resetPage();
+  else console.warn('本页没有定义 window.resetPage()，重置按钮无效');
+  window.scrollTo({ top: 0, behavior: 'auto' });
+});
+</script>
+<!-- up-shell:end -->
 <h1><span class="b">begin</span> vs <span class="s">start</span></h1>
 <p class="sub">点击标签或「下一页」逐步观看动画</p>
 
@@ -409,7 +454,6 @@ window.pageReset = () => {
 
 go(0);
 </script>
-<button type="button" class="lq-reset" id="lq-reset" title="把整页恢复到刚打开时的样子">↺ 重置</button>
 <script>
 window.LQ_ITEMS = [
   { type: '选择', q: "I can't ___ my car. The battery is dead.", opts: ['start', 'begin'], ans: 0,
@@ -433,9 +477,9 @@ window.LQ_ITEMS = [
 ];
 </script>
 <script>
-/* ---------- 练习题 + 全局重置（learn 通用组件） ----------
+/* ---------- 练习题（learn 通用组件） ----------
    题目来自 window.LQ_ITEMS：{type, q, opts, ans: 选项下标, why} 或填空题 {type, q, ans: [可接受答案…], why}
-   全局重置：先调用页面自己的 window.pageReset()，再清空练习、回到顶部 */
+   定义 window.resetPage()（导航条「重置」按钮调用）：先调用页面自己的 window.pageReset()，再清空练习 */
 (() => {
   const box = document.getElementById('lq');
   const items = window.LQ_ITEMS || [];
@@ -495,11 +539,11 @@ window.LQ_ITEMS = [
   }
 
   box.querySelector('.lq-redo').addEventListener('click', render);
-  document.getElementById('lq-reset').addEventListener('click', () => {
+  // 导航条的「重置」按钮调用它：页面各模块 + 练习题一起恢复初始状态
+  window.resetPage = () => {
     if (typeof window.pageReset === 'function') window.pageReset();
     render();
-    window.scrollTo({ top: 0, behavior: 'auto' });
-  });
+  };
   render();
 })();
 </script>
