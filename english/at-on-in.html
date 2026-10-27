@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>at / on / in 的区别</title>
+<meta name="description" content="用「点 · 面 · 容器」和时间倒金字塔动画，弄懂介词 at、on、in 在时间和地点上的区别。">
+<style>
+:root{
+  --bg:var(--up-bg); --surface:var(--up-surface); --surface2:var(--up-surface-2); --ink:var(--up-ink); --muted:var(--up-muted); --line:var(--up-line);
+  --accent:var(--up-accent); --ok:var(--up-ok); --bad:var(--up-bad);
+  --at:#d9480f; --at-soft:#fff0e6;
+  --on:#1971c2; --on-soft:#e7f1fc;
+  --in:#7048e8; --in-soft:#efeafe;
+  --wall:#868e96;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --at:#ffa94d; --at-soft:#3b2615; --on:#74c0fc; --on-soft:#15283d; --in:#b197fc; --in-soft:#2a2245; --wall:#adb5bd; }
+}
+:root[data-theme="dark"]{ --at:#ffa94d; --at-soft:#3b2615; --on:#74c0fc; --on-soft:#15283d; --in:#b197fc; --in-soft:#2a2245; --wall:#adb5bd; }
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 var(--up-font);padding:24px 16px 96px}
+main{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:48px}
+h1{font-size:clamp(1.7rem,4.5vw,2.4rem);line-height:1.25;margin:0 0 8px}
+h2{font-size:1.4rem;margin:0 0 8px}
+h3{font-size:1.05rem;margin:0 0 6px}
+p{margin:0}
+.lead{color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--up-radius);box-shadow:var(--up-shadow);padding:16px}
+.analogy{border-left:4px solid var(--accent)}
+.btn{font:inherit;font-size:14px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--up-surface)}
+.btn:disabled{opacity:.45;cursor:default}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.stepno{font-family:var(--up-mono);color:var(--muted);font-size:.9rem;min-width:56px;text-align:center}
+.caption{min-height:3.4em;margin-top:10px}
+.w-at{color:var(--at);font-weight:700}.w-on{color:var(--on);font-weight:700}.w-in{color:var(--in);font-weight:700}
+.en{font-family:var(--up-font);font-style:italic}
+
+/* 三张身份卡 */
+.trio{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.trio .card{text-align:center;padding:14px 10px}
+.trio .big{font-size:2rem;font-weight:800;line-height:1.2}
+.trio svg{width:72px;height:56px;display:block;margin:6px auto}
+.trio small{color:var(--muted);display:block;line-height:1.5}
+@media (max-width:560px){.trio{grid-template-columns:1fr}.trio .card{display:grid;grid-template-columns:64px 72px 1fr;align-items:center;text-align:left;gap:8px}.trio svg{margin:0}}
+
+/* 时间倒金字塔 */
+.zoom{margin-top:12px;background:var(--surface2);border-radius:10px;padding:12px}
+.lv{border:2px dashed var(--line);border-radius:10px;padding:8px 10px 10px;transition:border-color .7s,background .7s,opacity .7s,transform .7s}
+.lv + .lv,.lv .lv{margin-top:8px}
+.lv-h{display:flex;justify-content:space-between;gap:8px;font-size:14px;color:var(--muted);flex-wrap:wrap}
+.lv-h b{font-family:var(--up-mono)}
+.lv-tag{font-weight:700;opacity:0;transition:opacity .7s}
+.lv.hide{opacity:0;transform:scale(.96);pointer-events:none}
+.lv.dim{opacity:.55}
+.lv.cur-in{border:2px solid var(--in);background:var(--in-soft)}
+.lv.cur-on{border:2px solid var(--on);background:var(--on-soft)}
+.lv.cur-at{border:2px solid var(--at);background:var(--at-soft)}
+.lv.cur-in > .lv-h .lv-tag,.lv.cur-on > .lv-h .lv-tag,.lv.cur-at > .lv-h .lv-tag{opacity:1}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:6px}
+.day{font-family:var(--up-mono);font-size:12px;text-align:center;border:1px solid var(--line);border-radius:6px;padding:2px 0;color:var(--muted);background:var(--surface)}
+.day.me{border-color:var(--on);color:var(--on);font-weight:700}
+.clock{display:flex;align-items:center;gap:6px;margin-top:6px;font-family:var(--up-mono);font-size:12px;color:var(--muted)}
+.hours{flex:1;height:10px;border-radius:5px;background:var(--surface);border:1px solid var(--line);position:relative}
+.dot{position:absolute;top:50%;left:62.5%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:var(--at);box-shadow:0 0 0 4px var(--at-soft)}
+.sent{margin-top:10px;font-size:1.15rem;text-align:center;min-height:1.8em}
+
+/* 地点 SVG */
+.scene{margin-top:12px;background:var(--surface2);border-radius:10px}
+.scene svg{display:block;width:100%;height:auto;max-height:280px}
+.scene .zone{cursor:pointer}
+.scene .zone:hover{opacity:.85}
+#person{transition:transform .8s ease}
+.pick{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.pick .btn.sel-in{border-color:var(--in);color:var(--in);background:var(--in-soft)}
+.pick .btn.sel-on{border-color:var(--on);color:var(--on);background:var(--on-soft)}
+.pick .btn.sel-at{border-color:var(--at);color:var(--at);background:var(--at-soft)}
+
+/* 分拣机 */
+.sorter{text-align:center}
+.chip{display:inline-block;font-size:1.6rem;font-weight:700;padding:10px 22px;border-radius:12px;border:2px solid var(--line);background:var(--surface2);margin:10px 0;transition:transform .6s,border-color .6s}
+.chip.ok{border-color:var(--ok)}.chip.bad{border-color:var(--bad);animation:shake .6s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.bins{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.bin{font:inherit;font-size:1.1rem;font-weight:700;width:90px;padding:10px 0;border-radius:10px;cursor:pointer;background:var(--surface)}
+.bin.at{border:2px solid var(--at);color:var(--at)}.bin.on{border:2px solid var(--on);color:var(--on)}.bin.in{border:2px solid var(--in);color:var(--in)}
+.bin:disabled{opacity:.45;cursor:default}
+.fb{min-height:3.4em;margin-top:10px;color:var(--muted)}
+.fb .g{color:var(--ok);font-weight:700}.fb .r{color:var(--bad);font-weight:700}
+.prog{font-family:var(--up-mono);font-size:.9rem;color:var(--muted)}
+
+/* 误区 */
+.traps{display:grid;gap:12px}
+.trap{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.trap div{border-radius:8px;padding:6px 10px;background:var(--surface2)}
+.trap .x{border-left:4px solid var(--bad)}
+.trap .x .en{text-decoration:line-through;text-decoration-color:var(--bad)}
+.trap .y{border-left:4px solid var(--ok)}
+.trap p{grid-column:1/-1;color:var(--muted);font-size:14px}
+@media (max-width:560px){.trap{grid-template-columns:1fr}}
+table.sum{width:100%;border-collapse:collapse;font-size:15px}
+table.sum th,table.sum td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:top}
+table.sum th{color:var(--muted);font-weight:600}
+.one{font-size:1.1rem;text-align:center;line-height:1.9}
+@media (prefers-reduced-motion: reduce){.lv,.lv-tag,#person,.chip{transition:none}.chip.bad{animation:none}}
+
+:root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:var(--ok);--lq-bad:var(--bad)}
+/* ---------- 练习题（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+.lq{display:grid;gap:12px;margin-bottom:56px}
+.lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+.lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
+.lq-sub{margin:0;color:var(--lq-muted);font-size:14px}
+.lq-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--lq-muted);font-variant-numeric:tabular-nums}
+.lq-list{display:grid;gap:10px}
+.lq-item{background:var(--lq-surface);border:1.5px solid var(--lq-line);border-radius:10px;padding:12px 16px;display:grid;gap:10px;min-width:0;color:var(--lq-ink);text-align:left}
+.lq-item.lq-is-ok{border-color:var(--lq-ok)}
+.lq-item.lq-is-bad{border-color:var(--lq-bad)}
+.lq-q{font-size:15px;font-weight:600;line-height:1.6}
+.lq-tag{display:inline-block;font-size:11px;font-weight:500;line-height:1.6;color:var(--lq-muted);border:1px solid var(--lq-line);border-radius:999px;padding:0 8px;margin-right:8px;vertical-align:1px}
+.lq-opts,.lq-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lq .lq-opt,.lq .lq-redo{font:inherit;font-size:14px;line-height:1.4;padding:6px 14px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);cursor:pointer;text-align:left;opacity:1}
+.lq .lq-opt:hover:not(:disabled),.lq .lq-redo:hover{border-color:var(--lq-accent)}
+.lq .lq-opt:disabled{cursor:default;opacity:1}
+.lq .lq-opt.lq-right{border-color:var(--lq-ok);color:var(--lq-ok);font-weight:700}
+.lq .lq-opt.lq-wrong{border-color:var(--lq-bad);color:var(--lq-bad);text-decoration:line-through}
+.lq-fill input{font:inherit;font-size:14px;padding:6px 10px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);width:min(100%,200px)}
+.lq-fill input.lq-right{border-color:var(--lq-ok)}
+.lq-fill input.lq-wrong{border-color:var(--lq-bad)}
+.lq-why{font-size:14px;line-height:1.65;color:var(--lq-muted)}
+.lq-why:empty{display:none}
+.lq-why .lq-ok{color:var(--lq-ok)}
+.lq-why .lq-bad{color:var(--lq-bad)}
+</style>
+</style>
+</head>
+<body>
+<!-- up-shell:begin（由 scripts/shell.mjs 自动生成，勿手改） -->
+<nav id="up-nav" aria-label="网站导航">
+<a class="up-home" href="/" title="Up 学习站首页"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="up-nav-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c6ef5"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#up-nav-g)"/><path d="M12 52V42a2 2 0 0 1 2-2h10V32a2 2 0 0 1 2-2h10v-8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v30z" fill="#fff"/><circle cx="43" cy="13" r="5.5" fill="#ffa94d"/></svg><span>Up 学习站</span></a>
+<span class="up-sep" aria-hidden="true">›</span><a class="up-cat" href="/english">英语</a>
+<span class="up-sep" aria-hidden="true">›</span><span class="up-title">at / on / in 的区别</span>
+<button id="up-reset" type="button" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+</nav>
+<style>
+:root{--up-bg:#f5f6f8;--up-surface:#ffffff;--up-surface-2:#eef0f4;--up-ink:#1d2127;--up-muted:#626b78;--up-line:#dfe2e8;--up-ok:#2b8a3e;--up-bad:#d6336c;--up-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);--up-font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif;--up-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;--up-radius:12px;--up-accent:#2f9e44;--up-accent-soft:#ebfbee}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#69db7c;--up-accent-soft:#1b3222;color-scheme:dark}}
+:root[data-theme="dark"]{--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#69db7c;--up-accent-soft:#1b3222;color-scheme:dark}
+html{padding-top:52px;scroll-padding-top:64px}
+#up-nav{position:fixed;top:0;left:0;right:0;z-index:2147483000;height:52px;box-sizing:border-box;display:flex;align-items:center;gap:8px;
+padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));border-top:3px solid var(--up-accent);
+border-bottom:1px solid var(--up-line);background:color-mix(in srgb,var(--up-surface) 88%,transparent);
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:500 14px/1.2 var(--up-font);color:var(--up-ink);text-align:left}
+#up-nav a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none}
+#up-nav a:hover{color:var(--up-accent)}
+#up-nav svg{width:24px;height:24px;flex:none;display:block}
+#up-nav .up-home span{font-weight:700}
+#up-nav .up-cat{color:var(--up-accent);font-weight:600}
+#up-nav .up-sep{color:var(--up-muted);flex:none}
+#up-nav .up-title{color:var(--up-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#up-reset{margin:0 0 0 auto;flex:none;font:600 14px/1 var(--up-font);padding:8px 14px;border-radius:999px;cursor:pointer;
+border:1.5px solid var(--up-accent);background:transparent;color:var(--up-accent);transition:background .2s,color .2s}
+#up-reset:hover,#up-reset:focus-visible{background:var(--up-accent);color:var(--up-surface)}
+#up-reset:focus-visible,#up-nav a:focus-visible{outline:2px solid var(--up-accent);outline-offset:2px}
+@media (max-width:560px){#up-nav .up-home span{display:none}}
+@media print{#up-nav{display:none}html{padding-top:0}}
+</style>
+<script>
+document.getElementById('up-reset').addEventListener('click', function () {
+  if (typeof window.resetPage === 'function') window.resetPage();
+  else console.warn('本页没有定义 window.resetPage()，重置按钮无效');
+  window.scrollTo({ top: 0, behavior: 'auto' });
+});
+</script>
+<!-- up-shell:end -->
+<main>
+
+<section>
+  <h1>at、on、in 到底怎么选？</h1>
+  <p class="lead">三个小词都能翻成「在」，但它们看待时间和地点的「尺寸」不一样。记住三个形状就够了：<b>点</b>、<b>面</b>、<b>容器</b>。</p>
+</section>
+
+<section class="card analogy">
+  <b>生活比喻：地图 App 的缩放</b><br>
+  放大到最细，一个地方只是地图上的<b class="w-at">一个图钉（at）</b>；
+  桌面、墙面、某一天的日历格子是<b class="w-on">一块平面（on）</b>；
+  房间、城市、一个月、一年，是能把你<b class="w-in">装进去的容器（in）</b>。
+</section>
+
+<section class="trio" aria-label="三个介词的形状">
+  <div class="card"><div class="big w-at">at</div>
+    <svg viewBox="0 0 72 56" aria-hidden="true"><line x1="6" y1="40" x2="66" y2="40" stroke="var(--line)" stroke-width="3"/><circle cx="36" cy="40" r="7" fill="var(--at)"/></svg>
+    <small>一个<b>点</b><br>at 3 p.m. · at the door</small></div>
+  <div class="card"><div class="big w-on">on</div>
+    <svg viewBox="0 0 72 56" aria-hidden="true"><rect x="6" y="36" width="60" height="10" rx="2" fill="var(--on-soft)" stroke="var(--on)" stroke-width="2"/><circle cx="36" cy="27" r="8" fill="var(--on)"/></svg>
+    <small>一个<b>面</b>（贴在上面）<br>on Monday · on the wall</small></div>
+  <div class="card"><div class="big w-in">in</div>
+    <svg viewBox="0 0 72 56" aria-hidden="true"><path d="M8 12 V48 H64 V12" fill="var(--in-soft)" stroke="var(--in)" stroke-width="3"/><circle cx="36" cy="34" r="8" fill="var(--in)"/></svg>
+    <small>一个<b>容器</b>（在里面）<br>in July · in the room</small></div>
+</section>
+
+<section>
+  <h2>一、时间：从大到小的「倒金字塔」</h2>
+  <p class="lead">一层层放大日历，看介词怎么从 in 变成 on，再变成 at。</p>
+  <div class="card" id="tdemo">
+    <div class="zoom">
+      <div class="lv" data-lv="0" data-p="in"><div class="lv-h"><span>年 <b>2026</b></span><span class="lv-tag w-in">in 2026</span></div>
+        <div class="lv" data-lv="1" data-p="in"><div class="lv-h"><span>月 <b>October</b></span><span class="lv-tag w-in">in October</span></div>
+          <div class="lv" data-lv="2" data-p="on"><div class="lv-h"><span>日 <b>Tuesday, Oct 27</b></span><span class="lv-tag w-on">on Tuesday</span></div>
+            <div class="days"><span class="day">一 26</span><span class="day me">二 27</span><span class="day">三 28</span><span class="day">四 29</span><span class="day">五 30</span><span class="day">六 31</span><span class="day">日 1</span></div>
+            <div class="lv" data-lv="3" data-p="at"><div class="lv-h"><span>钟点 <b>3:00 p.m.</b></span><span class="lv-tag w-at">at 3 p.m.</span></div>
+              <div class="clock">0:00<div class="hours"><span class="dot"></span></div>24:00</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="sent en"></p>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>二、地点：小人站在哪？</h2>
+  <p class="lead">按步骤看，或者<b>直接点图里的房子、屋顶、公交站</b>，把小人挪过去。</p>
+  <div class="card" id="pdemo">
+    <div class="scene">
+      <svg viewBox="0 0 400 220" role="img" aria-label="房子、屋顶和公交站">
+        <line x1="10" y1="190" x2="390" y2="190" stroke="var(--line)" stroke-width="3"/>
+        <g class="zone" data-go="0">
+          <rect x="110" y="100" width="150" height="90" fill="var(--in-soft)" stroke="var(--wall)" stroke-width="2.5"/>
+          <rect x="125" y="118" width="28" height="24" fill="var(--surface)" stroke="var(--wall)" stroke-width="2"/>
+          <rect x="172" y="140" width="28" height="50" fill="var(--surface)" stroke="var(--wall)" stroke-width="2"/>
+        </g>
+        <polygon class="zone" data-go="1" points="98,100 185,40 272,100" fill="var(--on-soft)" stroke="var(--wall)" stroke-width="2.5"/>
+        <g class="zone" data-go="2">
+          <rect x="300" y="80" width="80" height="112" fill="transparent"/>
+          <line x1="340" y1="118" x2="340" y2="190" stroke="var(--wall)" stroke-width="4"/>
+          <circle cx="340" cy="104" r="16" fill="var(--at-soft)" stroke="var(--at)" stroke-width="2.5"/>
+          <text x="340" y="108" text-anchor="middle" font-size="11" font-weight="700" fill="var(--at)" font-family="sans-serif">BUS</text>
+        </g>
+        <g id="hl" fill="none" stroke-width="3" stroke-dasharray="6 5"></g>
+        <g id="person" pointer-events="none">
+          <circle cx="0" cy="-30" r="8" fill="var(--ink)"/>
+          <rect x="-7" y="-21" width="14" height="21" rx="5" fill="var(--ink)"/>
+        </g>
+      </svg>
+    </div>
+    <p class="sent en"></p>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>三、自己试试：介词分拣机</h2>
+  <p class="lead">屏幕上出现一个时间词，把它放进对的盒子里。</p>
+  <div class="card sorter" id="sorter">
+    <div class="prog"></div>
+    <div class="chip en"></div>
+    <div class="bins">
+      <button type="button" class="bin at" data-p="at">at</button>
+      <button type="button" class="bin on" data-p="on">on</button>
+      <button type="button" class="bin in" data-p="in">in</button>
+    </div>
+    <p class="fb"></p>
+    <div class="ctrl" style="justify-content:center">
+      <button type="button" class="btn primary" data-act="next">下一个 ▶</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>四、常见误区</h2>
+  <div class="traps">
+    <div class="card trap">
+      <div class="x en">in night</div><div class="y en">at night</div>
+      <p>早上、下午、晚上用 in：<span class="en">in the morning / afternoon / evening</span>；但「夜里」是固定搭配 <span class="en">at night</span>（中午 <span class="en">at noon</span> 也是 at）。</p>
+    </div>
+    <div class="card trap">
+      <div class="x en">in Monday morning</div><div class="y en">on Monday morning</div>
+      <p>只要落到<b>具体某一天</b>，就用 on，哪怕后面跟着「早上」：<span class="en">on Monday morning, on the morning of June 5</span>。</p>
+    </div>
+    <div class="card trap">
+      <div class="x en">on next Friday / at this morning</div><div class="y en">next Friday / this morning</div>
+      <p>前面有 <span class="en">next / last / this / every</span>，或者是 <span class="en">today / tomorrow / yesterday</span> 时，<b>不用</b>介词。</p>
+    </div>
+    <div class="card trap">
+      <div class="x en">in the bus</div><div class="y en">on the bus · in the car</div>
+      <p>交通工具：能站起来走动的大家伙（bus、train、plane、ship）用 on；只能坐着钻进去的小车（car、taxi）用 in。</p>
+    </div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>一句话总结</h2>
+  <p class="one"><b class="w-at">at</b> 指一个点，<b class="w-on">on</b> 指一个面或具体某一天，<b class="w-in">in</b> 指一个容器或一段时间：<br><b>范围越大越用 in，越精确越用 at。</b></p>
+  <table class="sum" style="margin-top:12px">
+    <tr><th></th><th>时间</th><th>地点</th></tr>
+    <tr><td class="w-at">at</td><td class="en">at 7:30, at noon, at night, at Christmas</td><td class="en">at the door, at the bus stop, at home, at school</td></tr>
+    <tr><td class="w-on">on</td><td class="en">on Monday, on May 1, on my birthday</td><td class="en">on the wall, on the table, on the bus</td></tr>
+    <tr><td class="w-in">in</td><td class="en">in 2026, in July, in summer, in the morning</td><td class="en">in the room, in Beijing, in China, in the car</td></tr>
+  </table>
+</section>
+
+<section class="lq" id="lq" aria-label="练习">
+  <div class="lq-head"><h2>练习</h2><span class="lq-score"></span></div>
+  <p class="lq-sub">学完上面的内容，来检验一下。每题作答后马上看到解析；点「重做练习」清空重来。</p>
+  <div class="lq-list"></div>
+  <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+</section>
+
+</main>
+
+</main>
+
+<script>
+const resets = [];
+window.pageReset = () => resets.forEach(f => f());
+
+/* 通用分步控制：上一步 / 下一步 / 播放 / 局部重置 */
+function stepper(root, steps, draw, ms = 1800) {
+  const btn = act => root.querySelector(`[data-act="${act}"]`), no = root.querySelector('.stepno');
+  const INIT = { step: 0, playing: false };
+  let S = { ...INIT }, timer = null;
+  const paint = () => {
+    draw(S.step);
+    no.textContent = `${S.step + 1} / ${steps}`;
+    btn('prev').disabled = S.step === 0; btn('next').disabled = S.step === steps - 1;
+    btn('play').textContent = S.playing ? '⏸ 暂停' : '▶ 播放';
+  };
+  const stop = () => { clearInterval(timer); timer = null; S.playing = false; };
+  const set = k => { S.step = Math.max(0, Math.min(steps - 1, k)); paint(); };
+  btn('prev').onclick = () => { stop(); set(S.step - 1); };
+  btn('next').onclick = () => { stop(); set(S.step + 1); };
+  btn('play').onclick = () => {
+    if (S.playing) { stop(); paint(); return; }
+    if (S.step === steps - 1) S.step = 0;
+    S.playing = true; paint();
+    timer = setInterval(() => { set(S.step + 1); if (S.step === steps - 1) { stop(); paint(); } }, ms);
+  };
+  const reset = () => { stop(); S = { ...INIT }; paint(); };
+  btn('reset').onclick = reset;
+  resets.push(reset);
+  reset();
+  return { jump: k => { stop(); set(k); } };
+}
+
+/* ---------- 一、时间倒金字塔 ---------- */
+{
+  const root = document.getElementById('tdemo');
+  const lvs = [...root.querySelectorAll('.lv')];
+  const sent = root.querySelector('.sent'), cap = root.querySelector('.caption');
+  const STEPS = [
+    { s: '<span class="w-in">in</span> 2026', t: '<b>年</b>是一大段时间，像一个大箱子，日子都装在里面，所以用 <b class="w-in">in</b>。' },
+    { s: '<span class="w-in">in</span> October', t: '放大到<b>月</b>：还是一段时间（容器），仍用 <b class="w-in">in</b>。季节、上午下午也一样：<span class="en">in summer, in the morning</span>。' },
+    { s: '<span class="w-on">on</span> Tuesday · <span class="w-on">on</span> October 27', t: '再放大到<b>具体某一天</b>：像日历上的一个格子（一块面），用 <b class="w-on">on</b>。星期几、日期、生日、节日当天都用 on。' },
+    { s: '<span class="w-at">at</span> 3 p.m.', t: '最后到<b>钟点</b>：时间轴上的一个点，用 <b class="w-at">at</b>。同理 <span class="en">at noon, at midnight, at night</span>。' },
+    { s: 'See you <span class="w-at">at</span> 3 p.m. <span class="w-on">on</span> Tuesday, October 27, 2026.', t: '合起来看：范围从大到小，介词就是 <b class="w-in">in</b> → <b class="w-on">on</b> → <b class="w-at">at</b>。越精确，越用 at。' },
+  ];
+  stepper(root, STEPS.length, k => {
+    lvs.forEach((el, i) => {
+      el.className = 'lv';
+      if (k < 4) { if (i > k) el.classList.add('hide'); else if (i < k) el.classList.add('dim'); else el.classList.add('cur-' + el.dataset.p); }
+      else el.classList.add('cur-' + el.dataset.p);
+    });
+    sent.innerHTML = STEPS[k].s; cap.innerHTML = STEPS[k].t;
+  });
+}
+
+/* ---------- 二、地点 ---------- */
+{
+  const root = document.getElementById('pdemo');
+  const person = root.querySelector('#person'), hl = root.querySelector('#hl');
+  const sent = root.querySelector('.sent'), cap = root.querySelector('.caption');
+  const STEPS = [
+    { x: 232, y: 188, c: 'var(--in)', hl: '<rect x="104" y="94" width="162" height="102" rx="6"/>',
+      s: 'I\'m <span class="w-in">in</span> the house.', t: '在房子<b>里面</b>：房子是个容器，用 <b class="w-in">in</b>。同理 <span class="en">in the room, in the box, in Beijing</span>（城市、国家是更大的容器）。' },
+    { x: 185, y: 41, c: 'var(--on)', hl: '<polyline points="92,104 185,34 278,104"/>',
+      s: 'I\'m <span class="w-on">on</span> the roof.', t: '站在屋顶<b>表面上</b>，贴着一个面，用 <b class="w-on">on</b>。同理 <span class="en">on the wall, on the table, on the floor</span>。' },
+    { x: 316, y: 190, c: 'var(--at)', hl: '<circle cx="336" cy="144" r="62"/>',
+      s: 'I\'m <span class="w-at">at</span> the bus stop.', t: '公交站在这里只是<b>一个位置点</b>，不关心里外上下，用 <b class="w-at">at</b>。同理 <span class="en">at the corner, at the traffic lights</span>。' },
+    { x: 186, y: 190, c: 'var(--at)', hl: '<rect x="164" y="132" width="44" height="64" rx="6"/>',
+      s: 'I\'m <span class="w-at">at</span> the door. · I\'m <span class="w-at">at</span> home.', t: '同一栋楼可以换着说：只当成「一个地点」用 <b class="w-at">at</b>（<span class="en">at home, at school, at the airport</span>）；强调「在建筑里面」才用 <b class="w-in">in</b>（<span class="en">Stay in the house, it\'s raining.</span>）。' },
+  ];
+  const ctl = stepper(root, STEPS.length, k => {
+    const s = STEPS[k];
+    person.setAttribute('transform', `translate(${s.x} ${s.y})`);
+    person.style.transform = `translate(${s.x}px, ${s.y}px)`;
+    hl.setAttribute('stroke', s.c); hl.innerHTML = s.hl;
+    sent.innerHTML = s.s; cap.innerHTML = s.t;
+  });
+  root.querySelectorAll('.zone').forEach(z => z.addEventListener('click', () => ctl.jump(+z.dataset.go)));
+}
+
+/* ---------- 三、分拣机 ---------- */
+{
+  const root = document.getElementById('sorter');
+  const chip = root.querySelector('.chip'), fb = root.querySelector('.fb'), prog = root.querySelector('.prog');
+  const bins = [...root.querySelectorAll('.bin')], nextBtn = root.querySelector('[data-act="next"]');
+  const WORDS = [
+    { w: 'Monday', a: ['on'], why: '星期几是具体某一天 → on Monday。' },
+    { w: '7 o\'clock', a: ['at'], why: '钟点是一个点 → at 7 o\'clock。' },
+    { w: 'July', a: ['in'], why: '月份是一段时间 → in July。' },
+    { w: 'night', a: ['at'], why: '固定搭配 at night（不说 in night）。' },
+    { w: '2026', a: ['in'], why: '年份是一大段时间 → in 2026。' },
+    { w: 'my birthday', a: ['on'], why: '生日是具体某一天 → on my birthday。' },
+    { w: 'noon', a: ['at'], why: '中午 12 点是一个时刻 → at noon。' },
+    { w: 'the morning', a: ['in'], why: '上午是一段时间 → in the morning。' },
+    { w: 'Christmas Day', a: ['on'], why: '圣诞节当天是某一天 → on Christmas Day（说整个节期才用 at Christmas）。' },
+    { w: 'the weekend', a: ['at', 'on'], why: 'at 和 on 都对：英式说 at the weekend，美式说 on the weekend。' },
+  ];
+  const INIT = { i: 0, answered: false, right: 0 };
+  let S = { ...INIT };
+  const draw = () => {
+    const done = S.i >= WORDS.length;
+    prog.textContent = done ? `完成！答对 ${S.right} / ${WORDS.length}` : `第 ${S.i + 1} / ${WORDS.length} 个 · 已答对 ${S.right}`;
+    chip.className = 'chip en';
+    chip.textContent = done ? '🎉' : '___ ' + WORDS[S.i].w;
+    bins.forEach(b => b.disabled = done || S.answered);
+    nextBtn.disabled = done || !S.answered;
+    nextBtn.textContent = S.i === WORDS.length - 1 ? '看结果 ▶' : '下一个 ▶';
+    if (!S.answered) fb.innerHTML = done ? (S.right === WORDS.length ? '全对，倒金字塔已经刻进脑子了！' : '点「重置本模块」再来一轮。') : '';
+  };
+  bins.forEach(b => b.onclick = () => {
+    const it = WORDS[S.i], ok = it.a.includes(b.dataset.p);
+    S.answered = true; if (ok) S.right++;
+    draw();
+    chip.classList.add(ok ? 'ok' : 'bad');
+    chip.textContent = `${it.a.join(' / ')} ${it.w}`;
+    fb.innerHTML = (ok ? '<span class="g">✓ 对！</span>' : '<span class="r">✗ 不对。</span>') + it.why;
+  });
+  nextBtn.onclick = () => { S.i++; S.answered = false; draw(); };
+  const reset = () => { S = { ...INIT }; draw(); };
+  root.querySelector('[data-act="reset"]').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+window.LQ_ITEMS = [
+  { type: '选择', q: 'I was born ___ 1998.', opts: ['at', 'on', 'in'], ans: 2, why: '年份是一大段时间（倒金字塔最外层），用 in。' },
+  { type: '选择', q: 'The meeting starts ___ 9 o\'clock.', opts: ['at', 'on', 'in'], ans: 0, why: '具体钟点是时间轴上的一个点，用 at。' },
+  { type: '选择', q: 'See you ___ Friday!', opts: ['at', 'on', 'in'], ans: 1, why: '星期几是日历上的一个格子（具体某一天），用 on。' },
+  { type: '判断', q: '「I usually read books in night.」这句话的介词用对了。', opts: ['对', '错'], ans: 1, why: '「夜里」是固定搭配 at night。in 用于 in the morning / afternoon / evening，night 是例外。' },
+  { type: '选择', q: 'There is a picture ___ the wall.', opts: ['at', 'on', 'in'], ans: 1, why: '画贴在墙的表面上，是「面」的关系，用 on（参考地点动画第 2 步）。' },
+  { type: '选择', q: 'He is waiting for you ___ the bus stop.', opts: ['at', 'on', 'in'], ans: 0, why: '公交站在这里只是一个位置点，用 at（地点动画第 3 步）。' },
+  { type: '选择', q: '常见误区：I\'ll call you ___ next Monday.', opts: ['on', 'at', '不用介词'], ans: 2, why: '前面有 next / last / this / every 时不加介词：直接说 next Monday。' },
+  { type: '填空', q: '迁移应用：She arrived ___ the morning of June 5th.（填一个介词）', ans: ['on'], placeholder: 'at / on / in', why: '虽然有 morning，但它是「6 月 5 日那天的早上」，落到了具体某一天，所以用 on。单独说 in the morning 才用 in。' },
+  { type: '选择', q: '迁移应用：我们坐公交去学校，路上他说「我在公交车上」，英语应该说 I\'m ___ the bus.', opts: ['in', 'on', 'at'], ans: 1, why: '公交、火车、飞机这种能站起来走动的大型交通工具用 on；小汽车、出租车才用 in the car / in a taxi。' },
+];
+</script>
+<script>
+/* ---------- 练习题（learn 通用组件） ----------
+   题目来自 window.LQ_ITEMS：{type, q, opts, ans: 选项下标, why} 或填空题 {type, q, ans: [可接受答案…], why}
+   定义 window.resetPage()（导航条「重置」按钮调用）：先调用页面自己的 window.pageReset()，再清空练习 */
+(() => {
+  const box = document.getElementById('lq');
+  const items = window.LQ_ITEMS || [];
+  const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let answered = 0, right = 0;
+
+  function update() {
+    const all = answered === items.length;
+    score.textContent = `已答 ${answered} / ${items.length} · 答对 ${right}` +
+      (all ? (right === items.length ? ' · 全对！' : ' · 看看解析，再重做一次') : '');
+  }
+
+  function render() {
+    answered = 0; right = 0; list.innerHTML = '';
+    items.forEach((it, i) => {
+      const el = document.createElement('div');
+      el.className = 'lq-item';
+      el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
+      const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
+      const judge = (ok, answer) => {
+        answered++; if (ok) right++;
+        el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
+        why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
+        update();
+      };
+      if (it.opts) {
+        a.classList.add('lq-opts');
+        it.opts.forEach((o, j) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'lq-opt'; b.innerHTML = o;
+          b.onclick = () => {
+            a.querySelectorAll('button').forEach(x => x.disabled = true);
+            a.children[it.ans].classList.add('lq-right');
+            if (j !== it.ans) b.classList.add('lq-wrong');
+            judge(j === it.ans, it.opts[it.ans]);
+          };
+          a.append(b);
+        });
+      } else {
+        a.classList.add('lq-fill');
+        a.innerHTML = `<input type="text" autocomplete="off" spellcheck="false" placeholder="${it.placeholder || '输入答案'}" aria-label="第 ${i + 1} 题答案"><button type="button" class="lq-opt">确定</button>`;
+        const inp = a.querySelector('input'), go = a.querySelector('button');
+        const submit = () => {
+          if (!inp.value.trim()) { inp.focus(); return; }
+          inp.disabled = go.disabled = true;
+          const ok = it.ans.some(x => norm(x) === norm(inp.value));
+          inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
+          judge(ok, it.ans[0]);
+        };
+        go.onclick = submit;
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      }
+      list.append(el);
+    });
+    update();
+  }
+
+  box.querySelector('.lq-redo').addEventListener('click', render);
+  // 导航条的「重置」按钮调用它：页面各模块 + 练习题一起恢复初始状态
+  window.resetPage = () => {
+    if (typeof window.pageReset === 'function') window.pageReset();
+    render();
+  };
+  render();
+})();
+</script>
+</body>
+</html>
