@@ -27,10 +27,10 @@
 3. **构建**：`npm run build`。确认输出里各类目篇数符合预期，并处理 `⚠` 警告。
 4. **部署**：`npm run deploy`，直接执行，不用确认。
 5. **线上验证**：`curl -s -o /dev/null -w "%{http_code}" https://up.yiwei.website/<类目>/<文件名>` 返回 200，且首页能搜到这一篇。改名或删除时，旧地址会变成 404，要告诉用户。
-6. **留档**：`git add -A && git commit -m "<类目>: <主题>"`。
+6. **留档**：`git add -A && git commit -m "<类目>: <主题>" && git push`（远程仓库 `git@github.com:lawrencehe/learn.git`，所有项目资料——html、CLAUDE.md、skills、rules、docs、脚本等——都推送到这里）。
 7. **交付**：给出线上链接 `https://up.yiwei.website/<类目>/<文件名>`（不带 `.html`）和本地链接 `file:///home/opc/learn/<类目>/<文件名>.html`。
 
-部署失败（凭据缺失、网络问题等）时，第 1、3、6 步照常完成，把报错如实告诉用户，并说明页面暂时只在本地。
+部署失败（凭据缺失、网络问题等）时，第 1、3、6 步照常完成（push 失败同样如实报告），把报错如实告诉用户，并说明页面暂时只在本地。
 
 ## 类目
 
