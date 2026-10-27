@@ -55,4 +55,5 @@
 - 线上站点：https://up.yiwei.website（Cloudflare Workers 静态资源，完全公开，无需登录）。其他 wrangler 命令用 `npm run cf -- <命令>`，例如回滚用 `npm run cf -- rollback`。
 - 部署凭据 `CLOUDFLARE_API_TOKEN`、`CLOUDFLARE_ACCOUNT_ID` 放在 `~/.config/cloudflare/up-learn.env`，由 `scripts/cf.sh` 读取，切勿读取或输出其内容。
 - 只有四个类目目录里的 `.html` 会被发布（见 `scripts/build.mjs`），网站首页（学科分类 + 搜索 + 最近更新）和各类目目录页都由该脚本自动生成，不要手写；新增类目时同步修改脚本里的 `CATEGORIES`。网站 logo（`site/favicon.svg`、`site/apple-touch-icon.png`）和 `site/` 下其他文件原样发布到网站根目录。
+- 发音音频：涉及读音的页面用 `npm run tts -- <类目>/<文件>.html` 生成内嵌 mp3（本地 Kokoro 模型，装在 `~/.local/share/kokoro/`，美音 af_heart + 英音 bf_emma）。页面约定见 `scripts/tts.py` 开头的说明；生成后核对打印出的音标，有歧义的词（如 close、live）在 `audio-words` 清单里手动指定音标。
 - 文件名用简短的英文 kebab-case，例如 `tcp-sliding-window.html`、`rbtree.html`。生成前先 `ls` 看是否已有同主题文件。

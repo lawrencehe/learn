@@ -5,7 +5,8 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "cf": "sh scripts/cf.sh",
-    "deploy": "node scripts/build.mjs && sh scripts/cf.sh deploy"
+    "deploy": "node scripts/build.mjs && sh scripts/cf.sh deploy",
+    "tts": "$HOME/.local/share/kokoro/.venv/bin/python scripts/tts.py"
   },
   "devDependencies": {
     "wrangler": "^4.153.0"
