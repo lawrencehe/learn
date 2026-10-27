@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs",
-    "deploy": "node scripts/build.mjs && wrangler deploy"
+    "cf": "sh scripts/cf.sh",
+    "deploy": "node scripts/build.mjs && sh scripts/cf.sh deploy"
   },
   "devDependencies": {
     "wrangler": "^4.153.0"

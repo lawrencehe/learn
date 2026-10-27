@@ -38,7 +38,7 @@
 
 ## 其他
 
-- 每次新建或修改学习页后，都直接同步到网站 https://up.yiwei.love（完全公开，无需登录）：在 `/home/opc/learn` 下运行 `npm run deploy`（构建 `dist/` 并用 wrangler 部署到 Cloudflare），再 `git add -A && git commit` 留档。交付时同时给出本地链接和线上链接 `https://up.yiwei.love/<类目>/<文件名>`（不带 `.html`）。
-- 部署依赖环境变量 `CLOUDFLARE_API_TOKEN` 和 `CLOUDFLARE_ACCOUNT_ID`；缺失或部署失败时如实告知用户，本地文件照常交付。
+- 每次新建或修改学习页后，都直接同步到网站 https://up.yiwei.love（完全公开，无需登录）：在 `/home/opc/learn` 下运行 `npm run deploy`（构建 `dist/` 并用 wrangler 部署到 Cloudflare；其他 wrangler 命令用 `npm run cf -- <命令>`），再 `git add -A && git commit` 留档。交付时同时给出本地链接和线上链接 `https://up.yiwei.love/<类目>/<文件名>`（不带 `.html`）。
+- 部署凭据 `CLOUDFLARE_API_TOKEN`、`CLOUDFLARE_ACCOUNT_ID` 放在 `~/.config/cloudflare/up-learn.env`（由 `scripts/cf.sh` 读取，切勿读取或输出其内容）；缺失或部署失败时如实告知用户，本地文件照常交付。
 - 只有四个类目目录里的 `.html` 会被发布（见 `scripts/build.mjs`），网站首页（学科分类 + 搜索 + 最近更新）和各类目目录页都由该脚本自动生成，不要手写；新增类目时同步修改脚本里的 `CATEGORIES`。
 - 文件名用简短的英文 kebab-case，例如 `tcp-sliding-window.html`、`rbtree.html`。生成前先 `ls` 看是否已有同主题文件。
