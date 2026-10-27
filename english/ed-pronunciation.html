@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>-ed 的三种读音</title>
+<meta name="description" content="过去式 -ed 什么时候读 /t/、什么时候读 /d/、什么时候读 /ɪd/：看原形最后一个「音」，摸喉咙辨清浊，三步判断">
+<style>
+:root {
+  --bg: #f4f5f8;
+  --surface: #ffffff;
+  --surface2: #eef0f5;
+  --ink: #1c2230;
+  --muted: #5f6878;
+  --line: #d8dce5;
+  --t: #2563d4;   --t-soft: #dfe9fc;
+  --d: #c2560c;   --d-soft: #fdebd8;
+  --id: #7c3aed;  --id-soft: #ede4fd;
+  --accent: #0f766e;
+  --ok: #15803d; --ok-soft: #dcf2e7;
+  --bad: #c2412d; --bad-soft: #fbe3de;
+  --font: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+  --mono: ui-monospace, Menlo, Consolas, monospace;
+  --ipa: "Charis SIL", "Doulos SIL", "Lucida Sans Unicode", "Segoe UI", "Arial Unicode MS", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #12151c; --surface: #1b202a; --surface2: #232a36; --ink: #e8ecf3; --muted: #9aa4b5; --line: #2f3746;
+    --t: #7aa7ff; --t-soft: #1c2b4a;
+    --d: #f5a35c; --d-soft: #3d2a17;
+    --id: #b79cff; --id-soft: #2e2347;
+    --accent: #2dd4bf;
+    --ok: #4ade80; --ok-soft: #163a26;
+    --bad: #ff8a73; --bad-soft: #47231d;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font);
+  font-size: 16px; line-height: 1.7; padding: 72px 16px 96px;
+}
+main { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 48px; }
+h1, h2, h3, p { margin: 0; }
+h2 { font-size: 1.4rem; margin-bottom: 8px; }
+.topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 10; display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); }
+.tag { display: inline-block; font-family: var(--mono); font-size: 12px; letter-spacing: .1em; padding: 2px 10px; border-radius: 999px; background: var(--surface2); color: var(--muted); }
+.hero h1 { font-size: clamp(28px, 6vw, 44px); line-height: 1.2; margin: 10px 0; }
+.lead { color: var(--muted); }
+.box { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
+.analogy { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 12px; padding: 14px 16px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+.card .big { font-size: 1.5rem; font-weight: 800; font-family: var(--ipa); }
+.card.T { border-top: 4px solid var(--t); } .card.T .big { color: var(--t); }
+.card.D { border-top: 4px solid var(--d); } .card.D .big { color: var(--d); }
+.card.ID { border-top: 4px solid var(--id); } .card.ID .big { color: var(--id); }
+.ipa { font-family: var(--ipa); }
+.cT { color: var(--t); font-weight: 700; } .cD { color: var(--d); font-weight: 700; } .cID { color: var(--id); font-weight: 700; }
+small, .note { color: var(--muted); font-size: .9rem; }
+button { font: inherit; cursor: pointer; }
+.btn { padding: 6px 14px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); }
+.btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.btn:disabled { opacity: .4; cursor: default; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.ctrl { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: center; }
+.stepno { font-family: var(--mono); color: var(--muted); font-size: .9rem; min-width: 56px; text-align: center; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.chip { padding: 3px 12px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); }
+.chip.on { border-color: var(--accent); background: var(--accent); color: #fff; }
+.mod-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+
+/* 动画 1：三步判断 */
+.stage { background: var(--surface2); border-radius: 12px; padding: 20px 10px; min-height: 300px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.word { font-size: clamp(30px, 8vw, 48px); font-weight: 800; letter-spacing: .02em; display: flex; align-items: baseline; }
+.word .ed { display: inline-block; transition: opacity .8s, transform .8s; color: var(--muted); }
+.word .ed.gone { opacity: 0; transform: translateX(30px); }
+.word .base-e { color: var(--muted); }
+.ipa-line { font-family: var(--ipa); font-size: 1.6rem; min-height: 2.2rem; transition: opacity .6s; }
+.ipa-line .last { display: inline-block; padding: 0 4px; border-radius: 6px; background: var(--accent); color: #fff; animation: pop .7s; }
+@keyframes pop { 0% { transform: scale(.6); } 60% { transform: scale(1.25); } 100% { transform: scale(1); } }
+.tree { display: grid; grid-template-columns: 1fr; gap: 8px; width: 100%; max-width: 520px; }
+.q { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 10px; border: 1.5px dashed var(--line); background: var(--surface); opacity: .45; transition: all .6s; }
+.q.lit { opacity: 1; border-style: solid; border-color: var(--accent); }
+.q .ans { font-weight: 700; font-size: .95rem; white-space: nowrap; }
+.res { font-family: var(--ipa); font-size: 1.4rem; font-weight: 800; padding: 6px 16px; border-radius: 10px; transition: all .6s; opacity: 0; transform: translateY(8px); }
+.res.show { opacity: 1; transform: none; }
+.res.T { background: var(--t-soft); color: var(--t); } .res.D { background: var(--d-soft); color: var(--d); } .res.ID { background: var(--id-soft); color: var(--id); }
+.caption { text-align: center; font-size: 1.05rem; min-height: 3.4em; margin: 12px 0; }
+
+/* 动画 2：喉咙振动 */
+.voice-wrap { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; align-items: center; }
+.pairs { display: grid; grid-template-columns: auto 1fr 1fr; gap: 6px; text-align: center; align-items: center; }
+.pairs .h { font-size: .85rem; color: var(--muted); font-weight: 700; }
+.snd { font-family: var(--ipa); font-size: 1.15rem; padding: 4px 0; border-radius: 8px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); }
+.snd.vl { border-color: color-mix(in srgb, var(--t) 50%, var(--line)); }
+.snd.vd { border-color: color-mix(in srgb, var(--d) 50%, var(--line)); }
+.snd.on.vl { background: var(--t); color: #fff; } .snd.on.vd { background: var(--d); color: #fff; }
+.scope { background: var(--surface2); border-radius: 12px; padding: 14px; text-align: center; }
+.scope svg { width: 100%; height: 120px; display: block; }
+.scope .wave { fill: none; stroke-width: 3; stroke-linecap: round; }
+.scope .wave.vib { animation: shake .25s linear infinite; }
+@keyframes shake { 0% { transform: translateX(0); } 100% { transform: translateX(-40px); } }
+.verdict { font-size: 1.05rem; min-height: 3.2em; margin-top: 6px; }
+
+/* 分拣机 */
+.sorter-card { text-align: center; font-size: clamp(26px, 7vw, 38px); font-weight: 800; padding: 10px; min-height: 70px; transition: all .6s; }
+.sorter-card.fly { opacity: 0; transform: translateY(40px) scale(.7); }
+.bins { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.bin { border-radius: 12px; padding: 10px 6px; min-height: 120px; border: 2px solid var(--line); background: var(--surface); text-align: center; }
+.bin button { width: 100%; font-family: var(--ipa); font-weight: 800; font-size: 1.2rem; border-radius: 8px; padding: 4px; border: none; color: #fff; }
+.bin.T button { background: var(--t); } .bin.D button { background: var(--d); } .bin.ID button { background: var(--id); }
+.bin ul { list-style: none; margin: 8px 0 0; padding: 0; font-size: .95rem; }
+.bin li.wrong { color: var(--bad); text-decoration: line-through; }
+.fb { margin-top: 10px; padding: 10px 12px; border-radius: 10px; min-height: 2.8em; }
+.fb.ok { background: var(--ok-soft); } .fb.bad { background: var(--bad-soft); }
+
+/* 误区 */
+.myth { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.myth .card b.x { color: var(--bad); } .myth .card b.v { color: var(--ok); }
+table.cmp { width: 100%; border-collapse: collapse; font-size: .95rem; }
+table.cmp td, table.cmp th { border-bottom: 1px solid var(--line); padding: 6px 4px; text-align: left; }
+table.cmp th { color: var(--muted); font-weight: 600; }
+
+.summary { font-size: 1.15rem; text-align: center; padding: 20px; border-radius: 14px; background: var(--surface); border: 2px solid var(--accent); }
+
+/* 练习 */
+.quiz { display: flex; flex-direction: column; gap: 14px; }
+.qcard { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+.qcard .qt { font-weight: 600; margin-bottom: 8px; }
+.opts { display: flex; flex-direction: column; gap: 6px; }
+.opt { text-align: left; padding: 7px 12px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); }
+.opt:hover:not(:disabled) { border-color: var(--accent); }
+.opt:disabled { cursor: default; }
+.opt.right { border-color: var(--ok); background: var(--ok-soft); }
+.opt.wrong { border-color: var(--bad); background: var(--bad-soft); }
+.explain { margin-top: 8px; padding: 8px 12px; border-radius: 8px; background: var(--surface2); font-size: .95rem; display: none; }
+.explain.show { display: block; }
+.score { font-size: 1.2rem; font-weight: 700; text-align: center; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+@media (max-width: 480px) {
+  .bin button { font-size: 1rem; }
+  .bin ul { font-size: .85rem; }
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <span class="tag">english</span>
+  <button class="btn primary" id="globalReset">↺ 重置</button>
+</div>
+
+<main>
+  <section class="hero">
+    <span class="tag">english · 发音</span>
+    <h1>过去式 -ed 怎么读？</h1>
+    <p class="lead">同样是加 -ed：<b>looked</b> 末尾像 /t/，<b>played</b> 末尾像 /d/，<b>wanted</b> 却多出一个 /ɪd/。<br>决定读法的只有一件事：<b>原形最后一个「音」</b>。</p>
+  </section>
+
+  <section>
+    <h2>先摸摸喉咙 🖐️</h2>
+    <div class="analogy">
+      <p>把手指轻放在喉咙上，分别发 <b>“ssss”</b> 和 <b>“zzzz”</b>。</p>
+      <p>发 z 时手指感到<b>嗡嗡震动</b>，发 s 时没有。喉咙里像有个<b>「声带开关」</b>。</p>
+      <p>-ed 很“懒”：前面的音开关是<b>关</b>的，它就读不震的 <span class="cT ipa">/t/</span>；开关是<b>开</b>的，它就读震动的 <span class="cD ipa">/d/</span>。</p>
+    </div>
+    <p class="note" style="margin-top:8px">术语：声带不震的辅音叫<b>清辅音</b>，声带震动的音叫<b>浊音</b>（浊辅音 + 所有元音）。</p>
+  </section>
+
+  <section>
+    <h2>是什么：三种读音，一张表</h2>
+    <div class="grid">
+      <div class="card ID">
+        <div class="big">/ɪd/</div>
+        <p>原形以 <b class="ipa">/t/</b> 或 <b class="ipa">/d/</b> 音结尾</p>
+        <small>wanted · needed · decided · visited</small>
+        <p class="note">多出一个音节</p>
+      </div>
+      <div class="card T">
+        <div class="big">/t/</div>
+        <p>以其他<b>清辅音</b>结尾<br><span class="ipa">/p/ /k/ /f/ /s/ /ʃ/ /tʃ/ /θ/</span></p>
+        <small>stopped · looked · laughed · kissed · washed · watched</small>
+      </div>
+      <div class="card D">
+        <div class="big">/d/</div>
+        <p>以其他<b>浊辅音</b>或<b>元音</b>结尾<br><span class="ipa">/b/ /g/ /v/ /z/ /m/ /n/ /l/ …</span></p>
+        <small>played · called · lived · closed · opened · cried</small>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>为什么会这样？</h2>
+    <div class="grid">
+      <div class="card">
+        <p><b>① 省力：开关不来回拨</b></p>
+        <p>look 末尾 /k/ 声带没震，紧接着再震一下发 /d/ 很别扭，干脆顺着读成 /t/：<span class="ipa">/lʊkt/</span>。</p>
+      </div>
+      <div class="card">
+        <p><b>② 听得清：两个 t/d 撞车要隔开</b></p>
+        <p>want 已经以 /t/ 结尾，再贴一个 /t/ 就成了 “wantt”，和 want 听不出差别。于是中间插个 <span class="ipa cID">/ɪ/</span>：<span class="ipa">/ˈwɒntɪd/</span>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 动画 1 -->
+  <section>
+    <div class="mod-head">
+      <h2 style="margin:0">怎么判断：三步走（分步动画）</h2>
+      <button class="btn" id="s-reset">↺ 重置本模块</button>
+    </div>
+    <div class="box">
+      <div class="chips" id="s-words"></div>
+      <div class="caption" id="s-cap"></div>
+      <div class="stage">
+        <div class="word" id="s-word"></div>
+        <div class="ipa-line" id="s-ipa"></div>
+        <div class="tree">
+          <div class="q" id="s-q1"><span>原形最后一个音是 /t/ 或 /d/ 吗？</span><span class="ans" id="s-a1"></span></div>
+          <div class="q" id="s-q2"><span>最后一个音声带震动吗？（浊音？）</span><span class="ans" id="s-a2"></span></div>
+        </div>
+        <div class="res" id="s-res"></div>
+      </div>
+      <div class="ctrl" style="margin-top:12px">
+        <button class="btn" id="s-prev">← 上一步</button>
+        <span class="stepno" id="s-no"></span>
+        <button class="btn" id="s-next">下一步 →</button>
+        <button class="btn primary" id="s-play">▶ 播放</button>
+        <button class="btn" id="s-say">🔊 读一下</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 动画 2 -->
+  <section>
+    <div class="mod-head">
+      <h2 style="margin:0">自己试试：清还是浊？</h2>
+      <button class="btn" id="v-reset">↺ 重置本模块</button>
+    </div>
+    <p class="note" style="margin-bottom:10px">英语辅音大多“成对”：嘴型一样，只差声带开不开。点任意一个音看看。</p>
+    <div class="box voice-wrap">
+      <div class="pairs" id="v-pairs">
+        <div></div><div class="h cT">清（不震）→ /t/</div><div class="h cD">浊（震动）→ /d/</div>
+      </div>
+      <div class="scope">
+        <svg viewBox="0 0 300 120" preserveAspectRatio="none" aria-hidden="true">
+          <line x1="0" y1="60" x2="300" y2="60" stroke="var(--line)" stroke-width="1"/>
+          <path id="v-wave" class="wave" d="" />
+        </svg>
+        <div class="verdict" id="v-verdict"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 分拣机 -->
+  <section>
+    <div class="mod-head">
+      <h2 style="margin:0">分拣机：把单词放进对的桶</h2>
+      <button class="btn" id="g-reset">↺ 重置本模块</button>
+    </div>
+    <div class="box">
+      <p class="note" style="text-align:center">先在心里还原原形、找最后一个音，再点下面的桶。</p>
+      <div class="sorter-card" id="g-card"></div>
+      <div class="bins">
+        <div class="bin T"><button data-b="T">/t/</button><ul id="g-T"></ul></div>
+        <div class="bin D"><button data-b="D">/d/</button><ul id="g-D"></ul></div>
+        <div class="bin ID"><button data-b="ID">/ɪd/</button><ul id="g-ID"></ul></div>
+      </div>
+      <div class="fb" id="g-fb"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>常见误区</h2>
+    <div class="myth">
+      <div class="card">
+        <p><b class="x">✗ 看最后一个字母</b> → <b class="v">✓ 听最后一个音</b></p>
+        <table class="cmp">
+          <tr><th>单词</th><th>结尾字母</th><th>实际末音</th><th>-ed</th></tr>
+          <tr><td>closed</td><td>s(e)</td><td class="ipa">/z/ 浊</td><td class="cD ipa">/d/</td></tr>
+          <tr><td>kissed</td><td>ss</td><td class="ipa">/s/ 清</td><td class="cT ipa">/t/</td></tr>
+          <tr><td>laughed</td><td>gh</td><td class="ipa">/f/ 清</td><td class="cT ipa">/t/</td></tr>
+          <tr><td>fixed</td><td>x</td><td class="ipa">/ks/ 清</td><td class="cT ipa">/t/</td></tr>
+          <tr><td>danced</td><td>c(e)</td><td class="ipa">/s/ 清</td><td class="cT ipa">/t/</td></tr>
+          <tr><td>played</td><td>y</td><td class="ipa">/eɪ/ 元音</td><td class="cD ipa">/d/</td></tr>
+        </table>
+        <p class="note">不发音的 e（bake、close）要跳过，看它前面那个真正发出来的音。</p>
+      </div>
+      <div class="card">
+        <p><b class="x">✗ 把 -ed 都读成“依德”</b>：look-ed、stop-ed。</p>
+        <p><b class="v">✓</b> 只有 /t/、/d/ 结尾才多一个音节。looked 是<b>一个</b>音节 <span class="ipa">/lʊkt/</span>。</p>
+      </div>
+      <div class="card">
+        <p><b>边界情况：少数形容词仍读 /ɪd/</b></p>
+        <p>naked <span class="ipa">/ˈneɪkɪd/</span>、wicked、beloved、learned（博学的）、aged（年迈的）。它们是形容词，不按动词规则走；作动词过去式时 learned 仍读 <span class="ipa">/lɜːnd/</span>。</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="summary">
+      <b>一句话：</b>看原形最后一个<b>音</b>——<br>
+      是 t/d → <span class="cID ipa">/ɪd/</span>；不震（清）→ <span class="cT ipa">/t/</span>；震（浊/元音）→ <span class="cD ipa">/d/</span>。
+    </div>
+  </section>
+
+  <section>
+    <div class="mod-head">
+      <h2 style="margin:0">练习</h2>
+      <button class="btn" id="q-redo">↺ 重做练习</button>
+    </div>
+    <div class="quiz" id="quiz"></div>
+    <p class="score" id="q-score" style="margin-top:14px"></p>
+  </section>
+</main>
+
+<script>
+// ============ 可选：朗读 ============
+function say(text) {
+  try {
+    if (!('speechSynthesis' in window)) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-US'; u.rate = 0.75;
+    speechSynthesis.speak(u);
+  } catch (e) {}
+}
+function stopSay() { try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) {} }
+
+// ============ 模块 1：三步判断 ============
+const S_WORDS = [
+  { w: 'stopped', pre: 'stopp', base: 'stop', ipaHead: '/stɒ', last: 'p', kind: 'T', full: '/stɒpt/', syl: 1, why: '/p/ 是清辅音，声带不震' },
+  { w: 'played',  pre: 'play',  base: 'play', ipaHead: '/pl', last: 'eɪ', kind: 'D', full: '/pleɪd/', syl: 1, why: '/eɪ/ 是元音，元音都震动' },
+  { w: 'wanted',  pre: 'want',  base: 'want', ipaHead: '/wɒn', last: 't', kind: 'ID', full: '/ˈwɒntɪd/', syl: 2, why: '已经以 /t/ 结尾' },
+  { w: 'laughed', pre: 'laugh', base: 'laugh', ipaHead: '/lɑː', last: 'f', kind: 'T', full: '/lɑːft/', syl: 1, why: 'gh 在这里读 /f/，清辅音' },
+  { w: 'closed',  pre: 'clos',  base: 'close', ipaHead: '/kləʊ', last: 'z', kind: 'D', full: '/kləʊzd/', syl: 1, why: '这里的 s 读 /z/，浊辅音' },
+  { w: 'needed',  pre: 'need',  base: 'need', ipaHead: '/niː', last: 'd', kind: 'ID', full: '/ˈniːdɪd/', syl: 2, why: '已经以 /d/ 结尾' },
+];
+const S_STEPS = 5; // 0..4
+const S_INIT = { word: 0, step: 0 };
+let S = { ...S_INIT }, sTimer = null;
+const $ = id => document.getElementById(id);
+
+function sRender() {
+  const d = S_WORDS[S.word], st = S.step;
+  $('s-words').innerHTML = S_WORDS.map((x, i) => `<button class="chip ${i === S.word ? 'on' : ''}" data-i="${i}">${x.w}</button>`).join('');
+  // 单词
+  const edGone = st >= 1;
+  let wordHtml;
+  if (!edGone) wordHtml = `<span>${d.pre}</span><span class="ed">ed</span>`;
+  else {
+    const silentE = d.base.length > d.pre.length; // close
+    const shown = silentE ? `${d.pre}<span class="base-e">e</span>` : d.base;
+    wordHtml = `<span>${shown}</span><span class="ed${st > 1 ? ' gone' : ''}">ed</span>`;
+  }
+  $('s-word').innerHTML = wordHtml;
+  if (st === 1) requestAnimationFrame(() => requestAnimationFrame(() => { const e = $('s-word').querySelector('.ed'); if (e) e.classList.add('gone'); }));
+  // 音标
+  $('s-ipa').innerHTML = st >= 2 ? `${d.ipaHead}<span class="last">${d.last}</span>/` : '';
+  // 判断树
+  const isTD = d.kind === 'ID';
+  $('s-q1').classList.toggle('lit', st >= 3);
+  $('s-a1').textContent = st >= 3 ? (isTD ? '是 → /ɪd/' : '否 ↓') : '';
+  $('s-a1').style.color = st >= 3 ? (isTD ? 'var(--id)' : 'var(--muted)') : '';
+  const q2on = st >= 3 && !isTD;
+  $('s-q2').classList.toggle('lit', q2on);
+  $('s-a2').textContent = q2on ? (d.kind === 'D' ? '震 → /d/' : '不震 → /t/') : (st >= 3 ? '（跳过）' : '');
+  $('s-a2').style.color = q2on ? (d.kind === 'D' ? 'var(--d)' : 'var(--t)') : 'var(--muted)';
+  // 结果
+  const res = $('s-res');
+  res.className = 'res ' + d.kind + (st >= 4 ? ' show' : '');
+  res.textContent = st >= 4 ? `${d.w} = ${d.full}` : '';
+  // 说明
+  const caps = [
+    `看到过去式 <b>${d.w}</b>，结尾的 -ed 该怎么读？`,
+    `第 1 步：去掉 -ed，还原成原形 <b>${d.base}</b>。` + (d.pre !== d.base ? (d.base.length > d.pre.length ? '<span class="note">末尾的 e 不发音，后面要跳过它。</span>' : '<span class="note">双写的 p 只是拼写规则，不影响读音。</span>') : ''),
+    `第 2 步：找原形<b>最后一个音</b>（不是最后一个字母）：<span class="ipa"><b>/${d.last}/</b></span>。<span class="note">${d.why}。</span>`,
+    isTD ? `第 3 步：是 /t/ 或 /d/ → 中间插个 /ɪ/ 隔开，读 <span class="cID ipa">/ɪd/</span>。` :
+      `第 3 步：不是 t/d，再问声带震不震 → ${d.kind === 'D' ? '震，-ed 读 <span class="cD ipa">/d/</span>' : '不震，-ed 读 <span class="cT ipa">/t/</span>'}。`,
+    `结果：<span class="ipa"><b>${d.full}</b></span>，共 ${d.syl} 个音节。` + (d.syl === 1 ? '<span class="note">-ed 不单独成音节，只是尾巴上的一个辅音。</span>' : '<span class="note">-ed 自成一个音节，比原形多一拍。</span>'),
+  ];
+  $('s-cap').innerHTML = caps[st];
+  $('s-no').textContent = `${st + 1} / ${S_STEPS}`;
+  $('s-prev').disabled = st === 0;
+  $('s-next').disabled = st === S_STEPS - 1;
+  $('s-play').textContent = sTimer ? '⏸ 暂停' : '▶ 播放';
+}
+function sStop() { if (sTimer) { clearInterval(sTimer); sTimer = null; } }
+function sReset() { sStop(); S = { ...S_INIT }; sRender(); }
+$('s-words').addEventListener('click', e => {
+  const b = e.target.closest('[data-i]'); if (!b) return;
+  sStop(); S.word = +b.dataset.i; S.step = 0; sRender();
+});
+$('s-prev').onclick = () => { sStop(); if (S.step > 0) S.step--; sRender(); };
+$('s-next').onclick = () => { sStop(); if (S.step < S_STEPS - 1) S.step++; sRender(); };
+$('s-play').onclick = () => {
+  if (sTimer) { sStop(); sRender(); return; }
+  if (S.step === S_STEPS - 1) S.step = 0;
+  sTimer = setInterval(() => {
+    if (S.step < S_STEPS - 1) S.step++;
+    if (S.step === S_STEPS - 1) sStop();
+    sRender();
+  }, 1600);
+  sRender();
+};
+$('s-say').onclick = () => say(S.step >= 1 && S.step < 4 ? S_WORDS[S.word].base : S_WORDS[S.word].w);
+$('s-reset').onclick = sReset;
+
+// ============ 模块 2：清浊辨音 ============
+const V_PAIRS = [
+  ['p', 'b', 'hope → hoped', 'rob → robbed'],
+  ['k', 'g', 'look → looked', 'beg → begged'],
+  ['f', 'v', 'laugh → laughed', 'live → lived'],
+  ['s', 'z', 'kiss → kissed', 'close → closed'],
+  ['ʃ', 'ʒ', 'wash → washed', 'massage → massaged'],
+  ['tʃ', 'dʒ', 'watch → watched', 'judge → judged'],
+  ['θ', 'ð', 'froth → frothed', 'breathe → breathed'],
+  ['t', 'd', 'want → wanted', 'need → needed'],
+];
+const V_EXTRA = [['m n ŋ l r', 'call → called / open → opened'], ['元音', 'play → played / cry → cried']];
+const V_INIT = { sel: null };
+let V = { ...V_INIT };
+
+(function vBuild() {
+  let h = '';
+  V_PAIRS.forEach((p, i) => {
+    h += `<div class="note">${i === 7 ? '特殊' : ''}</div>`;
+    h += `<button class="snd vl" data-v="${i}-0">/${p[0]}/</button><button class="snd vd" data-v="${i}-1">/${p[1]}/</button>`;
+  });
+  V_EXTRA.forEach((x, i) => {
+    h += `<div class="note"></div><div class="note">—</div><button class="snd vd" data-v="x${i}">${x[0]}</button>`;
+  });
+  $('v-pairs').insertAdjacentHTML('beforeend', h);
+})();
+
+function wavePath(voiced) {
+  if (!voiced) return 'M0 60 L300 60';
+  let d = 'M0 60';
+  for (let x = 0; x <= 340; x += 4) d += ` L${x} ${60 + 34 * Math.sin(x / 40 * Math.PI * 2)}`;
+  return d;
+}
+function vRender() {
+  document.querySelectorAll('#v-pairs .snd').forEach(b => b.classList.toggle('on', b.dataset.v === V.sel));
+  const wave = $('v-wave');
+  if (V.sel === null) {
+    wave.setAttribute('d', ''); wave.classList.remove('vib');
+    $('v-verdict').innerHTML = '<span class="note">← 点一个音。真实练习：边发音边摸喉咙。</span>';
+    return;
+  }
+  let voiced, label, ex, end;
+  if (V.sel[0] === 'x') {
+    const x = V_EXTRA[+V.sel.slice(1)];
+    voiced = true; label = x[0]; ex = x[1];
+  } else {
+    const [i, j] = V.sel.split('-').map(Number);
+    voiced = j === 1; label = '/' + V_PAIRS[i][j] + '/'; ex = V_PAIRS[i][2 + j];
+    if (i === 7) end = true;
+  }
+  wave.setAttribute('d', wavePath(voiced));
+  wave.style.stroke = end ? 'var(--id)' : voiced ? 'var(--d)' : 'var(--t)';
+  wave.classList.toggle('vib', voiced);
+  if (end) {
+    $('v-verdict').innerHTML = `<b class="ipa">${label}</b> ${voiced ? '震动' : '不震'}，但它和 -ed 撞车 → 读 <span class="cID ipa">/ɪd/</span><br><small>${ex}</small>`;
+  } else {
+    $('v-verdict').innerHTML = voiced
+      ? `<b class="ipa">${label}</b> 声带<b>震动</b>（浊）→ -ed 读 <span class="cD ipa">/d/</span><br><small>${ex}</small>`
+      : `<b class="ipa">${label}</b> 声带<b>不震</b>，只有气流（清）→ -ed 读 <span class="cT ipa">/t/</span><br><small>${ex}</small>`;
+  }
+}
+$('v-pairs').addEventListener('click', e => {
+  const b = e.target.closest('[data-v]'); if (!b) return;
+  V.sel = b.dataset.v; vRender();
+});
+function vReset() { V = { ...V_INIT }; vRender(); }
+$('v-reset').onclick = vReset;
+
+// ============ 模块 3：分拣机 ============
+const G_WORDS = [
+  ['helped', 'T', 'help 末音 /p/，清'],
+  ['closed', 'D', 'close 末音 /z/（s 读 z），浊'],
+  ['started', 'ID', 'start 末音 /t/'],
+  ['danced', 'T', 'dance 末音 /s/（ce 读 s），清'],
+  ['smiled', 'D', 'smile 末音 /l/，浊'],
+  ['visited', 'ID', 'visit 末音 /t/'],
+  ['jumped', 'T', 'jump 末音 /p/，清'],
+  ['changed', 'D', 'change 末音 /dʒ/，浊（不是 /d/ 本身，所以不加 ɪ）'],
+  ['cried', 'D', 'cry 末音 /aɪ/，元音'],
+  ['added', 'ID', 'add 末音 /d/'],
+  ['fixed', 'T', 'fix 末音 /ks/，清'],
+  ['breathed', 'D', 'breathe 末音 /ð/，浊'],
+];
+const G_LABEL = { T: '/t/', D: '/d/', ID: '/ɪd/' };
+const G_INIT = () => ({ idx: 0, placed: [], right: 0, fb: null, busy: false });
+let G = G_INIT(), gTimer = null;
+
+function gRender() {
+  const card = $('g-card');
+  card.classList.remove('fly');
+  card.textContent = G.idx < G_WORDS.length ? G_WORDS[G.idx][0] : `🎉 完成！答对 ${G.right} / ${G_WORDS.length}`;
+  ['T', 'D', 'ID'].forEach(k => {
+    $('g-' + k).innerHTML = G.placed.filter(p => p.chosen === k)
+      .map(p => `<li class="${p.ok ? '' : 'wrong'}">${p.w}</li>`).join('');
+  });
+  document.querySelectorAll('.bin button').forEach(b => b.disabled = G.idx >= G_WORDS.length || G.busy);
+  const fb = $('g-fb');
+  fb.className = 'fb' + (G.fb ? (G.fb.ok ? ' ok' : ' bad') : '');
+  fb.innerHTML = G.fb ? G.fb.html : '<span class="note">共 12 个词，放错了会划线并告诉你正确答案。</span>';
+}
+document.querySelectorAll('.bin button').forEach(b => b.onclick = () => {
+  if (G.busy || G.idx >= G_WORDS.length) return;
+  const [w, ans, why] = G_WORDS[G.idx], chosen = b.dataset.b, ok = chosen === ans;
+  if (ok) G.right++;
+  G.fb = { ok, html: (ok ? '✓ 对！' : `✗ 应该是 <b class="ipa">${G_LABEL[ans]}</b>。`) + ` ${w}：${why}。` };
+  G.busy = true;
+  $('g-card').classList.add('fly');
+  gRender(); $('g-card').classList.add('fly');
+  gTimer = setTimeout(() => {
+    gTimer = null;
+    G.placed.push({ w, chosen, ok }); G.idx++; G.busy = false; gRender();
+  }, 650);
+});
+function gReset() { if (gTimer) { clearTimeout(gTimer); gTimer = null; } G = G_INIT(); gRender(); }
+$('g-reset').onclick = gReset;
+
+// ============ 练习 ============
+const QUIZ = [
+  { q: '1. worked 的 -ed 读什么？', o: ['/t/', '/d/', '/ɪd/'], a: 0,
+    e: 'work 末音 /k/ 是清辅音（声带不震），所以读 /t/：/wɜːkt/，一个音节。' },
+  { q: '2. needed 的 -ed 读什么？', o: ['/t/', '/d/', '/ɪd/'], a: 2,
+    e: 'need 已经以 /d/ 结尾，再贴 /d/ 会听不出来，所以插入 /ɪ/：/ˈniːdɪd/（见动画最后一个例子）。' },
+  { q: '3. 判断：bake 以字母 e（元音字母）结尾，所以 baked 的 -ed 读 /d/。', o: ['对', '错'], a: 1,
+    e: '错。这个 e 不发音，bake 真正的最后一个音是 /k/（清），所以 baked 读 /beɪkt/。看「音」不看「字母」。' },
+  { q: '4. 下面哪一组的 -ed 全都读 /d/？', o: ['played, cleaned, lived', 'kissed, called, opened', 'wanted, rained, moved', 'closed, danced, smiled'], a: 0,
+    e: 'play 末音元音 /eɪ/，clean 末音 /n/，live 末音 /v/，都是浊音 → /d/。B 中 kissed 读 /t/；C 中 wanted 读 /ɪd/；D 中 danced 的 ce 读 /s/，读 /t/。' },
+  { q: '5. 哪个单词加 -ed 后会多出一个音节？', o: ['fixed', 'washed', 'decided', 'begged'], a: 2,
+    e: 'decide 以 /d/ 结尾 → /dɪˈsaɪdɪd/，多一个音节。fixed /fɪkst/、washed /wɒʃt/、begged /beɡd/ 都只是在尾巴上加一个辅音。' },
+  { q: '6. 朋友说 “I fixed the bike.” 其中 fixed 的正确读法是？', o: ['/fɪksd/', '/fɪkst/', '/fɪksɪd/'], a: 1,
+    e: '字母 x 读 /ks/，末音 /s/ 是清辅音 → -ed 读 /t/：/fɪkst/。/fɪksɪd/ 是把所有 -ed 都读成“依德”的典型误区。' },
+  { q: '7. 迁移：复数 -s 也按同一套「清浊 + 撞车」规律：cats 读 /s/，dogs 读 /z/，buses 读 /ɪz/。那么 books 的 -s 读什么？', o: ['/s/', '/z/', '/ɪz/'], a: 0,
+    e: 'book 末音 /k/ 是清辅音，-s 跟着读不震的 /s/。和 -ed 一样：清跟清、浊跟浊，同类音撞车（s/z/ʃ… 遇 -s，t/d 遇 -ed）才插入 /ɪ/。' },
+];
+const Q_INIT = () => ({ ans: QUIZ.map(() => null) });
+let Q = Q_INIT();
+
+function qRender() {
+  $('quiz').innerHTML = QUIZ.map((it, i) => {
+    const picked = Q.ans[i];
+    const opts = it.o.map((t, j) => {
+      let cls = 'opt';
+      if (picked !== null) { if (j === it.a) cls += ' right'; else if (j === picked) cls += ' wrong'; }
+      return `<button class="${cls}" data-q="${i}" data-o="${j}" ${picked !== null ? 'disabled' : ''}><span class="ipa">${t}</span></button>`;
+    }).join('');
+    const ex = picked !== null ? `<div class="explain show">${picked === it.a ? '✓ 正确。' : '✗ 不对。'}${it.e}</div>` : '';
+    return `<div class="qcard"><div class="qt">${it.q}</div><div class="opts">${opts}</div>${ex}</div>`;
+  }).join('');
+  const done = Q.ans.filter(a => a !== null).length;
+  const right = Q.ans.filter((a, i) => a === QUIZ[i].a).length;
+  $('q-score').textContent = `得分：${right} / ${QUIZ.length}` + (done === QUIZ.length ? (right === QUIZ.length ? ' 🎉 全对！' : '（可点「重做练习」再来一次）') : `（已答 ${done} 题）`);
+}
+$('quiz').addEventListener('click', e => {
+  const b = e.target.closest('[data-q]'); if (!b) return;
+  const i = +b.dataset.q; if (Q.ans[i] !== null) return;
+  Q.ans[i] = +b.dataset.o; qRender();
+});
+function qReset() { Q = Q_INIT(); qRender(); }
+$('q-redo').onclick = qReset;
+
+// ============ 全局重置 ============
+function resetAll() {
+  stopSay(); sReset(); vReset(); gReset(); qReset();
+  window.scrollTo({ top: 0, behavior: 'auto' });
+}
+$('globalReset').onclick = resetAll;
+resetAll();
+</script>
+</body>
+</html>
