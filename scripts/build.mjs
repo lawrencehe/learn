@@ -1,97 +1,226 @@
-// 把四个类目目录复制到 dist/，并生成首页 index.html 和 404.html。
-// 只发布类目目录里的 .html，.claude/、CLAUDE.md 等不会进入 dist/。
-import { readdirSync, readFileSync, statSync, rmSync, mkdirSync, copyFileSync, writeFileSync, existsSync } from 'node:fs';
+// 构建网站到 dist/：
+//   /            首页：学科分类卡片 + 搜索 + 最近更新
+//   /<类目>      类目页：该学科下的全部学习条目
+//   /<类目>/<文件名>  学习页本身（复制时在左下角注入「返回目录」按钮，源文件不动）
+// 只发布四个类目目录里的 .html，.claude/、CLAUDE.md 等不会进入 dist/。
+import { readdirSync, readFileSync, statSync, rmSync, mkdirSync, writeFileSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = join(ROOT, 'dist');
+const SITE = 'Up 学习站';
 const CATEGORIES = [
-  { id: 'math', name: '数学' },
-  { id: 'english', name: '英语' },
-  { id: 'model', name: 'AI 模型' },
-  { id: 'tech', name: '计算机技术' },
+  { id: 'math', name: '数学', glyph: '∑', desc: '代数、几何、概率统计、微积分、线性代数' },
+  { id: 'english', name: '英语', glyph: 'Aa', desc: '单词辨析、语法、发音、习惯用法' },
+  { id: 'model', name: 'AI 模型', glyph: 'AI', desc: '机器学习、神经网络、大模型原理' },
+  { id: 'tech', name: '计算机技术', glyph: '</>', desc: '网络协议、数据结构与算法、操作系统、编程' },
 ];
 
 const esc = (s) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const text = (s) => s.replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+const fmt = (d) => d.toISOString().slice(0, 10);
+
+// 学习页左下角的「返回目录」按钮（重置按钮都在右下角，互不遮挡）
+const backLink = (cat) => `
+<a id="up-back" href="/${cat.id}" aria-label="返回${cat.name}目录">← ${cat.name}</a>
+<style>
+#up-back{position:fixed;left:max(16px,env(safe-area-inset-left,0px));bottom:max(16px,env(safe-area-inset-bottom,0px));z-index:2147483000;
+padding:8px 14px;border-radius:999px;font:500 14px/1.2 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+background:rgba(255,255,255,.92);color:#1f2328;border:1px solid rgba(0,0,0,.12);box-shadow:0 2px 8px rgba(0,0,0,.08);text-decoration:none;
+-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+#up-back:hover{border-color:rgba(0,0,0,.3)}
+@media (prefers-color-scheme:dark){#up-back{background:rgba(30,33,40,.92);color:#e6e8eb;border-color:rgba(255,255,255,.15)}}
+@media print{#up-back{display:none}}
+</style>
+`;
 
 rmSync(DIST, { recursive: true, force: true });
 mkdirSync(DIST);
 
-const groups = [];
-let total = 0;
+// 收集并复制学习页
+const all = [];
 for (const cat of CATEGORIES) {
+  cat.pages = [];
   const src = join(ROOT, cat.id);
   if (!existsSync(src)) continue;
-  const pages = [];
   for (const file of readdirSync(src)) {
     if (!file.endsWith('.html')) continue;
     const path = join(src, file);
     const html = readFileSync(path, 'utf8');
-    const title = (html.match(/<title>([^<]*)<\/title>/i)?.[1] || file.replace(/\.html$/, '')).trim();
+    const slug = file.replace(/\.html$/, '');
+    const title = text(html.match(/<title>([\s\S]*?)<\/title>/i)?.[1] || slug);
+    const meta = html.match(/<meta\s+name=["']description["']\s+content=["']([^"']*)["']/i)?.[1];
+    const h1 = text(html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1] || '');
+    const desc = meta || (h1 && h1 !== title ? h1 : '');
     mkdirSync(join(DIST, cat.id), { recursive: true });
-    copyFileSync(path, join(DIST, cat.id, file));
-    pages.push({ href: `${cat.id}/${file.replace(/\.html$/, '')}`, title, mtime: statSync(path).mtime });
+    const out = html.includes('</body>') ? html.replace(/<\/body>(?![\s\S]*<\/body>)/i, `${backLink(cat)}</body>`) : html + backLink(cat);
+    writeFileSync(join(DIST, cat.id, file), out);
+    const page = { cat, href: `/${cat.id}/${slug}`, title, desc, mtime: statSync(path).mtime };
+    cat.pages.push(page);
+    all.push(page);
   }
-  if (!pages.length) continue;
-  pages.sort((a, b) => b.mtime - a.mtime);
-  groups.push({ ...cat, pages });
-  total += pages.length;
+  cat.pages.sort((a, b) => b.mtime - a.mtime);
 }
-
-const fmt = (d) => d.toISOString().slice(0, 10);
-const sections = groups.map((g) => `
-    <section>
-      <h2><span class="tag">${g.id}</span>${g.name}<small>${g.pages.length} 篇</small></h2>
-      <ul>${g.pages.map((p) => `
-        <li><a href="/${p.href}">${esc(p.title)}</a><time>${fmt(p.mtime)}</time></li>`).join('')}
-      </ul>
-    </section>`).join('');
+all.sort((a, b) => b.mtime - a.mtime);
 
 const style = `
-  :root { --bg:#f7f7f5; --card:#fff; --fg:#1f2328; --muted:#6b7280; --line:#e5e7eb; --accent:#2563eb; --tag-bg:#eef2ff; }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg:#111317; --card:#1a1d23; --fg:#e6e8eb; --muted:#9aa3af; --line:#2a2f37; --accent:#7aa7ff; --tag-bg:#1e2a44; }
+  :root {
+    --bg:#f6f5f2; --card:#ffffff; --fg:#1d2127; --muted:#6b7280; --line:#e6e4df; --shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);
+    --math:#d9480f; --math-bg:#fff1e8; --english:#2f9e44; --english-bg:#ebfbee;
+    --model:#7048e8; --model-bg:#f3f0ff; --tech:#1c7ed6; --tech-bg:#e7f5ff;
   }
-  * { box-sizing: border-box; }
-  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.6 -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; }
-  main { max-width:760px; margin:0 auto; padding:40px 16px 64px; }
-  h1 { font-size:28px; margin:0 0 4px; }
-  .sub { color:var(--muted); margin:0 0 32px; }
-  section { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px 20px; margin-bottom:20px; }
-  h2 { font-size:18px; margin:0 0 8px; display:flex; align-items:center; gap:8px; }
-  h2 small { margin-left:auto; color:var(--muted); font-weight:normal; font-size:13px; }
-  .tag { font-size:12px; font-weight:600; padding:2px 8px; border-radius:999px; background:var(--tag-bg); color:var(--accent); }
-  ul { list-style:none; margin:0; padding:0; }
-  li { display:flex; gap:12px; align-items:baseline; padding:8px 0; border-top:1px solid var(--line); }
-  li:first-child { border-top:0; }
-  a { color:var(--accent); text-decoration:none; }
-  a:hover { text-decoration:underline; }
-  time { margin-left:auto; color:var(--muted); font-size:13px; white-space:nowrap; }`;
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:#121418; --card:#1b1e24; --fg:#e7e9ec; --muted:#9aa3af; --line:#2a2e36; --shadow:0 1px 2px rgba(0,0,0,.3);
+      --math:#ff8a50; --math-bg:#3a2218; --english:#69db7c; --english-bg:#1b3222;
+      --model:#b197fc; --model-bg:#2a2445; --tech:#74c0fc; --tech-bg:#17304a;
+    }
+  }
+  * { box-sizing:border-box; }
+  html { -webkit-text-size-adjust:100%; }
+  body { margin:0; background:var(--bg); color:var(--fg);
+    font:16px/1.6 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif; }
+  main { max-width:880px; margin:0 auto; padding:48px 16px 72px; }
+  a { color:inherit; text-decoration:none; }
+  header.hero h1 { font-size:32px; line-height:1.2; margin:0 0 8px; letter-spacing:.5px; }
+  .sub { color:var(--muted); margin:0; }
+  .crumb { font-size:14px; color:var(--muted); margin-bottom:16px; }
+  .crumb a:hover { color:var(--fg); }
+  h2.sec { font-size:15px; color:var(--muted); font-weight:600; margin:40px 0 12px; }
 
-const page = (title, body) => `<!doctype html>
+  .search { margin:28px 0 0; position:relative; }
+  .search input { width:100%; font:inherit; padding:12px 16px; border-radius:12px; border:1px solid var(--line);
+    background:var(--card); color:var(--fg); outline:none; box-shadow:var(--shadow); }
+  .search input:focus { border-color:var(--muted); }
+  .results { margin-top:12px; }
+
+  .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; margin-top:32px; }
+  @media (max-width:600px) { .grid { grid-template-columns:1fr; } header.hero h1 { font-size:26px; } main { padding-top:32px; } }
+  .cat { display:flex; flex-direction:column; gap:10px; padding:20px; border-radius:16px; background:var(--card);
+    border:1px solid var(--line); box-shadow:var(--shadow); transition:transform .2s, border-color .2s; }
+  a.cat:hover { transform:translateY(-2px); border-color:var(--c); }
+  .cat.empty { opacity:.6; }
+  .cat .top { display:flex; align-items:center; gap:12px; }
+  .glyph { width:44px; height:44px; border-radius:12px; display:grid; place-items:center; flex:none;
+    background:var(--cbg); color:var(--c); font:700 17px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+  .glyph.lg { width:56px; height:56px; font-size:22px; border-radius:14px; }
+  .cat h3 { margin:0; font-size:19px; }
+  .cat .id { font-size:12px; color:var(--c); font-weight:600; letter-spacing:.5px; }
+  .cat p { margin:0; color:var(--muted); font-size:14px; }
+  .cat .foot { display:flex; justify-content:space-between; align-items:center; font-size:13px; color:var(--muted);
+    border-top:1px dashed var(--line); padding-top:10px; margin-top:auto; }
+  .cat .count { color:var(--c); font-weight:600; }
+
+  .list { display:flex; flex-direction:column; gap:10px; }
+  .item { display:flex; align-items:center; gap:14px; padding:14px 18px; border-radius:12px; background:var(--card);
+    border:1px solid var(--line); box-shadow:var(--shadow); transition:border-color .2s, transform .2s; }
+  .item:hover { border-color:var(--c); transform:translateX(2px); }
+  .item .body { flex:1; min-width:0; }
+  .item .t { font-weight:600; }
+  .item .d { color:var(--muted); font-size:14px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .item .meta { display:flex; flex-direction:column; align-items:flex-end; gap:2px; font-size:12px; color:var(--muted); flex:none; }
+  .item .tag { color:var(--c); background:var(--cbg); padding:1px 8px; border-radius:999px; font-weight:600; }
+  .item .arrow { color:var(--muted); flex:none; }
+  .none { color:var(--muted); padding:24px; text-align:center; border:1px dashed var(--line); border-radius:12px; }
+  .cat-head { display:flex; align-items:center; gap:16px; }
+  footer { margin-top:56px; color:var(--muted); font-size:13px; text-align:center; }
+  ${CATEGORIES.map((c) => `.c-${c.id}{--c:var(--${c.id});--cbg:var(--${c.id}-bg)}`).join('\n  ')}
+  @media (prefers-reduced-motion: reduce) { * { transition:none !important; } }`;
+
+const layout = (title, body, script = '') => `<!doctype html>
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${title}</title>
+<title>${esc(title)}</title>
+<meta name="description" content="一个知识点一个页面，用动画把知识讲明白。">
 <style>${style}</style>
 </head>
 <body>
 <main>
 ${body}
+<footer>${SITE} · 一个知识点一个页面，用动画讲明白</footer>
 </main>
+${script}
 </body>
 </html>
 `;
 
-writeFileSync(join(DIST, 'index.html'), page('动画学习页', `
-    <h1>动画学习页</h1>
-    <p class="sub">一个知识点一个页面，用动画讲明白。共 ${total} 篇，按更新时间排列。</p>
-${sections}`));
+const item = (p, showCat) => `
+      <a class="item c-${p.cat.id}" href="${p.href}">
+        <div class="body"><div class="t">${esc(p.title)}</div>${p.desc ? `<div class="d">${esc(p.desc)}</div>` : ''}</div>
+        <div class="meta">${showCat ? `<span class="tag">${p.cat.name}</span>` : ''}<time>${fmt(p.mtime)}</time></div>
+        <span class="arrow" aria-hidden="true">›</span>
+      </a>`;
 
-writeFileSync(join(DIST, '404.html'), page('页面不存在', `
+// 首页
+const cards = CATEGORIES.map((c) => {
+  const inner = `
+        <div class="top"><span class="glyph">${esc(c.glyph)}</span><div><div class="id">${c.id.toUpperCase()}</div><h3>${c.name}</h3></div></div>
+        <p>${c.desc}</p>
+        <div class="foot">${c.pages.length
+          ? `<span><span class="count">${c.pages.length}</span> 篇</span><span>最近：${fmt(c.pages[0].mtime)}</span>`
+          : '<span>即将上线</span>'}</div>`;
+  return c.pages.length
+    ? `\n      <a class="cat c-${c.id}" href="/${c.id}">${inner}\n      </a>`
+    : `\n      <div class="cat empty c-${c.id}">${inner}\n      </div>`;
+}).join('');
+
+const searchData = JSON.stringify(all.map((p) => ({ i: all.indexOf(p), k: `${p.title} ${p.desc} ${p.cat.name} ${p.cat.id}`.toLowerCase() })));
+const homeScript = `<script>
+(function () {
+  var data = ${searchData};
+  var input = document.getElementById('q'), box = document.getElementById('results'), home = document.getElementById('home');
+  var items = Array.prototype.slice.call(document.querySelectorAll('#all .item'));
+  input.addEventListener('input', function () {
+    var q = input.value.trim().toLowerCase();
+    if (!q) { box.hidden = true; home.hidden = false; return; }
+    var hit = 0;
+    data.forEach(function (d) { var ok = d.k.indexOf(q) !== -1; items[d.i].hidden = !ok; if (ok) hit++; });
+    document.getElementById('none').hidden = hit > 0;
+    box.hidden = false; home.hidden = true;
+  });
+})();
+</script>`;
+
+writeFileSync(join(DIST, 'index.html'), layout(SITE, `
+  <header class="hero">
+    <h1>${SITE}</h1>
+    <p class="sub">一个知识点一个页面，用动画讲明白。目前共 ${all.length} 篇，选一个学科开始吧。</p>
+  </header>
+  <div class="search"><input id="q" type="search" placeholder="搜索学习条目，如：红黑树、few、神经网络" autocomplete="off" aria-label="搜索学习条目"></div>
+  <div id="results" class="results" hidden>
+    <div id="all" class="list">${all.map((p) => item(p, true)).join('')}
+    </div>
+    <div id="none" class="none" hidden>没有找到相关条目</div>
+  </div>
+  <div id="home">
+    <div class="grid">${cards}
+    </div>
+    ${all.length ? `<h2 class="sec">最近更新</h2>
+    <div class="list">${all.slice(0, 5).map((p) => item(p, true)).join('')}
+    </div>` : ''}
+  </div>`, homeScript));
+
+// 类目页
+for (const c of CATEGORIES) {
+  mkdirSync(join(DIST, c.id), { recursive: true });
+  writeFileSync(join(DIST, c.id, 'index.html'), layout(`${c.name} · ${SITE}`, `
+  <nav class="crumb"><a href="/">← ${SITE}</a></nav>
+  <header class="hero cat-head c-${c.id}">
+    <span class="glyph lg">${esc(c.glyph)}</span>
+    <div><h1>${c.name}</h1><p class="sub">${c.desc} · 共 ${c.pages.length} 篇</p></div>
+  </header>
+  <h2 class="sec">全部条目</h2>
+  ${c.pages.length ? `<div class="list">${c.pages.map((p) => item(p, false)).join('')}
+  </div>` : '<div class="none">这个学科还没有内容，敬请期待</div>'}`));
+}
+
+writeFileSync(join(DIST, '404.html'), layout(`页面不存在 · ${SITE}`, `
+  <header class="hero">
     <h1>页面不存在</h1>
-    <p class="sub">这个页面可能已改名或删除。<a href="/">回到首页</a></p>`));
+    <p class="sub">这个页面可能已改名或删除。<a href="/" style="text-decoration:underline">回到首页</a></p>
+  </header>`));
 
-console.log(`built ${total} pages into dist/`);
+console.log(`built ${all.length} pages into dist/ (${CATEGORIES.map((c) => `${c.id}:${c.pages.length}`).join(' ')})`);
