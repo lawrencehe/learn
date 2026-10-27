@@ -1,9 +1,10 @@
 // 构建网站到 dist/：
 //   /            首页：学科分类卡片 + 搜索 + 最近更新
 //   /<类目>      类目页：该学科下的全部学习条目
-//   /<类目>/<文件名>  学习页本身（复制时在左下角注入「返回目录」按钮，源文件不动）
-// 只发布四个类目目录里的 .html，.claude/、CLAUDE.md 等不会进入 dist/。
-import { readdirSync, readFileSync, statSync, rmSync, mkdirSync, writeFileSync, existsSync } from 'node:fs';
+//   /<类目>/<文件名>  学习页本身（复制时注入网站图标和左下角「返回目录」按钮，源文件不动）
+//   site/ 下的文件（logo、favicon 等）原样复制到网站根目录
+// 只发布上面这些，.claude/、CLAUDE.md 等不会进入 dist/。
+import { readdirSync, readFileSync, statSync, rmSync, mkdirSync, writeFileSync, existsSync, cpSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -35,8 +36,20 @@ background:rgba(255,255,255,.92);color:#1f2328;border:1px solid rgba(0,0,0,.12);
 </style>
 `;
 
+const ICONS = '<link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/apple-touch-icon.png">';
+
+// 首页标题旁的 logo：与 site/favicon.svg 同款，打开时小球沿台阶跳上去
+const LOGO = `<svg class="logo" viewBox="0 0 64 64" aria-hidden="true">
+      <defs><linearGradient id="up-logo-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c6ef5"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs>
+      <rect width="64" height="64" rx="14" fill="url(#up-logo-g)"/>
+      <path d="M12 52V42a2 2 0 0 1 2-2h10V32a2 2 0 0 1 2-2h10v-8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v30z" fill="#fff"/>
+      <path class="trail" d="M17 36Q20 25 29 26Q32 16 37 14" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="0.1 4.2" opacity=".8"/>
+      <circle class="ball" cx="43" cy="13" r="5.5" fill="#ffa94d"/>
+    </svg>`;
+
 rmSync(DIST, { recursive: true, force: true });
 mkdirSync(DIST);
+cpSync(join(ROOT, 'site'), DIST, { recursive: true });
 
 // 收集并复制学习页
 const all = [];
@@ -54,7 +67,10 @@ for (const cat of CATEGORIES) {
     const h1 = text(html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1] || '');
     const desc = meta || (h1 && h1 !== title ? h1 : '');
     mkdirSync(join(DIST, cat.id), { recursive: true });
-    const out = html.includes('</body>') ? html.replace(/<\/body>(?![\s\S]*<\/body>)/i, `${backLink(cat)}</body>`) : html + backLink(cat);
+    let out = html.includes('</body>') ? html.replace(/<\/body>(?![\s\S]*<\/body>)/i, `${backLink(cat)}</body>`) : html + backLink(cat);
+    if (!/rel=["']icon["']/i.test(out)) {
+      out = /<\/head>/i.test(out) ? out.replace(/<\/head>/i, `${ICONS}\n</head>`) : out.replace(/<\/title>/i, `</title>\n${ICONS}`);
+    }
     writeFileSync(join(DIST, cat.id, file), out);
     const page = { cat, href: `/${cat.id}/${slug}`, title, desc, mtime: statSync(path).mtime };
     cat.pages.push(page);
@@ -84,6 +100,18 @@ const style = `
   main { max-width:880px; margin:0 auto; padding:48px 16px 72px; }
   a { color:inherit; text-decoration:none; }
   header.hero h1 { font-size:32px; line-height:1.2; margin:0 0 8px; letter-spacing:.5px; }
+  .brand { display:flex; align-items:center; gap:14px; }
+  .brand h1 { margin:0 !important; }
+  .logo { width:52px; height:52px; flex:none; overflow:visible; }
+  .logo .ball { animation:hop 1.6s .3s ease-in-out both; }
+  .logo .trail { animation:fade 1.6s .3s ease-out both; }
+  @keyframes hop {
+    0% { transform:translate(-25px,21.5px); } 20% { transform:translate(-19px,8px); }
+    40% { transform:translate(-13px,11.5px); } 60% { transform:translate(-7px,-1px); } 80%,100% { transform:translate(0,0); }
+  }
+  @keyframes fade { 0%,40% { opacity:0; } 100% { opacity:.8; } }
+  .crumb .mini { width:18px; height:18px; vertical-align:-4px; margin-right:6px; }
+  @media (prefers-reduced-motion: reduce) { .logo .ball, .logo .trail { animation:none; } }
   .sub { color:var(--muted); margin:0; }
   .crumb { font-size:14px; color:var(--muted); margin-bottom:16px; }
   .crumb a:hover { color:var(--fg); }
@@ -135,6 +163,7 @@ const layout = (title, body, script = '') => `<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(title)}</title>
 <meta name="description" content="一个知识点一个页面，用动画把知识讲明白。">
+${ICONS}
 <style>${style}</style>
 </head>
 <body>
@@ -186,8 +215,8 @@ const homeScript = `<script>
 
 writeFileSync(join(DIST, 'index.html'), layout(SITE, `
   <header class="hero">
-    <h1>${SITE}</h1>
-    <p class="sub">一个知识点一个页面，用动画讲明白。目前共 ${all.length} 篇，选一个学科开始吧。</p>
+    <div class="brand">${LOGO}<h1>${SITE}</h1></div>
+    <p class="sub" style="margin-top:12px">一个知识点一个页面，用动画讲明白。目前共 ${all.length} 篇，选一个学科开始吧。</p>
   </header>
   <div class="search"><input id="q" type="search" placeholder="搜索学习条目，如：红黑树、few、神经网络" autocomplete="off" aria-label="搜索学习条目"></div>
   <div id="results" class="results" hidden>
@@ -207,7 +236,7 @@ writeFileSync(join(DIST, 'index.html'), layout(SITE, `
 for (const c of CATEGORIES) {
   mkdirSync(join(DIST, c.id), { recursive: true });
   writeFileSync(join(DIST, c.id, 'index.html'), layout(`${c.name} · ${SITE}`, `
-  <nav class="crumb"><a href="/">← ${SITE}</a></nav>
+  <nav class="crumb"><a href="/"><img class="mini" src="/favicon.svg" alt="">${SITE}</a></nav>
   <header class="hero cat-head c-${c.id}">
     <span class="glyph lg">${esc(c.glyph)}</span>
     <div><h1>${c.name}</h1><p class="sub">${c.desc} · 共 ${c.pages.length} 篇</p></div>
