@@ -53,6 +53,10 @@ cpSync(join(ROOT, 'site'), DIST, { recursive: true });
 
 // 收集并复制学习页
 const all = [];
+const warnings = [];
+for (const name of readdirSync(ROOT)) {
+  if (name.endsWith('.html')) warnings.push(`${name} 在项目根目录，未归入任何类目，不会发布`);
+}
 for (const cat of CATEGORIES) {
   cat.pages = [];
   const src = join(ROOT, cat.id);
@@ -66,6 +70,7 @@ for (const cat of CATEGORIES) {
     const meta = html.match(/<meta\s+name=["']description["']\s+content=["']([^"']*)["']/i)?.[1];
     const h1 = text(html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1] || '');
     const desc = meta || (h1 && h1 !== title ? h1 : '');
+    if (!meta) warnings.push(`${cat.id}/${file} 缺少 <meta name="description">`);
     mkdirSync(join(DIST, cat.id), { recursive: true });
     let out = html.includes('</body>') ? html.replace(/<\/body>(?![\s\S]*<\/body>)/i, `${backLink(cat)}</body>`) : html + backLink(cat);
     if (!/rel=["']icon["']/i.test(out)) {
@@ -252,4 +257,5 @@ writeFileSync(join(DIST, '404.html'), layout(`页面不存在 · ${SITE}`, `
     <p class="sub">这个页面可能已改名或删除。<a href="/" style="text-decoration:underline">回到首页</a></p>
   </header>`));
 
+for (const w of warnings) console.warn(`⚠ ${w}`);
 console.log(`built ${all.length} pages into dist/ (${CATEGORIES.map((c) => `${c.id}:${c.pages.length}`).join(' ')})`);
