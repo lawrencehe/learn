@@ -7,6 +7,6 @@
     "html_handling": "drop-trailing-slash",
     "not_found_handling": "404-page"
   },
-  "routes": [{ "pattern": "up.yiwei.love", "custom_domain": true }],
+  "routes": [{ "pattern": "up.yiwei.website", "custom_domain": true }],
   "workers_dev": false
 }
