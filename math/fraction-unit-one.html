@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>比…少几分之几</title>
+<meta name="description" content="牛有 1200 头，比羊少 1/6，羊有多少只？用线段图动画讲清单位“1”，以及为什么用 1200÷(1−1/6)。">
+<style>
+:root{
+  --bg:var(--up-bg); --surface:var(--up-surface); --surface2:var(--up-surface-2); --ink:var(--up-ink); --muted:var(--up-muted); --line:var(--up-line);
+  --accent:var(--up-accent); --ok:var(--up-ok); --bad:var(--up-bad);
+  --sheep:#1971c2; --sheep-soft:#dbeafc;   /* 羊 = 单位“1” */
+  --cow:#0c8599;   --cow-soft:#d3f1f5;     /* 牛 */
+  --part:#7048e8;                          /* 每一份的数 */
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --sheep:#74c0fc; --sheep-soft:#16314d; --cow:#66d9e8; --cow-soft:#123a40; --part:#b197fc; }
+}
+:root[data-theme="dark"]{ --sheep:#74c0fc; --sheep-soft:#16314d; --cow:#66d9e8; --cow-soft:#123a40; --part:#b197fc; }
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 var(--up-font);padding:24px 16px 96px}
+main{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:48px}
+h1{font-size:clamp(1.6rem,4.5vw,2.3rem);line-height:1.3;margin:0 0 8px}
+h2{font-size:1.4rem;margin:0 0 8px}
+p{margin:0}
+.lead{color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--up-radius);box-shadow:var(--up-shadow);padding:16px}
+.analogy{border-left:4px solid var(--accent)}
+.btn{font:inherit;font-size:14px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--up-surface)}
+.btn.sel{border-color:var(--accent);background:var(--up-accent-soft);color:var(--accent);font-weight:700}
+.btn:disabled{opacity:.45;cursor:default}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.stepno{font-family:var(--up-mono);color:var(--muted);font-size:.9rem;min-width:56px;text-align:center}
+.caption{min-height:3.4em;margin-top:10px}
+.num{font-family:var(--up-mono)}
+.s{color:var(--sheep);font-weight:700}.c{color:var(--cow);font-weight:700}.p{color:var(--part);font-weight:700}
+.fr{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;font-family:var(--up-mono);font-size:.85em;line-height:1.1;margin:0 2px}
+.fr span:first-child{border-bottom:1.5px solid currentColor;padding:0 2px}
+
+.stage{margin-top:12px;background:var(--surface2);border-radius:10px;padding:16px 12px}
+.q{font-size:1.1rem;text-align:center;margin-bottom:14px}
+.q mark{background:transparent;color:inherit;border-radius:4px;padding:0 2px;transition:background .7s,box-shadow .7s}
+.q mark.hl{background:var(--sheep-soft);box-shadow:0 0 0 2px var(--sheep)}
+.brow{display:grid;grid-template-columns:2.6em 1fr;align-items:center;gap:8px;margin:10px 0;transition:opacity .8s,transform .8s}
+.brow.hide{opacity:0;transform:translateX(-16px)}
+.blab{font-weight:700;text-align:right}
+.bar{display:flex;height:44px;position:relative}
+.cell{flex:1;display:flex;align-items:center;justify-content:center;font-family:var(--up-mono);font-size:13px;font-weight:700;border:2px solid;border-left-width:0;transition:background .8s,border-color .8s,opacity .8s,color .8s;min-width:0;overflow:hidden;white-space:nowrap}
+.cell:first-child{border-left-width:2px;border-radius:6px 0 0 6px}
+.cell:last-child{border-radius:0 6px 6px 0}
+.bar.sheep .cell{background:var(--sheep-soft);border-color:var(--sheep);color:var(--sheep)}
+.bar.cow .cell{background:var(--cow-soft);border-color:var(--cow);color:var(--cow)}
+.bar.whole .cell{border-left-color:transparent}
+.bar.whole .cell:first-child{border-left-color:inherit}
+.cell.ghost{background:transparent!important;border-style:dashed;border-color:var(--muted)!important;color:var(--muted)!important}
+.cell.ghost.gone{opacity:0}
+.cell .v{opacity:0;transition:opacity .7s}
+.cell.showv .v{opacity:1}
+.cell.pv .v{color:var(--part)}
+.tot{grid-column:2;text-align:center;font-weight:700;font-size:15px;min-height:1.6em;margin-top:-6px}
+.formula{margin-top:12px;text-align:center;font-size:1.1rem;min-height:2.4em;font-family:var(--up-font)}
+@keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.pop{animation:pop .7s ease both}
+
+.why{display:grid;gap:10px}
+.eq{font-size:1.15rem;text-align:center;background:var(--surface2);border-radius:8px;padding:10px;line-height:2}
+.rule{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.rule .card{border-top:4px solid var(--sheep)}
+@media (max-width:560px){.rule{grid-template-columns:1fr}}
+.traps{display:grid;gap:12px}
+.trap{border-left:4px solid var(--bad)}
+.trap b.x{color:var(--bad)}
+.one{font-size:1.1rem;text-align:center;line-height:1.9}
+.chk{color:var(--ok);font-weight:700}
+@media (prefers-reduced-motion: reduce){.brow,.cell,.cell .v,.q mark{transition:none}.pop{animation:none}}
+
+:root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:var(--ok);--lq-bad:var(--bad)}
+/* ---------- 练习题（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+.lq{display:grid;gap:12px;margin-bottom:56px}
+.lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+.lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
+.lq-sub{margin:0;color:var(--lq-muted);font-size:14px}
+.lq-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--lq-muted);font-variant-numeric:tabular-nums}
+.lq-list{display:grid;gap:10px}
+.lq-item{background:var(--lq-surface);border:1.5px solid var(--lq-line);border-radius:10px;padding:12px 16px;display:grid;gap:10px;min-width:0;color:var(--lq-ink);text-align:left}
+.lq-item.lq-is-ok{border-color:var(--lq-ok)}
+.lq-item.lq-is-bad{border-color:var(--lq-bad)}
+.lq-q{font-size:15px;font-weight:600;line-height:1.6}
+.lq-tag{display:inline-block;font-size:11px;font-weight:500;line-height:1.6;color:var(--lq-muted);border:1px solid var(--lq-line);border-radius:999px;padding:0 8px;margin-right:8px;vertical-align:1px}
+.lq-opts,.lq-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lq .lq-opt,.lq .lq-redo{font:inherit;font-size:14px;line-height:1.4;padding:6px 14px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);cursor:pointer;text-align:left;opacity:1}
+.lq .lq-opt:hover:not(:disabled),.lq .lq-redo:hover{border-color:var(--lq-accent)}
+.lq .lq-opt:disabled{cursor:default;opacity:1}
+.lq .lq-opt.lq-right{border-color:var(--lq-ok);color:var(--lq-ok);font-weight:700}
+.lq .lq-opt.lq-wrong{border-color:var(--lq-bad);color:var(--lq-bad);text-decoration:line-through}
+.lq-fill input{font:inherit;font-size:14px;padding:6px 10px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);width:min(100%,200px)}
+.lq-fill input.lq-right{border-color:var(--lq-ok)}
+.lq-fill input.lq-wrong{border-color:var(--lq-bad)}
+.lq-why{font-size:14px;line-height:1.65;color:var(--lq-muted)}
+.lq-why:empty{display:none}
+.lq-why .lq-ok{color:var(--lq-ok)}
+.lq-why .lq-bad{color:var(--lq-bad)}
+</style>
+</style>
+</head>
+<body>
+<!-- up-shell:begin（由 scripts/shell.mjs 自动生成，勿手改） -->
+<nav id="up-nav" aria-label="网站导航">
+<a class="up-home" href="/" title="Up 学习站首页"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="up-nav-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c6ef5"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#up-nav-g)"/><path d="M12 52V42a2 2 0 0 1 2-2h10V32a2 2 0 0 1 2-2h10v-8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v30z" fill="#fff"/><circle cx="43" cy="13" r="5.5" fill="#ffa94d"/></svg><span>Up 学习站</span></a>
+<span class="up-sep" aria-hidden="true">›</span><a class="up-cat" href="/math">数学</a>
+<span class="up-sep" aria-hidden="true">›</span><span class="up-title">比…少几分之几</span>
+<button id="up-reset" type="button" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+</nav>
+<style>
+:root{--up-bg:#f5f6f8;--up-surface:#ffffff;--up-surface-2:#eef0f4;--up-ink:#1d2127;--up-muted:#626b78;--up-line:#dfe2e8;--up-ok:#2b8a3e;--up-bad:#d6336c;--up-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);--up-font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif;--up-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;--up-radius:12px;--up-accent:#d9480f;--up-accent-soft:#fff1e8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#ff8a50;--up-accent-soft:#3a2218;color-scheme:dark}}
+:root[data-theme="dark"]{--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#ff8a50;--up-accent-soft:#3a2218;color-scheme:dark}
+html{padding-top:52px;scroll-padding-top:64px}
+#up-nav{position:fixed;top:0;left:0;right:0;z-index:2147483000;height:52px;box-sizing:border-box;display:flex;align-items:center;gap:8px;
+padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));border-top:3px solid var(--up-accent);
+border-bottom:1px solid var(--up-line);background:color-mix(in srgb,var(--up-surface) 88%,transparent);
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:500 14px/1.2 var(--up-font);color:var(--up-ink);text-align:left}
+#up-nav a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none}
+#up-nav a:hover{color:var(--up-accent)}
+#up-nav svg{width:24px;height:24px;flex:none;display:block}
+#up-nav .up-home span{font-weight:700}
+#up-nav .up-cat{color:var(--up-accent);font-weight:600}
+#up-nav .up-sep{color:var(--up-muted);flex:none}
+#up-nav .up-title{color:var(--up-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#up-reset{margin:0 0 0 auto;flex:none;font:600 14px/1 var(--up-font);padding:8px 14px;border-radius:999px;cursor:pointer;
+border:1.5px solid var(--up-accent);background:transparent;color:var(--up-accent);transition:background .2s,color .2s}
+#up-reset:hover,#up-reset:focus-visible{background:var(--up-accent);color:var(--up-surface)}
+#up-reset:focus-visible,#up-nav a:focus-visible{outline:2px solid var(--up-accent);outline-offset:2px}
+@media (max-width:560px){#up-nav .up-home span{display:none}}
+@media print{#up-nav{display:none}html{padding-top:0}}
+</style>
+<script>
+document.getElementById('up-reset').addEventListener('click', function () {
+  if (typeof window.resetPage === 'function') window.resetPage();
+  else console.warn('本页没有定义 window.resetPage()，重置按钮无效');
+  window.scrollTo({ top: 0, behavior: 'auto' });
+});
+</script>
+<!-- up-shell:end -->
+<main>
+
+<section>
+  <h1>牛比羊少 <span class="fr"><span>1</span><span>6</span></span>，羊有多少只？</h1>
+  <p class="lead">题目：牧场有 <b class="c">牛 1200 头</b>，比<b class="s">羊</b>的总数少 <span class="fr"><span>1</span><span>6</span></span>。羊有多少只？<br>
+  算式是 <b class="num">1200 ÷ (1 − <span class="fr"><span>1</span><span>6</span></span>)</b>。下面用一张「线段图」把它拆开看。</p>
+</section>
+
+<section class="card analogy">
+  <b>生活比喻：拿谁当尺子</b><br>
+  「牛比羊少 <span class="fr"><span>1</span><span>6</span></span>」，是拿<b class="s">羊</b>当尺子去量牛：把羊的总数切成 6 段，牛只有其中 5 段那么长。
+  这把「尺子」在数学里叫<b>单位“1”</b>——就是被当成整体 1 的那个量。
+</section>
+
+<section>
+  <h2>一、一步一步画线段图</h2>
+  <div class="card" id="demo">
+    <div class="stage">
+      <p class="q">牛有 1200 头，<mark data-k="bi">比<b>羊</b></mark>的总数少 <span class="fr"><span>1</span><span>6</span></span></p>
+      <div class="brow" data-row="sheep"><span class="blab s">羊</span><div class="bar sheep"></div><div class="tot s"></div></div>
+      <div class="brow" data-row="cow"><span class="blab c">牛</span><div class="bar cow"></div><div class="tot c"></div></div>
+      <div class="formula"></div>
+    </div>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>二、为什么是「除」？</h2>
+  <div class="why">
+    <p>先把题目翻译成一句等式。「牛比羊少 <span class="fr"><span>1</span><span>6</span></span>」= 牛是羊的 <span class="fr"><span>5</span><span>6</span></span>：</p>
+    <div class="eq"><b class="s">羊</b> × (1 − <span class="fr"><span>1</span><span>6</span></span>) = <b class="c">牛</b><br>
+      <b class="s">羊</b> × <span class="fr"><span>5</span><span>6</span></span> = <b class="c">1200</b></div>
+    <p>羊是未知数。「某数乘 <span class="fr"><span>5</span><span>6</span></span> 得 1200」，反过来求这个数，就用除法：</p>
+    <div class="eq"><b class="s">羊</b> = <b class="c">1200</b> ÷ <span class="fr"><span>5</span><span>6</span></span> = 1200 × <span class="fr"><span>6</span><span>5</span></span> = <b class="s">1440</b>（只）</div>
+    <div class="rule">
+      <div class="card"><b>单位“1”已知 → 用乘法</b><br>知道整体，求它的几分之几：<br><span class="num">整体 × 分率 = 部分</span></div>
+      <div class="card"><b>单位“1”未知 → 用除法</b><br>知道部分和分率，求整体：<br><span class="num">部分 ÷ 分率 = 整体</span>（本题就是这种）</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>三、自己试试：换个说法，算式就变了</h2>
+  <p class="lead">牛始终是 1200 头。换一种比较方式、换一个分数，看单位“1”是谁、该乘还是该除。</p>
+  <div class="card" id="play">
+    <div class="ctrl" style="margin-top:0" data-g="mode"></div>
+    <div class="ctrl" data-g="n"><span>分数：</span></div>
+    <div class="stage">
+      <p class="q" id="pq"></p>
+      <div class="brow"><span class="blab" id="pl1"></span><div class="bar" id="pb1"></div></div>
+      <div class="brow"><span class="blab" id="pl2"></span><div class="bar" id="pb2"></div></div>
+      <div class="formula" id="pf"></div>
+    </div>
+    <p class="caption" id="pc"></p>
+    <div class="ctrl"><button type="button" class="btn" data-act="reset">↺ 重置本模块</button></div>
+  </div>
+</section>
+
+<section>
+  <h2>四、常见误区</h2>
+  <div class="traps">
+    <div class="card trap"><b class="x">✗ 1200 − <span class="fr"><span>1</span><span>6</span></span></b><br>看到「少」就减。但 <span class="fr"><span>1</span><span>6</span></span> 不是「1/6 头」，而是「羊的 <span class="fr"><span>1</span><span>6</span></span>」，是个比例，不能直接和头数相减。</div>
+    <div class="card trap"><b class="x">✗ 1200 × (1 − <span class="fr"><span>1</span><span>6</span></span>) = 1000</b><br>这是把<b class="c">牛</b>当成了单位“1”。估算一下就露馅：牛比羊少，羊应该<b>比 1200 多</b>，1000 反而更少了。</div>
+    <div class="card trap"><b class="x">✗ 1200 × (1 + <span class="fr"><span>1</span><span>6</span></span>) = 1400</b><br>「牛比羊少 <span class="fr"><span>1</span><span>6</span></span>」≠「羊比牛多 <span class="fr"><span>1</span><span>6</span></span>」。两者差 240 头：240 是羊的 <span class="fr"><span>1</span><span>6</span></span>，却是牛的 <span class="fr"><span>1</span><span>5</span></span>。尺子换了，分数就变了。</div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>一句话总结</h2>
+  <p class="one">先找「<b>比</b>」后面的那个量当单位“1”；<br>单位“1”知道就<b>乘</b>，不知道就<b>除</b>：<b class="num">1200 ÷ (1 − <span class="fr"><span>1</span><span>6</span></span>) = 1440</b>。<br>最后用 <span class="num">1440 − 1440 × <span class="fr"><span>1</span><span>6</span></span> = 1200</span> 验算一下。</p>
+</section>
+
+<section class="lq" id="lq" aria-label="练习">
+  <div class="lq-head"><h2>练习</h2><span class="lq-score"></span></div>
+  <p class="lq-sub">学完上面的内容，来检验一下。每题作答后马上看到解析；点「重做练习」清空重来。</p>
+  <div class="lq-list"></div>
+  <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+</section>
+
+</main>
+
+</main>
+
+<script>
+const resets = [];
+window.pageReset = () => resets.forEach(f => f());
+const F = (a, b) => `<span class="fr"><span>${a}</span><span>${b}</span></span>`;
+
+function stepper(root, steps, draw, ms = 2000) {
+  const btn = act => root.querySelector(`[data-act="${act}"]`), no = root.querySelector('.stepno');
+  const INIT = { step: 0, playing: false };
+  let S = { ...INIT }, timer = null;
+  const paint = () => {
+    draw(S.step);
+    no.textContent = `${S.step + 1} / ${steps}`;
+    btn('prev').disabled = S.step === 0; btn('next').disabled = S.step === steps - 1;
+    btn('play').textContent = S.playing ? '⏸ 暂停' : '▶ 播放';
+  };
+  const stop = () => { clearInterval(timer); timer = null; S.playing = false; };
+  const set = k => { S.step = Math.max(0, Math.min(steps - 1, k)); paint(); };
+  btn('prev').onclick = () => { stop(); set(S.step - 1); };
+  btn('next').onclick = () => { stop(); set(S.step + 1); };
+  btn('play').onclick = () => {
+    if (S.playing) { stop(); paint(); return; }
+    if (S.step === steps - 1) S.step = 0;
+    S.playing = true; paint();
+    timer = setInterval(() => { set(S.step + 1); if (S.step === steps - 1) { stop(); paint(); } }, ms);
+  };
+  const reset = () => { stop(); S = { ...INIT }; paint(); };
+  btn('reset').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+/* ---------- 一、线段图分步 ---------- */
+{
+  const root = document.getElementById('demo');
+  const mark = root.querySelector('mark');
+  const rowS = root.querySelector('[data-row="sheep"]'), rowC = root.querySelector('[data-row="cow"]');
+  const barS = rowS.querySelector('.bar'), barC = rowC.querySelector('.bar');
+  const totS = rowS.querySelector('.tot'), totC = rowC.querySelector('.tot');
+  const fml = root.querySelector('.formula'), cap = root.querySelector('.caption');
+  for (let i = 0; i < 6; i++) { barS.insertAdjacentHTML('beforeend', '<div class="cell"><span class="v"></span></div>'); barC.insertAdjacentHTML('beforeend', '<div class="cell"><span class="v"></span></div>'); }
+  const cS = [...barS.children], cC = [...barC.children];
+  const STEPS = [
+    { f: '「比」后面是谁，谁就是单位“1”', t: '先找单位“1”：「比<b class="s">羊</b>少」是拿羊来比，所以<b class="s">羊的总数</b>是整体“1”。它正是我们要求的，还不知道。' },
+    { f: `把羊平均分成 6 份，每份是羊的 ${F(1, 6)}`, t: `分母是 6，就把羊这条线段平均分成 6 份。` },
+    { f: `牛 = 羊 − 羊的 ${F(1, 6)} = 羊的 ${F(5, 6)}`, t: `牛比羊少 ${F(1, 6)}，就是少了<b>1 份</b>：牛只有 5 份那么长。这 5 份对应 <b class="c">1200 头</b>。` },
+    { f: `5 份 = 1200 头 → 1 份 = 1200 ÷ 5 = <b class="p">240</b>`, t: '5 份是 1200，每一份就是 1200 ÷ 5 = <b class="p">240</b>。' },
+    { f: `羊 = 240 × 6 = <b class="s">1440</b>，也就是 1200 ÷ ${F(5, 6)} = 1440`, t: `羊有 6 份：240 × 6 = 1440。先 ÷5 再 ×6，合起来正是 <b>1200 ÷ ${F(5, 6)}</b>，也就是 1200 ÷ (1 − ${F(1, 6)})。` },
+    { f: `验算：1440 × ${F(1, 6)} = 240，1440 − 240 = 1200 <span class="chk">✓</span>`, t: '把答案放回题目检查：羊的 1/6 是 240，羊少 240 正好是牛的 1200 头。' },
+  ];
+  stepper(root, STEPS.length, k => {
+    mark.classList.toggle('hl', k === 0);
+    barS.classList.toggle('whole', k === 0);
+    rowC.classList.toggle('hide', k < 2);
+    cS.forEach(c => { c.className = 'cell' + (k >= 1 ? ' showv' : '') + (k >= 4 ? ' pv' : ''); c.firstChild.textContent = k >= 4 ? '240' : '1/6'; });
+    cC.forEach((c, i) => {
+      const ghost = i === 5;
+      c.className = 'cell' + (ghost ? ' ghost' : '') + (ghost || k >= 3 ? ' showv' : '') + (!ghost && k >= 3 ? ' pv' : '');
+      c.firstChild.textContent = ghost ? '少' : '240';
+    });
+    totS.innerHTML = k >= 4 ? '240 × 6 = 1440 只' : '单位“1”：? 只';
+    totC.innerHTML = k >= 2 ? '5 份 = 1200 头' : '';
+    fml.innerHTML = STEPS[k].f; cap.innerHTML = STEPS[k].t;
+    fml.classList.remove('pop'); void fml.offsetWidth; fml.classList.add('pop');
+  });
+}
+
+/* ---------- 三、换个说法 ---------- */
+{
+  const root = document.getElementById('play');
+  const gMode = root.querySelector('[data-g="mode"]'), gN = root.querySelector('[data-g="n"]');
+  const q = root.querySelector('#pq'), l1 = root.querySelector('#pl1'), l2 = root.querySelector('#pl2');
+  const b1 = root.querySelector('#pb1'), b2 = root.querySelector('#pb2'), f = root.querySelector('#pf'), c = root.querySelector('#pc');
+  const MODES = ['牛比羊少', '牛比羊多', '羊比牛少', '羊比牛多'];
+  const gcd = (a, b) => b ? gcd(b, a % b) : a;
+  const fmt = (a, b) => { const g = gcd(a, b); a /= g; b /= g; if (b === 1) return String(a); const w = Math.floor(a / b); return (w ? w + ' ' : '') + `${a % b}/${b}`; };
+  const INIT = { mode: 0, n: 6 };
+  let S = { ...INIT };
+  MODES.forEach((m, i) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn'; b.dataset.m = i; b.textContent = m + '…'; b.onclick = () => { S.mode = i; draw(); }; gMode.append(b); });
+  [2, 3, 4, 5, 6].forEach(n => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn'; b.dataset.n = n; b.textContent = '1/' + n; b.onclick = () => { S.n = n; draw(); }; gN.append(b); });
+  const cells = (parts, total, cls, text) => {
+    let h = '';
+    for (let i = 0; i < total; i++) {
+      const ghost = i >= parts, extra = cls === 'extra' && i === total - 1;
+      h += `<div class="cell showv pop${ghost ? ' ghost' : ''}" style="animation-delay:${i * 0.08}s;${extra ? 'border-style:dashed' : ''}"><span class="v">${ghost ? '少' : text}</span></div>`;
+    }
+    return h;
+  };
+  const draw = () => {
+    const n = S.n, m = S.mode, less = m % 2 === 0, sheepUnit = m < 2;
+    const other = less ? n - 1 : n + 1;
+    gMode.querySelectorAll('button').forEach(b => b.classList.toggle('sel', +b.dataset.m === m));
+    gN.querySelectorAll('button').forEach(b => b.classList.toggle('sel', +b.dataset.n === n));
+    q.innerHTML = `牛有 1200 头，${MODES[m]} ${F(1, n)}，羊有多少只？`;
+    const sign = less ? '−' : '+', maxP = Math.max(n, other);
+    let ans, per, formula, why;
+    if (sheepUnit) {           // 羊是单位“1”，未知 → 除
+      per = fmt(1200, other); ans = fmt(1200 * n, other);
+      l1.innerHTML = '<span class="s">羊</span>'; l2.innerHTML = '<span class="c">牛</span>';
+      b1.className = 'bar sheep'; b2.className = 'bar cow';
+      b1.innerHTML = cells(n, n, '', per); b2.innerHTML = cells(other, less ? n : other, less ? '' : 'extra', per);
+      formula = `羊 = 1200 <b>÷</b> (1 ${sign} ${F(1, n)}) = <b class="s">${ans}</b>`;
+      why = `「比<b class="s">羊</b>…」→ 羊是单位“1”，而且<b>不知道</b> → 用<b>除法</b>。牛是 ${other} 份 = 1200，1 份 = ${per}。估算：羊应该比 1200 ${less ? '多' : '少'}。`;
+    } else {                   // 牛是单位“1”，已知 → 乘
+      per = fmt(1200, n); ans = fmt(1200 * other, n);
+      l1.innerHTML = '<span class="c">牛</span>'; l2.innerHTML = '<span class="s">羊</span>';
+      b1.className = 'bar cow'; b2.className = 'bar sheep';
+      b1.innerHTML = cells(n, n, '', per); b2.innerHTML = cells(other, less ? n : other, less ? '' : 'extra', per);
+      formula = `羊 = 1200 <b>×</b> (1 ${sign} ${F(1, n)}) = <b class="s">${ans}</b>`;
+      why = `「比<b class="c">牛</b>…」→ 牛是单位“1”，而且<b>已知</b>是 1200 → 用<b>乘法</b>。估算：羊应该比 1200 ${less ? '少' : '多'}。`;
+    }
+    b1.style.width = (n / maxP * 100) + '%';
+    b2.style.width = ((less ? n : other) / maxP * 100) + '%';
+    if (ans.includes('/')) why += ' （结果不是整数，真实题目会换一组数据。）';
+    f.innerHTML = formula; c.innerHTML = why;
+  };
+  const reset = () => { S = { ...INIT }; draw(); };
+  root.querySelector('[data-act="reset"]').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+window.LQ_ITEMS = [
+  { type: '选择', q: `「牛比羊少 ${F(1, 6)}」这句话里，单位“1”是谁？`, opts: ['牛', '羊', '少的那部分'], ans: 1, why: '「比」后面的量是被拿来当标准的，这里是「比羊」，所以羊是单位“1”（动画第 1 步）。' },
+  { type: '选择', q: `牛比羊少 ${F(1, 6)}，那么牛是羊的几分之几？`, opts: ['1/6', '5/6', '7/6'], ans: 1, why: '羊是 6 份，牛少 1 份，剩 5 份，所以牛是羊的 5/6（动画第 3 步）。' },
+  { type: '填空', q: `动手算：1200 ÷ ${F(5, 6)} = ?`, ans: ['1440'], placeholder: '填数字', why: '除以一个分数等于乘它的倒数：1200 × 6/5 = 7200 ÷ 5 = 1440。' },
+  { type: '判断', q: `常见误区：「既然牛比羊少 ${F(1, 6)}，那么羊就比牛多 ${F(1, 6)}。」`, opts: ['对', '错'], ans: 1, why: '差都是 240 头，但 240 是羊（1440）的 1/6，却是牛（1200）的 1/5。所以羊比牛多 1/5。单位“1”换了，分数就变了。' },
+  { type: '选择', q: '果园有苹果树 400 棵，梨树比苹果树少 1/4。梨树有多少棵？', opts: ['400 × (1 − 1/4) = 300', '400 ÷ (1 − 1/4) ≈ 533', '400 − 1/4'], ans: 0, why: '「比苹果树」→ 苹果树是单位“1”，而且已知是 400，用乘法：400 × 3/4 = 300。' },
+  { type: '选择', q: '迁移应用：一件衣服现价 180 元，比原价便宜了 1/10。原价是多少元？', opts: ['180 × (1 − 1/10) = 162', '180 ÷ (1 − 1/10) = 200', '180 × (1 + 1/10) = 198'], ans: 1, why: '「比原价便宜」→ 原价是单位“1”，不知道，用除法：180 ÷ 9/10 = 200。验算：200 的 1/10 是 20，200 − 20 = 180 ✓。' },
+  { type: '填空', q: '迁移应用：小明有 300 元，比小红多 1/4。小红有多少元？', ans: ['240', '240元'], placeholder: '填数字', why: '「比小红多」→ 小红是单位“1”，未知，用除法：300 ÷ (1 + 1/4) = 300 ÷ 5/4 = 240。验算：240 + 240 × 1/4 = 300 ✓。' },
+  { type: '选择', q: '有同学算成 1200 × (1 − 1/6) = 1000 只。最快发现错误的方法是：', opts: ['重新抄一遍题', '估算：牛比羊少，羊应该比 1200 多，1000 不对', '换成小数再算'], ans: 1, why: '先估方向：牛比羊少，说明羊更多，答案必须大于 1200。1000 比 1200 小，一看就错（误区第 2 条）。' },
+];
+</script>
+<script>
+/* ---------- 练习题（learn 通用组件） ----------
+   题目来自 window.LQ_ITEMS：{type, q, opts, ans: 选项下标, why} 或填空题 {type, q, ans: [可接受答案…], why}
+   定义 window.resetPage()（导航条「重置」按钮调用）：先调用页面自己的 window.pageReset()，再清空练习 */
+(() => {
+  const box = document.getElementById('lq');
+  const items = window.LQ_ITEMS || [];
+  const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let answered = 0, right = 0;
+
+  function update() {
+    const all = answered === items.length;
+    score.textContent = `已答 ${answered} / ${items.length} · 答对 ${right}` +
+      (all ? (right === items.length ? ' · 全对！' : ' · 看看解析，再重做一次') : '');
+  }
+
+  function render() {
+    answered = 0; right = 0; list.innerHTML = '';
+    items.forEach((it, i) => {
+      const el = document.createElement('div');
+      el.className = 'lq-item';
+      el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
+      const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
+      const judge = (ok, answer) => {
+        answered++; if (ok) right++;
+        el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
+        why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
+        update();
+      };
+      if (it.opts) {
+        a.classList.add('lq-opts');
+        it.opts.forEach((o, j) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'lq-opt'; b.innerHTML = o;
+          b.onclick = () => {
+            a.querySelectorAll('button').forEach(x => x.disabled = true);
+            a.children[it.ans].classList.add('lq-right');
+            if (j !== it.ans) b.classList.add('lq-wrong');
+            judge(j === it.ans, it.opts[it.ans]);
+          };
+          a.append(b);
+        });
+      } else {
+        a.classList.add('lq-fill');
+        a.innerHTML = `<input type="text" autocomplete="off" spellcheck="false" placeholder="${it.placeholder || '输入答案'}" aria-label="第 ${i + 1} 题答案"><button type="button" class="lq-opt">确定</button>`;
+        const inp = a.querySelector('input'), go = a.querySelector('button');
+        const submit = () => {
+          if (!inp.value.trim()) { inp.focus(); return; }
+          inp.disabled = go.disabled = true;
+          const ok = it.ans.some(x => norm(x) === norm(inp.value));
+          inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
+          judge(ok, it.ans[0]);
+        };
+        go.onclick = submit;
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      }
+      list.append(el);
+    });
+    update();
+  }
+
+  box.querySelector('.lq-redo').addEventListener('click', render);
+  // 导航条的「重置」按钮调用它：页面各模块 + 练习题一起恢复初始状态
+  window.resetPage = () => {
+    if (typeof window.pageReset === 'function') window.pageReset();
+    render();
+  };
+  render();
+})();
+</script>
+</body>
+</html>
