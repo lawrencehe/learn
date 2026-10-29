@@ -109,6 +109,10 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .sw.neg{background:var(--neg)}
 canvas.drawing{cursor:crosshair;touch-action:none}
 .hint{font-size:.8rem;color:var(--target)}
+.bridge-cap{min-height:4.8em;font-size:.95rem;line-height:1.7}
+.stepno{font-family:var(--f-mono);color:var(--muted);font-size:.85rem;min-width:52px;text-align:center}
+#bridge .controls{align-items:center;gap:8px}
+.btn:disabled{opacity:.4;cursor:default}
 
 .theorem{border-left:3px solid var(--accent);padding:6px 0 6px 18px;display:grid;gap:10px;max-width:760px}
 .theorem .eyebrow{color:var(--muted)}
@@ -278,12 +282,36 @@ document.getElementById('up-reset').addEventListener('click', function () {
       <div class="panel"><canvas id="cv-b2" class="ar-sq"></canvas><h3>② 两个台阶相减 = 一个凸起</h3><p>σ(w(x − t₁)) − σ(w(x − t₂)) 只在 t₁ 到 t₂ 之间为 1，其余地方为 0。</p></div>
       <div class="panel"><canvas id="cv-b3" class="ar-sq"></canvas><h3>③ 凸起乘上高度，再相加</h3><p>每个凸起乘以目标函数在这一段的值，加起来就是一条贴着目标走的阶梯。</p></div>
     </div>
-    <figcaption>相邻两个凸起交界处的那一对台阶可以合并成一个。所以把区间切成 N+1 段，只需要 N 个神经元，每个神经元负责一个“台阶”，它在第 2 层的权重 wᵢ⁽²⁾ 就是相邻两段的高度差。</figcaption>
+    <figcaption>①②③ 说明了“为什么能拼”。但实验台里你只会看到台阶、看不到凸起，下面这段动画解释凸起去哪儿了。</figcaption>
   </figure>
+
+  <div class="stack prose" id="bridge-intro">
+    <h3>凸起和实验台是什么关系？</h3>
+    <p>先说结论：<strong>凸起是用来想明白的积木，台阶才是真正干活的神经元。</strong></p>
+    <p>凸起解决的是“<em>为什么</em>什么曲线都能拼”：任何曲线都能看成一排挨着的窄柱子（像柱状图），柱子越窄越贴合；而一个凸起恰好就是一根柱子，位置、宽度、高度都能随意调。所以“能造柱子”⇒“能拼任何曲线”。</p>
+    <p>可每根柱子要 2 个神经元，太浪费。下面一步步看：相邻柱子交界处的两个台阶会<strong>合并成一个</strong>，合并完凸起就“看不见”了，只剩一串台阶，这就是实验台里那些细蓝线。</p>
+  </div>
+  <figure class="fig" style="margin:0" id="bridge">
+    <canvas id="cv-bridge" class="ar-main" aria-label="从一排凸起出发，把相邻台阶合并，得到实验台里的台阶网络"></canvas>
+    <p class="bridge-cap" aria-live="polite"></p>
+    <div class="controls">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+    <div class="legend"><span><i class="sw target"></i>目标 f(x)</span><span><i class="sw model"></i>往上跳的台阶 / 网络输出</span><span><i class="sw neg"></i>往下跳的台阶</span></div>
+  </figure>
+  <div class="theorem">
+    <p class="eyebrow">那么，不讲凸起行不行？</p>
+    <p>行。网络本身根本不知道“凸起”，它只会把一堆台阶（或任意形状的 S 形曲线）乘上权重加起来。实验台直接用台阶写法，训练出来的网络（第四步）更不会排成凸起。</p>
+    <p>凸起的价值在<strong>论证</strong>：它把“一堆台阶能不能拼出任意曲线？”这个不好回答的问题，换成了“能不能造出一根柱子？”，而后者两个神经元就能做到。想通这一点后，合并只是省神经元的记账技巧，不改变拼出来的形状。</p>
+  </div>
 
   <div class="stack prose">
     <h3>实验台</h3>
-    <p>下面按这个方法直接计算出每个神经元的参数，不做任何训练。增加神经元数量 N，看阶梯怎样越来越细。<span class="t-neg">浅红色区域</span>是误差。选“手绘”后可以直接在图上拖动，改画目标曲线。</p>
+    <p>下面按刚才“先拼柱子、再合并台阶”的方法直接算出每个神经元的参数，不做任何训练：区间切成 N+1 段，用 N 个神经元，每条细蓝线就是一个合并后的台阶。增加神经元数量 N，看阶梯怎样越来越细。<span class="t-neg">浅红色区域</span>是误差。选“手绘”后可以直接在图上拖动，改画目标曲线。</p>
   </div>
   <figure class="fig" style="margin:0">
     <div class="controls">
@@ -745,6 +773,122 @@ function maxErr(F, f, n = 300) { let e = 0; for (let i = 0; i <= n; i++) { const
   resets.push(() => setRange('wb', 30));
 }
 
+/* ---------- 3a': BUMPS -> MERGED STEPS (stepper) ---------- */
+{
+  const root = document.getElementById('bridge'), cv = document.getElementById('cv-bridge');
+  const cap = root.querySelector('.bridge-cap'), no = root.querySelector('.stepno');
+  const btn = act => root.querySelector(`[data-act="${act}"]`);
+  const g = x => 0.55 + 0.4 * Math.sin(4.5 * x);
+  const M = 4, E = [0, 0.25, 0.5, 0.75, 1], Hs = [0, 1, 2, 3].map(i => g((i + 0.5) / M));
+  const K = 90, st = (t, x) => sig(K * (x - t));
+  const v = j => Hs[j] - Hs[j - 1];                 // merged step at edge j (j = 1..3)
+  const n2 = x => x.toFixed(2), sgn = x => (x >= 0 ? '+' : '−') + Math.abs(x).toFixed(2);
+  const STEPS = [
+    '第 1 步：这是想拼出的目标曲线 f(x)。我们手里只有“台阶”（陡峭的 sigmoid 神经元）。',
+    '第 2 步：先换个看法——把区间切成 4 段，每段取中间的高度，曲线就近似成 4 根柱子。段切得越细，柱子就越贴曲线。',
+    `第 3 步：每根柱子就是一个凸起。比如第 2 根：在 x = 0.25 往上跳 ${n2(Hs[1])}，在 x = 0.5 往下跳 ${n2(Hs[1])}，两个台阶相减，只留下中间这一段。`,
+    '第 4 步：4 根柱子 × 每根 2 个台阶 = 8 个台阶，也就是 8 个神经元。箭头画出每个台阶跳的方向和高度。',
+    `第 5 步：看 x = 0.25：柱子 1 在这里往下跳 ${n2(Hs[0])}，柱子 2 在同一位置往上跳 ${n2(Hs[1])}。两个台阶位置相同，加起来就是一个跳 ${sgn(v(1))} 的台阶，一个神经元就够了。`,
+    `第 6 步：每个交界都这样合并。最左边那个往上跳的台阶在区间起点，整段都“已经跳起”，等于常数 ${n2(Hs[0])}，交给偏置 b⁽²⁾；最右边往下跳的那个落在终点 x = 1，跳完已经出了要拼的范围，用不着。8 个神经元 → 3 个。`,
+    '第 7 步：3 个台阶（细线）加上偏置，拼出的阶梯和 4 根柱子一模一样。这就是实验台里 N = 3 的样子：凸起没有消失，每两个相邻台阶之间夹着的平台，就是一根柱子的顶。',
+  ];
+  const INIT = { step: 0, playing: false };
+  let S = { ...INIT }, timer = null, A = 0;
+  const prog = () => RM ? 1 : clamp((performance.now() - A) / 900, 0, 1);
+  const ease = p => p < .5 ? 2 * p * p : 1 - (-2 * p + 2) ** 2 / 2;
+  function arrow(ctx, fr, x, y0, y1, color, alpha = 1, w = 2.5) {
+    if (Math.abs(fr.Y(y1) - fr.Y(y0)) < 2) return;
+    const px = fr.X(x), a = fr.Y(y0), b = fr.Y(y1), d = Math.sign(b - a), hl = Math.min(8, Math.abs(b - a) * .4);
+    ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = w;
+    ctx.beginPath(); ctx.moveTo(px, a); ctx.lineTo(px, b - d * hl); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(px, b); ctx.lineTo(px - 5, b - d * hl); ctx.lineTo(px + 5, b - d * hl); ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+  function tag(ctx, fr, x, y, text, color, alpha = 1) {
+    const below = y < 0;
+    ctx.save(); ctx.globalAlpha = alpha; ctx.font = '600 10.5px ' + MONO; ctx.fillStyle = color; ctx.textAlign = 'center';
+    ctx.textBaseline = below ? 'top' : 'bottom'; ctx.fillText(text, fr.X(x), fr.Y(y) + (below ? 4 : -4)); ctx.restore();
+  }
+  function bars(ctx, fr, alpha, hi = -1) {
+    ctx.save();
+    for (let i = 0; i < M; i++) {
+      const x0 = fr.X(E[i]) + 1, x1 = fr.X(E[i + 1]) - 1, y = fr.Y(Hs[i]), y0 = fr.Y(0);
+      ctx.globalAlpha = alpha * (hi < 0 || hi === i ? 1 : .35);
+      ctx.fillStyle = COL.accent; ctx.globalAlpha *= .14; ctx.fillRect(x0, y, x1 - x0, y0 - y);
+      ctx.globalAlpha = alpha * (hi < 0 || hi === i ? 1 : .35) * .6; ctx.strokeStyle = COL.accent; ctx.lineWidth = 1; ctx.strokeRect(x0 + .5, y + .5, x1 - x0 - 1, y0 - y - 1);
+    }
+    ctx.restore();
+  }
+  const m = addModule({ el: cv, canvases: [cv], animating: () => prog() < 1, draw() {
+    const { ctx, w, h } = setup(cv);
+    const fr = frame(w, h, [0, 1], [-1.15, 1.2], { l: 36, r: 14, t: 16 });
+    axes(ctx, fr, E, [-1, -0.5, 0, 0.5, 1], v => v, v => v.toFixed(1));
+    const s = S.step, p = ease(prog()), off = 0.018;
+    plot(ctx, fr, g, { color: COL.target, width: 2.5, alpha: s === 0 ? p : (s >= 2 && s <= 5 ? .45 : 1) });
+    if (s === 1) bars(ctx, fr, p);
+    if (s >= 2) bars(ctx, fr, s === 6 ? .7 : .55, s === 2 ? 1 : -1);
+    if (s === 2) {
+      plot(ctx, fr, x => Hs[1] * st(.25, x), { color: COL.accent, width: 1.5, alpha: .55 * p, n: 500 });
+      plot(ctx, fr, x => -Hs[1] * st(.5, x), { color: COL.neg, width: 1.5, alpha: .6 * p, dash: [5, 4], n: 500 });
+      plot(ctx, fr, x => Hs[1] * (st(.25, x) - st(.5, x)), { color: COL.accent, width: 3.5, alpha: p, n: 500 });
+      arrow(ctx, fr, .25, 0, Hs[1], COL.accent, p); tag(ctx, fr, .25, Hs[1], sgn(Hs[1]), COL.accent, p);
+      arrow(ctx, fr, .5, 0, -Hs[1], COL.neg, p); tag(ctx, fr, .5, -Hs[1], sgn(-Hs[1]), COL.neg, p);
+      label(ctx, '1 根柱子 = 2 个台阶', fr.pad.l + 8, fr.pad.t, COL.ink, 'left', 13);
+    }
+    if (s >= 3 && s <= 5) {
+      for (let j = 0; j <= M; j++) {
+        const up = j < M ? Hs[j] : 0, dn = j > 0 ? Hs[j - 1] : 0;
+        let a = s === 3 ? p : 1, o = off, comb = 0;           // comb: 0 = 两个箭头分开，1 = 已合并
+        if (j > 0 && j < M) {
+          if (s === 4 && j === 1) { o = off * (1 - Math.min(1, p * 2)); comb = Math.max(0, p * 2 - 1); }
+          else if (s === 5) comb = 1;
+          else if (s === 4) a = .35;
+        }
+        const end = j === 0 || j === M, fadeEnd = s === 5 && end ? 1 - p : 1;
+        if (comb < 1) {
+          if (up) { arrow(ctx, fr, E[j] + (j === 0 ? off : o), 0, up, COL.accent, a * (1 - comb) * fadeEnd); tag(ctx, fr, E[j] + (j === 0 ? off : o), up, sgn(up), COL.accent, a * (1 - comb) * fadeEnd); }
+          if (dn) { arrow(ctx, fr, E[j] - (j === M ? off : o), 0, -dn, COL.neg, a * (1 - comb) * fadeEnd); tag(ctx, fr, E[j] - (j === M ? off : o), -dn, sgn(-dn), COL.neg, a * (1 - comb) * fadeEnd); }
+        }
+        if (comb > 0) { const vv = v(j), c = vv >= 0 ? COL.accent : COL.neg; arrow(ctx, fr, E[j], 0, vv, c, comb, 3.5); tag(ctx, fr, E[j], vv, sgn(vv), c, comb); }
+      }
+      if (s === 4) { const px = fr.X(.25); ctx.save(); ctx.strokeStyle = COL.ink; ctx.globalAlpha = .5; ctx.setLineDash([3, 4]); ctx.beginPath(); ctx.moveTo(px, fr.pad.t); ctx.lineTo(px, h - fr.pad.b); ctx.stroke(); ctx.restore(); }
+      if (s === 5) {
+        plot(ctx, fr, () => Hs[0], { color: COL.ink, width: 1.5, alpha: .7 * p, dash: [6, 5] });
+        label(ctx, `偏置 b⁽²⁾ = ${n2(Hs[0])}`, fr.X(.02), fr.Y(Hs[0]) - 18, COL.ink, 'left', 11.5);
+        ctx.save(); ctx.globalAlpha = p; ctx.font = '700 16px ' + MONO; ctx.fillStyle = COL.neg; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('✕', fr.X(1) - 10, fr.Y(-Hs[M - 1] / 2)); ctx.restore();
+      }
+      label(ctx, s === 5 ? '3 个台阶（神经元）+ 1 个偏置' : '8 个台阶 = 8 个神经元', fr.pad.l + 8, fr.pad.t, COL.ink, 'left', 13);
+    }
+    if (s === 6) {
+      for (let j = 1; j < M; j++) { const vv = v(j); plot(ctx, fr, x => vv * st(E[j], x), { color: vv >= 0 ? COL.accent : COL.neg, width: 1.5, alpha: .6 * p, n: 500 }); }
+      plot(ctx, fr, () => Hs[0], { color: COL.ink, width: 1.2, alpha: .45 * p, dash: [6, 5] });
+      plot(ctx, fr, x => { let y = Hs[0]; for (let j = 1; j < M; j++) y += v(j) * st(E[j], x); return y; }, { color: COL.accent, width: 3.5, alpha: p, n: 600 });
+      label(ctx, 'F(x) = b⁽²⁾ + 3 个台阶，N = 3', fr.pad.l + 8, fr.pad.t, COL.ink, 'left', 13);
+    }
+  }});
+  const draw = () => {
+    cap.textContent = STEPS[S.step]; no.textContent = `${S.step + 1} / ${STEPS.length}`;
+    btn('prev').disabled = S.step === 0; btn('next').disabled = S.step === STEPS.length - 1;
+    btn('play').textContent = S.playing ? '⏸ 暂停' : '▶ 播放';
+    m.dirty = true;
+  };
+  const stop = () => { clearInterval(timer); timer = null; S.playing = false; };
+  const go = d => { const n = clamp(S.step + d, 0, STEPS.length - 1); if (n !== S.step) { S.step = n; A = performance.now(); } draw(); };
+  btn('prev').onclick = () => { stop(); go(-1); };
+  btn('next').onclick = () => { stop(); go(1); };
+  btn('play').onclick = () => {
+    if (S.playing) { stop(); draw(); return; }
+    if (S.step === STEPS.length - 1) { S.step = 0; A = performance.now(); }
+    S.playing = true; draw();
+    timer = setInterval(() => { go(1); if (S.step === STEPS.length - 1) { stop(); draw(); } }, 3200);
+  };
+  const reset = () => { stop(); S = { ...INIT }; A = performance.now(); draw(); };
+  btn('reset').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
 /* ---------- 3b: APPROXIMATION BENCH ---------- */
 {
   const cv = document.getElementById('cv-ua'), cvE = document.getElementById('cv-err'), ro = document.getElementById('ro-ua');
@@ -929,6 +1073,11 @@ window.LQ_ITEMS = [
     why: '台阶位置 t = −b/w，所以 b = −w·t = −50 × 0.4 = −20。' },
   { type: '选择', q: '用 sigmoid 台阶法把区间 [0, 1] 切成 N + 1 段，需要几个隐藏神经元？', opts: ['N 个', 'N + 1 个', '2N 个'], ans: 0,
     why: '每个凸起要两个台阶，但相邻凸起交界处的一对台阶可以合并成一个，所以 N 个台阶就够了，每个神经元在第 2 层的权重 w⁽²⁾ 是相邻两段的高度差。' },
+  { type: '选择', q: '实验台里只看到一串台阶，看不到一个个凸起。这说明什么？',
+    opts: ['凸起被合并了：相邻凸起交界处的“下跳 + 上跳”合成了一个台阶', '实验台用的是另一种方法，和凸起无关', '凸起太窄，屏幕上显示不出来'], ans: 0,
+    why: '常见误区。实验台就是凸起构造合并之后的样子：每个交界处“前一根柱子往下跳 + 后一根柱子往上跳”位置相同，合成一个台阶。相邻两个台阶之间的平台，就是一根柱子的顶（见“凸起和实验台”动画第 5～7 步）。' },
+  { type: '计算', q: '区间被切成若干段，相邻两段的高度分别是 0.3 和 0.8。合并后，交界处那个神经元在第 2 层的权重 w⁽²⁾ 是多少？', ans: ['0.5', '+0.5', '.5'], placeholder: '例如 0.1',
+    why: '前一根柱子在这里往下跳 0.3，后一根往上跳 0.8，合起来跳 0.8 − 0.3 = 0.5，所以这个台阶神经元的 w⁽²⁾ = 0.5。' },
   { type: '判断', q: '通用逼近定理告诉了我们怎样通过训练找到这些参数。', opts: ['对', '错'], ans: 1,
     why: '定理只保证这样的参数<b>存在</b>，不告诉你怎么找，也不保证网络小、不保证泛化。找参数要靠梯度下降训练。' },
   { type: '选择', q: '如果输入从 1 维变成 n 维，用“切格子拼台阶”的构造，需要的神经元数会怎样变化？',
