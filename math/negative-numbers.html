@@ -1,0 +1,713 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>负数的运算</title>
+<meta name="description" content="从数轴、正负豆子和“搬家”动画讲清负数：负号和减号怎么分，−3 + 5、3 − (−6)、−12 × 8 = 12 × (−8) 为什么这样算。">
+<style>
+:root{
+  --bg:var(--up-bg); --surface:var(--up-surface); --surface2:var(--up-surface-2); --ink:var(--up-ink); --muted:var(--up-muted); --line:var(--up-line);
+  --accent:var(--up-accent); --ok:var(--up-ok); --bad:var(--up-bad);
+  --pos:#1971c2; --pos-soft:#dbeafc;   /* 正数 / 向右 */
+  --neg:#9c36b5; --neg-soft:#f3d9fa;   /* 负数 / 负号 / 向左 */
+  --sub:#0c8599; --sub-soft:#d3f1f5;   /* 减号（运算） */
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --pos:#74c0fc; --pos-soft:#16314d; --neg:#e599f7; --neg-soft:#3b1f45; --sub:#66d9e8; --sub-soft:#123a40; }
+}
+:root[data-theme="dark"]{ --pos:#74c0fc; --pos-soft:#16314d; --neg:#e599f7; --neg-soft:#3b1f45; --sub:#66d9e8; --sub-soft:#123a40; }
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 var(--up-font);padding:24px 16px 96px}
+main{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:48px}
+h1{font-size:clamp(1.7rem,4.5vw,2.4rem);line-height:1.25;margin:0 0 8px}
+h2{font-size:1.4rem;margin:0 0 8px}
+p{margin:0}
+.lead{color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--up-radius);box-shadow:var(--up-shadow);padding:16px}
+.analogy{border-left:4px solid var(--accent)}
+.btn{font:inherit;font-size:14px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--up-surface)}
+.btn.on{border-color:var(--accent);background:var(--up-accent-soft);color:var(--accent);font-weight:700}
+.btn:disabled{opacity:.45;cursor:default}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.stepno{font-family:var(--up-mono);color:var(--muted);font-size:.9rem;min-width:56px;text-align:center}
+.caption{min-height:3.4em;margin-top:10px}
+.num{font-family:var(--up-mono)}
+.pos{color:var(--pos)} .neg{color:var(--neg)} .sub{color:var(--sub)}
+.stack{display:flex;flex-direction:column;gap:12px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.note{font-size:14px;color:var(--muted)}
+.rules{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.rules span{font-size:13px;border:1px solid var(--line);border-radius:999px;padding:1px 10px;background:var(--surface2)}
+svg{display:block;width:100%;height:auto}
+svg text{font-family:var(--up-mono)}
+.big{font-family:var(--up-mono);font-size:clamp(1.4rem,5vw,1.9rem);text-align:center;padding:8px 0}
+label.sl{display:flex;align-items:center;gap:8px;font-size:14px}
+label.sl input{width:130px;accent-color:var(--accent)}
+
+/* 负号 / 减号 标注 */
+.tags{display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-start;gap:6px;padding:14px 0 4px;font-family:var(--up-mono)}
+.tk{display:flex;flex-direction:column;align-items:center;gap:4px}
+.tk b{font-size:clamp(1.4rem,5vw,1.9rem);font-weight:600;padding:0 6px;border-radius:8px;border:2px solid transparent;line-height:1.4}
+.tk small{font-family:var(--up-font);font-size:12px;color:var(--muted);min-height:1.5em}
+.tk-negnum b{border-color:var(--neg);background:var(--neg-soft);color:var(--neg)}
+.tk-negnum small{color:var(--neg);font-weight:700}
+.tk-sub b{color:var(--sub);border-color:var(--sub);border-style:dashed}
+.tk-sub small{color:var(--sub);font-weight:700}
+.tk-num b{color:var(--pos)}
+
+/* 豆子 */
+.beans{display:flex;flex-direction:column;gap:10px;margin-top:12px;background:var(--surface2);border-radius:10px;padding:12px}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-height:40px}
+.row .rl{font-size:13px;color:var(--muted);width:52px;flex:none}
+.bean{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font:700 18px/1 var(--up-mono);transition:opacity .7s,transform .7s}
+.bean.p{background:var(--pos-soft);color:var(--pos);border:2px solid var(--pos)}
+.bean.m{background:var(--neg-soft);color:var(--neg);border:2px solid var(--neg)}
+.bean.new{animation:pop .7s ease}
+.bean.out{opacity:.25;transform:translateY(10px) scale(.8);border-style:dashed}
+@keyframes pop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.val{font-family:var(--up-mono);text-align:center;margin-top:8px;font-size:1.1rem}
+
+/* 乘法搬家 */
+.flip{display:flex;justify-content:center;align-items:center;flex-wrap:nowrap;min-height:90px;font:600 clamp(1.3rem,5.4vw,2rem)/1 var(--up-mono);background:var(--surface2);border-radius:10px;margin-top:12px;padding:0 8px;overflow:hidden}
+.flip span{display:inline-block;margin:0 .22em;white-space:nowrap}
+.flip span.gl{margin-right:0} .flip span.gr{margin-left:0}
+.flip span.n{color:var(--neg)}
+.flip span.fade{animation:pop .7s ease}
+
+.sign{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:8px}
+.trap b.x{color:var(--bad)}
+.trap b.y{color:var(--ok)}
+table.pat{border-collapse:collapse;font-family:var(--up-mono);margin:8px auto 0}
+table.pat td{padding:2px 10px;text-align:right}
+table.pat tr.hl td{color:var(--neg);font-weight:700}
+@media (prefers-reduced-motion: reduce){.bean,.bean.new,.flip span.fade{animation:none;transition:none}}
+
+:root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:var(--ok);--lq-bad:var(--bad)}
+/* ---------- 练习题（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+.lq{display:grid;gap:12px;margin-bottom:56px}
+.lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+.lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
+.lq-sub{margin:0;color:var(--lq-muted);font-size:14px}
+.lq-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--lq-muted);font-variant-numeric:tabular-nums}
+.lq-list{display:grid;gap:10px}
+.lq-item{background:var(--lq-surface);border:1.5px solid var(--lq-line);border-radius:10px;padding:12px 16px;display:grid;gap:10px;min-width:0;color:var(--lq-ink);text-align:left}
+.lq-item.lq-is-ok{border-color:var(--lq-ok)}
+.lq-item.lq-is-bad{border-color:var(--lq-bad)}
+.lq-q{font-size:15px;font-weight:600;line-height:1.6}
+.lq-tag{display:inline-block;font-size:11px;font-weight:500;line-height:1.6;color:var(--lq-muted);border:1px solid var(--lq-line);border-radius:999px;padding:0 8px;margin-right:8px;vertical-align:1px}
+.lq-opts,.lq-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lq .lq-opt,.lq .lq-redo{font:inherit;font-size:14px;line-height:1.4;padding:6px 14px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);cursor:pointer;text-align:left;opacity:1}
+.lq .lq-opt:hover:not(:disabled),.lq .lq-redo:hover{border-color:var(--lq-accent)}
+.lq .lq-opt:disabled{cursor:default;opacity:1}
+.lq .lq-opt.lq-right{border-color:var(--lq-ok);color:var(--lq-ok);font-weight:700}
+.lq .lq-opt.lq-wrong{border-color:var(--lq-bad);color:var(--lq-bad);text-decoration:line-through}
+.lq-fill input{font:inherit;font-size:14px;padding:6px 10px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);width:min(100%,200px)}
+.lq-fill input.lq-right{border-color:var(--lq-ok)}
+.lq-fill input.lq-wrong{border-color:var(--lq-bad)}
+.lq-why{font-size:14px;line-height:1.65;color:var(--lq-muted)}
+.lq-why:empty{display:none}
+.lq-why .lq-ok{color:var(--lq-ok)}
+.lq-why .lq-bad{color:var(--lq-bad)}
+
+</style>
+</head>
+<body>
+<!-- up-shell:begin（由 scripts/shell.mjs 自动生成，勿手改） -->
+<nav id="up-nav" aria-label="网站导航">
+<a class="up-home" href="/" title="Up 学习站首页"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="up-nav-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c6ef5"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#up-nav-g)"/><path d="M12 52V42a2 2 0 0 1 2-2h10V32a2 2 0 0 1 2-2h10v-8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v30z" fill="#fff"/><circle cx="43" cy="13" r="5.5" fill="#ffa94d"/></svg><span>Up 学习站</span></a>
+<span class="up-sep" aria-hidden="true">›</span><a class="up-cat" href="/math">数学</a>
+<span class="up-sep" aria-hidden="true">›</span><span class="up-title">负数的运算</span>
+<button id="up-reset" type="button" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+</nav>
+<style>
+:root{--up-bg:#f5f6f8;--up-surface:#ffffff;--up-surface-2:#eef0f4;--up-ink:#1d2127;--up-muted:#626b78;--up-line:#dfe2e8;--up-ok:#2b8a3e;--up-bad:#d6336c;--up-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);--up-font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif;--up-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;--up-radius:12px;--up-accent:#d9480f;--up-accent-soft:#fff1e8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#ff8a50;--up-accent-soft:#3a2218;color-scheme:dark}}
+:root[data-theme="dark"]{--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#ff8a50;--up-accent-soft:#3a2218;color-scheme:dark}
+html{padding-top:52px;scroll-padding-top:64px}
+#up-nav{position:fixed;top:0;left:0;right:0;z-index:2147483000;height:52px;box-sizing:border-box;display:flex;align-items:center;gap:8px;
+padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));border-top:3px solid var(--up-accent);
+border-bottom:1px solid var(--up-line);background:color-mix(in srgb,var(--up-surface) 88%,transparent);
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:500 14px/1.2 var(--up-font);color:var(--up-ink);text-align:left}
+#up-nav a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none}
+#up-nav a:hover{color:var(--up-accent)}
+#up-nav svg{width:24px;height:24px;flex:none;display:block}
+#up-nav .up-home span{font-weight:700}
+#up-nav .up-cat{color:var(--up-accent);font-weight:600}
+#up-nav .up-sep{color:var(--up-muted);flex:none}
+#up-nav .up-title{color:var(--up-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#up-reset{margin:0 0 0 auto;flex:none;font:600 14px/1 var(--up-font);padding:8px 14px;border-radius:999px;cursor:pointer;
+border:1.5px solid var(--up-accent);background:transparent;color:var(--up-accent);transition:background .2s,color .2s}
+#up-reset:hover,#up-reset:focus-visible{background:var(--up-accent);color:var(--up-surface)}
+#up-reset:focus-visible,#up-nav a:focus-visible{outline:2px solid var(--up-accent);outline-offset:2px}
+@media (max-width:560px){#up-nav .up-home span{display:none}}
+@media print{#up-nav{display:none}html{padding-top:0}}
+</style>
+<script>
+document.getElementById('up-reset').addEventListener('click', function () {
+  if (typeof window.resetPage === 'function') window.resetPage();
+  else console.warn('本页没有定义 window.resetPage()，重置按钮无效');
+  window.scrollTo({ top: 0, behavior: 'auto' });
+});
+</script>
+<!-- up-shell:end -->
+<main>
+
+<section>
+  <h1>负数的运算</h1>
+  <p class="lead">−3 + 5 的第一个数怎么理解？−12 × 8 为什么等于 12 × (−8)？3 − (−6) 为什么是 9 而不是 6 − 3？这一页用数轴上走路、正负豆子、负号“搬家”三个动画讲清楚。</p>
+</section>
+
+<section class="card analogy">
+  <b>生活比喻：钱包里的钱和欠条</b><br>
+  正数像<b class="pos">存着的钱</b>，负数像<b class="neg">欠条</b>：−3 就是“欠 3 块钱”。<br>
+  欠 3 块，又挣了 5 块 → 还完还剩 2 块：<span class="num">−3 + 5 = 2</span>。撕掉一张 6 块钱的欠条 → 你等于多了 6 块：<span class="num">3 − (−6) = 9</span>。
+</section>
+
+<!-- 一、数轴 -->
+<section>
+  <h2>一、负数在哪里：数轴</h2>
+  <p>数轴就是一把横着的尺子：0 在中间，<b class="pos">右边是正数</b>，<b class="neg">左边是负数</b>。像温度计横过来，0℃ 往下就是零下。</p>
+  <div class="card" id="nl">
+    <svg viewBox="0 0 560 125" aria-label="数轴"><g class="ax"></g><line class="seg" y1="60" y2="60" stroke-width="8" stroke-linecap="round"/><circle class="dot" cy="60" r="11"/><text class="dl" y="34" text-anchor="middle" font-size="18" font-weight="700"></text></svg>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <label class="sl">选一个数 <input type="range" min="-10" max="10" step="1"> <b class="num v"></b></label>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+    <p class="note" style="margin-top:8px">越往右越大：<span class="num">−8 &lt; −3 &lt; 0 &lt; 2</span>。所以 −8 比 −3 <b>小</b>（零下 8℃ 比零下 3℃ 更冷）。</p>
+  </div>
+</section>
+
+<!-- 二、负号 vs 减号 -->
+<section>
+  <h2>二、同一个“−”，两种身份</h2>
+  <p>“−”有时是<b class="neg">负号</b>（数自己的一部分，粘在数上），有时是<b class="sub">减号</b>（一个运算，夹在两个数中间）。<b>先分清身份，后面就不会乱。</b></p>
+  <div class="card" id="tag">
+    <div class="ctrl ex" style="margin-top:0"></div>
+    <div class="tags"></div>
+    <p class="caption"></p>
+    <div class="rules">
+      <span>“−”在最前面 → <b class="neg">负号</b></span>
+      <span>“−”前面是 + − × ÷ 或 “(” → <b class="neg">负号</b></span>
+      <span>“−”前面是一个数（或 “)”） → <b class="sub">减号</b></span>
+    </div>
+    <div class="ctrl"><button type="button" class="btn" data-act="reset">↺ 重置本模块</button></div>
+  </div>
+</section>
+
+<!-- 三、数轴上走路 -->
+<section>
+  <h2>三、加减法：小人在数轴上走路</h2>
+  <p>只要记住 4 条规则，所有加减法都能“走”出来：</p>
+  <div class="rules" style="margin:6px 0 0">
+    <span>① 站在第一个数上</span>
+    <span>② 「+」面朝右，「−」转身面朝左</span>
+    <span>③ 第二个数是正数 → 向前走；负数 → 倒着退</span>
+    <span>④ 走第二个数那么多格</span>
+  </div>
+  <div class="card" id="walk" style="margin-top:12px">
+    <div class="ctrl pre" style="margin-top:0"></div>
+    <div class="big expr"></div>
+    <svg viewBox="0 0 560 180" aria-label="数轴上走路">
+      <g class="ax"></g>
+      <g class="trail"><line y1="116" y2="116" stroke-width="6" stroke-linecap="round"/><path/></g>
+      <g class="bot">
+        <g class="face"><circle r="15"/><circle cx="6" cy="-4" r="3" class="eye"/><path d="M17,-8 L29,0 L17,8Z"/></g>
+        <text class="bl" y="-26" text-anchor="middle" font-size="19" font-weight="700"></text>
+      </g>
+    </svg>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+    <div class="ctrl" style="border-top:1px dashed var(--line);padding-top:12px">
+      <b style="font-size:14px">自己出题：</b>
+      <label class="sl">第一个数 <input type="range" class="ia" min="-8" max="8" step="1"> <b class="num va"></b></label>
+      <button type="button" class="btn" data-op="+">+</button><button type="button" class="btn" data-op="-">−</button>
+      <label class="sl">第二个数 <input type="range" class="ib" min="-8" max="8" step="1"> <b class="num vb"></b></label>
+    </div>
+  </div>
+  <p class="note" style="margin-top:10px">💡 −3 + 5 也可以交换成 5 + (−3) = 5 − 3 = 2。注意交换时，<b>每个数带着自己的符号一起走</b>：−3 整个换到后面，负号不会留在原地，也不会跑到 5 身上。</p>
+</section>
+
+<!-- 四、减负数 -->
+<section>
+  <h2>四、为什么“减去负数”等于“加上正数”</h2>
+  <p>用两种豆子：<b class="pos">⊕ 正豆</b>算 +1，<b class="neg">⊖ 负豆</b>算 −1。一颗正豆和一颗负豆凑一对，正好抵消成 0。</p>
+  <div class="card" id="bean">
+    <div class="big"><span class="pos">3</span> <span class="sub">−</span> (<span class="neg">−6</span>) = ?</div>
+    <div class="beans">
+      <div class="row rp"><span class="rl">正豆</span></div>
+      <div class="row rm"><span class="rl">负豆</span></div>
+    </div>
+    <p class="val"></p>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+  <p class="note" style="margin-top:10px">结论：<b>减去一个数，等于加上它的相反数。</b> 3 − (−6) = 3 + 6；7 − 2 = 7 + (−2)。减号和负号“两次掉头”，就变成了加号。</p>
+</section>
+
+<!-- 五、乘法搬家 -->
+<section>
+  <h2>五、乘法里，负号为什么能“搬家”</h2>
+  <p>秘密是：负号其实就是一个藏起来的 <b class="neg">× (−1)</b>。乘法可以随便换顺序，所以这个 (−1) 能挪到任何一个因数身边。</p>
+  <div class="card" id="mv">
+    <div class="flip"></div>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+  <div class="card trap" style="margin-top:12px;border-left:4px solid var(--bad)">
+    <b>⚠ 搬家只在乘除法里成立！</b><br>
+    3 − (−6) 里是<b class="sub">减号</b>，不是乘号，6 的负号是 6 自己的，<b>不能</b>搬给 3。<br>
+    <b class="x">✗ 搬了：6 − 3 = 3</b>　　<b class="y">✓ 正确：3 + 6 = 9</b>（回到第三部分选「3 − (−6)」走一遍就能看到停在 9）
+  </div>
+</section>
+
+<!-- 六、数负号 -->
+<section>
+  <h2>六、自己试试：乘法先数负号</h2>
+  <p>连乘时，先不管数字，只<b>数负号有几个</b>：偶数个 → 结果为正；奇数个 → 结果为负。点数字切换正负：</p>
+  <div class="card" id="cnt">
+    <div class="sign"></div>
+    <div class="big expr"></div>
+    <p class="caption" style="text-align:center"></p>
+    <div class="ctrl" style="justify-content:center"><button type="button" class="btn" data-act="reset">↺ 重置本模块</button></div>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <b>为什么“负负得正”？看规律：</b>
+    <table class="pat">
+      <tr><td>3 × (−2) =</td><td>−6</td></tr>
+      <tr><td>2 × (−2) =</td><td>−4</td></tr>
+      <tr><td>1 × (−2) =</td><td>−2</td></tr>
+      <tr><td>0 × (−2) =</td><td>0</td></tr>
+      <tr class="hl"><td>(−1) × (−2) =</td><td>2</td></tr>
+      <tr class="hl"><td>(−2) × (−2) =</td><td>4</td></tr>
+    </table>
+    <p class="note" style="margin-top:8px">左边每次少 1，结果每次多 2。照这个规律继续往下排，(−1) × (−2) 只能是 +2。</p>
+  </div>
+</section>
+
+<!-- 七、误区 -->
+<section>
+  <h2>七、常见误区</h2>
+  <div class="stack">
+    <div class="card trap"><b class="x">✗ “−3 + 5 开头就是减号，前面没有数，没法算。”</b><br>开头的 − 是 3 的<b class="neg">负号</b>，读作“负 3 加 5”：站在 −3，向右走 5 格 → <b>2</b>。</div>
+    <div class="card trap"><b class="x">✗ “3 − (−6)，把 6 的负号搬到 3 上，变成 6 − 3。”</b><br>负号搬家只在<b>乘除法</b>里成立。加减法里用“减负 = 加正”：3 − (−6) = 3 + 6 = <b>9</b>。</div>
+    <div class="card trap"><b class="x">✗ “−5 − 4 = −1。”</b><br>−5 − 4 是从 −5 再往左走 4 格 → <b>−9</b>。欠 5 块又花掉 4 块，一共欠 9 块，不会变少。</div>
+    <div class="card trap"><b class="x">✗ “−12 × 8 把负号搬到 8 上，12 上也留一个。”</b><br>负号只有<b>一个</b>，搬走了原处就没有了：12 × (−8)。留两个就成了 (−12) × (−8) = 96，结果变号。</div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>一句话总结</h2>
+  <p><b class="neg">负号粘在数上，减号夹在两数中间</b>；加减法在数轴上走（<b>减去负数 = 加上正数</b>）；乘除法先数负号（偶正奇负），负号能在因数之间搬家，但只有乘除能搬。</p>
+</section>
+
+<section class="lq" id="lq" aria-label="练习">
+  <div class="lq-head"><h2>练习</h2><span class="lq-score"></span></div>
+  <p class="lq-sub">学完上面的内容，来检验一下。每题作答后马上看到解析；点「重做练习」清空重来。</p>
+  <div class="lq-list"></div>
+  <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+</section>
+
+</main>
+
+<script>
+const resets = [];
+window.pageReset = () => resets.forEach(f => f());
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const f = n => n < 0 ? `−${-n}` : `${n}`;                       // 用真正的减号显示负数
+const SVGNS = 'http://www.w3.org/2000/svg';
+function axis(g, lo, hi, X, y, every) {
+  let h = `<line x1="${X(lo) - 10}" x2="${X(hi) + 10}" y1="${y}" y2="${y}" stroke="var(--muted)" stroke-width="2"/>` +
+          `<path d="M${X(hi) + 10},${y - 6} L${X(hi) + 20},${y} L${X(hi) + 10},${y + 6}Z" fill="var(--muted)"/>`;
+  for (let n = lo; n <= hi; n++) {
+    const x = X(n), lab = n % every === 0;
+    h += `<line x1="${x}" x2="${x}" y1="${y - (lab ? 7 : 4)}" y2="${y + (lab ? 7 : 4)}" stroke="var(--muted)" stroke-width="${n === 0 ? 3 : 1.5}"/>`;
+    if (lab) h += `<text x="${x}" y="${y + 30}" text-anchor="middle" font-size="19" fill="${n < 0 ? 'var(--neg)' : n > 0 ? 'var(--pos)' : 'var(--ink)'}" font-weight="${n === 0 ? 700 : 400}">${f(n)}</text>`;
+  }
+  g.innerHTML = h;
+}
+
+/* ---------- 一、数轴 ---------- */
+{
+  const root = document.getElementById('nl');
+  const inp = root.querySelector('input'), v = root.querySelector('.v'), cap = root.querySelector('.caption');
+  const dot = root.querySelector('.dot'), seg = root.querySelector('.seg'), dl = root.querySelector('.dl');
+  const X = n => 30 + (n + 10) * 25;
+  axis(root.querySelector('.ax'), -10, 10, X, 60, 2);
+  const INIT = { n: -3 };
+  let S = { ...INIT };
+  const draw = () => {
+    const n = S.n, c = n < 0 ? 'var(--neg)' : n > 0 ? 'var(--pos)' : 'var(--ink)';
+    inp.value = n; v.textContent = f(n);
+    dot.setAttribute('cx', X(n)); dot.setAttribute('fill', c);
+    seg.setAttribute('x1', X(0)); seg.setAttribute('x2', X(n)); seg.setAttribute('stroke', c); seg.setAttribute('opacity', .35);
+    dl.setAttribute('x', X(n)); dl.setAttribute('fill', c); dl.textContent = f(n);
+    cap.innerHTML = n < 0 ? `<b class="neg">${f(n)}</b>：在 0 的<b>左边 ${-n} 格</b>。就像零下 ${-n}℃，比 0℃ 还冷 ${-n} 度；也像欠了 ${-n} 块钱。`
+      : n > 0 ? `<b class="pos">${n}</b>：在 0 的<b>右边 ${n} 格</b>（也可以写成 +${n}）。像零上 ${n}℃，或兜里有 ${n} 块钱。`
+      : `<b>0</b>：既不是正数也不是负数，是正负的分界线。`;
+  };
+  inp.oninput = () => { S.n = +inp.value; draw(); };
+  const reset = () => { S = { ...INIT }; draw(); };
+  root.querySelector('[data-act="reset"]').onclick = reset;
+  resets.push(reset); reset();
+}
+
+/* ---------- 二、负号 vs 减号 ---------- */
+{
+  const root = document.getElementById('tag');
+  const ex = root.querySelector('.ex'), tags = root.querySelector('.tags'), cap = root.querySelector('.caption');
+  const EX = ['−3 + 5', '3 − (−6)', '−12 × 8', '12 × (−8)', '−5 − 4', '7 − 2'];
+  const READ = { '+': '加', '−': '减', '×': '乘', '÷': '除以' };
+  const parse = s => {
+    const raw = s.match(/\d+|[+−×÷()]/g), out = [];
+    for (let i = 0; i < raw.length; i++) {
+      const t = raw[i], prev = raw[i - 1];
+      if (t === '−' && (!prev || /[+−×÷(]/.test(prev))) { out.push({ k: 'negnum', t: '−' + raw[i + 1] }); i++; }
+      else if (/\d/.test(t)) out.push({ k: 'num', t });
+      else if (t === '−') out.push({ k: 'sub', t });
+      else if (/[()]/.test(t)) out.push({ k: 'par', t });
+      else out.push({ k: 'op', t });
+    }
+    return out;
+  };
+  const LAB = { negnum: '负号+数', sub: '减号', num: '正数', op: '运算', par: '' };
+  const INIT = { i: 0 };
+  let S = { ...INIT };
+  ex.innerHTML = EX.map((e, i) => `<button type="button" class="btn num" data-i="${i}">${e}</button>`).join('');
+  ex.onclick = e => { const b = e.target.closest('[data-i]'); if (b) { S.i = +b.dataset.i; draw(); } };
+  const draw = () => {
+    ex.querySelectorAll('button').forEach((b, i) => b.classList.toggle('on', i === S.i));
+    const toks = parse(EX[S.i]);
+    tags.innerHTML = toks.map(t => `<span class="tk tk-${t.k}"><b>${t.t}</b><small>${LAB[t.k]}</small></span>`).join('');
+    const nNeg = toks.filter(t => t.k === 'negnum').length, nSub = toks.filter(t => t.k === 'sub').length;
+    const read = toks.filter(t => t.k !== 'par').map(t => t.k === 'negnum' ? '负' + t.t.slice(1) : READ[t.t] || t.t).join(' ');
+    cap.innerHTML = `读作：<b>“${read}”</b>。这里有 <b class="neg">${nNeg} 个负号</b>、<b class="sub">${nSub} 个减号</b>。` +
+      (nNeg ? ` 紫框里的负号和数是<b>一个整体</b>，像 ${toks.find(t => t.k === 'negnum').t} 就是“欠 ${toks.find(t => t.k === 'negnum').t.slice(1)}”。` : '');
+  };
+  const reset = () => { S = { ...INIT }; draw(); };
+  root.querySelector('[data-act="reset"]').onclick = reset;
+  resets.push(reset); reset();
+}
+
+/* ---------- 三、数轴上走路 ---------- */
+{
+  const root = document.getElementById('walk');
+  const $ = s => root.querySelector(s), btn = a => root.querySelector(`[data-act="${a}"]`);
+  const PRE = [[-3, '+', 5], [3, '-', -6], [-5, '-', 4], [2, '+', -7]];
+  const pre = $('.pre');
+  const INIT = { a: -3, op: '+', b: 5, step: 0, playing: false };
+  let S = { ...INIT }, timer = null, raf = null, lo, hi;
+  const N = 5;
+  const X = n => 30 + (n - lo) * 500 / (hi - lo);
+  const face = () => S.op === '+' ? 1 : -1;
+  const res = () => S.a + face() * S.b;
+  const opc = () => S.op === '+' ? '+' : '−';
+  const txt = (a, op, b) => `${f(a)} ${op === '+' ? '+' : '−'} ${b < 0 ? `(${f(b)})` : b}`;
+  const html = () => `<span class="${S.a < 0 ? 'neg' : 'pos'}">${f(S.a)}</span> <span class="${S.op === '+' ? '' : 'sub'}">${opc()}</span> ` +
+    (S.b < 0 ? `(<span class="neg">${f(S.b)}</span>)` : `<span class="pos">${S.b}</span>`);
+  pre.innerHTML = PRE.map((p, i) => `<button type="button" class="btn num" data-p="${i}">${txt(...p)}</button>`).join('');
+  const bot = $('.bot'), fc = $('.face'), bl = $('.bl'), trail = $('.trail'), tl = trail.querySelector('line'), th = trail.querySelector('path');
+  fc.querySelector('circle').setAttribute('fill', 'var(--accent)');
+  fc.querySelector('.eye').setAttribute('fill', 'var(--up-surface)');
+  fc.querySelector('path').setAttribute('fill', 'var(--accent)');
+  bl.setAttribute('fill', 'var(--ink)');
+  const place = p => {
+    bot.setAttribute('transform', `translate(${X(p)},78)`);
+    const d = Math.sign(p - S.a);
+    trail.style.display = d ? '' : 'none';
+    if (d) {
+      const c = d > 0 ? 'var(--pos)' : 'var(--neg)', x1 = X(S.a), x2 = X(p);
+      tl.setAttribute('x1', x1); tl.setAttribute('x2', x2 - d * 8); tl.setAttribute('stroke', c);
+      th.setAttribute('d', `M${x2 - d * 12},107 L${x2 + d * 2},116 L${x2 - d * 12},125Z`); th.setAttribute('fill', c);
+    }
+  };
+  const layout = () => {
+    const r = res();
+    lo = Math.min(0, S.a, r) - 2; hi = Math.max(0, S.a, r) + 2;
+    while (hi - lo < 12) { lo--; if (hi - lo < 12) hi++; }
+    axis($('.ax'), lo, hi, X, 140, hi - lo > 20 ? 2 : 1);
+  };
+  const walkDur = () => RM ? 0 : Math.max(700, Math.abs(S.b) * 380);
+  const animate = () => {
+    cancelAnimationFrame(raf);
+    const from = S.a, to = res(), dur = walkDur(), t0 = performance.now();
+    if (!dur) { place(to); return; }
+    const tick = now => {
+      const k = Math.min(1, (now - t0) / dur);
+      place(from + (to - from) * k);
+      if (k < 1) raf = requestAnimationFrame(tick);
+    };
+    place(from); raf = requestAnimationFrame(tick);
+  };
+  const caption = () => {
+    const { a, b, op, step } = S, r = res(), mv = face() * Math.sign(b);
+    if (step === 0) return `第 1 步：找起点。第一个数是 <b>${f(a)}</b>，小人站到 ${f(a)} 上。` + (a < 0 ? `（开头的 − 是<b class="neg">负号</b>，属于 ${-a}，说明起点在 0 的左边）` : '');
+    if (step === 1) return op === '+' ? '第 2 步：看运算符。是「+」，小人<b>面朝右</b>（正方向）。' : '第 2 步：看运算符。是「−」<b class="sub">减号</b>，小人<b>转身面朝左</b>。';
+    if (step === 2) return b > 0 ? `第 3 步：看第二个数。${b} 是正数 → <b>向前走</b>（朝着脸的方向）。` : b < 0 ? `第 3 步：看第二个数。${f(b)} 是负数 → <b>倒着退</b>（脸不动，往背后退）。` : '第 3 步：第二个数是 0，不用走。';
+    if (step === 3) return b === 0 ? '第 4 步：原地不动。' : `第 4 步：走 ${Math.abs(b)} 格。${op === '-' && b < 0 ? '面朝左又倒着退，' : op === '+' && b < 0 ? '面朝右却倒着退，' : op === '-' ? '面朝左向前走，' : '面朝右向前走，'}实际是<b>向${mv > 0 ? '右' : '左'}</b>移动 ${Math.abs(b)} 格。`;
+    let s = `第 5 步：停在 <b>${f(r)}</b>。所以 <span class="num">${txt(a, op, b)} = ${f(r)}</span>。`;
+    if (op === '-' && b < 0) s += ` 减号掉头一次、负数又掉头一次，等于没掉头：<span class="num">${txt(a, op, b)} = ${f(a)} + ${-b}</span>。`;
+    if (op === '+' && b < 0) s += ` 加一个负数，就是往左走：<span class="num">${txt(a, op, b)} = ${f(a)} − ${-b}</span>。`;
+    return s;
+  };
+  const label = () => {
+    const { b, step } = S;
+    if (step === 0) return '起点';
+    if (step === 1) return face() > 0 ? '面朝右' : '面朝左';
+    if (step === 2) return b > 0 ? '向前走' : b < 0 ? '倒着退' : '不动';
+    if (step === 3) return b > 0 ? `前进 ${b} 格` : b < 0 ? `后退 ${-b} 格` : '不动';
+    return `到了 ${f(res())}`;
+  };
+  const draw = (walk = false) => {
+    $('.expr').innerHTML = html() + (S.step === N - 1 ? ` = <b>${f(res())}</b>` : ' = ?');
+    fc.setAttribute('transform', `scale(${S.step >= 1 ? face() : 1},1)`);
+    bl.textContent = label();
+    if (walk && S.step === 3) animate(); else { cancelAnimationFrame(raf); place(S.step >= 3 ? res() : S.a); }
+    root.querySelector('.caption').innerHTML = caption();
+    $('.stepno').textContent = `${S.step + 1} / ${N}`;
+    btn('prev').disabled = S.step === 0; btn('next').disabled = S.step === N - 1;
+    btn('play').textContent = S.playing ? '⏸ 暂停' : '▶ 播放';
+    $('.ia').value = S.a; $('.ib').value = S.b; $('.va').textContent = f(S.a); $('.vb').textContent = f(S.b);
+    root.querySelectorAll('[data-op]').forEach(b => b.classList.toggle('on', b.dataset.op === S.op));
+    pre.querySelectorAll('button').forEach((b, i) => b.classList.toggle('on', PRE[i][0] === S.a && PRE[i][1] === S.op && PRE[i][2] === S.b));
+  };
+  const stop = () => { clearTimeout(timer); timer = null; S.playing = false; };
+  const go = d => { S.step = Math.max(0, Math.min(N - 1, S.step + d)); draw(true); };
+  const setExpr = (a, op, b) => { stop(); S.a = a; S.op = op; S.b = b; S.step = 0; layout(); draw(); };
+  btn('prev').onclick = () => { stop(); go(-1); };
+  btn('next').onclick = () => { stop(); go(1); };
+  const loop = () => { timer = setTimeout(() => { go(1); if (S.step === N - 1) { stop(); draw(); } else loop(); }, S.step === 3 ? walkDur() + 1000 : 1600); };
+  btn('play').onclick = () => {
+    if (S.playing) { stop(); draw(); return; }
+    if (S.step === N - 1) S.step = 0;
+    S.playing = true; draw(true); loop();
+  };
+  pre.onclick = e => { const b = e.target.closest('[data-p]'); if (b) setExpr(...PRE[+b.dataset.p]); };
+  root.querySelectorAll('[data-op]').forEach(b => b.onclick = () => setExpr(S.a, b.dataset.op, S.b));
+  $('.ia').oninput = e => setExpr(+e.target.value, S.op, S.b);
+  $('.ib').oninput = e => setExpr(S.a, S.op, +e.target.value);
+  const reset = () => { stop(); cancelAnimationFrame(raf); S = { ...INIT }; layout(); draw(); };
+  btn('reset').onclick = reset;
+  resets.push(reset); reset();
+}
+
+/* ---------- 四、正负豆子 ---------- */
+{
+  const root = document.getElementById('bean');
+  const $ = s => root.querySelector(s), btn = a => root.querySelector(`[data-act="${a}"]`);
+  const rep = (n, k, st = '') => Array.from({ length: n }, () => ({ k, st }));
+  const STEPS = [
+    { p: rep(3, 'p'), m: [], val: '总值：3', text: '第 1 步：3 就是 3 颗<b class="pos">正豆</b>。' },
+    { p: rep(3, 'p'), m: [], val: '总值：3　要拿走 6 颗负豆……', text: '第 2 步：“− (−6)”的意思是：<b>拿走 6 颗<span class="neg">负豆</span></b>。可是现在一颗负豆都没有，拿不了！' },
+    { p: [...rep(3, 'p'), ...rep(6, 'p', 'new')], m: rep(6, 'm', 'new'), val: '总值：9 − 6 = 3（没变）', text: '第 3 步：放进 6 对「⊕⊖」。每一对抵消成 0，所以总值<b>还是 3</b>，但现在有负豆可以拿了。' },
+    { p: rep(9, 'p'), m: rep(6, 'm', 'out'), val: '拿走 6 颗负豆……', text: '第 4 步：拿走 6 颗<span class="neg">负豆</span>。和它们配对的 6 颗正豆没了“对手”，留了下来。' },
+    { p: rep(9, 'p'), m: [], val: '总值：9', text: '第 5 步：只剩 9 颗正豆：<b class="num">3 − (−6) = 9 = 3 + 6</b>。拿走负的，就等于加上正的——就像撕掉一张欠条，你反而多了钱。' },
+  ];
+  const INIT = { step: 0, playing: false };
+  let S = { ...INIT }, timer = null;
+  const beans = arr => arr.map(b => `<span class="bean ${b.k} ${b.st}">${b.k === 'p' ? '+' : '−'}</span>`).join('');
+  const draw = () => {
+    const s = STEPS[S.step];
+    $('.rp').innerHTML = '<span class="rl">正豆</span>' + beans(s.p);
+    $('.rm').innerHTML = '<span class="rl">负豆</span>' + beans(s.m);
+    $('.val').textContent = s.val; $('.caption').innerHTML = s.text;
+    $('.stepno').textContent = `${S.step + 1} / ${STEPS.length}`;
+    btn('prev').disabled = S.step === 0; btn('next').disabled = S.step === STEPS.length - 1;
+    btn('play').textContent = S.playing ? '⏸ 暂停' : '▶ 播放';
+  };
+  const stop = () => { clearInterval(timer); timer = null; S.playing = false; };
+  const go = d => { S.step = Math.max(0, Math.min(STEPS.length - 1, S.step + d)); draw(); };
+  btn('prev').onclick = () => { stop(); go(-1); };
+  btn('next').onclick = () => { stop(); go(1); };
+  btn('play').onclick = () => {
+    if (S.playing) { stop(); draw(); return; }
+    if (S.step === STEPS.length - 1) S.step = 0;
+    S.playing = true; draw();
+    timer = setInterval(() => { go(1); if (S.step === STEPS.length - 1) { stop(); draw(); } }, 2200);
+  };
+  const reset = () => { stop(); S = { ...INIT }; draw(); };
+  btn('reset').onclick = reset;
+  resets.push(reset); reset();
+}
+
+/* ---------- 五、乘法里负号搬家（FLIP 动画） ---------- */
+{
+  const root = document.getElementById('mv');
+  const $ = s => root.querySelector(s), btn = a => root.querySelector(`[data-act="${a}"]`), stage = $('.flip');
+  // [id, 文字, 类名]
+  const STEPS = [
+    { t: [['m', '−', 'n gl'], ['a', '12', 'gr'], ['x1', '×'], ['b', '8']], text: '第 1 步：原式 −12 × 8。这个负号粘在 12 上。' },
+    { t: [['m', '(−1)', 'n'], ['x0', '×'], ['a', '12'], ['x1', '×'], ['b', '8']], text: '第 2 步：负号其实就是“× (−1)”：−12 = (−1) × 12。把它单独拿出来，变成三个数相乘。' },
+    { t: [['a', '12'], ['x1', '×'], ['m', '(−1)', 'n'], ['x0', '×'], ['b', '8']], text: '第 3 步：乘法可以随便交换顺序（乘法交换律），把 (−1) 挪到 8 前面，积不变。' },
+    { t: [['a', '12'], ['x1', '×'], ['m', '(−', 'n gl'], ['b', '8', 'n gl gr'], ['cp', ')', 'n gr']], text: '第 4 步：(−1) × 8 = −8，负号就“粘”到了 8 上：12 × (−8)。' },
+    { t: [['a', '12'], ['x1', '×'], ['m', '(−', 'n gl'], ['b', '8', 'n gl gr'], ['cp', ')', 'n gr'], ['eq', '='], ['r', '−96', 'n']], text: '第 5 步：两种写法都只有 <b>1 个负号</b>，结果都是 <b>−96</b>。负号放在哪个因数上都行，但只能放一个、不能复制。' },
+  ];
+  const INIT = { step: 0, playing: false };
+  let S = { ...INIT }, timer = null;
+  const render = anim => {
+    const old = {};
+    if (anim && !RM) stage.querySelectorAll('span').forEach(el => old[el.dataset.id] = el.getBoundingClientRect());
+    stage.innerHTML = STEPS[S.step].t.map(([id, t, c = '']) => `<span data-id="${id}" class="${c}">${t}</span>`).join('');
+    if (!anim || RM) return;
+    const els = [...stage.querySelectorAll('span')];
+    els.forEach(el => {
+      const o = old[el.dataset.id];
+      if (!o) { el.classList.add('fade'); return; }
+      const n = el.getBoundingClientRect();
+      el.style.transition = 'none';
+      el.style.transform = `translate(${o.left - n.left}px,${o.top - n.top}px)`;
+    });
+    stage.offsetWidth;
+    els.forEach(el => { el.style.transition = 'transform .9s ease'; el.style.transform = ''; });
+  };
+  const draw = (anim = false) => {
+    render(anim);
+    $('.caption').innerHTML = STEPS[S.step].text;
+    $('.stepno').textContent = `${S.step + 1} / ${STEPS.length}`;
+    btn('prev').disabled = S.step === 0; btn('next').disabled = S.step === STEPS.length - 1;
+    btn('play').textContent = S.playing ? '⏸ 暂停' : '▶ 播放';
+  };
+  const stop = () => { clearInterval(timer); timer = null; S.playing = false; };
+  const go = d => { const s = Math.max(0, Math.min(STEPS.length - 1, S.step + d)); const ch = s !== S.step; S.step = s; draw(ch); };
+  btn('prev').onclick = () => { stop(); go(-1); };
+  btn('next').onclick = () => { stop(); go(1); };
+  btn('play').onclick = () => {
+    if (S.playing) { stop(); draw(); return; }
+    const restart = S.step === STEPS.length - 1;
+    if (restart) S.step = 0;
+    S.playing = true; draw(restart);
+    timer = setInterval(() => { go(1); if (S.step === STEPS.length - 1) { stop(); btn('play').textContent = '▶ 播放'; } }, 2200);
+  };
+  const reset = () => { stop(); S = { ...INIT }; draw(); };
+  btn('reset').onclick = reset;
+  resets.push(reset); reset();
+}
+
+/* ---------- 六、数负号 ---------- */
+{
+  const root = document.getElementById('cnt');
+  const $ = s => root.querySelector(s);
+  const NUM = [2, 3, 4];
+  const INIT = { sg: [1, 1, 1] };
+  let S = { sg: [...INIT.sg] };
+  const draw = () => {
+    $('.sign').innerHTML = NUM.map((n, i) => `<button type="button" class="btn num ${S.sg[i] < 0 ? 'on' : ''}" data-i="${i}">${S.sg[i] < 0 ? '变回 +' : '变成 −'}${n}</button>`).join('');
+    const vals = NUM.map((n, i) => n * S.sg[i]), k = S.sg.filter(s => s < 0).length, p = vals.reduce((x, y) => x * y, 1);
+    $('.expr').innerHTML = vals.map(v => v < 0 ? `(<span class="neg">${f(v)}</span>)` : `<span class="pos">${v}</span>`).join(' × ') + ` = <b class="${p < 0 ? 'neg' : 'pos'}">${f(p)}</b>`;
+    $('.caption').innerHTML = `负号有 <b>${k}</b> 个 → ${k % 2 ? '<b class="neg">奇数个，结果为负</b>' : `<b class="pos">偶数个${k ? '' : '（0 个也算偶数）'}，结果为正</b>`}。数字部分永远是 2 × 3 × 4 = 24。`;
+  };
+  $('.sign').onclick = e => { const b = e.target.closest('[data-i]'); if (b) { S.sg[+b.dataset.i] *= -1; draw(); } };
+  const reset = () => { S = { sg: [...INIT.sg] }; draw(); };
+  root.querySelector('[data-act="reset"]').onclick = reset;
+  resets.push(reset); reset();
+}
+
+/* ---------- 练习题 ---------- */
+window.LQ_ITEMS = [
+  { type: '选择', q: '−3 + 5 = ?', opts: ['−8', '2', '8', '−2'], ans: 1, why: '站在 −3，「+」面朝右，5 是正数就向前走 5 格，停在 2（第三部分动画）。也可以想成欠 3 块、挣 5 块，还剩 2 块。' },
+  { type: '判断', q: '在 −3 + 5 中，开头的“−”是减号。', opts: ['对', '错'], ans: 1, why: '开头的“−”前面没有数，不可能是减号，它是 3 的<b>负号</b>，−3 是一个整体（第二部分）。' },
+  { type: '填空', q: '3 − (−6) = ?', ans: ['9', '+9'], placeholder: '输入数字', why: '减去一个负数 = 加上它的相反数：3 − (−6) = 3 + 6 = 9。豆子动画里，拿走 6 颗负豆，留下 9 颗正豆。' },
+  { type: '选择', q: '小芳把 3 − (−6) 算成 6 − 3 = 3。她错在哪里？', opts: ['把 6 的负号“搬”给了 3，但加减法里负号不能搬家', '没错，答案就是 3', '应该算成 −3 − 6 = −9'], ans: 0, why: '“负号能搬家”只在<b>乘除法</b>里成立（因为负号是 × (−1) 这个因数）。这里是减法，要用“减负 = 加正”：3 + 6 = 9。' },
+  { type: '填空', q: '−5 − 4 = ?', ans: ['-9'], placeholder: '负数可以用 - 表示', why: '站在 −5，「−」转身朝左，4 是正数就向前走 4 格 → −9。欠 5 块又花 4 块，一共欠 9 块。常见错误是算成 −1。' },
+  { type: '选择', q: '下面哪一个和 −12 × 8 <b>不相等</b>？', opts: ['(−12) × 8', '12 × (−8)', '−(12 × 8)', '(−12) × (−8)'], ans: 3, why: '前三个都只有 1 个负号，结果都是 −96。最后一个有 2 个负号，偶数个 → 结果为正，是 96。负号搬家时不能“复制”。' },
+  { type: '判断', q: '(−2) × (−3) × (−1) 的结果是正数，因为“负负得正”。', opts: ['对', '错'], ans: 1, why: '一共有 3 个负号，是奇数个 → 结果为负：(−2) × (−3) × (−1) = −6。“负负得正”只抵消了一对，还剩一个负号。' },
+  { type: '选择', q: '夜里气温是 −2℃，到了清晨又下降了 5℃。清晨气温是多少？', opts: ['3℃', '−7℃', '7℃', '−3℃'], ans: 1, why: '下降 5℃ 就是减 5：−2 − 5 = −7。在数轴（温度计）上从 −2 再往下 5 格。' },
+  { type: '填空', q: '银行卡余额 50 元。银行发现之前一笔“−30 元”的扣款扣错了，把它撤销。余额变成多少元？（算式：50 − (−30)）', ans: ['80', '80元'], placeholder: '输入数字', why: '撤销一笔扣款（拿走一个 −30）= 把钱还给你（加上 30）：50 − (−30) = 50 + 30 = 80 元。' },
+];
+</script>
+<script>
+/* ---------- 练习题（learn 通用组件） ----------
+   题目来自 window.LQ_ITEMS：{type, q, opts, ans: 选项下标, why} 或填空题 {type, q, ans: [可接受答案…], why}
+   定义 window.resetPage()（导航条「重置」按钮调用）：先调用页面自己的 window.pageReset()，再清空练习 */
+(() => {
+  const box = document.getElementById('lq');
+  const items = window.LQ_ITEMS || [];
+  const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let answered = 0, right = 0;
+
+  function update() {
+    const all = answered === items.length;
+    score.textContent = `已答 ${answered} / ${items.length} · 答对 ${right}` +
+      (all ? (right === items.length ? ' · 全对！' : ' · 看看解析，再重做一次') : '');
+  }
+
+  function render() {
+    answered = 0; right = 0; list.innerHTML = '';
+    items.forEach((it, i) => {
+      const el = document.createElement('div');
+      el.className = 'lq-item';
+      el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
+      const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
+      const judge = (ok, answer) => {
+        answered++; if (ok) right++;
+        el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
+        why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
+        update();
+      };
+      if (it.opts) {
+        a.classList.add('lq-opts');
+        it.opts.forEach((o, j) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'lq-opt'; b.innerHTML = o;
+          b.onclick = () => {
+            a.querySelectorAll('button').forEach(x => x.disabled = true);
+            a.children[it.ans].classList.add('lq-right');
+            if (j !== it.ans) b.classList.add('lq-wrong');
+            judge(j === it.ans, it.opts[it.ans]);
+          };
+          a.append(b);
+        });
+      } else {
+        a.classList.add('lq-fill');
+        a.innerHTML = `<input type="text" autocomplete="off" spellcheck="false" placeholder="${it.placeholder || '输入答案'}" aria-label="第 ${i + 1} 题答案"><button type="button" class="lq-opt">确定</button>`;
+        const inp = a.querySelector('input'), go = a.querySelector('button');
+        const submit = () => {
+          if (!inp.value.trim()) { inp.focus(); return; }
+          inp.disabled = go.disabled = true;
+          const ok = it.ans.some(x => norm(x) === norm(inp.value));
+          inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
+          judge(ok, it.ans[0]);
+        };
+        go.onclick = submit;
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      }
+      list.append(el);
+    });
+    update();
+  }
+
+  box.querySelector('.lq-redo').addEventListener('click', render);
+  // 导航条的「重置」按钮调用它：页面各模块 + 练习题一起恢复初始状态
+  window.resetPage = () => {
+    if (typeof window.pageReset === 'function') window.pageReset();
+    render();
+  };
+  render();
+})();
+</script>
+</body>
+</html>
