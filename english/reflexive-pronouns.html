@@ -1,0 +1,595 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>反身代词</title>
+<meta name="description" content="myself、himself、themselves 怎么用：动作回到自己才用反身代词；强调和 by oneself 的用法；它管到哪个人；以及 contact myself、relax myself 这类中国学生最常见的误用。">
+<style>
+:root{
+  --bg:var(--up-bg); --surface:var(--up-surface); --ink:var(--up-ink); --muted:var(--up-muted); --line:var(--up-line);
+  --accent:var(--up-accent); --ok:var(--up-ok); --bad:var(--up-bad);
+  --cSelf:#9c36b5;   /* 反身代词：动作回到自己 */
+  --cOther:#1c7ed6;  /* 普通代词 / 别人 */
+  --cEmph:#e8590c;   /* 强调用法 */
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --cSelf:#e599f7; --cOther:#74c0fc; --cEmph:#ffa94d; }
+}
+:root[data-theme="dark"]{ --cSelf:#e599f7; --cOther:#74c0fc; --cEmph:#ffa94d; }
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 var(--up-font);padding:24px 16px 96px}
+main{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:48px}
+h1{font-size:clamp(1.7rem,4.5vw,2.4rem);line-height:1.25;margin:0 0 8px}
+h2{font-size:1.4rem;margin:0 0 8px}
+h3{font-size:1.05rem;margin:0 0 6px}
+p{margin:0}
+.lead{color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--up-radius);box-shadow:var(--up-shadow);padding:16px}
+.analogy{border-left:4px solid var(--accent);display:grid;gap:8px}
+.btn{font:inherit;font-size:14px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn.primary,.btn.on{background:var(--accent);border-color:var(--accent);color:var(--up-surface)}
+.btn.primary:hover:not(:disabled),.btn.on:hover:not(:disabled){color:var(--up-surface)}
+.btn:disabled{opacity:.45;cursor:default}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.stepno{font-family:var(--up-mono);color:var(--muted);font-size:.9rem;min-width:56px;text-align:center}
+.caption{min-height:3.4em;margin-top:10px}
+.en{font-weight:600}
+.kS{color:var(--cSelf);font-weight:700}
+.kO{color:var(--cOther);font-weight:700}
+.kE{color:var(--cEmph);font-weight:700}
+.gap{display:grid;gap:10px}
+ul.tight{margin:0;padding-left:1.3em}
+
+/* 模块 1：镜子舞台 */
+.stage{border-radius:10px;background:var(--up-surface-2);margin-top:12px;padding:8px}
+.stage svg{display:block;width:100%;height:auto}
+.sent{font-size:clamp(1.05rem,3.6vw,1.35rem);font-weight:700;text-align:center;min-height:1.8em;margin-top:6px}
+.sent .del{text-decoration:line-through;opacity:.45}
+.fade{transition:opacity .7s ease}
+@media (prefers-reduced-motion: reduce){.fade{transition:none}}
+
+/* 模块 2：拼写 */
+.persons{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.build{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:16px;font-size:clamp(1.4rem,5vw,2rem);font-weight:800;min-height:2.2em}
+.build .part{padding:2px 10px;border-radius:8px;background:var(--up-surface-2);transition:transform .6s ease,opacity .6s ease}
+.build .part.a{color:var(--cOther)}
+.build .part.b{color:var(--cSelf)}
+.build .op{color:var(--muted);font-weight:400}
+.build.joined .op{opacity:0;width:0;overflow:hidden}
+.build.joined .part{padding:2px 0;background:none}
+.tbl{width:100%;border-collapse:collapse;font-size:15px;margin-top:12px}
+.tbl th,.tbl td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left}
+.tbl th{color:var(--muted);font-weight:600}
+.trap{margin-top:10px;font-size:15px}
+
+/* 模块 3：删掉试试 */
+.cuts{display:grid;gap:10px;margin-top:12px}
+.cut{border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;display:grid;gap:6px;transition:border-color .5s}
+.cut.obj{border-color:var(--cSelf)}
+.cut.emp{border-color:var(--cEmph)}
+.cut .row{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between}
+.cut .s{font-size:1.1rem}
+.cut .r{transition:opacity .6s,text-decoration-color .6s}
+.cut.done .r{text-decoration:line-through;opacity:.4}
+.cut .v{font-size:14px;color:var(--muted)}
+.cut .v:empty{display:none}
+
+/* 模块 4：谁是 himself */
+.bind .q{font-size:clamp(1.05rem,3.4vw,1.25rem);margin-top:12px;line-height:2.2}
+.clause{border:2px dashed transparent;border-radius:8px;padding:2px 4px;transition:border-color .6s,background .6s}
+.clause.show{border-color:var(--cSelf);background:color-mix(in srgb,var(--cSelf) 10%,transparent)}
+.who{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.who .btn.right{border-color:var(--ok);color:var(--ok);font-weight:700}
+.who .btn.wrong{border-color:var(--bad);color:var(--bad);text-decoration:line-through}
+.bind .exp{margin-top:10px;font-size:15px;min-height:3em}
+
+/* 模块 5：误区卡 */
+.myths{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.myth{border:1.5px solid var(--line);border-radius:10px;padding:12px;display:grid;gap:8px;background:var(--surface)}
+.myth .bad{color:var(--bad)}
+.myth .good{color:var(--ok);transition:opacity .6s}
+.myth .good.hide{opacity:0}
+.myth .note{font-size:14px;color:var(--muted)}
+.myth .note.hide{display:none}
+
+.summary{border-left:4px solid var(--cSelf);font-size:1.05rem}
+
+:root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:var(--ok);--lq-bad:var(--bad)}
+/* ---------- 练习题（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+.lq{display:grid;gap:12px;margin-bottom:56px}
+.lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+.lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
+.lq-sub{margin:0;color:var(--lq-muted);font-size:14px}
+.lq-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--lq-muted);font-variant-numeric:tabular-nums}
+.lq-list{display:grid;gap:10px}
+.lq-item{background:var(--lq-surface);border:1.5px solid var(--lq-line);border-radius:10px;padding:12px 16px;display:grid;gap:10px;min-width:0;color:var(--lq-ink);text-align:left}
+.lq-item.lq-is-ok{border-color:var(--lq-ok)}
+.lq-item.lq-is-bad{border-color:var(--lq-bad)}
+.lq-q{font-size:15px;font-weight:600;line-height:1.6}
+.lq-tag{display:inline-block;font-size:11px;font-weight:500;line-height:1.6;color:var(--lq-muted);border:1px solid var(--lq-line);border-radius:999px;padding:0 8px;margin-right:8px;vertical-align:1px}
+.lq-opts,.lq-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lq .lq-opt,.lq .lq-redo{font:inherit;font-size:14px;line-height:1.4;padding:6px 14px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);cursor:pointer;text-align:left;opacity:1}
+.lq .lq-opt:hover:not(:disabled),.lq .lq-redo:hover{border-color:var(--lq-accent)}
+.lq .lq-opt:disabled{cursor:default;opacity:1}
+.lq .lq-opt.lq-right{border-color:var(--lq-ok);color:var(--lq-ok);font-weight:700}
+.lq .lq-opt.lq-wrong{border-color:var(--lq-bad);color:var(--lq-bad);text-decoration:line-through}
+.lq-fill input{font:inherit;font-size:14px;padding:6px 10px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);width:min(100%,200px)}
+.lq-fill input.lq-right{border-color:var(--lq-ok)}
+.lq-fill input.lq-wrong{border-color:var(--lq-bad)}
+.lq-why{font-size:14px;line-height:1.65;color:var(--lq-muted)}
+.lq-why:empty{display:none}
+.lq-why .lq-ok{color:var(--lq-ok)}
+.lq-why .lq-bad{color:var(--lq-bad)}
+</style>
+</head>
+<body>
+<!-- up-shell:begin（由 scripts/shell.mjs 自动生成，勿手改） -->
+<nav id="up-nav" aria-label="网站导航">
+<a class="up-home" href="/" title="Up 学习站首页"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="up-nav-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c6ef5"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#up-nav-g)"/><path d="M12 52V42a2 2 0 0 1 2-2h10V32a2 2 0 0 1 2-2h10v-8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v30z" fill="#fff"/><circle cx="43" cy="13" r="5.5" fill="#ffa94d"/></svg><span>Up 学习站</span></a>
+<span class="up-sep" aria-hidden="true">›</span><a class="up-cat" href="/english">英语</a>
+<span class="up-sep" aria-hidden="true">›</span><span class="up-title">反身代词</span>
+<button id="up-reset" type="button" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+</nav>
+<style>
+:root{--up-bg:#f5f6f8;--up-surface:#ffffff;--up-surface-2:#eef0f4;--up-ink:#1d2127;--up-muted:#626b78;--up-line:#dfe2e8;--up-ok:#2b8a3e;--up-bad:#d6336c;--up-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);--up-font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif;--up-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;--up-radius:12px;--up-accent:#2f9e44;--up-accent-soft:#ebfbee}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#69db7c;--up-accent-soft:#1b3222;color-scheme:dark}}
+:root[data-theme="dark"]{--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#69db7c;--up-accent-soft:#1b3222;color-scheme:dark}
+html{padding-top:52px;scroll-padding-top:64px}
+#up-nav{position:fixed;top:0;left:0;right:0;z-index:2147483000;height:52px;box-sizing:border-box;display:flex;align-items:center;gap:8px;
+padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));border-top:3px solid var(--up-accent);
+border-bottom:1px solid var(--up-line);background:color-mix(in srgb,var(--up-surface) 88%,transparent);
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:500 14px/1.2 var(--up-font);color:var(--up-ink);text-align:left}
+#up-nav a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none}
+#up-nav a:hover{color:var(--up-accent)}
+#up-nav svg{width:24px;height:24px;flex:none;display:block}
+#up-nav .up-home span{font-weight:700}
+#up-nav .up-cat{color:var(--up-accent);font-weight:600}
+#up-nav .up-sep{color:var(--up-muted);flex:none}
+#up-nav .up-title{color:var(--up-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#up-reset{margin:0 0 0 auto;flex:none;font:600 14px/1 var(--up-font);padding:8px 14px;border-radius:999px;cursor:pointer;
+border:1.5px solid var(--up-accent);background:transparent;color:var(--up-accent);transition:background .2s,color .2s}
+#up-reset:hover,#up-reset:focus-visible{background:var(--up-accent);color:var(--up-surface)}
+#up-reset:focus-visible,#up-nav a:focus-visible{outline:2px solid var(--up-accent);outline-offset:2px}
+@media (max-width:560px){#up-nav .up-home span{display:none}}
+@media print{#up-nav{display:none}html{padding-top:0}}
+</style>
+<script>
+document.getElementById('up-reset').addEventListener('click', function () {
+  if (typeof window.resetPage === 'function') window.resetPage();
+  else console.warn('本页没有定义 window.resetPage()，重置按钮无效');
+  window.scrollTo({ top: 0, behavior: 'auto' });
+});
+</script>
+<!-- up-shell:end -->
+<main>
+
+<section>
+  <h1>反身代词：myself / himself / themselves</h1>
+  <p class="lead">它到底什么时候必须用、什么时候能删、什么时候根本不该用？一页把这几个 GAP 补齐。</p>
+</section>
+
+<section class="card analogy">
+  <b>生活比喻：照镜子 🪞</b>
+  <p>你挥手，镜子里挥手的还是<b>你自己</b>。动作从你出发，又<b>弹回到你身上</b>——这时英语就用 <span class="kS">-self</span>。</p>
+  <p>动作打到<b>别人</b>身上，用普通的 <span class="kO">him / her / them</span>。一句话：<b>做事的人 = 被做事的人，才用反身代词。</b></p>
+</section>
+
+<!-- 模块 1：镜子动画 -->
+<section>
+  <h2>1. 动作打到谁身上？</h2>
+  <p class="lead">反身代词有三种用法，一步步看它们的区别。</p>
+  <div class="card" id="mirror">
+    <div class="stage">
+      <svg viewBox="0 0 560 210" role="img" aria-label="Tom 与 Jack 的动作示意">
+        <defs>
+          <marker id="ahO" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--cOther)"/></marker>
+          <marker id="ahS" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--cSelf)"/></marker>
+        </defs>
+        <!-- Tom -->
+        <g id="mTom">
+          <circle cx="140" cy="130" r="38" fill="var(--up-surface)" stroke="var(--line)" stroke-width="2"/>
+          <text x="140" y="144" text-anchor="middle" font-size="40">🧑</text>
+          <text x="140" y="196" text-anchor="middle" font-size="16" font-weight="700" fill="var(--ink)">Tom</text>
+        </g>
+        <!-- Jack -->
+        <g id="mJack" class="fade">
+          <circle cx="420" cy="130" r="38" fill="var(--up-surface)" stroke="var(--line)" stroke-width="2"/>
+          <text x="420" y="144" text-anchor="middle" font-size="40">👦</text>
+          <text x="420" y="196" text-anchor="middle" font-size="16" font-weight="700" fill="var(--ink)">Jack</text>
+        </g>
+        <!-- 打到别人 -->
+        <path id="mArrO" class="fade" d="M184,130 L372,130" stroke="var(--cOther)" stroke-width="4" fill="none" marker-end="url(#ahO)"/>
+        <!-- 弹回自己 -->
+        <path id="mArrS" class="fade" d="M120,94 C 70,10 210,10 160,94" stroke="var(--cSelf)" stroke-width="4" fill="none" marker-end="url(#ahS)"/>
+        <!-- 禁止：him 不能指自己 -->
+        <g id="mNo" class="fade">
+          <path d="M120,94 C 70,10 210,10 160,94" stroke="var(--bad)" stroke-width="3" stroke-dasharray="6 5" fill="none"/>
+          <text x="140" y="46" text-anchor="middle" font-size="30" font-weight="800" fill="var(--bad)">✗</text>
+        </g>
+        <!-- 强调光环 -->
+        <circle id="mHalo" class="fade" cx="140" cy="130" r="48" fill="none" stroke="var(--cEmph)" stroke-width="4" stroke-dasharray="8 6"/>
+        <!-- 修好的车 -->
+        <g id="mCar" class="fade"><text x="300" y="148" text-anchor="middle" font-size="44">🚗</text><text x="300" y="186" text-anchor="middle" font-size="14" fill="var(--muted)">the car</text></g>
+        <!-- 独自 -->
+        <g id="mAlone" class="fade"><text x="420" y="80" text-anchor="middle" font-size="15" fill="var(--muted)">没人帮忙</text><text x="420" y="140" text-anchor="middle" font-size="44" opacity=".35">🙅</text></g>
+      </svg>
+      <p class="sent"></p>
+    </div>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<!-- 模块 2：拼写 -->
+<section>
+  <h2>2. 怎么拼：前半截从哪来？</h2>
+  <p class="lead">点一个人称，看反身代词是怎么「拼」出来的。规律只有两条。</p>
+  <div class="card" id="forms">
+    <div class="persons"></div>
+    <div class="build"><span class="part a"></span><span class="op">+</span><span class="part b"></span></div>
+    <p class="caption"></p>
+    <table class="tbl">
+      <tr><th>前半截</th><th>单数 + self</th><th>复数 + selves</th></tr>
+      <tr><td>第一、二人称：用<b class="kO">物主</b>（my / your / our）</td><td>myself, yourself</td><td>ourselves, yourselves</td></tr>
+      <tr><td>第三人称：用<b class="kO">宾格</b>（him / her / it / them）</td><td>himself, herself, itself</td><td>themselves</td></tr>
+    </table>
+    <p class="trap">⚠ 所以 <s>hisself</s>、<s>theirselves</s>、<s>ourself</s> 都是错的；泛指"一个人自己"用 <b>oneself</b>。</p>
+    <div class="ctrl"><button type="button" class="btn" data-act="reset">↺ 重置本模块</button></div>
+  </div>
+</section>
+
+<!-- 模块 3：删掉试试 -->
+<section>
+  <h2>3. 删掉试试：它是宾语，还是强调？</h2>
+  <p class="lead">判断方法：把 -self 删掉。句子<b>还完整、意思不变</b> → 只是<span class="kE">强调</span>；句子<b>残缺或意思变了</b> → 它是<span class="kS">宾语</span>，必须有。</p>
+  <div class="card" id="cuts">
+    <div class="cuts"></div>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="all">✂ 全部删掉看看</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<!-- 模块 4：谁是 himself -->
+<section>
+  <h2>4. himself 到底指谁？</h2>
+  <p class="lead">一句话里有好几个人时，反身代词只认<b>离它最近的那个"做动作的人"</b>（同一个小句里的主语）。而 him / her 恰恰相反——<b>不能</b>指这个人。</p>
+  <div class="card bind" id="bind">
+    <div class="ctrl" style="margin-top:0"><span class="stepno"></span></div>
+    <p class="q"></p>
+    <div class="who"></div>
+    <p class="exp"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一句</button>
+      <button type="button" class="btn" data-act="next">下一句 ▶</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<!-- 模块 5：误区 -->
+<section>
+  <h2>5. 中国学生最常见的误用</h2>
+  <p class="lead">先看红色的错句，想想错在哪，再点「看正确说法」。</p>
+  <div class="myths" id="myths"></div>
+  <div class="ctrl"><button type="button" class="btn" id="mythAll">全部翻开</button><button type="button" class="btn" id="mythReset">↺ 重置本模块</button></div>
+</section>
+
+<section class="card">
+  <h2>固定搭配：直接记</h2>
+  <ul class="tight">
+    <li><b>enjoy yourself</b> 玩得开心 · <b>help yourself (to …)</b> 请随便吃/拿 · <b>make yourself at home</b> 别客气，当自己家</li>
+    <li><b>behave yourself</b> 规矩点 · <b>teach oneself</b> 自学 · <b>introduce oneself</b> 自我介绍</li>
+    <li><b>by oneself</b> 独自、没人帮 · <b>for oneself</b> 为自己、亲自（see for yourself 你自己去看）</li>
+  </ul>
+</section>
+
+<section class="card summary">
+  <b>一句话总结：</b>动作<b>弹回做事的人自己</b>才用 -self（必须有）；放在名词后或句末<b>只为强调</b>时可删；<b>by oneself</b> = 独自。别拿 myself 冒充礼貌版的 I / me，也别给 relax、feel、meet 这类动词硬塞 -self。
+</section>
+
+<section class="lq" id="lq" aria-label="练习">
+  <div class="lq-head"><h2>练习</h2><span class="lq-score"></span></div>
+  <p class="lq-sub">学完上面的内容，来检验一下。每题作答后马上看到解析；点「重做练习」清空重来。</p>
+  <div class="lq-list"></div>
+  <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+</section>
+
+</main>
+
+<script>
+const resets = [];
+window.pageReset = () => resets.forEach(f => f());
+
+/* ---------- 模块 1：镜子动画 ---------- */
+{
+  const root = document.getElementById('mirror');
+  const $ = id => root.querySelector('#' + id);
+  const sent = root.querySelector('.sent'), cap = root.querySelector('.caption'), no = root.querySelector('.stepno');
+  const btn = act => root.querySelector(`[data-act="${act}"]`);
+  const PARTS = ['mJack', 'mArrO', 'mArrS', 'mNo', 'mHalo', 'mCar', 'mAlone'];
+  const STEPS = [
+    { on: ['mJack', 'mArrO'], s: 'Tom hit <span class="kO">Jack</span>.',
+      t: '第 1 步：动作从 Tom 出发，打到<b>另一个人</b> Jack 身上。' },
+    { on: ['mJack', 'mArrO'], s: 'Tom hit <span class="kO">him</span>.',
+      t: '第 2 步：把 Jack 换成代词，用普通宾格 <span class="kO">him</span>。him 指的是 Tom 以外的人。' },
+    { on: ['mJack', 'mArrS'], s: 'Tom hit <span class="kS">himself</span>.',
+      t: '第 3 步：动作<b>弹回 Tom 自己</b>（打的人 = 被打的人），就必须用 <span class="kS">himself</span>。这是<b>用法①：作宾语</b>，删不掉。' },
+    { on: ['mJack', 'mNo'], s: 'Tom hit <span class="kO">him</span>. ≠ 打自己',
+      t: '第 4 步：反过来，<span class="kO">him</span> <b>不能</b>表示 Tom 自己。中文说"他打了他"可能含糊，英语用 him / himself 分得清清楚楚。' },
+    { on: ['mHalo', 'mCar'], s: 'Tom fixed the car <span class="kE">himself</span>.',
+      t: '第 5 步：<b>用法②：强调</b>——"是 Tom 亲自修的，不是别人"。删掉 himself 句子照样完整，只是少了强调语气。' },
+    { on: ['mCar', 'mAlone'], s: 'Tom fixed the car <span class="kE">by himself</span>.',
+      t: '第 6 步：<b>用法③：by + 反身代词 = 独自、没人帮忙</b>（= alone / without help）。' },
+  ];
+  const INIT = { step: 0, playing: false };
+  let S = { ...INIT }, timer = null;
+  const draw = () => {
+    const st = STEPS[S.step];
+    PARTS.forEach(p => $(p).style.opacity = st.on.includes(p) ? 1 : 0);
+    sent.innerHTML = st.s; cap.innerHTML = st.t; no.textContent = `${S.step + 1} / ${STEPS.length}`;
+    btn('prev').disabled = S.step === 0; btn('next').disabled = S.step === STEPS.length - 1;
+    btn('play').textContent = S.playing ? '⏸ 暂停' : '▶ 播放';
+  };
+  const stop = () => { clearInterval(timer); timer = null; S.playing = false; };
+  const go = d => { S.step = Math.max(0, Math.min(STEPS.length - 1, S.step + d)); draw(); };
+  btn('prev').onclick = () => { stop(); go(-1); };
+  btn('next').onclick = () => { stop(); go(1); };
+  btn('play').onclick = () => {
+    if (S.playing) { stop(); draw(); return; }
+    if (S.step === STEPS.length - 1) S.step = 0;
+    S.playing = true; draw();
+    timer = setInterval(() => { go(1); if (S.step === STEPS.length - 1) { stop(); draw(); } }, 3200);
+  };
+  const reset = () => { stop(); S = { ...INIT }; draw(); };
+  btn('reset').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+/* ---------- 模块 2：拼写 ---------- */
+{
+  const root = document.getElementById('forms');
+  const box = root.querySelector('.persons'), build = root.querySelector('.build'), cap = root.querySelector('.caption');
+  const [pa, pb] = build.querySelectorAll('.part');
+  const P = [
+    { k: 'I', a: 'my', b: 'self', t: 'I → 物主 <b>my</b> + self = <b>myself</b>' },
+    { k: 'you（一个人）', a: 'your', b: 'self', t: 'you（单数）→ 物主 <b>your</b> + self = <b>yourself</b>' },
+    { k: 'he', a: 'him', b: 'self', t: 'he → 宾格 <b>him</b> + self = <b>himself</b>（不是 his + self）' },
+    { k: 'she', a: 'her', b: 'self', t: 'she → <b>her</b> + self = <b>herself</b>（her 恰好既是物主又是宾格）' },
+    { k: 'it', a: 'it', b: 'self', t: 'it → <b>it</b> + self = <b>itself</b>（注意不是 it\'s）' },
+    { k: 'we', a: 'our', b: 'selves', t: 'we → 物主 <b>our</b> + 复数 selves = <b>ourselves</b>' },
+    { k: 'you（几个人）', a: 'your', b: 'selves', t: 'you（复数）→ <b>your</b> + selves = <b>yourselves</b>。对一群人说 Enjoy yourselves!' },
+    { k: 'they', a: 'them', b: 'selves', t: 'they → 宾格 <b>them</b> + selves = <b>themselves</b>（不是 their + selves）' },
+    { k: 'one（泛指）', a: 'one', b: 'self', t: 'one → <b>oneself</b>，词典里常这样写：teach oneself、by oneself' },
+  ];
+  const INIT = { i: -1 };
+  let S = { ...INIT }, t = null;
+  box.innerHTML = P.map((p, i) => `<button type="button" class="btn" data-i="${i}">${p.k}</button>`).join('');
+  const draw = () => {
+    box.querySelectorAll('.btn').forEach((b, i) => b.classList.toggle('on', i === S.i));
+    clearTimeout(t); build.classList.remove('joined');
+    if (S.i < 0) { pa.textContent = '?'; pb.textContent = 'self / selves'; cap.innerHTML = '点上面任意一个人称。'; return; }
+    const p = P[S.i];
+    pa.textContent = p.a; pb.textContent = p.b; cap.innerHTML = p.t;
+    t = setTimeout(() => build.classList.add('joined'), 900);
+  };
+  box.onclick = e => { const b = e.target.closest('[data-i]'); if (b) { S.i = +b.dataset.i; draw(); } };
+  const reset = () => { S = { ...INIT }; draw(); };
+  root.querySelector('[data-act="reset"]').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+/* ---------- 模块 3：删掉试试 ---------- */
+{
+  const root = document.getElementById('cuts');
+  const box = root.querySelector('.cuts');
+  const C = [
+    { pre: 'I cut ', r: 'myself', post: ' while cooking.', obj: true, v: '删掉后 "I cut while cooking." 割了什么？句子残缺 → <span class="kS">宾语</span>，必须有。' },
+    { pre: 'I made this cake ', r: 'myself', post: '.', obj: false, v: '"I made this cake." 依然完整 → <span class="kE">强调</span>"我亲手做的"。' },
+    { pre: 'The president ', r: 'himself', post: ' answered my letter.', obj: false, v: '"The president answered my letter." 完整 → <span class="kE">强调</span>"总统本人"。紧跟在名词后也是强调。' },
+    { pre: 'She taught ', r: 'herself', post: ' French.', obj: true, v: '"She taught French." 意思变成"她教别人法语" → <span class="kS">宾语</span>（自学），删了意思就变。' },
+    { pre: 'They blamed ', r: 'themselves', post: ' for the loss.', obj: true, v: '"They blamed for the loss." 怪谁？残缺 → <span class="kS">宾语</span>。' },
+  ];
+  const INIT = () => C.map(() => false);
+  let S = INIT();
+  box.innerHTML = C.map((c, i) => `<div class="cut" data-i="${i}"><div class="row"><span class="s en">${c.pre}<span class="r">${c.r}</span>${c.post}</span><button type="button" class="btn">✂ 删掉 ${c.r}</button></div><div class="v"></div></div>`).join('');
+  const draw = () => box.querySelectorAll('.cut').forEach((el, i) => {
+    const on = S[i], c = C[i];
+    el.classList.toggle('done', on);
+    el.classList.toggle('obj', on && c.obj); el.classList.toggle('emp', on && !c.obj);
+    el.querySelector('.btn').disabled = on;
+    el.querySelector('.v').innerHTML = on ? c.v : '';
+  });
+  box.onclick = e => { const el = e.target.closest('.btn') && e.target.closest('.cut'); if (el) { S[+el.dataset.i] = true; draw(); } };
+  root.querySelector('[data-act="all"]').onclick = () => { S = S.map(() => true); draw(); };
+  const reset = () => { S = INIT(); draw(); };
+  root.querySelector('[data-act="reset"]').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+/* ---------- 模块 4：谁是 himself ---------- */
+{
+  const root = document.getElementById('bind');
+  const q = root.querySelector('.q'), who = root.querySelector('.who'), exp = root.querySelector('.exp'), no = root.querySelector('.stepno');
+  const btn = act => root.querySelector(`[data-act="${act}"]`);
+  // html 里用 <span class="clause"> 圈出反身代词所在的小句
+  const Q = [
+    { html: 'Tom thinks <span class="clause">Jack likes <b class="kS">himself</b></span>.', ask: 'himself 指谁？', opts: ['Tom', 'Jack', '别的人'], ok: [1],
+      e: 'himself 在小句 "Jack likes himself" 里，这个小句的主语是 Jack → 指 <b>Jack</b>。Tom 在小句外面，管不着。' },
+    { html: 'Tom thinks <span class="clause">Jack likes <b class="kO">him</b></span>.', ask: 'him 可以指谁？（选一个可能的）', opts: ['Tom', 'Jack', '别的人'], ok: [0, 2],
+      e: '普通代词正好相反：<b>不能</b>指同一小句的主语 Jack（那得用 himself），所以 him 指 <b>Tom 或别的男生</b>。' },
+    { html: 'Amy asked Lisa <span class="clause">to help <b class="kS">herself</b></span> to some cake.', ask: 'herself 指谁？', opts: ['Amy', 'Lisa'], ok: [1],
+      e: '"to help herself" 是谁去拿蛋糕？是 Lisa（Amy 请 Lisa 拿）。所以"做动作的人"是 Lisa → herself 指 <b>Lisa</b>。' },
+    { html: '<span class="clause">The kids introduced <b class="kS">themselves</b></span> to the new teacher.', ask: 'themselves 指谁？', opts: ['the kids', 'the new teacher'], ok: [0],
+      e: '主语是 the kids，动作回到他们自己 → 孩子们<b>自我介绍</b>。如果是互相介绍，要用 each other。' },
+  ];
+  const INIT = { i: 0, pick: -1 };
+  let S = { ...INIT };
+  const draw = () => {
+    const it = Q[S.i];
+    no.textContent = `第 ${S.i + 1} / ${Q.length} 句 · ${it.ask}`;
+    q.innerHTML = it.html;
+    who.innerHTML = it.opts.map((o, j) => `<button type="button" class="btn" data-j="${j}">${o}</button>`).join('');
+    exp.innerHTML = '';
+    if (S.pick >= 0) {
+      who.querySelectorAll('.btn').forEach((b, j) => {
+        b.disabled = true;
+        if (it.ok.includes(j)) b.classList.add('right'); else if (j === S.pick) b.classList.add('wrong');
+      });
+      q.querySelector('.clause').classList.add('show');
+      exp.innerHTML = (it.ok.includes(S.pick) ? '<b style="color:var(--ok)">✓ 对。</b>' : '<b style="color:var(--bad)">✗ 再看看。</b>') + it.e;
+    }
+    btn('prev').disabled = S.i === 0; btn('next').disabled = S.i === Q.length - 1;
+  };
+  who.onclick = e => { const b = e.target.closest('[data-j]'); if (b && S.pick < 0) { S.pick = +b.dataset.j; draw(); } };
+  btn('prev').onclick = () => { S = { i: S.i - 1, pick: -1 }; draw(); };
+  btn('next').onclick = () => { S = { i: S.i + 1, pick: -1 }; draw(); };
+  const reset = () => { S = { ...INIT }; draw(); };
+  btn('reset').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+/* ---------- 模块 5：误区卡 ---------- */
+{
+  const box = document.getElementById('myths');
+  const M = [
+    { h: '误区 1：拿 myself 当"礼貌版"的 me', bad: '✗ Please contact myself if you have questions.', good: '✓ Please contact <b>me</b> if you have questions.',
+      n: '主语是 you，被联系的是"我"，不是"你自己" → 动作没有弹回来，用 me。myself 听起来更正式只是错觉。' },
+    { h: '误区 2：拿 myself 当主语', bad: '✗ John and myself will handle it.', good: '✓ John and <b>I</b> will handle it.',
+      n: '反身代词不能当主语。把 John 去掉试试："myself will handle it" 显然不对。' },
+    { h: '误区 3：按中文"放松自己"硬加 -self', bad: '✗ I relaxed myself / I feel myself happy.', good: '✓ I <b>relaxed</b>. / I <b>feel</b> happy.',
+      n: 'relax、feel、concentrate、meet、hurry、wake up 通常不带反身代词。wash、shave、dress 一般也不加；要强调"费劲地自己做到"时才加，如 My son can dress himself now.' },
+    { h: '误区 4：表示位置的介词后面', bad: '✗ She put the bag next to herself.', good: '✓ She put the bag next to <b>her</b>.',
+      n: 'next to / near / behind / around / with（带着）后表示位置时用 him/her。但 look at / talk to / be proud of 这类"动作对象"仍用 -self：She looked at herself.' },
+    { h: '误区 5：把"自己"和"互相"搞混', bad: '✗ Tom and Amy love themselves.（= 各自爱自己）', good: '✓ Tom and Amy love <b>each other</b>.',
+      n: 'themselves：每个人的动作回到自己身上；each other：动作在两人之间来回。' },
+  ];
+  const INIT = () => M.map(() => false);
+  let S = INIT();
+  box.innerHTML = M.map((m, i) => `<div class="myth" data-i="${i}"><h3>${m.h}</h3><div class="bad en">${m.bad}</div><div class="good en"></div><div class="note">${m.n}</div><div><button type="button" class="btn">看正确说法</button></div></div>`).join('');
+  const draw = () => box.querySelectorAll('.myth').forEach((el, i) => {
+    const g = el.querySelector('.good');
+    g.innerHTML = M[i].good; g.classList.toggle('hide', !S[i]);
+    el.querySelector('.note').classList.toggle('hide', !S[i]);
+    el.querySelector('.btn').textContent = S[i] ? '收起' : '看正确说法';
+  });
+  box.onclick = e => { const el = e.target.closest('.btn') && e.target.closest('.myth'); if (el) { const i = +el.dataset.i; S[i] = !S[i]; draw(); } };
+  document.getElementById('mythAll').onclick = () => { S = S.map(() => true); draw(); };
+  const reset = () => { S = INIT(); draw(); };
+  document.getElementById('mythReset').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+/* ---------- 练习题 ---------- */
+window.LQ_ITEMS = [
+  { type: '选择', q: 'She looked at ___ in the mirror and smiled.', opts: ['her', 'herself', 'hers'], ans: 1,
+    why: '看镜子的是她，被看的也是她——动作弹回自己，用 herself（动画第 3 步）。用 her 就变成"看着另一个女生"。' },
+  { type: '选择', q: 'Nobody helped them. They built the treehouse ___.', opts: ['theirselves', 'themself', 'themselves'], ans: 2,
+    why: '第三人称用宾格 them + 复数 selves = themselves。theirselves 是常见拼写错误。' },
+  { type: '判断', q: '写邮件时说 "Please send the report to myself." 比 "to me" 更礼貌、更正确。', opts: ['对', '错'], ans: 1,
+    why: '错。主语是（隐含的）you，收报告的是"我"，动作没回到"you"身上，应该用 me。myself 冒充礼貌是母语者也常犯、但被视为不规范的用法（误区 1）。' },
+  { type: '选择', q: 'After the long hike, we sat by the lake and ___.', opts: ['relaxed', 'relaxed ourselves', 'relaxed us'], ans: 0,
+    why: 'relax 本身就是"放松（自己）"，英语一般不加反身代词。中文"放松自己"不要直译（误区 3）。' },
+  { type: '选择', q: 'Anna says that Kate trusts herself. —— herself 指谁？', opts: ['Anna', 'Kate', 'Anna 或 Kate 都行'], ans: 1,
+    why: 'herself 所在的小句是 "Kate trusts herself"，主语是 Kate，所以只能指 Kate（模块 4 的规则）。' },
+  { type: '情景', q: '你请朋友来家里吃饭，指着桌上的点心说：「别客气，想吃什么自己拿。」', opts: ['Help you to anything.', 'Help yourself to anything.', 'Help by yourself.'], ans: 1,
+    why: 'help yourself (to sth.) 是固定搭配"请自便、随便吃"。by yourself 是"独自"，意思不对。' },
+  { type: '改错', q: '哪一句是正确的？', opts: ['My sister and myself are twins.', 'Me and myself are twins.', 'My sister and I are twins.'], ans: 2,
+    why: '反身代词不能当主语。去掉 my sister 检验："I am a twin"，所以是 My sister and I（误区 2）。' },
+  { type: '选择', q: 'Tom put his phone on the table beside ___.', opts: ['him', 'himself'], ans: 0,
+    why: 'beside 表示位置，介词后用 him 就能指 Tom，不用 himself（误区 4）。对比：Tom talked to himself（动作对象，用 himself）。' },
+  { type: '选择', q: 'The twins always help ___ with homework — Lily does maths for Lucy, Lucy does English for Lily.', opts: ['themselves', 'each other'], ans: 1,
+    why: '帮助在两人之间来回 → each other。themselves 表示各自帮自己（误区 5）。' },
+  { type: '填空', q: 'I didn\'t get any help — I painted the whole room by ___.', ans: ['myself'], placeholder: '填一个词',
+    why: 'by + 反身代词 = 独自、没人帮（动画第 6 步）。主语是 I，所以是 myself。' },
+];
+</script>
+<script>
+/* ---------- 练习题（learn 通用组件） ----------
+   题目来自 window.LQ_ITEMS：{type, q, opts, ans: 选项下标, why} 或填空题 {type, q, ans: [可接受答案…], why}
+   定义 window.resetPage()（导航条「重置」按钮调用）：先调用页面自己的 window.pageReset()，再清空练习 */
+(() => {
+  const box = document.getElementById('lq');
+  const items = window.LQ_ITEMS || [];
+  const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let answered = 0, right = 0;
+
+  function update() {
+    const all = answered === items.length;
+    score.textContent = `已答 ${answered} / ${items.length} · 答对 ${right}` +
+      (all ? (right === items.length ? ' · 全对！' : ' · 看看解析，再重做一次') : '');
+  }
+
+  function render() {
+    answered = 0; right = 0; list.innerHTML = '';
+    items.forEach((it, i) => {
+      const el = document.createElement('div');
+      el.className = 'lq-item';
+      el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
+      const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
+      const judge = (ok, answer) => {
+        answered++; if (ok) right++;
+        el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
+        why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
+        update();
+      };
+      if (it.opts) {
+        a.classList.add('lq-opts');
+        it.opts.forEach((o, j) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'lq-opt'; b.innerHTML = o;
+          b.onclick = () => {
+            a.querySelectorAll('button').forEach(x => x.disabled = true);
+            a.children[it.ans].classList.add('lq-right');
+            if (j !== it.ans) b.classList.add('lq-wrong');
+            judge(j === it.ans, it.opts[it.ans]);
+          };
+          a.append(b);
+        });
+      } else {
+        a.classList.add('lq-fill');
+        a.innerHTML = `<input type="text" autocomplete="off" spellcheck="false" placeholder="${it.placeholder || '输入答案'}" aria-label="第 ${i + 1} 题答案"><button type="button" class="lq-opt">确定</button>`;
+        const inp = a.querySelector('input'), go = a.querySelector('button');
+        const submit = () => {
+          if (!inp.value.trim()) { inp.focus(); return; }
+          inp.disabled = go.disabled = true;
+          const ok = it.ans.some(x => norm(x) === norm(inp.value));
+          inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
+          judge(ok, it.ans[0]);
+        };
+        go.onclick = submit;
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      }
+      list.append(el);
+    });
+    update();
+  }
+
+  box.querySelector('.lq-redo').addEventListener('click', render);
+  // 导航条的「重置」按钮调用它：页面各模块 + 练习题一起恢复初始状态
+  window.resetPage = () => {
+    if (typeof window.pageReset === 'function') window.pageReset();
+    render();
+  };
+  render();
+})();
+</script>
+</body>
+</html>
