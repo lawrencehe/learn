@@ -1,0 +1,945 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>绝对值与相反数</title>
+<meta name="description" content="用数轴上的“镜子”和“量距离”动画讲清相反数与绝对值：多重负号化简、|x| = 5 为什么有两个解、两个负数怎么比大小、−|−4| 和 −(−4) 的区别，并附随机专项训练。">
+<style>
+:root{
+  --bg:var(--up-bg); --surface:var(--up-surface); --surface2:var(--up-surface-2); --ink:var(--up-ink); --muted:var(--up-muted); --line:var(--up-line);
+  --accent:var(--up-accent); --ok:var(--up-ok); --bad:var(--up-bad);
+  --pos:#1971c2; --pos-soft:#dbeafc;   /* 正数 / 右边 */
+  --neg:#9c36b5; --neg-soft:#f3d9fa;   /* 负数 / 负号 / 左边 */
+  --dist:#0c8599; --dist-soft:#d3f1f5; /* 距离（绝对值） */
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --pos:#74c0fc; --pos-soft:#16314d; --neg:#e599f7; --neg-soft:#3b1f45; --dist:#66d9e8; --dist-soft:#123a40; }
+}
+:root[data-theme="dark"]{ --pos:#74c0fc; --pos-soft:#16314d; --neg:#e599f7; --neg-soft:#3b1f45; --dist:#66d9e8; --dist-soft:#123a40; }
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 var(--up-font);padding:24px 16px 96px}
+main{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:48px}
+h1{font-size:clamp(1.7rem,4.5vw,2.4rem);line-height:1.25;margin:0 0 8px}
+h2{font-size:1.4rem;margin:0 0 8px}
+p{margin:0}
+a{color:var(--accent)}
+.lead{color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--up-radius);box-shadow:var(--up-shadow);padding:16px}
+.analogy{border-left:4px solid var(--accent)}
+.btn{font:inherit;font-size:14px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--up-surface)}
+.btn.on{border-color:var(--accent);background:var(--up-accent-soft);color:var(--accent);font-weight:700}
+.btn:disabled{opacity:.45;cursor:default}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.stepno{font-family:var(--up-mono);color:var(--muted);font-size:.9rem;min-width:56px;text-align:center}
+.caption{min-height:3.4em;margin-top:10px}
+.num{font-family:var(--up-mono)}
+.pos{color:var(--pos)} .neg{color:var(--neg)} .dist{color:var(--dist)}
+.stack{display:flex;flex-direction:column;gap:12px}
+.note{font-size:14px;color:var(--muted)}
+.rules{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.rules span{font-size:13px;border:1px solid var(--line);border-radius:999px;padding:1px 10px;background:var(--surface2)}
+svg{display:block;width:100%;height:auto}
+svg text{font-family:var(--up-mono)}
+.big{font-family:var(--up-mono);font-size:clamp(1.4rem,5vw,1.9rem);text-align:center;padding:8px 0}
+label.sl{display:flex;align-items:center;gap:8px;font-size:14px}
+label.sl input{width:130px;accent-color:var(--accent)}
+.trap b.x{color:var(--bad)}
+.trap b.y{color:var(--ok)}
+.lines{margin-top:12px;background:var(--surface2);border-radius:10px;padding:12px 16px;display:grid;gap:8px;min-height:150px}
+.lines div{font-family:var(--up-mono);font-size:clamp(1.15rem,4.4vw,1.5rem);animation:pop .6s ease}
+.lines div small{display:block;font-family:var(--up-font);font-size:13px;color:var(--muted)}
+@keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){.lines div{animation:none}}
+
+/* 专项训练 */
+.tmeta{display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px 12px;font-size:13px;color:var(--muted);margin-top:14px}
+.ttag{border:1px solid var(--accent);color:var(--accent);border-radius:999px;padding:0 10px}
+.texpr{background:var(--surface2);border-radius:10px;margin-top:8px;padding:16px 8px;overflow-wrap:anywhere}
+.box{display:inline-block;border:2px dashed var(--accent);border-radius:6px;padding:0 .25em;color:var(--accent);line-height:1.1}
+.tans{font:1.2rem var(--up-mono);width:140px;padding:6px 10px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);text-align:center}
+.tans.ok{border-color:var(--ok)} .tans.bad{border-color:var(--bad)}
+.btn.cmp{font:700 1.3rem var(--up-mono);min-width:56px}
+.btn.cmp.ok{border-color:var(--ok);color:var(--ok)} .btn.cmp.bad{border-color:var(--bad);color:var(--bad)}
+.tmsg{margin-top:10px;min-height:1.7em}
+.tmsg .ok{color:var(--ok)} .tmsg .bad{color:var(--bad)}
+.tsteps{margin:6px 0 0;padding-left:1.6em;display:grid;gap:6px}
+.tsteps:empty{display:none}
+.tsteps li .why{display:block;font-size:13px;color:var(--muted);line-height:1.55}
+ol.twrong{margin:6px 0 0;padding-left:1.6em;font-size:14px;overflow-wrap:anywhere}
+.tsum:empty{display:none}
+.tsum{margin-top:12px;padding:12px;border-radius:10px;background:var(--up-accent-soft)}
+table.tstat{width:100%;border-collapse:collapse;margin-top:14px;font-size:13px}
+table.tstat th,table.tstat td{border-bottom:1px solid var(--line);padding:4px 6px;text-align:left}
+table.tstat td.r,table.tstat th.r{text-align:right;font-family:var(--up-mono)}
+table.tstat tr.weak td{color:var(--bad);font-weight:700}
+
+:root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:var(--ok);--lq-bad:var(--bad)}
+/* ---------- 练习题（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+.lq{display:grid;gap:12px;margin-bottom:56px}
+.lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+.lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
+.lq-sub{margin:0;color:var(--lq-muted);font-size:14px}
+.lq-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--lq-muted);font-variant-numeric:tabular-nums}
+.lq-list{display:grid;gap:10px}
+.lq-item{background:var(--lq-surface);border:1.5px solid var(--lq-line);border-radius:10px;padding:12px 16px;display:grid;gap:10px;min-width:0;color:var(--lq-ink);text-align:left}
+.lq-item.lq-is-ok{border-color:var(--lq-ok)}
+.lq-item.lq-is-bad{border-color:var(--lq-bad)}
+.lq-q{font-size:15px;font-weight:600;line-height:1.6}
+.lq-tag{display:inline-block;font-size:11px;font-weight:500;line-height:1.6;color:var(--lq-muted);border:1px solid var(--lq-line);border-radius:999px;padding:0 8px;margin-right:8px;vertical-align:1px}
+.lq-opts,.lq-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lq .lq-opt,.lq .lq-redo{font:inherit;font-size:14px;line-height:1.4;padding:6px 14px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);cursor:pointer;text-align:left;opacity:1}
+.lq .lq-opt:hover:not(:disabled),.lq .lq-redo:hover{border-color:var(--lq-accent)}
+.lq .lq-opt:disabled{cursor:default;opacity:1}
+.lq .lq-opt.lq-right{border-color:var(--lq-ok);color:var(--lq-ok);font-weight:700}
+.lq .lq-opt.lq-wrong{border-color:var(--lq-bad);color:var(--lq-bad);text-decoration:line-through}
+.lq-fill input{font:inherit;font-size:14px;padding:6px 10px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);width:min(100%,200px)}
+.lq-fill input.lq-right{border-color:var(--lq-ok)}
+.lq-fill input.lq-wrong{border-color:var(--lq-bad)}
+.lq-why{font-size:14px;line-height:1.65;color:var(--lq-muted)}
+.lq-why:empty{display:none}
+.lq-why .lq-ok{color:var(--lq-ok)}
+.lq-why .lq-bad{color:var(--lq-bad)}
+
+</style>
+</head>
+<body>
+<!-- up-shell:begin（由 scripts/shell.mjs 自动生成，勿手改） -->
+<nav id="up-nav" aria-label="网站导航">
+<a class="up-home" href="/" title="Up 学习站首页"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="up-nav-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c6ef5"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#up-nav-g)"/><path d="M12 52V42a2 2 0 0 1 2-2h10V32a2 2 0 0 1 2-2h10v-8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v30z" fill="#fff"/><circle cx="43" cy="13" r="5.5" fill="#ffa94d"/></svg><span>Up 学习站</span></a>
+<span class="up-sep" aria-hidden="true">›</span><a class="up-cat" href="/math">数学</a>
+<span class="up-sep" aria-hidden="true">›</span><span class="up-title">绝对值与相反数</span>
+<button id="up-reset" type="button" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+</nav>
+<style>
+:root{--up-bg:#f5f6f8;--up-surface:#ffffff;--up-surface-2:#eef0f4;--up-ink:#1d2127;--up-muted:#626b78;--up-line:#dfe2e8;--up-ok:#2b8a3e;--up-bad:#d6336c;--up-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);--up-font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif;--up-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;--up-radius:12px;--up-accent:#d9480f;--up-accent-soft:#fff1e8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#ff8a50;--up-accent-soft:#3a2218;color-scheme:dark}}
+:root[data-theme="dark"]{--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#ff8a50;--up-accent-soft:#3a2218;color-scheme:dark}
+html{padding-top:52px;scroll-padding-top:64px}
+#up-nav{position:fixed;top:0;left:0;right:0;z-index:2147483000;height:52px;box-sizing:border-box;display:flex;align-items:center;gap:8px;
+padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));border-top:3px solid var(--up-accent);
+border-bottom:1px solid var(--up-line);background:color-mix(in srgb,var(--up-surface) 88%,transparent);
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:500 14px/1.2 var(--up-font);color:var(--up-ink);text-align:left}
+#up-nav a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none}
+#up-nav a:hover{color:var(--up-accent)}
+#up-nav svg{width:24px;height:24px;flex:none;display:block}
+#up-nav .up-home span{font-weight:700}
+#up-nav .up-cat{color:var(--up-accent);font-weight:600}
+#up-nav .up-sep{color:var(--up-muted);flex:none}
+#up-nav .up-title{color:var(--up-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#up-reset{margin:0 0 0 auto;flex:none;font:600 14px/1 var(--up-font);padding:8px 14px;border-radius:999px;cursor:pointer;
+border:1.5px solid var(--up-accent);background:transparent;color:var(--up-accent);transition:background .2s,color .2s}
+#up-reset:hover,#up-reset:focus-visible{background:var(--up-accent);color:var(--up-surface)}
+#up-reset:focus-visible,#up-nav a:focus-visible{outline:2px solid var(--up-accent);outline-offset:2px}
+@media (max-width:560px){#up-nav .up-home span{display:none}}
+@media print{#up-nav{display:none}html{padding-top:0}}
+</style>
+<script>
+document.getElementById('up-reset').addEventListener('click', function () {
+  if (typeof window.resetPage === 'function') window.resetPage();
+  else console.warn('本页没有定义 window.resetPage()，重置按钮无效');
+  window.scrollTo({ top: 0, behavior: 'auto' });
+});
+</script>
+<!-- up-shell:end -->
+<main>
+
+<section>
+  <h1>绝对值与相反数</h1>
+  <p class="lead">相反数是“照镜子”，绝对值是“量距离”。这一页讲清 −(−(−3)) 怎么化简、|x| = 5 为什么有两个答案、−7 和 −3 谁大、−|−4| 和 −(−4) 有什么不同。学完可以去 <a href="#train-sec">七、专项训练</a> 随机刷题。</p>
+</section>
+
+<section class="card analogy">
+  <b>生活比喻：从家门口出发</b><br>
+  把家门口当作 0，<b class="pos">向东为正</b>，<b class="neg">向西为负</b>。<br>
+  <b>相反数</b>：同样走 3 步，一个向东（+3）、一个向西（−3），它们方向相反、步数一样。<br>
+  <b class="dist">绝对值</b>：只问“离家多远”，不管往哪边走。+3 和 −3 都离家 3 步，所以 |3| = |−3| = 3。
+</section>
+
+<!-- 一、相反数 -->
+<section>
+  <h2>一、相反数：在 0 处放一面镜子</h2>
+  <p>只有<b>符号不同</b>、数字一样的两个数，叫<b>互为相反数</b>。在数轴上，它们正好在 0 的两边，像照镜子一样对称。</p>
+  <div class="card" id="opp">
+    <svg viewBox="0 0 560 160" aria-label="相反数的镜子">
+      <line class="mir" y1="18" y2="128" stroke="var(--accent)" stroke-width="3" stroke-dasharray="6 5"/>
+      <text class="mirl" y="34" text-anchor="start" font-size="17" fill="var(--accent)">镜子</text>
+      <g class="ax"></g>
+      <line class="ba" y1="112" y2="112" stroke-width="8" stroke-linecap="round" opacity=".35"/>
+      <line class="bb" y1="112" y2="112" stroke-width="8" stroke-linecap="round" opacity=".35"/>
+      <path class="arc" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="5 5"/>
+      <circle class="pa" cy="112" r="11"/><text class="la" y="88" text-anchor="middle" font-size="19" font-weight="700"></text>
+      <circle class="pb" cy="112" r="11"/><text class="lb" y="88" text-anchor="middle" font-size="19" font-weight="700"></text>
+      <circle class="mv" r="11"/>
+    </svg>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+    <div class="ctrl"><label class="sl">换一个数 <input type="range" min="-8" max="8" step="1"> <b class="num v"></b></label></div>
+  </div>
+  <p class="note" style="margin-top:10px">⚠ “−a”读作“a 的相反数”，<b>不一定是负数</b>：a = −5 时，−a = −(−5) = 5，是正数。把滑块拖到负数看看。</p>
+</section>
+
+<!-- 二、多重符号 -->
+<section>
+  <h2>二、一层层套负号：每套一层就翻一次面</h2>
+  <p>“−( )”就是“求相反数”，在数轴上翻到镜子另一边。套两层就翻回来了。“+( )”什么都不改变。</p>
+  <div class="card" id="nest">
+    <div class="ctrl" style="margin-top:0">
+      <button type="button" class="btn" data-base="3">从 3 开始</button>
+      <button type="button" class="btn" data-base="-3">从 −3 开始</button>
+    </div>
+    <div class="big expr"></div>
+    <svg viewBox="0 0 560 140" aria-label="翻面的点">
+      <line x1="280" x2="280" y1="18" y2="108" stroke="var(--accent)" stroke-width="2" stroke-dasharray="6 5" opacity=".6"/>
+      <g class="ax"></g>
+      <path class="arc" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="5 5"/>
+      <circle class="pt" cy="92" r="12"/>
+    </svg>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn primary" data-add="−">套一层 −( )</button>
+      <button type="button" class="btn" data-add="+">套一层 +( )</button>
+      <button type="button" class="btn" data-act="pop">拆掉最外层</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+  <div class="rules">
+    <span>口诀：<b>数负号</b></span>
+    <span>偶数个“−” → 正</span>
+    <span>奇数个“−” → 负</span>
+    <span>“+”不用管</span>
+  </div>
+</section>
+
+<!-- 三、绝对值 -->
+<section>
+  <h2>三、绝对值：到 0 的距离</h2>
+  <p>一个数在数轴上<b class="dist">离 0 有多远</b>，就是它的绝对值，记作 |a|。距离只有长短、没有方向，所以<b>绝对值永远不会是负数</b>。</p>
+  <div class="card" id="abs">
+    <div class="big expr"></div>
+    <svg viewBox="0 0 560 140" aria-label="绝对值是距离">
+      <g class="ax"></g>
+      <line class="bar" y1="70" y2="70" stroke="var(--dist)" stroke-width="10" stroke-linecap="round"/>
+      <text class="cnt" y="54" text-anchor="middle" font-size="19" font-weight="700" fill="var(--dist)"></text>
+      <circle class="ghost" cy="92" r="10" fill="none" stroke-width="2.5" stroke-dasharray="4 3"/>
+      <circle class="pt" cy="92" r="12"/>
+    </svg>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+    <div class="ctrl"><label class="sl">换一个数 <input type="range" min="-10" max="10" step="1"> <b class="num v"></b></label></div>
+  </div>
+  <div class="rules">
+    <span><b class="pos">正数</b>的绝对值 = 它本身：|5| = 5</span>
+    <span><b class="neg">负数</b>的绝对值 = 它的相反数：|−5| = 5</span>
+    <span>0 的绝对值 = 0</span>
+  </div>
+</section>
+
+<!-- 四、反过来问 -->
+<section>
+  <h2>四、反过来问：|x| = 5，x 是几？</h2>
+  <p>问的是“离 0 有 5 格的点在哪”，答案是<b>两边各一个</b>。拖动滑块试试，特别看看 0 和负数。</p>
+  <div class="card" id="solve">
+    <div class="big expr"></div>
+    <svg viewBox="0 0 560 140" aria-label="绝对值方程">
+      <g class="ax"></g>
+      <line class="b1" y1="70" y2="70" stroke="var(--dist)" stroke-width="8" stroke-linecap="round" opacity=".5"/>
+      <line class="b2" y1="70" y2="70" stroke="var(--dist)" stroke-width="8" stroke-linecap="round" opacity=".5"/>
+      <circle class="p1" cy="92" r="12"/><circle class="p2" cy="92" r="12"/>
+      <text class="no" x="280" y="62" text-anchor="middle" font-size="22" font-weight="700" fill="var(--bad)">无解</text>
+    </svg>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <label class="sl">|x| = <input type="range" min="-3" max="9" step="1"> <b class="num v"></b></label>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<!-- 五、比大小 -->
+<section>
+  <h2>五、两个负数比大小：绝对值大的反而小</h2>
+  <p>比大小只看<b>数轴上谁更靠右</b>。−7 的绝对值比 −3 大，但它在更左边，所以 −7 &lt; −3。就像欠 7 块钱比欠 3 块钱更“穷”。</p>
+  <div class="card" id="cmp">
+    <div class="big expr"></div>
+    <svg viewBox="0 0 560 140" aria-label="比较大小">
+      <g class="ax"></g>
+      <circle class="pa" cy="92" r="12"/><text class="la" y="68" text-anchor="middle" font-size="19" font-weight="700"></text>
+      <circle class="pb" cy="92" r="12"/><text class="lb" y="68" text-anchor="middle" font-size="19" font-weight="700"></text>
+    </svg>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <label class="sl">A <input type="range" class="ia" min="-10" max="10" step="1"> <b class="num va"></b></label>
+      <label class="sl">B <input type="range" class="ib" min="-10" max="10" step="1"> <b class="num vb"></b></label>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<!-- 六、算式里的绝对值 -->
+<section>
+  <h2>六、算式里的绝对值号：像一副括号</h2>
+  <p>绝对值号 | | 和括号一样，<b>先算里面</b>，再取绝对值。<b>只有夹在里面的东西</b>才受影响，外面的负号原样保留。</p>
+  <div class="card" id="calc">
+    <div class="ctrl pre" style="margin-top:0"></div>
+    <div class="lines"></div>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+  <div class="stack" style="margin-top:12px">
+    <div class="card trap"><b class="x">✗ −|−4| = 4</b>　<b class="y">✓ −|−4| = −4</b><br>绝对值号只管里面的 −4，把它变成 4；最前面的“−”在绝对值号<b>外面</b>，要保留。对比：−(−4) = 4，那是括号，不是绝对值号。</div>
+    <div class="card trap"><b class="x">✗ |3 − 8| = |3| − |8| = −5</b>　<b class="y">✓ |3 − 8| = |−5| = 5</b><br>绝对值号里有算式，要先算出结果再取绝对值。|3 − 8| 一定 ≥ 0，算出负数就肯定错了。</div>
+    <div class="card trap"><b class="x">✗ |x| = 5，所以 x = 5</b>　<b class="y">✓ x = 5 或 x = −5</b><br>离 0 有 5 格的点，0 的左右两边各有一个，漏掉负的那个是最常见的错误。</div>
+    <div class="card trap"><b class="x">✗ −a 一定是负数</b>　<b class="y">✓ 要看 a 本身</b><br>−a 是“a 的相反数”。a 是负数时，−a 反而是正数；a = 0 时，−a = 0。</div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>一句话总结</h2>
+  <p><b>相反数</b>是在 0 处照镜子：只翻符号，数字不变，套几层负号就数几个“−”（偶正奇负）；<b class="dist">绝对值</b>是到 0 的距离：永远 ≥ 0，|x| = 5 有两个解，两个负数比较时绝对值大的反而小。</p>
+</section>
+
+<!-- 七、专项训练 -->
+<section id="train-sec">
+  <h2>七、专项训练：随机出题，练到熟</h2>
+  <p>选一类专练，或者选「全部混合」。每题做完都有<b>分步解析</b>；10 题一轮，结束时告诉你哪一类最容易错。</p>
+  <div class="card" id="train" style="margin-top:12px">
+    <div class="ctrl cats" style="margin-top:0"></div>
+    <div class="ctrl lvls"><span class="note">难度：</span></div>
+    <div class="tmeta"><span class="ttag"></span><span class="tprog num"></span></div>
+    <div class="big texpr"></div>
+    <div class="ctrl tin" style="justify-content:center">
+      <span class="tlab num"></span>
+      <button type="button" class="btn tsign" title="切换正负号">±</button>
+      <input class="tans" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" aria-label="答案" placeholder="答案">
+      <button type="button" class="btn tnone">无解</button>
+      <button type="button" class="btn primary tok">确定</button>
+    </div>
+    <div class="ctrl tcmp" style="justify-content:center">
+      <button type="button" class="btn cmp" data-cmp="&lt;">&lt;</button>
+      <button type="button" class="btn cmp" data-cmp="=">=</button>
+      <button type="button" class="btn cmp" data-cmp="&gt;">&gt;</button>
+    </div>
+    <div class="ctrl" style="justify-content:center"><button type="button" class="btn tnext">下一题 ▶</button></div>
+    <p class="tmsg"></p>
+    <ol class="tsteps"></ol>
+    <div class="tsum"></div>
+    <table class="tstat"></table>
+    <div class="ctrl"><button type="button" class="btn" data-act="reset">↺ 重置本模块</button></div>
+  </div>
+</section>
+
+<section class="lq" id="lq" aria-label="练习">
+  <div class="lq-head"><h2>练习</h2><span class="lq-score"></span></div>
+  <p class="lq-sub">学完上面的内容，来检验一下。每题作答后马上看到解析；点「重做练习」清空重来。</p>
+  <div class="lq-list"></div>
+  <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+</section>
+
+</main>
+
+<script>
+const resets = [];
+window.pageReset = () => resets.forEach(f => f());
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const f = n => n < 0 ? `−${-n}` : `${n}`;                       // 用真正的减号显示负数
+const colorOf = n => n < 0 ? 'var(--neg)' : n > 0 ? 'var(--pos)' : 'var(--ink)';
+const X10 = n => 30 + (n + 10) * 25;                             // −10..10 的数轴坐标
+function axis(g, lo, hi, X, y, every) {
+  let h = `<line x1="${X(lo) - 10}" x2="${X(hi) + 10}" y1="${y}" y2="${y}" stroke="var(--muted)" stroke-width="2"/>` +
+          `<path d="M${X(hi) + 10},${y - 6} L${X(hi) + 20},${y} L${X(hi) + 10},${y + 6}Z" fill="var(--muted)"/>`;
+  for (let n = lo; n <= hi; n++) {
+    const x = X(n), lab = n % every === 0;
+    h += `<line x1="${x}" x2="${x}" y1="${y - (lab ? 7 : 4)}" y2="${y + (lab ? 7 : 4)}" stroke="var(--muted)" stroke-width="${n === 0 ? 3 : 1.5}"/>`;
+    if (lab) h += `<text x="${x}" y="${y + 30}" text-anchor="middle" font-size="19" fill="${colorOf(n)}" font-weight="${n === 0 ? 700 : 400}">${f(n)}</text>`;
+  }
+  g.innerHTML = h;
+}
+// 点沿弧线从 x1 翻到 x2（翻到镜子对面）
+function flip(el, arc, x1, x2, y, done) {
+  const h = Math.max(30, Math.abs(x2 - x1) * .35);
+  arc.setAttribute('d', `M${x1},${y} Q${(x1 + x2) / 2},${y - h * 2} ${x2},${y}`);
+  if (RM || x1 === x2) { el.setAttribute('cx', x2); el.setAttribute('cy', y); done && done(); return () => {}; }
+  const t0 = performance.now(), dur = 1000; let raf;
+  const tick = now => {
+    const k = Math.min(1, (now - t0) / dur), e = k < .5 ? 2 * k * k : 1 - (-2 * k + 2) ** 2 / 2;
+    el.setAttribute('cx', x1 + (x2 - x1) * e); el.setAttribute('cy', y - Math.sin(Math.PI * e) * h);
+    if (k < 1) raf = requestAnimationFrame(tick); else done && done();
+  };
+  raf = requestAnimationFrame(tick);
+  return () => cancelAnimationFrame(raf);
+}
+// 通用分步控制：上一步 / 下一步 / 播放 / 局部重置
+function stepper(root, n, draw, delay = 1800) {
+  const btn = a => root.querySelector(`[data-act="${a}"]`);
+  const st = { step: 0, playing: false }; let timer = null;
+  const total = () => typeof n === 'function' ? n() : n;
+  const ui = () => {
+    root.querySelector('.stepno').textContent = `${st.step + 1} / ${total()}`;
+    btn('prev').disabled = st.step === 0; btn('next').disabled = st.step === total() - 1;
+    btn('play').textContent = st.playing ? '⏸ 暂停' : '▶ 播放';
+  };
+  const show = anim => { draw(st.step, anim); ui(); };
+  const stop = () => { clearInterval(timer); timer = null; st.playing = false; };
+  const go = d => { const s = Math.max(0, Math.min(total() - 1, st.step + d)); const ch = s !== st.step; st.step = s; show(ch && d > 0); };
+  btn('prev').onclick = () => { stop(); go(-1); };
+  btn('next').onclick = () => { stop(); go(1); };
+  btn('play').onclick = () => {
+    if (st.playing) { stop(); ui(); return; }
+    if (st.step === total() - 1) { st.step = 0; show(false); }
+    st.playing = true; ui();
+    timer = setInterval(() => { go(1); if (st.step === total() - 1) { stop(); ui(); } }, delay);
+  };
+  return { st, show, restart: () => { stop(); st.step = 0; show(false); } };
+}
+
+/* ---------- 一、相反数：镜子 ---------- */
+{
+  const root = document.getElementById('opp'), $ = s => root.querySelector(s);
+  axis($('.ax'), -10, 10, X10, 112, 2);
+  const mir = $('.mir'), mirl = $('.mirl');
+  mir.setAttribute('x1', X10(0)); mir.setAttribute('x2', X10(0)); mirl.setAttribute("x", X10(0) + 8);
+  const INIT = { a: 3 };
+  let S = { ...INIT }, cancel = () => {};
+  const inp = $('input');
+  const caption = (step, a) => {
+    if (a === 0) return ['0 就站在镜子上。', '在 0 处放一面镜子。', '0 照镜子还是它自己。', '<b>0 的相反数是 0</b>——唯一一个相反数等于自己的数。'][step];
+    const side = a > 0 ? '右' : '左', k = Math.abs(a);
+    return [
+      `第 1 步：先看 <b style="color:${colorOf(a)}">${f(a)}</b>：在 0 的${side}边 ${k} 格。`,
+      '第 2 步：在 0 处放一面镜子（也可以想成把数轴沿 0 对折）。',
+      `第 3 步：${f(a)} 翻到镜子另一边，落在 <b style="color:${colorOf(-a)}">${f(-a)}</b>。`,
+      `第 4 步：${f(a)} 和 ${f(-a)} 离 0 一样远（都是 ${k} 格），方向相反 → <b>互为相反数</b>。` + (a < 0 ? `注意：${f(a)} 的相反数 ${f(-a)} 是<b>正数</b>。` : ''),
+    ][step];
+  };
+  const draw = (step, anim) => {
+    cancel();
+    const a = S.a, xa = X10(a), xb = X10(-a);
+    inp.value = a; $('.v').textContent = f(a);
+    mir.style.opacity = mirl.style.opacity = step >= 1 ? 1 : 0;
+    $('.pa').setAttribute('cx', xa); $('.pa').setAttribute('fill', colorOf(a));
+    $('.la').setAttribute('x', xa); $('.la').setAttribute('fill', colorOf(a)); $('.la').textContent = f(a);
+    const showB = step >= 3 || (step === 2 && !anim);
+    $('.pb').setAttribute('cx', xb); $('.pb').setAttribute('fill', colorOf(-a)); $('.pb').style.opacity = showB ? 1 : 0;
+    $('.lb').setAttribute('x', xb); $('.lb').setAttribute('fill', colorOf(-a)); $('.lb').textContent = f(-a); $('.lb').style.opacity = showB ? 1 : 0;
+    $('.arc').style.opacity = step >= 2 ? .8 : 0;
+    $('.arc').setAttribute('d', `M${xa},112 Q${X10(0)},${112 - Math.max(30, Math.abs(xb - xa) * .35) * 2} ${xb},112`);
+    [['.ba', xa, a], ['.bb', xb, -a]].forEach(([s, x, n], i) => {
+      const el = $(s); el.setAttribute('x1', X10(0)); el.setAttribute('x2', x); el.setAttribute('stroke', colorOf(n));
+      el.style.opacity = step >= 3 && (i === 0 || showB) ? .35 : 0;
+    });
+    const mv = $('.mv'); mv.setAttribute('fill', colorOf(-a)); mv.style.opacity = 0;
+    if (step === 2 && anim) {
+      mv.style.opacity = 1;
+      cancel = flip(mv, $('.arc'), xa, xb, 112, () => { mv.style.opacity = 0; ['.pb', '.lb'].forEach(s => $(s).style.opacity = 1); });
+    }
+    root.querySelector('.caption').innerHTML = caption(step, a);
+  };
+  const sp = stepper(root, 4, draw, 1900);
+  inp.oninput = () => { S.a = +inp.value; sp.restart(); };
+  const reset = () => { cancel(); S = { ...INIT }; sp.restart(); };
+  root.querySelector('[data-act="reset"]').onclick = reset;
+  resets.push(reset); reset();
+}
+
+/* ---------- 二、多重符号 ---------- */
+{
+  const root = document.getElementById('nest'), $ = s => root.querySelector(s);
+  axis($('.ax'), -10, 10, X10, 92, 2);
+  const MAX = 5, INIT = { base: 3, layers: [] };
+  let S = { base: 3, layers: [] }, cancel = () => {};
+  const val = () => S.layers.reduce((v, L) => L === '−' ? -v : v, S.base);
+  const html = () => {
+    let s = S.base < 0 ? `<span class="neg">−${-S.base}</span>` : `${S.base}`;
+    S.layers.forEach((L, i) => {
+      const o = L === '−' ? '<span class="neg">−</span>' : '+';
+      s = i === 0 && S.base > 0 ? o + s : `${o}(${s})`;
+    });
+    return s;
+  };
+  const draw = (from) => {
+    cancel();
+    const v = val(), k = S.layers.filter(L => L === '−').length + (S.base < 0 ? 1 : 0), pt = $('.pt');
+    pt.setAttribute('fill', colorOf(v));
+    if (from !== undefined && from !== v) { $('.arc').style.opacity = .8; cancel = flip(pt, $('.arc'), X10(from), X10(v), 92); }
+    else { $('.arc').style.opacity = 0; pt.setAttribute('cx', X10(v)); pt.setAttribute('cy', 92); }
+    $('.expr').innerHTML = `${html()} = <b style="color:${colorOf(v)}">${f(v)}</b>`;
+    root.querySelectorAll('[data-base]').forEach(b => b.classList.toggle('on', +b.dataset.base === S.base));
+    root.querySelectorAll('[data-add]').forEach(b => b.disabled = S.layers.length >= MAX);
+    $('[data-act="pop"]').disabled = !S.layers.length;
+    const plus = S.layers.includes('+') ? ' “+( )”不改变符号，可以直接去掉。' : '';
+    $('.caption').innerHTML = !S.layers.length && S.base > 0 ? '点「套一层 −( )」，看看点怎么翻面。'
+      : `数一数“−”：一共 <b>${k}</b> 个${S.base < 0 ? '（含 −3 自己的 1 个）' : ''} → ${k % 2 ? '<b class="neg">奇数个，结果为负</b>' : '<b class="pos">偶数个，结果为正</b>'}。${plus}`;
+  };
+  root.querySelectorAll('[data-add]').forEach(b => b.onclick = () => { const from = val(); S.layers.push(b.dataset.add); draw(from); });
+  $('[data-act="pop"]').onclick = () => { const from = val(); S.layers.pop(); draw(from); };
+  root.querySelectorAll('[data-base]').forEach(b => b.onclick = () => { S = { base: +b.dataset.base, layers: [] }; draw(); });
+  const reset = () => { S = { base: INIT.base, layers: [] }; draw(); };
+  $('[data-act="reset"]').onclick = reset;
+  resets.push(reset); reset();
+}
+
+/* ---------- 三、绝对值：量距离 ---------- */
+{
+  const root = document.getElementById('abs'), $ = s => root.querySelector(s);
+  axis($('.ax'), -10, 10, X10, 92, 2);
+  const INIT = { n: -4 };
+  let S = { ...INIT }, raf = null;
+  const inp = $('input'), bar = $('.bar'), cnt = $('.cnt');
+  const setBar = k => {   // 从 n 往 0 量了 k 格
+    const n = S.n, x0 = X10(n), x1 = X10(n - Math.sign(n) * k);
+    bar.setAttribute('x1', x0); bar.setAttribute('x2', x1); bar.style.opacity = k > 0 ? 1 : 0;
+    cnt.setAttribute('x', (x0 + x1) / 2); cnt.textContent = k > 0 ? `${Math.round(k)} 格` : '';
+  };
+  const draw = (step, anim) => {
+    cancelAnimationFrame(raf);
+    const n = S.n, k = Math.abs(n);
+    inp.value = n; $('.v').textContent = f(n);
+    $('.pt').setAttribute('cx', X10(n)); $('.pt').setAttribute('fill', colorOf(n));
+    const g = $('.ghost'); g.setAttribute('cx', X10(-n)); g.setAttribute('stroke', colorOf(-n)); g.style.opacity = step === 2 && n ? 1 : 0;
+    if (step === 0) setBar(0);
+    else if (step === 1 && anim && !RM && k) {
+      const t0 = performance.now(), dur = Math.max(800, k * 300);
+      const tick = now => { const t = Math.min(1, (now - t0) / dur); setBar(k * t); if (t < 1) raf = requestAnimationFrame(tick); };
+      raf = requestAnimationFrame(tick);
+    } else setBar(k);
+    $('.expr').innerHTML = step === 2 ? `|<span style="color:${colorOf(n)}">${f(n)}</span>| = <b class="dist">${k}</b>` : `|<span style="color:${colorOf(n)}">${f(n)}</span>| = ?`;
+    const rule = n < 0 ? `负数的绝对值是它的相反数：|${f(n)}| = −(${f(n)}) = ${k}。` : n > 0 ? `正数的绝对值是它本身。` : '0 的绝对值是 0。';
+    $('.caption').innerHTML = [
+      `第 1 步：找到 ${f(n)} 在数轴上的位置。`,
+      n ? `第 2 步：从 ${f(n)} 往 0 量一量，一共 <b class="dist">${k} 格</b>。` : '第 2 步：0 就在 0 上，距离是 0。',
+      `第 3 步：距离是 ${k}，所以 <b>|${f(n)}| = ${k}</b>。${rule}` + (n ? ` 虚线圈 ${f(-n)} 也离 0 有 ${k} 格：|${f(-n)}| = ${k}。` : ''),
+    ][step];
+  };
+  const sp = stepper(root, 3, draw, 2400);
+  inp.oninput = () => { S.n = +inp.value; sp.restart(); };
+  const reset = () => { S = { ...INIT }; sp.restart(); };
+  root.querySelector('[data-act="reset"]').onclick = reset;
+  resets.push(reset); reset();
+}
+
+/* ---------- 四、|x| = k ---------- */
+{
+  const root = document.getElementById('solve'), $ = s => root.querySelector(s);
+  axis($('.ax'), -10, 10, X10, 92, 2);
+  const INIT = { k: 5 };
+  let S = { ...INIT };
+  const inp = $('input');
+  const draw = () => {
+    const k = S.k, ok = k >= 0;
+    inp.value = k; $('.v').textContent = f(k);
+    [['.p1', '.b1', k], ['.p2', '.b2', -k]].forEach(([p, b, n], i) => {
+      const show = ok && (i === 0 || k > 0);
+      $(p).setAttribute('cx', X10(n)); $(p).setAttribute('fill', colorOf(n)); $(p).style.opacity = show ? 1 : 0;
+      $(b).setAttribute('x1', X10(0)); $(b).setAttribute('x2', X10(n)); $(b).style.opacity = show && k ? .5 : 0;
+    });
+    $('.no').style.opacity = ok ? 0 : 1;
+    $('.expr').innerHTML = `|x| = ${f(k)}　→　` + (k > 0 ? `x = <span class="pos">${k}</span> 或 x = <span class="neg">−${k}</span>` : k === 0 ? 'x = 0' : '<span style="color:var(--bad)">无解</span>');
+    $('.caption').innerHTML = k > 0 ? `离 0 有 ${k} 格的点有<b>两个</b>：右边的 ${k} 和左边的 −${k}。千万别漏掉负的那个！`
+      : k === 0 ? '离 0 的距离是 0，只能是 0 自己，所以<b>只有一个解</b>。'
+      : `绝对值是距离，距离<b>不可能是负数</b>，所以 |x| = ${f(k)} <b>无解</b>。`;
+  };
+  inp.oninput = () => { S.k = +inp.value; draw(); };
+  const reset = () => { S = { ...INIT }; draw(); };
+  root.querySelector('[data-act="reset"]').onclick = reset;
+  resets.push(reset); reset();
+}
+
+/* ---------- 五、比大小 ---------- */
+{
+  const root = document.getElementById('cmp'), $ = s => root.querySelector(s);
+  axis($('.ax'), -10, 10, X10, 92, 2);
+  const INIT = { a: -7, b: -3 };
+  let S = { ...INIT };
+  const draw = () => {
+    const { a, b } = S, sym = a < b ? '&lt;' : a > b ? '&gt;' : '=';
+    $('.ia').value = a; $('.ib').value = b; $('.va').textContent = f(a); $('.vb').textContent = f(b);
+    [['.pa', '.la', a, 'A'], ['.pb', '.lb', b, 'B']].forEach(([p, l, n, nm]) => {
+      $(p).setAttribute('cx', X10(n)); $(p).setAttribute('fill', colorOf(n));
+      $(l).setAttribute('x', X10(n)); $(l).setAttribute('fill', colorOf(n)); $(l).textContent = nm;
+    });
+    $('.lb').setAttribute('y', a === b ? 44 : 68);
+    $('.expr').innerHTML = `<span style="color:${colorOf(a)}">${f(a)}</span> ${sym} <span style="color:${colorOf(b)}">${f(b)}</span>`;
+    const lo = Math.min(a, b), hi = Math.max(a, b);
+    let c;
+    if (a === b) c = '两个数一样大。';
+    else if (hi < 0) c = `${f(lo)} 在 ${f(hi)} 的左边，所以 <b>${f(lo)} &lt; ${f(hi)}</b>。虽然 |${f(lo)}| = ${-lo} 比 |${f(hi)}| = ${-hi} 大——<b>两个负数，绝对值大的反而小</b>（欠 ${-lo} 块比欠 ${-hi} 块更穷）。`;
+    else if (lo < 0 && hi >= 0) c = `${hi === 0 ? '0 比任何负数都大' : '正数比任何负数都大'}：${f(lo)} &lt; ${f(hi)}。`;
+    else c = `${f(hi)} 更靠右，所以更大：${f(lo)} &lt; ${f(hi)}。两个正数比较，绝对值大的就大。`;
+    $('.caption').innerHTML = c;
+  };
+  $('.ia').oninput = e => { S.a = +e.target.value; draw(); };
+  $('.ib').oninput = e => { S.b = +e.target.value; draw(); };
+  const reset = () => { S = { ...INIT }; draw(); };
+  root.querySelector('[data-act="reset"]').onclick = reset;
+  resets.push(reset); reset();
+}
+
+/* ---------- 六、算式里的绝对值号 ---------- */
+{
+  const root = document.getElementById('calc'), $ = s => root.querySelector(s);
+  const n = v => `<span class="neg">${v}</span>`;
+  const PRE = [
+    ['−|−4|', [[`−|${n('−4')}|`, ''], [`= ${n('−4')}`, '先算绝对值号里面：|−4| = 4；最前面的“−”在绝对值号外面，保留 → −4']]],
+    ['−(−4)', [[`−(${n('−4')})`, ''], ['= 4', '这里是括号，不是绝对值号：−(−4) 是“−4 的相反数”，两个负号抵消 → 4']]],
+    ['|3 − 8|', [['|3 − 8|', ''], [`= |${n('−5')}|`, '绝对值号像括号：先算里面，3 − 8 = −5'], ['= 5', '再取绝对值：−5 离 0 有 5 格']]],
+    ['|3| − |8|', [['|3| − |8|', ''], ['= 3 − 8', '两个绝对值号各管各的：|3| = 3，|8| = 8'], [`= ${n('−5')}`, '注意：和上一题 |3 − 8| = 5 不一样！']]],
+    ['|−2| × (−3)', [[`|${n('−2')}| × (${n('−3')})`, ''], [`= 2 × (${n('−3')})`, '|−2| = 2；后面的 −3 不在绝对值号里，保持不变'], [`= ${n('−6')}`, '只有 1 个负号 → 结果为负']]],
+    ['−|−5| − (−|−2|)', [[`−|${n('−5')}| − (−|${n('−2')}|)`, ''], [`= ${n('−5')} − (${n('−2')})`, '先算两个绝对值，外面的负号都保留'], [`= ${n('−5')} + 2`, '减去负数 = 加上正数'], [`= ${n('−3')}`, '负的 5 比正的 2 多，结果为负']]],
+  ];
+  const INIT = { i: 0 };
+  let S = { ...INIT };
+  $('.pre').innerHTML = PRE.map((p, i) => `<button type="button" class="btn num" data-i="${i}">${p[0]}</button>`).join('');
+  const draw = step => {
+    $('.pre').querySelectorAll('button').forEach((b, i) => b.classList.toggle('on', i === S.i));
+    $('.lines').innerHTML = PRE[S.i][1].slice(0, step + 1).map(([e, w]) => `<div>${e}${w ? `<small>${w}</small>` : ''}</div>`).join('');
+  };
+  const sp = stepper(root, () => PRE[S.i][1].length, draw, 2200);
+  $('.pre').onclick = e => { const b = e.target.closest('[data-i]'); if (b) { S.i = +b.dataset.i; sp.restart(); } };
+  const reset = () => { S = { ...INIT }; sp.restart(); };
+  root.querySelector('[data-act="reset"]').onclick = reset;
+  resets.push(reset); reset();
+}
+
+/* ---------- 七、专项训练：随机出题 + 分步解析 ---------- */
+{
+  const root = document.getElementById('train');
+  const $ = s => root.querySelector(s);
+  const CATS = [['all', '全部混合'], ['c1', '① 相反数与多重符号'], ['c2', '② 求绝对值'], ['c3', '③ 已知绝对值求数'], ['c4', '④ 比较大小'], ['c5', '⑤ 含绝对值的计算']];
+  const NAME = Object.fromEntries(CATS);
+  const LVLS = ['基础', '提高'], ROUND = 10, SEED = 20261029;
+
+  // 可复现的随机数：重置后回到同一套题
+  let rs = SEED;
+  const rnd = () => { rs = rs + 0x6D2B79F5 | 0; let t = Math.imul(rs ^ rs >>> 15, 1 | rs); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  const R = (a, b) => a + Math.floor(rnd() * (b - a + 1));
+  const pick = arr => arr[R(0, arr.length - 1)];
+  const V = (a, b) => R(a, b) * (rnd() < .5 ? -1 : 1);
+
+  const neg = v => `<span class="neg">−${-v}</span>`;
+  const N = (v, bare) => v < 0 ? (bare ? neg(v) : `(${neg(v)})`) : `${v}`;
+  const F = f;
+  const OPP = '<span class="neg">−</span>';
+  // 两个带符号的数相加，给出结果和理由
+  const fin = s => {
+    const r = s.reduce((a, b) => a + b, 0), P = s.filter(v => v > 0).reduce((a, b) => a + b, 0), M = -s.filter(v => v < 0).reduce((a, b) => a + b, 0);
+    return [N(r, true), !M ? '' : !P ? '全是负数，欠上加欠，结果为负' : r > 0 ? `正的 ${P} 比负的 ${M} 多，结果为正：${P} − ${M} = ${r}` : r < 0 ? `负的 ${M} 比正的 ${P} 多，结果为负：−(${M} − ${P})` : '正负抵消，结果为 0'];
+  };
+  const num = (q, ans, steps) => ({ type: 'num', q, ans, steps });
+  const signNote = (k, base) => `数一数“−”：一共 ${k} 个${base < 0 ? '（含数字自带的 1 个）' : ''} → ${k % 2 ? '奇数个，结果为<b class="neg">负</b>' : '偶数个，结果为<b class="pos">正</b>'}`;
+  function nestQ(base, L) {
+    let s = base < 0 ? neg(base) : `${base}`;
+    L.forEach((op, i) => { const o = op === '−' ? OPP : '+'; s = i === 0 && base > 0 ? o + s : `${o}(${s})`; });
+    const k = L.filter(x => x === '−').length + (base < 0 ? 1 : 0), ans = L.reduce((v, x) => x === '−' ? -v : v, base);
+    return num(s, ans, [...(L.includes('+') ? [[null, '“+( )”不改变符号，可以直接去掉']] : []), [null, signNote(k, base)], [N(ans, true), '']]);
+  }
+  const setText = a => !a.length ? '无解' : a.length === 1 ? `x = ${F(a[0])}` : `x = ${F(a[0])} 或 x = ${F(a[1])}`;
+  const setQ = (q, k, pre = []) => ({
+    type: 'set', q, ans: k > 0 ? [k, -k] : k === 0 ? [0] : [],
+    steps: [...pre, k > 0 ? [null, `离 0 有 ${k} 格的点有两个：0 右边的 ${k} 和左边的 −${k}`] : k === 0 ? [null, '离 0 的距离是 0，只能是 0 自己'] : [null, `绝对值是距离，不可能是负数，|x| = ${F(k)} 不成立`],
+      [null, `<b>${setText(k > 0 ? [k, -k] : k === 0 ? [0] : [])}</b>`]],
+  });
+
+  const G = {
+    c1(l) {   // 相反数与多重符号
+      if (!l) {
+        const t = R(0, 2), a = V(1, 20);
+        if (t === 0) return num(`${N(a, true)} 的相反数是？`, -a, [[null, `求相反数：只改符号，数字不变。${F(a)} → ${F(-a)}`], [N(-a, true), '']]);
+        if (t === 1) { const b = R(1, 20); return num(`${OPP}(${neg(-b)})`, b, [[null, `−(−${b}) 就是“−${b} 的相反数”`], [null, signNote(2, 1)], [`${b}`, '']]); }
+        return num(`如果 a 的相反数是 ${N(a, true)}，那么 a = ?`, -a, [[null, '互为相反数的两个数：数字一样，符号相反'], [N(-a, true), `${F(-a)} 的相反数正是 ${F(a)}`]]);
+      }
+      const t = R(0, 3);
+      if (t <= 1) return nestQ(V(1, 20), Array.from({ length: R(2, 4) }, () => rnd() < .7 ? '−' : '+'));
+      if (t === 2) { const b = V(1, 20); return num(`若 −a = ${N(b, true)}，则 a = ?`, -b, [[null, `−a 是 a 的相反数。−a = ${F(b)}，说明 a 是 ${F(b)} 的相反数`], [N(-b, true), b > 0 ? '这时 a 是负数，−a 反而是正数——“−a”不一定是负数' : '']]); }
+      const a = V(1, 20); return num(`${N(a, true)} 的相反数的相反数是？`, a, [[null, '翻一次面到对面，再翻一次又回到原处'], [N(a, true), '']]);
+    },
+    c2(l) {   // 求绝对值
+      if (!l) {
+        const a = rnd() < .1 ? 0 : V(1, 30);
+        return num(`|${N(a, true)}|`, Math.abs(a), [[null, a < 0 ? `${F(a)} 离 0 有 ${-a} 格（负数的绝对值是它的相反数）` : a > 0 ? `${a} 离 0 有 ${a} 格（正数的绝对值是它本身）` : '0 离 0 的距离是 0'], [`${Math.abs(a)}`, '']]);
+      }
+      const a = R(1, 30), t = R(0, 3);
+      if (t === 0) return num(`${OPP}|${neg(-a)}|`, -a, [[`−${a}`, `先算绝对值号里面：|−${a}| = ${a}；最前面的“−”在绝对值号外面，保留`]]);
+      if (t === 1) return num(`|${OPP}(${neg(-a)})|`, a, [[`|${a}|`, `先算里面：−(−${a}) = ${a}`], [`${a}`, '']]);
+      if (t === 2) return num(`${OPP}|${a}|`, -a, [[`−${a}`, `|${a}| = ${a}，外面的负号保留`]]);
+      return num(`|${neg(-a)}| 的相反数是？`, -a, [[null, `先求绝对值：|−${a}| = ${a}`], [neg(-a), `${a} 的相反数是 −${a}`]]);
+    },
+    c3(l) {   // 已知绝对值求数
+      if (!l) {
+        const t = pick([0, 0, 0, 1, 2]), k = R(1, 20);
+        if (t === 0) return setQ(`|x| = ${k}，x = ?`, k);
+        if (t === 1) return setQ('|x| = 0，x = ?', 0);
+        return setQ(`|x| = ${neg(-k)}，x = ?`, -k);
+      }
+      const t = R(0, 3);
+      if (t === 0) { const k = R(1, 20), lt = rnd() < .5; return num(`|x| = ${k}，且 x ${lt ? '&lt;' : '&gt;'} 0，x = ?`, lt ? -k : k, [[null, `|x| = ${k} 时 x = ${k} 或 −${k}`], [N(lt ? -k : k, true), `x ${lt ? '&lt;' : '&gt;'} 0，只能取${lt ? '负' : '正'}的那个`]]); }
+      if (t === 1) { const a = R(1, 15), k = rnd() < .15 ? -R(1, 5) : R(0, 12), b = a + k; return setQ(`|x| + ${a} = ${b}，x = ?`, k, [[null, `先求出 |x|：|x| = ${b} − ${a} = ${F(k)}`]]); }
+      if (t === 2) {
+        const k = R(2, 8), strict = rnd() < .5, c = strict ? 2 * k - 1 : 2 * k + 1, m = strict ? k - 1 : k;
+        return num(`绝对值${strict ? '小于' : '不大于'} ${k} 的整数有几个？`, c, [[null, `就是 −${m}、…、−1、0、1、…、${m}${strict ? `（${k} 和 −${k} 本身不算，因为“小于”不含等于）` : `（含 ${k} 和 −${k}）`}`], [`${c}`, `正数 ${m} 个 + 负数 ${m} 个 + 0 一个`]]);
+      }
+      const a = R(1, 20); return setQ(`|x| = |${neg(-a)}|，x = ?`, a, [[null, `先算右边：|−${a}| = ${a}，所以 |x| = ${a}`]]);
+    },
+    c4(l) {   // 比较大小
+      const it = (h, v, note = '') => ({ h, v, note });
+      let A, B;
+      if (!l) {
+        const t = R(0, 3);
+        if (t === 0) { const a = R(1, 15); let b; do b = R(1, 15); while (b === a); A = it(neg(-a), -a); B = it(neg(-b), -b); }
+        else if (t === 1) { const a = R(1, 15), b = R(1, 9); A = it(neg(-a), -a); B = it(`${b}`, b); }
+        else if (t === 2) { const a = R(1, 15), b = R(1, 15); A = it(`|${neg(-a)}|`, a, `|−${a}| = ${a}`); B = it(`|${b}|`, b, `|${b}| = ${b}`); }
+        else { const a = R(1, 15); A = it(neg(-a), -a); B = it('0', 0); }
+        if (rnd() < .5) [A, B] = [B, A];
+      } else {
+        const mk = [
+          () => { const v = V(1, 12); return it(`|${N(v, true)}|`, Math.abs(v), `|${F(v)}| = ${Math.abs(v)}`); },
+          () => { const v = V(1, 12); return it(`${OPP}|${N(v, true)}|`, -Math.abs(v), `−|${F(v)}| = −${Math.abs(v)}`); },
+          () => { const v = V(1, 12); return it(`${OPP}(${v > 0 ? '+' + v : N(v, true)})`, -v, `−(${v > 0 ? '+' + v : F(v)}) = ${F(-v)}`); },
+          () => { const v = V(1, 12); return it(N(v, true), v); },
+        ];
+        A = pick(mk)(); B = pick(mk)();
+      }
+      const a = A.v, b = B.v, sym = a < b ? '<' : a > b ? '>' : '=';
+      const why = a === b ? '两边相等' : a < 0 && b < 0 ? `两个负数比较，绝对值大的反而小：|${F(a)}| = ${-a}，|${F(b)}| = ${-b}` : (a < 0) !== (b < 0) || !a || !b ? '负数 < 0 < 正数' : '两个正数，数字大的就大';
+      const notes = [A.note, B.note].filter(Boolean);
+      return { type: 'cmp', q: `${A.h} <span class="box">○</span> ${B.h}`, ans: sym, steps: [...(notes.length ? [[null, '先化简：' + notes.join('，')]] : []), [null, why], [null, `<b>${F(a)} ${sym.replace('<', '&lt;').replace('>', '&gt;')} ${F(b)}</b>`]] };
+    },
+    c5(l) {   // 含绝对值的计算
+      const a = R(2, 15), b = R(2, 15), c = R(2, 9), d = R(2, 15);
+      if (!l) {
+        const t = R(0, 3);
+        if (t === 0) return num(`|${neg(-a)}| + |${neg(-b)}|`, a + b, [[`${a} + ${b}`, '先把每个绝对值算出来'], [`${a + b}`, '']]);
+        if (t === 1) return num(`|${a} − ${a + b}|`, b, [[`|${neg(-b)}|`, `绝对值号像括号：先算里面 ${a} − ${a + b} = −${b}`], [`${b}`, '再取绝对值']]);
+        if (t === 2) return num(`${OPP}|${neg(-a)}| + ${b}`, b - a, [[`${neg(-a)} + ${b}`, `|−${a}| = ${a}，外面的负号保留`], fin([-a, b])]);
+        return num(`|${neg(-a)}| − |${neg(-b)}|`, a - b, [[`${a} − ${b}`, '两个绝对值各算各的'], fin([a, -b])]);
+      }
+      const t = R(0, 4);
+      if (t === 0) { const e = c - d; return num(`|${a} − ${a + b}| − |${c} − ${d}|`, b - Math.abs(e), [[`|${neg(-b)}| − |${N(e, true)}|`, '先算两个绝对值号里面'], [`${b} − ${Math.abs(e)}`, '再分别取绝对值'], fin([b, -Math.abs(e)])]); }
+      if (t === 1) return num(`|${neg(-a * c)}| × (${neg(-b)}) ÷ |${neg(-c)}|`, -a * b, [[`${a * c} × (${neg(-b)}) ÷ ${c}`, '先把绝对值算出来（绝对值都是正的）'], [null, '只剩 1 个负号 → 结果为负；数字从左往右算'], [neg(-a * b), '']]);
+      if (t === 2) return num(`${OPP}|${neg(-a)}| − (${OPP}|${neg(-b)}|)`, b - a, [[`${neg(-a)} − (${neg(-b)})`, '先算绝对值，外面的负号都保留'], [`${neg(-a)} + ${b}`, '减去负数 = 加上正数'], fin([-a, b])]);
+      if (t === 3) return num(`${a} − |${b} − ${b + d}|`, a - d, [[`${a} − |${neg(-d)}|`, `先算绝对值号里面：${b} − ${b + d} = −${d}`], [`${a} − ${d}`, `|−${d}| = ${d}`], fin([a, -d])]);
+      if (a === b) return null;
+      const e = Math.abs(b - a);
+      return num(`|${neg(-a)} + ${b}| × (${neg(-c)})`, -c * e, [[`|${N(b - a, true)}| × (${neg(-c)})`, `先算里面：−${a} + ${b} = ${F(b - a)}`], [`${e} × (${neg(-c)})`, '取绝对值'], [neg(-c * e), '只有 1 个负号 → 结果为负']]);
+    },
+  };
+  const gen = cat => {
+    for (let i = 0; i < 60; i++) {
+      const c = cat === 'all' ? pick(['c1', 'c2', 'c3', 'c4', 'c5']) : cat;
+      const p = G[c](S.lvl);
+      if (p) { p.cat = c; return p; }
+    }
+  };
+
+  // 作答解析与判分
+  const normalize = s => s.replace(/[−–—－]/g, '-').replace(/＋/g, '+').replace(/\s/g, '');
+  const parseSet = s => {
+    s = normalize(s);
+    if (/无/.test(s)) return [];
+    const out = [];
+    for (const m of s.matchAll(/(±|\+-|-\+)?([+-]?\d+)/g)) { const v = +m[2]; if (m[1]) out.push(Math.abs(v), -Math.abs(v)); else out.push(v); }
+    return out.length ? [...new Set(out)].sort((x, y) => x - y) : null;
+  };
+  const sameSet = (a, b) => a.length === b.length && [...b].sort((x, y) => x - y).every((v, i) => v === a[i]);
+  const ansText = p => p.type === 'set' ? setText(p.ans) : p.type === 'cmp' ? p.ans : F(p.ans);
+
+  const fresh = () => ({ cat: 'all', lvl: 0, n: 0, right: 0, streak: 0, done: false, answered: false, ok: false, you: '', wrong: [], stat: {}, p: null });
+  let S = fresh();
+  $('.cats').innerHTML = CATS.map(([id, nm]) => `<button type="button" class="btn" data-c="${id}">${nm}</button>`).join('');
+  $('.lvls').innerHTML += LVLS.map((nm, i) => `<button type="button" class="btn" data-l="${i}">${nm}</button>`).join('');
+  const inp = $('.tans');
+
+  const next = () => {
+    if (S.done) { S.n = 0; S.right = 0; S.streak = 0; S.wrong = []; S.done = false; }
+    S.p = gen(S.cat); S.answered = false; S.you = ''; inp.value = ''; draw();
+  };
+  const judge = (ok, you) => {
+    const st = S.stat[S.p.cat] || (S.stat[S.p.cat] = [0, 0]);
+    st[0]++; S.n++; S.answered = true; S.ok = ok; S.you = you;
+    if (ok) { st[1]++; S.right++; S.streak++; } else { S.streak = 0; S.wrong.push({ q: S.p.q, ans: ansText(S.p), you }); }
+    if (S.n >= ROUND) S.done = true;
+    draw();
+  };
+  const submit = raw => {
+    if (S.answered || S.done) return;
+    const p = S.p, msg = t => { $('.tmsg').innerHTML = `<span class="bad">${t}</span>`; inp.focus(); };
+    if (p.type === 'set') {
+      const a = parseSet(raw);
+      if (!a) return msg('请写出 x 的所有值，例如“5, -5”或“±5”；没有解就点「无解」。');
+      return judge(sameSet(a, p.ans), setText(a));
+    }
+    const v = normalize(raw);
+    if (!/^[+-]?\d+$/.test(v)) return msg('请输入一个整数，负数前面加 - 号（可以点 ± 按钮）。');
+    judge(+v === p.ans, F(+v));
+  };
+  const draw = () => {
+    const p = S.p;
+    root.querySelectorAll('[data-c]').forEach(b => b.classList.toggle('on', b.dataset.c === S.cat));
+    root.querySelectorAll('[data-l]').forEach(b => b.classList.toggle('on', +b.dataset.l === S.lvl));
+    $('.ttag').textContent = NAME[p.cat];
+    $('.tprog').textContent = `第 ${Math.min(ROUND, S.n + (S.answered ? 0 : 1))} / ${ROUND} 题 · 答对 ${S.right} · 连对 ${S.streak}`;
+    $('.texpr').innerHTML = p.q + (p.type === 'num' && !/[?？]$/.test(p.q) ? ' = ?' : '');
+    $('.tin').style.display = p.type === 'cmp' ? 'none' : '';
+    $('.tcmp').style.display = p.type === 'cmp' ? '' : 'none';
+    $('.tnone').style.display = p.type === 'set' ? '' : 'none';
+    $('.tsign').style.display = p.type === 'set' ? 'none' : '';
+    $('.tlab').textContent = p.type === 'set' ? 'x =' : '';
+    inp.placeholder = p.type === 'set' ? '如 5, -5' : '答案';
+    inp.disabled = $('.tok').disabled = $('.tsign').disabled = $('.tnone').disabled = S.answered;
+    inp.classList.toggle('ok', S.answered && S.ok); inp.classList.toggle('bad', S.answered && !S.ok);
+    root.querySelectorAll('[data-cmp]').forEach(b => {
+      b.disabled = S.answered;
+      b.classList.toggle('ok', S.answered && b.dataset.cmp === p.ans);
+      b.classList.toggle('bad', S.answered && !S.ok && b.dataset.cmp === S.you);
+    });
+    $('.tnext').textContent = S.done ? '开始新一轮 ▶' : S.answered ? '下一题 ▶' : '换一题 ↻';
+    if (!S.answered) { $('.tmsg').innerHTML = ''; $('.tsteps').innerHTML = ''; }
+    else {
+      const at = ansText(p).replace('<', '&lt;').replace('>', '&gt;');
+      $('.tmsg').innerHTML = S.ok ? '<b class="ok">✓ 正确！</b>看看解题步骤，和你想的一样吗？' : `<b class="bad">✗ 不对，正确答案是 ${at}。</b>对照下面的步骤，找找是哪一步出错了：`;
+      $('.tsteps').innerHTML = `<li><span class="num">${p.q}</span></li>` +
+        p.steps.map(([e, w]) => `<li>${e != null ? `<span class="num">= ${e}</span>` : ''}${w ? `<span class="why">${w}</span>` : ''}</li>`).join('');
+    }
+    if (S.done) {
+      const weak = worst();
+      const esc = s => s.replace('<', '&lt;').replace('>', '&gt;');
+      $('.tsum').innerHTML = `<b>本轮结束：${ROUND} 题答对 ${S.right} 题。</b>` +
+        (S.right === ROUND ? ' 全对！可以换「提高」难度挑战一下。' : (weak ? ` 最需要再练的是 <b>${NAME[weak]}</b>，可以单独选它专练。` : '')) +
+        (S.wrong.length ? '<ol class="twrong">' + S.wrong.map(w => `<li><span class="num">${w.q}</span>　正确：<b>${esc(w.ans)}</b>（你答 ${esc(w.you)}）</li>`).join('') + '</ol>' : '');
+    } else $('.tsum').innerHTML = '';
+    const ids = CATS.slice(1).map(c => c[0]).filter(id => S.stat[id]), weak = worst();
+    $('.tstat').innerHTML = ids.length ? '<tr><th>类型</th><th class="r">做过</th><th class="r">答对</th><th class="r">正确率</th></tr>' +
+      ids.map(id => { const [a, r] = S.stat[id]; return `<tr class="${id === weak ? 'weak' : ''}"><td>${NAME[id]}</td><td class="r">${a}</td><td class="r">${r}</td><td class="r">${Math.round(r / a * 100)}%</td></tr>`; }).join('') : '';
+  };
+  const worst = () => {
+    let w = null, best = 2;
+    for (const [id, [a, r]] of Object.entries(S.stat)) if (r < a && r / a < best) { best = r / a; w = id; }
+    return w;
+  };
+
+  $('.cats').onclick = e => { const b = e.target.closest('[data-c]'); if (b) { S.cat = b.dataset.c; next(); } };
+  $('.lvls').onclick = e => { const b = e.target.closest('[data-l]'); if (b) { S.lvl = +b.dataset.l; next(); } };
+  $('.tok').onclick = () => submit(inp.value);
+  $('.tnone').onclick = () => submit('无解');
+  $('.tcmp').onclick = e => { const b = e.target.closest('[data-cmp]'); if (b && !S.answered && !S.done) judge(b.dataset.cmp === S.p.ans, b.dataset.cmp); };
+  $('.tnext').onclick = next;
+  $('.tsign').onclick = () => { inp.value = inp.value.startsWith('-') ? inp.value.slice(1) : '-' + inp.value.replace(/^[+−]/, ''); inp.focus(); };
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') { if (S.answered) next(); else submit(inp.value); } });
+  const reset = () => { rs = SEED; S = fresh(); next(); };
+  root.querySelector('[data-act="reset"]').onclick = reset;
+  resets.push(reset); reset();
+}
+
+/* ---------- 练习题 ---------- */
+window.LQ_ITEMS = [
+  { type: '选择', q: '−7 的相反数是？', opts: ['7', '−7', '0', '−1/7'], ans: 0, why: '相反数只改符号、数字不变：−7 → 7。在数轴上，7 和 −7 关于 0 对称（第一部分的镜子）。' },
+  { type: '填空', q: '|−9| = ?', ans: ['9', '+9'], placeholder: '输入数字', why: '−9 离 0 有 9 格，所以 |−9| = 9。负数的绝对值是它的相反数。' },
+  { type: '判断', q: '−a 一定是负数。', opts: ['对', '错'], ans: 1, why: '−a 是“a 的相反数”。a = −5 时，−a = 5 是正数；a = 0 时，−a = 0。所以不一定。' },
+  { type: '选择', q: '−|−4| 等于？', opts: ['4', '−4', '0', '±4'], ans: 1, why: '先算绝对值号里面：|−4| = 4；最前面的“−”在绝对值号外面，保留 → −4。别和 −(−4) = 4 搞混。' },
+  { type: '填空', q: '−(−(−8)) = ?', ans: ['-8'], placeholder: '负数可以用 - 表示', why: '数负号：一共 3 个“−”，奇数个 → 结果为负，−8。每套一层“−( )”就翻一次面（第二部分）。' },
+  { type: '选择', q: '|x| = 6，x = ?', opts: ['6', '−6', '6 或 −6', '无解'], ans: 2, why: '离 0 有 6 格的点在 0 的两边各一个：6 和 −6。只写 6 是最常见的漏解。' },
+  { type: '判断', q: '|x| = −3 有两个解：3 和 −3。', opts: ['对', '错'], ans: 1, why: '绝对值是距离，不可能是负数，所以 |x| = −3 <b>无解</b>。|3| 和 |−3| 都等于 3，不等于 −3。' },
+  { type: '选择', q: '比较 −9 和 −4 的大小：', opts: ['−9 &gt; −4', '−9 &lt; −4', '−9 = −4'], ans: 1, why: '−9 在 −4 的左边，所以更小。两个负数比较，绝对值大的反而小：|−9| = 9 > 4，但 −9 < −4。' },
+  { type: '填空', q: '|3 − 8| = ?', ans: ['5', '+5'], placeholder: '输入数字', why: '绝对值号像括号，先算里面：3 − 8 = −5；再取绝对值：|−5| = 5。' },
+  { type: '选择', q: '小明算 |3 − 8| = |3| − |8| = −5。他对吗？', opts: ['对', '错：要先算里面 3 − 8 = −5，再取绝对值得 5', '错：应该是 |3| + |8| = 11'], ans: 1, why: '绝对值号不能“拆开”分给每个数。先把里面算完，再取绝对值。绝对值的结果不可能是负数，算出 −5 就肯定错了。' },
+  { type: '填空', q: '|−6| × (−2) + |−3| = ?', ans: ['-9'], placeholder: '负数可以用 - 表示', why: '先算绝对值：6 × (−2) + 3；再先乘后加：−12 + 3 = −9。' },
+  { type: '填空', q: '绝对值小于 4 的整数一共有几个？', ans: ['7', '7个'], placeholder: '输入数字', why: '有 −3、−2、−1、0、1、2、3，一共 7 个。4 和 −4 的绝对值等于 4，不算“小于 4”。' },
+  { type: '选择', q: '小区大门记为 0，向东为正。小红在 −250 米处，小明在 +180 米处。谁离大门更远？', opts: ['小红，离大门 250 米', '小明，因为 180 &gt; −250', '一样远'], ans: 0, why: '“离多远”问的是距离，也就是绝对值：|−250| = 250 > |180| = 180。比“远近”看绝对值，比“大小”才看数轴上的左右。' },
+  { type: '挑战', q: '若 |a| = 3，|b| = 5，且 a &gt; 0，b &lt; 0，则 a + b = ?', ans: ['-2'], placeholder: '负数可以用 - 表示', why: '|a| = 3 且 a > 0 → a = 3；|b| = 5 且 b < 0 → b = −5。a + b = 3 + (−5) = −2。' },
+  { type: '挑战', q: '−|−5| − (−|−2|) = ?', ans: ['-3'], placeholder: '负数可以用 - 表示', why: '先算绝对值，外面的负号保留：−5 − (−2)；减去负数 = 加上正数：−5 + 2 = −3（第六部分最后一个例子）。' },
+];
+</script>
+<script>
+/* ---------- 练习题（learn 通用组件） ----------
+   题目来自 window.LQ_ITEMS：{type, q, opts, ans: 选项下标, why} 或填空题 {type, q, ans: [可接受答案…], why}
+   定义 window.resetPage()（导航条「重置」按钮调用）：先调用页面自己的 window.pageReset()，再清空练习 */
+(() => {
+  const box = document.getElementById('lq');
+  const items = window.LQ_ITEMS || [];
+  const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let answered = 0, right = 0;
+
+  function update() {
+    const all = answered === items.length;
+    score.textContent = `已答 ${answered} / ${items.length} · 答对 ${right}` +
+      (all ? (right === items.length ? ' · 全对！' : ' · 看看解析，再重做一次') : '');
+  }
+
+  function render() {
+    answered = 0; right = 0; list.innerHTML = '';
+    items.forEach((it, i) => {
+      const el = document.createElement('div');
+      el.className = 'lq-item';
+      el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
+      const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
+      const judge = (ok, answer) => {
+        answered++; if (ok) right++;
+        el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
+        why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
+        update();
+      };
+      if (it.opts) {
+        a.classList.add('lq-opts');
+        it.opts.forEach((o, j) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'lq-opt'; b.innerHTML = o;
+          b.onclick = () => {
+            a.querySelectorAll('button').forEach(x => x.disabled = true);
+            a.children[it.ans].classList.add('lq-right');
+            if (j !== it.ans) b.classList.add('lq-wrong');
+            judge(j === it.ans, it.opts[it.ans]);
+          };
+          a.append(b);
+        });
+      } else {
+        a.classList.add('lq-fill');
+        a.innerHTML = `<input type="text" autocomplete="off" spellcheck="false" placeholder="${it.placeholder || '输入答案'}" aria-label="第 ${i + 1} 题答案"><button type="button" class="lq-opt">确定</button>`;
+        const inp = a.querySelector('input'), go = a.querySelector('button');
+        const submit = () => {
+          if (!inp.value.trim()) { inp.focus(); return; }
+          inp.disabled = go.disabled = true;
+          const ok = it.ans.some(x => norm(x) === norm(inp.value));
+          inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
+          judge(ok, it.ans[0]);
+        };
+        go.onclick = submit;
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      }
+      list.append(el);
+    });
+    update();
+  }
+
+  box.querySelector('.lq-redo').addEventListener('click', render);
+  // 导航条的「重置」按钮调用它：页面各模块 + 练习题一起恢复初始状态
+  window.resetPage = () => {
+    if (typeof window.pageReset === 'function') window.pageReset();
+    render();
+  };
+  render();
+})();
+</script>
+</body>
+</html>
