@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>负数的运算</title>
-<meta name="description" content="从数轴、正负豆子和“搬家”动画讲清负数：负号和减号怎么分，−3 + 5、3 − (−6)、−12 × 8 = 12 × (−8) 为什么这样算。">
+<meta name="description" content="从数轴、正负豆子和“搬家”动画讲清负数：负号和减号怎么分，−3 + 5、3 − (−6)、−12 × 8 = 12 × (−8) 为什么这样算，并附五类难点的随机专项训练。">
 <style>
 :root{
   --bg:var(--up-bg); --surface:var(--up-surface); --surface2:var(--up-surface-2); --ink:var(--up-ink); --muted:var(--up-muted); --line:var(--up-line);
@@ -87,6 +87,26 @@ table.pat td{padding:2px 10px;text-align:right}
 table.pat tr.hl td{color:var(--neg);font-weight:700}
 @media (prefers-reduced-motion: reduce){.bean,.bean.new,.flip span.fade{animation:none;transition:none}}
 
+/* 专项训练 */
+.tmeta{display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px 12px;font-size:13px;color:var(--muted);margin-top:14px}
+.ttag{border:1px solid var(--accent);color:var(--accent);border-radius:999px;padding:0 10px}
+.texpr{background:var(--surface2);border-radius:10px;margin-top:8px;padding:16px 8px;overflow-wrap:anywhere}
+.box{display:inline-block;border:2px dashed var(--accent);border-radius:6px;padding:0 .25em;color:var(--accent);line-height:1.1}
+.tans{font:1.2rem var(--up-mono);width:120px;padding:6px 10px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);text-align:center}
+.tans.ok{border-color:var(--ok)} .tans.bad{border-color:var(--bad)}
+.tmsg{margin-top:10px;min-height:1.7em}
+.tmsg .ok{color:var(--ok)} .tmsg .bad{color:var(--bad)}
+.tsteps{margin:6px 0 0;padding-left:1.6em;display:grid;gap:6px}
+.tsteps:empty{display:none}
+.tsteps li .why{display:block;font-size:13px;color:var(--muted);line-height:1.55}
+.tsum:empty{display:none}
+ol.twrong{margin:6px 0 0;padding-left:1.6em;font-size:14px;overflow-wrap:anywhere}
+.tsum{margin-top:12px;padding:12px;border-radius:10px;background:var(--up-accent-soft)}
+table.tstat{width:100%;border-collapse:collapse;margin-top:14px;font-size:13px}
+table.tstat th,table.tstat td{border-bottom:1px solid var(--line);padding:4px 6px;text-align:left}
+table.tstat td.r{text-align:right;font-family:var(--up-mono)}
+table.tstat tr.weak td{color:var(--bad);font-weight:700}
+
 :root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:var(--ok);--lq-bad:var(--bad)}
 /* ---------- 练习题（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
 .lq{display:grid;gap:12px;margin-bottom:56px}
@@ -159,7 +179,7 @@ document.getElementById('up-reset').addEventListener('click', function () {
 
 <section>
   <h1>负数的运算</h1>
-  <p class="lead">−3 + 5 的第一个数怎么理解？−12 × 8 为什么等于 12 × (−8)？3 − (−6) 为什么是 9 而不是 6 − 3？这一页用数轴上走路、正负豆子、负号“搬家”三个动画讲清楚。</p>
+  <p class="lead">−3 + 5 的第一个数怎么理解？−12 × 8 为什么等于 12 × (−8)？3 − (−6) 为什么是 9 而不是 6 − 3？这一页用数轴上走路、正负豆子、负号“搬家”三个动画讲清楚。学完可以去 <a href="#train-sec" style="color:var(--accent)">八、专项训练</a> 随机刷题。</p>
 </section>
 
 <section class="card analogy">
@@ -322,6 +342,30 @@ document.getElementById('up-reset').addEventListener('click', function () {
 <section class="card">
   <h2>一句话总结</h2>
   <p><b class="neg">负号粘在数上，减号夹在两数中间</b>；加减法在数轴上走（<b>减去负数 = 加上正数</b>）；乘除法先数负号（偶正奇负），负号能在因数之间搬家，但只有乘除能搬。</p>
+</section>
+
+<!-- 八、专项训练 -->
+<section id="train-sec">
+  <h2>八、专项训练：随机出题，练到熟</h2>
+  <p>选一个难点专练，或者选「全部混合」。每题做完都有<b>分步解析</b>；10 题一轮，结束时告诉你哪一类最容易错。</p>
+  <div class="card" id="train" style="margin-top:12px">
+    <div class="ctrl cats" style="margin-top:0"></div>
+    <div class="ctrl lvls"><span class="note">难度：</span></div>
+    <div class="tmeta"><span class="ttag"></span><span class="tprog num"></span></div>
+    <div class="big texpr"></div>
+    <div class="ctrl" style="justify-content:center">
+      <span class="tlab num"></span>
+      <button type="button" class="btn tsign" title="切换正负号">±</button>
+      <input class="tans" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" aria-label="答案" placeholder="答案">
+      <button type="button" class="btn primary tok">确定</button>
+      <button type="button" class="btn tnext">下一题 ▶</button>
+    </div>
+    <p class="tmsg"></p>
+    <ol class="tsteps"></ol>
+    <div class="tsum"></div>
+    <table class="tstat"></table>
+    <div class="ctrl"><button type="button" class="btn" data-act="reset">↺ 重置本模块</button></div>
+  </div>
 </section>
 
 <section class="lq" id="lq" aria-label="练习">
@@ -625,6 +669,248 @@ function axis(g, lo, hi, X, y, every) {
   resets.push(reset); reset();
 }
 
+/* ---------- 八、专项训练：随机出题 + 分步解析 ---------- */
+{
+  const root = document.getElementById('train');
+  const $ = s => root.querySelector(s);
+  const CATS = [['all', '全部混合'], ['c1', '① 负数在开头'], ['c2', '② 减去负数'], ['c3', '③ 两个负数相减'], ['c4', '④ 乘除：负号搬家与抵消'], ['c5', '⑤ 混合运算']];
+  const NAME = Object.fromEntries(CATS);
+  const LVLS = ['基础', '提高'], ROUND = 10, SEED = 20261029;
+
+  // 可复现的随机数：重置后回到同一套题
+  let rs = SEED;
+  const rnd = () => { rs = rs + 0x6D2B79F5 | 0; let t = Math.imul(rs ^ rs >>> 15, 1 | rs); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  const R = (a, b) => a + Math.floor(rnd() * (b - a + 1));
+  const pick = arr => arr[R(0, arr.length - 1)];
+  const V = (a, b) => R(a, b) * (rnd() < .5 ? -1 : 1);   // 随机正负
+
+  // 显示
+  const neg = v => `<span class="neg">−${-v}</span>`;
+  const N = (v, bare) => v < 0 ? (bare ? neg(v) : `(${neg(v)})`) : `${v}`;
+  const F = v => v < 0 ? `−${-v}` : `${v}`;
+  const OP = { '+': '+', '-': '<span class="sub">−</span>', '×': '×', '÷': '÷' };
+  const BOX = '<span class="box">□</span>';
+
+  // 表达式：terms = [{op, f:[因数…], o:[因数间的 × ÷], pf}]，因数是整数或 {s: terms}（括号）
+  const T = (op, v) => ({ op, f: [v], o: [] });
+  const P = (op, f, o) => ({ op, f, o });
+  const isS = x => typeof x === 'object';
+  const sumVal = ts => ts.reduce((a, t) => a + (t.op === '-' ? -1 : 1) * termVal(t), 0);
+  const fVal = x => isS(x) ? sumVal(x.s) : x;
+  const termVal = t => t.f.slice(1).reduce((m, x, k) => t.o[k] === '×' ? m * fVal(x) : m / fVal(x), fVal(t.f[0]));
+  const dispF = (x, bare) => isS(x) ? `(${disp(x.s)})` : N(x, bare);
+  const dispTerm = (t, first) => t.f.map((x, j) => (j ? ` ${OP[t.o[j - 1]]} ` : '') + dispF(x, j === 0 && first && !t.pf)).join('');
+  const disp = ts => ts.map((t, i) => (i ? ` ${OP[t.op]} ` : '') + dispTerm(t, i === 0)).join('');
+  const simple = (first, ...rest) => [T('+', first), ...rest.map(([op, v]) => T(op, v))];
+
+  // 加减法步骤：减负变加正 → 正数、负数各自合起来 → 大减小
+  function sumSteps(ts) {
+    const L = [], s = ts.map(t => (t.op === '-' ? -1 : 1) * t.f[0]);
+    const subNeg = ts.some((t, i) => i && t.op === '-' && t.f[0] < 0), addNeg = ts.some((t, i) => i && t.op === '+' && t.f[0] < 0);
+    if (subNeg || addNeg) L.push([s.map((v, i) => i ? (v < 0 ? ` ${OP['-']} ${-v}` : ` + ${v}`) : N(v, true)).join(''),
+      [subNeg && '减去负数 = 加上正数：“− (−b)”变成“+ b”', addNeg && '加上负数 = 减去正数：“+ (−b)”变成“− b”'].filter(Boolean).join('；')]);
+    const pos = s.filter(v => v > 0), ng = s.filter(v => v < 0);
+    const Pp = pos.reduce((a, b) => a + b, 0), M = -ng.reduce((a, b) => a + b, 0), r = Pp - M;
+    if (s.length < 2) return L;
+    if (!ng.length) { L.push([F(r), '全是正数，直接相加']); return L; }
+    if (!pos.length) { L.push([`−(${ng.map(v => -v).join(' + ')})`, '全是负数：欠上加欠，把欠的加起来，结果为负']); L.push([N(r, true), '']); return L; }
+    if (pos.length > 1 || ng.length > 1) L.push([`${Pp} ${OP['-']} ${M}`, `正数合起来是 ${Pp}，负数合起来是 −${M}`]);
+    L.push([N(r, true), r > 0 ? `正的 ${Pp} 比负的 ${M} 多，结果为正：${Pp} − ${M} = ${r}` : r < 0 ? `负的 ${M} 比正的 ${Pp} 多，结果为负：−(${M} − ${Pp})` : '正负正好抵消，结果为 0']);
+    return L;
+  }
+  const negCount = t => t.f.filter(v => v < 0).length;
+  // 乘除步骤：先数负号定符号，再算数字
+  function prodSteps(t) {
+    const k = negCount(t), r = termVal(t);
+    const absE = t.f.map((v, j) => (j ? ` ${t.o[j - 1]} ` : '') + Math.abs(v)).join('');
+    return [
+      [null, `先数负号：一共 ${k} 个 → ${k % 2 ? '奇数个，结果为<b class="neg">负</b>' : '偶数个，结果为<b class="pos">正</b>'}${k >= 2 ? '（每两个负号抵消成正）' : ''}`],
+      [k % 2 ? `−(${absE})` : absE, '再算数字部分，先不管符号' + (t.o.length > 1 ? '；乘除同级，从左往右' : '')],
+      [N(r, true), ''],
+    ];
+  }
+  // 混合运算步骤：括号 → 乘除 → 加减
+  function mixSteps(ts) {
+    const L = [];
+    const par = [];
+    const t1 = ts.map(t => ({ ...t, pf: false, f: t.f.map(x => { if (isS(x)) { par.push(`(${disp(x.s)}) = ${F(fVal(x))}`); return fVal(x); } return x; }) }));
+    if (par.length) L.push([disp(t1), '先算括号里面：' + par.join('；')]);
+    const multi = t1.filter(t => t.f.length > 1);
+    if (multi.length) {
+      const t2 = t1.map(t => T(t.op, termVal(t)));
+      L.push([disp(t2), '再算乘除（同级从左往右）：' + multi.map(t => `${dispTerm(t, true)} = ${F(termVal(t))}（${negCount(t)} 个负号 → ${negCount(t) % 2 ? '负' : '正'}）`).join('；')]);
+      return L.concat(sumSteps(t2));
+    }
+    return L.concat(sumSteps(t1));
+  }
+  const mk = (cat, ts) => ({ cat, q: disp(ts), ans: sumVal(ts), steps: mixSteps(ts) });
+
+  // 连乘连除：从左往右每一步都能整除
+  function chain(n) {
+    const abs = [], o = [];
+    if (n === 2) {
+      if (rnd() < .5) { const d = R(2, 9); abs.push(d * R(2, 9), d); o.push('÷'); } else { abs.push(R(2, 15), R(2, 9)); o.push('×'); }
+    } else {
+      let m = R(2, 9) * R(2, 6); abs.push(m);
+      for (let i = 1; i < n; i++) {
+        const divs = []; for (let d = 2; d <= 12; d++) if (m % d === 0) divs.push(d);
+        const op = divs.length && (rnd() < .5 || m > 60) ? '÷' : '×';
+        const b = op === '÷' ? pick(divs) : R(2, 6);
+        abs.push(b); o.push(op); m = op === '÷' ? m / b : m * b;
+      }
+    }
+    return P('+', abs.map(v => v * (rnd() < .5 ? -1 : 1)), o);
+  }
+
+  const G = {
+    c1(l) {   // 负数在开头
+      const a = R(2, l ? 30 : 20);
+      if (!l) return mk('c1', simple(-a, [pick(['+', '-']), R(2, 20)]));
+      const ts = [T('+', -a)], n = pick([2, 3]);
+      for (let i = 0; i < n; i++) ts.push(T(pick(['+', '-']), rnd() < .25 ? -R(2, 20) : R(2, 30)));
+      return mk('c1', ts);
+    },
+    c2(l) {   // 减去负数
+      if (!l) return mk('c2', rnd() < .8 ? simple(R(1, 20), ['-', -R(2, 20)]) : simple(R(1, 20), ['+', -R(2, 20)]));
+      const a = R(1, 30), b = -R(2, 25), c = R(2, 25), d = -R(2, 25);
+      return mk('c2', pick([
+        simple(a, ['-', b], ['-', c]), simple(a, ['-', b], ['+', d]), simple(a, ['-', b], ['-', d]),
+        simple(a, ['-', c], ['-', b]), simple(-R(2, 30), ['-', b], ['+', c], ['-', d]),
+      ]));
+    },
+    c3(l) {   // 两个负数相减
+      const a = R(2, l ? 50 : 20), b = R(2, l ? 50 : 20), c = R(2, 40), d = R(2, 40);
+      if (!l) return mk('c3', rnd() < .7 ? simple(-a, ['-', -b]) : simple(-a, ['-', b]));
+      return mk('c3', pick([simple(-a, ['-', -b], ['-', -c]), simple(-a, ['-', -b], ['-', c]), simple(-a, ['-', b], ['-', -c], ['+', -d]), simple(-a, ['-', -b], ['+', -c])]));
+    },
+    c4(l) {   // 乘除：负号搬家与抵消
+      const kind = l ? pick(['chain', 'chain', 'fill3', 'oppo3']) : pick(['two', 'two', 'fill', 'oppo']);
+      if (kind === 'two' || kind === 'chain') {
+        const t = chain(l ? pick([3, 4]) : 2); t.pf = rnd() < .5;
+        return { cat: 'c4', q: dispTerm(t, true), ans: termVal(t), steps: prodSteps(t) };
+      }
+      const a = R(2, 15), b = R(2, 12), c = R(2, 9);
+      if (kind === 'fill') return pick([
+        { cat: 'c4', box: 1, q: `${neg(-a)} × ${b} = ${a} × (${BOX})`, ans: -b, steps: [[null, `左边只有 1 个负号。负号就是“× (−1)”，乘法能交换顺序，所以它可以从 ${a} 身上搬到 ${b} 身上。`], [null, `搬走后 ${a} 上就没有负号了：${a} × (−${b})，所以 □ = <b>−${b}</b>。`]] },
+        { cat: 'c4', box: 1, q: `(${neg(-a)}) × (${neg(-b)}) = ${a} × ${BOX}`, ans: b, steps: [[null, '左边有 2 个负号，两个负号抵消成正。'], [null, `所以 (−${a}) × (−${b}) = ${a} × ${b}，□ = <b>${b}</b>。`]] },
+        { cat: 'c4', box: 1, q: `${neg(-a)} × ${b} = ${BOX} × (${neg(-b)})`, ans: a, steps: [[null, '左边 1 个负号；右边的 −' + b + ' 已经带了 1 个负号。'], [null, `负号只有一个，不能复制，所以 □ 不能再带负号：□ = <b>${a}</b>。`]] },
+        { cat: 'c4', box: 1, q: `${a * b} ÷ (${neg(-b)}) = (${neg(-a * b)}) ÷ ${BOX}`, ans: b, steps: [[null, `左边 1 个负号，结果是 −${a}。右边的 −${a * b} 已经带了 1 个负号。`], [null, `负号搬到了被除数上，除数就不再带负号：□ = <b>${b}</b>。`]] },
+      ]);
+      if (kind === 'fill3') return pick([
+        { cat: 'c4', box: 1, q: `(${neg(-a)}) × (${neg(-b)}) × (${neg(-c)}) = ${a} × ${b} × (${BOX})`, ans: -c, steps: [[null, '左边 3 个负号：两个抵消，还剩 1 个 → 结果为负。'], [null, `右边 ${a}、${b} 都是正的，剩下那个负号只能放在 □ 上：□ = <b>−${c}</b>。`]] },
+        { cat: 'c4', box: 1, q: `(${neg(-a)}) × ${b} × (${neg(-c)}) = ${a} × (${BOX}) × ${c}`, ans: b, steps: [[null, '左边 2 个负号，抵消成正 → 结果为正。'], [null, `右边全都是正数就对了：□ = <b>${b}</b>。`]] },
+        { cat: 'c4', box: 1, q: `${neg(-a * c)} × (${neg(-b)}) ÷ (${neg(-c)}) = ${a * c} × ${b} ÷ (${BOX})`, ans: -c, steps: [[null, '左边 3 个负号 → 结果为负。'], [null, `右边 ${a * c} 和 ${b} 是正的，负号要落在 □ 上：□ = <b>−${c}</b>。`]] },
+      ]);
+      if (kind === 'oppo') return { cat: 'c4', q: `−(${neg(-a)})`, ans: a, steps: [[null, `外面的“−”表示“相反数”：−(−${a}) 就是 −${a} 的相反数。`], [null, '两个负号抵消，就像 × (−1) × (−1) = × 1。'], [`${a}`, '']] };
+      return pick([
+        { cat: 'c4', q: `−[−(${neg(-a)})]`, ans: -a, steps: [[null, '从里往外数负号：一共 3 个。'], [null, '两个抵消，还剩 1 个 → 结果为负。'], [neg(-a), '']] },
+        { cat: 'c4', q: `−(${neg(-a)}) × (${neg(-b)})`, ans: -a * b, steps: [[null, `−(−${a}) = ${a}（两个负号抵消）。`], [`${a} × (${neg(-b)})`, ''], [neg(-a * b), '只剩 1 个负号 → 结果为负']] },
+      ]);
+    },
+    c5(l) {   // 混合运算
+      const x = V(1, 15), op = pick(['+', '-']);
+      if (!l) {
+        const y = V(2, 9), z = V(2, 9), u = V(2, 9), w = V(2, 9);
+        return mk('c5', pick([
+          [T('+', x), P(op, [y, z], ['×'])],
+          [P('+', [z * u, z], ['÷']), T(op, x)],
+          [P('+', [y, z], ['×']), P(op, [u * w, w], ['÷'])],
+        ]));
+      }
+      const t = pick([0, 1, 2]);
+      if (t === 0) {   // (a ± b) × c ± d ÷ e
+        const a = V(1, 12), b = V(1, 12), bop = pick(['+', '-']), s = { s: simple(a, [bop, b]) };
+        if (!fVal(s)) return null;
+        const e = V(2, 6);
+        return mk('c5', [P('+', [s, V(2, 6)], ['×']), P(op, [e * V(2, 6), e], ['÷'])]);
+      }
+      if (t === 1) {   // x ± y ÷ z × w（同级从左往右的陷阱）
+        const z = V(2, 6);
+        return mk('c5', [T('+', x), P(op, [z * V(2, 6), z, V(2, 5)], ['÷', '×'])]);
+      }
+      // (a ± b) ÷ c ± x，括号的结果正好是 c 的倍数
+      const c = V(2, 6), Tt = c * V(2, 6), a = V(1, 15), bop = pick(['+', '-']), b = bop === '+' ? Tt - a : a - Tt;
+      if (!b || Math.abs(b) > 30) return null;
+      return mk('c5', [P('+', [{ s: simple(a, [bop, b]) }, c], ['÷']), T(op, x)]);
+    },
+  };
+  const gen = cat => {
+    for (let i = 0; i < 60; i++) {
+      const c = cat === 'all' ? pick(['c1', 'c2', 'c3', 'c4', 'c5']) : cat;
+      const p = G[c](S.lvl);
+      if (p && Number.isInteger(p.ans) && Math.abs(p.ans) <= 400) return p;
+    }
+  };
+
+  const fresh = () => ({ cat: 'all', lvl: 0, n: 0, right: 0, streak: 0, done: false, answered: false, wrong: [], stat: {}, p: null });
+  let S = fresh();
+  $('.cats').innerHTML = CATS.map(([id, nm]) => `<button type="button" class="btn" data-c="${id}">${nm}</button>`).join('');
+  $('.lvls').innerHTML += LVLS.map((nm, i) => `<button type="button" class="btn" data-l="${i}">${nm}</button>`).join('');
+  const inp = $('.tans');
+
+  const next = () => {
+    if (S.done) { S.n = 0; S.right = 0; S.streak = 0; S.wrong = []; S.done = false; }
+    S.p = gen(S.cat); S.answered = false; inp.value = ''; draw();
+  };
+  const submit = () => {
+    if (S.answered || S.done) return;
+    const v = inp.value.replace(/[−–—－]/g, '-').replace(/＋/g, '+').replace(/\s/g, '');
+    if (!/^[+-]?\d+$/.test(v)) { $('.tmsg').innerHTML = '<span class="bad">请输入一个整数，负数前面加 - 号（可以点 ± 按钮）。</span>'; inp.focus(); return; }
+    const ok = +v === S.p.ans, st = S.stat[S.p.cat] || (S.stat[S.p.cat] = [0, 0]);
+    st[0]++; S.n++; S.answered = true;
+    if (ok) { st[1]++; S.right++; S.streak++; } else { S.streak = 0; S.wrong.push({ q: S.p.q, box: S.p.box, ans: S.p.ans, you: +v }); }
+    if (S.n >= ROUND) S.done = true;
+    draw();
+  };
+  const draw = () => {
+    const p = S.p;
+    root.querySelectorAll('[data-c]').forEach(b => b.classList.toggle('on', b.dataset.c === S.cat));
+    root.querySelectorAll('[data-l]').forEach(b => b.classList.toggle('on', +b.dataset.l === S.lvl));
+    $('.ttag').textContent = NAME[p.cat];
+    $('.tprog').textContent = `第 ${Math.min(ROUND, S.n + (S.answered ? 0 : 1))} / ${ROUND} 题 · 答对 ${S.right} · 连对 ${S.streak}`;
+    $('.texpr').innerHTML = p.q + (p.box ? '' : ' = ?');
+    $('.tlab').innerHTML = p.box ? `${BOX} =` : '';
+    inp.disabled = $('.tok').disabled = $('.tsign').disabled = S.answered;
+    inp.classList.toggle('ok', S.answered && +inp.value.replace(/[−–—－]/g, '-') === p.ans);
+    inp.classList.toggle('bad', S.answered && +inp.value.replace(/[−–—－]/g, '-') !== p.ans);
+    $('.tnext').textContent = S.done ? '开始新一轮 ▶' : S.answered ? '下一题 ▶' : '换一题 ↻';
+    if (!S.answered) { $('.tmsg').innerHTML = ''; $('.tsteps').innerHTML = ''; }
+    else {
+      const ok = inp.classList.contains('ok');
+      $('.tmsg').innerHTML = ok ? '<b class="ok">✓ 正确！</b>看看解题步骤，和你想的一样吗？' : `<b class="bad">✗ 不对，正确答案是 ${F(p.ans)}。</b>对照下面的步骤，找找是哪一步出错了：`;
+      $('.tsteps').innerHTML = `<li><span class="num">${p.q}</span></li>` +
+        p.steps.map(([e, w]) => `<li>${e != null ? `<span class="num">= ${e}</span>` : ''}${w ? `<span class="why">${w}</span>` : ''}</li>`).join('');
+    }
+    // 本轮总结
+    if (S.done) {
+      const weak = worst();
+      $('.tsum').innerHTML = `<b>本轮结束：${ROUND} 题答对 ${S.right} 题。</b>` +
+        (S.right === ROUND ? ' 全对！可以换「提高」难度挑战一下。' : (weak ? ` 最需要再练的是 <b>${NAME[weak]}</b>，可以单独选它专练。` : '')) +
+        (S.wrong.length ? '<ol class="twrong">' + S.wrong.map(w => `<li><span class="num">${w.q}${w.box ? '，□ ' : ' '}= ${F(w.ans)}</span>（你答 ${F(w.you)}）</li>`).join('') + '</ol>' : '');
+    } else $('.tsum').innerHTML = '';
+    // 各类统计
+    const ids = CATS.slice(1).map(c => c[0]).filter(id => S.stat[id]), weak = worst();
+    $('.tstat').innerHTML = ids.length ? '<tr><th>类型</th><th style="text-align:right">做过</th><th style="text-align:right">答对</th><th style="text-align:right">正确率</th></tr>' +
+      ids.map(id => { const [a, r] = S.stat[id]; return `<tr class="${id === weak ? 'weak' : ''}"><td>${NAME[id]}</td><td class="r">${a}</td><td class="r">${r}</td><td class="r">${Math.round(r / a * 100)}%</td></tr>`; }).join('') : '';
+  };
+  // 正确率最低（且做错过）的一类
+  const worst = () => {
+    let w = null, best = 2;
+    for (const [id, [a, r]] of Object.entries(S.stat)) if (r < a && r / a < best) { best = r / a; w = id; }
+    return w;
+  };
+
+  $('.cats').onclick = e => { const b = e.target.closest('[data-c]'); if (b) { S.cat = b.dataset.c; next(); } };
+  $('.lvls').onclick = e => { const b = e.target.closest('[data-l]'); if (b) { S.lvl = +b.dataset.l; next(); } };
+  $('.tok').onclick = submit;
+  $('.tnext').onclick = next;
+  $('.tsign').onclick = () => { inp.value = inp.value.startsWith('-') ? inp.value.slice(1) : '-' + inp.value.replace(/^[+−]/, ''); inp.focus(); };
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') { if (S.answered) next(); else submit(); } });
+  const reset = () => { rs = SEED; S = fresh(); next(); };
+  root.querySelector('[data-act="reset"]').onclick = reset;
+  resets.push(reset); reset();
+}
+
 /* ---------- 练习题 ---------- */
 window.LQ_ITEMS = [
   { type: '选择', q: '−3 + 5 = ?', opts: ['−8', '2', '8', '−2'], ans: 1, why: '站在 −3，「+」面朝右，5 是正数就向前走 5 格，停在 2（第三部分动画）。也可以想成欠 3 块、挣 5 块，还剩 2 块。' },
@@ -636,6 +922,15 @@ window.LQ_ITEMS = [
   { type: '判断', q: '(−2) × (−3) × (−1) 的结果是正数，因为“负负得正”。', opts: ['对', '错'], ans: 1, why: '一共有 3 个负号，是奇数个 → 结果为负：(−2) × (−3) × (−1) = −6。“负负得正”只抵消了一对，还剩一个负号。' },
   { type: '选择', q: '夜里气温是 −2℃，到了清晨又下降了 5℃。清晨气温是多少？', opts: ['3℃', '−7℃', '7℃', '−3℃'], ans: 1, why: '下降 5℃ 就是减 5：−2 − 5 = −7。在数轴（温度计）上从 −2 再往下 5 格。' },
   { type: '填空', q: '银行卡余额 50 元。银行发现之前一笔“−30 元”的扣款扣错了，把它撤销。余额变成多少元？（算式：50 − (−30)）', ans: ['80', '80元'], placeholder: '输入数字', why: '撤销一笔扣款（拿走一个 −30）= 把钱还给你（加上 30）：50 − (−30) = 50 + 30 = 80 元。' },
+  { type: '提高', q: '−8 − (−3) = ?', ans: ['-5'], placeholder: '负数可以用 - 表示', why: '两个负数相减：先把“− (−3)”变成“+ 3”，得 −8 + 3。负的 8 比正的 3 多，结果为负：−(8 − 3) = −5。' },
+  { type: '提高', q: '−4 − (−9) = ?', ans: ['5', '+5'], placeholder: '输入数字', why: '−4 − (−9) = −4 + 9。正的 9 比负的 4 多，结果为正：9 − 4 = 5。注意：两个负数相减，结果不一定是负数！' },
+  { type: '提高', q: '下面哪一个等于 (−15) × (−4)？', opts: ['15 × (−4)', '−15 × 4', '15 × 4', '−60'], ans: 2, why: '左边 2 个负号，抵消成正：(−15) × (−4) = 15 × 4 = 60。前两个选项只剩 1 个负号，结果是 −60。' },
+  { type: '提高', q: '(−36) ÷ (−4) × (−2) = ?', ans: ['-18'], placeholder: '负数可以用 - 表示', why: '3 个负号 → 结果为负；数字部分从左往右：36 ÷ 4 × 2 = 9 × 2 = 18。所以是 −18。' },
+  { type: '判断', q: '计算 −20 ÷ 4 × (−5) 时，可以先算 4 × (−5) = −20，所以结果是 1。', opts: ['对', '错'], ans: 1, why: '乘除是同级运算，必须<b>从左往右</b>：−20 ÷ 4 = −5，再 × (−5) = 25。先算后面的乘法是常见错误。' },
+  { type: '提高', q: '−3 + (−4) × 2 = ?', ans: ['-11'], placeholder: '负数可以用 - 表示', why: '先乘后加：(−4) × 2 = −8；再算 −3 + (−8) = −3 − 8 = −11。' },
+  { type: '提高', q: '6 − (−2) × (−5) = ?', ans: ['-4'], placeholder: '负数可以用 - 表示', why: '先算乘法：(−2) × (−5) = 10（两个负号抵消）。再算 6 − 10 = −4。别先算 6 − (−2)！' },
+  { type: '提高', q: '−2 × (−3) − (−4) × 5 = ?', ans: ['26', '+26'], placeholder: '输入数字', why: '两个乘法先算：−2 × (−3) = 6，(−4) × 5 = −20。再算 6 − (−20) = 6 + 20 = 26。' },
+  { type: '挑战', q: '(−3 − 5) × (−2) + 12 ÷ (−4) = ?', ans: ['13', '+13'], placeholder: '输入数字', why: '先算括号：−3 − 5 = −8；再算乘除：(−8) × (−2) = 16，12 ÷ (−4) = −3；最后 16 + (−3) = 16 − 3 = 13。' },
 ];
 </script>
 <script>
