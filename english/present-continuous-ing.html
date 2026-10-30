@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>现在进行时与 -ing</title>
+<meta name="description" content="现在进行时和动词 -ing 是不是一回事？be + -ing 的拼装原理、-ing 的四种身份，以及总忘加 -ing 的原因和两步自检法。">
+<style>
+/* ---------- 页面变量：中性色映射到站点变量，只为内容另加语义色 ---------- */
+:root{
+  --bg:var(--up-bg); --surface:var(--up-surface); --ink:var(--up-ink); --muted:var(--up-muted); --line:var(--up-line);
+  --accent:var(--up-accent); --ok:var(--up-ok); --bad:var(--up-bad);
+  --cBe:#1c7ed6;    /* be 部分：am / is / are / was / will be */
+  --cIng:#e8590c;   /* -ing 部分 */
+  --cZh:#9c36b5;    /* 中文 */
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --cBe:#74c0fc; --cIng:#ffa94d; --cZh:#e599f7; }
+}
+:root[data-theme="dark"]{ --cBe:#74c0fc; --cIng:#ffa94d; --cZh:#e599f7; }
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 var(--up-font);padding:24px 16px 96px}
+main{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:48px}
+h1{font-size:clamp(1.7rem,4.5vw,2.4rem);line-height:1.25;margin:0 0 8px}
+h2{font-size:1.4rem;margin:0 0 8px}
+h3{font-size:1.05rem;margin:0 0 6px}
+p{margin:0}
+.lead{color:var(--muted)}
+.muted{color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--up-radius);box-shadow:var(--up-shadow);padding:16px}
+.analogy{border-left:4px solid var(--accent)}
+.btn{font:inherit;font-size:14px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--up-surface)}
+.btn.on{border-color:var(--accent);background:var(--up-accent-soft);color:var(--ink);font-weight:600}
+.btn:disabled{opacity:.45;cursor:default}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.stepno{font-family:var(--up-mono);color:var(--muted);font-size:.9rem;min-width:56px;text-align:center}
+.caption{min-height:3.4em;margin-top:10px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.be{color:var(--cBe);font-weight:700}
+.ing{color:var(--cIng);font-weight:700}
+.zh{color:var(--cZh);font-weight:700}
+.en{font-weight:600}
+.x{color:var(--bad);font-weight:700}
+.v{color:var(--ok);font-weight:700}
+.formula{font-size:clamp(1.2rem,4vw,1.6rem);text-align:center;margin:8px 0 4px;font-weight:700}
+.formula .plus{color:var(--muted);margin:0 8px}
+ul.tight{margin:6px 0 0;padding-left:1.2em}
+ul.tight li{margin:2px 0}
+
+/* ---------- 词块舞台 ---------- */
+.stage{border-radius:10px;background:var(--up-surface-2);padding:16px 12px;margin-top:12px;display:grid;gap:14px;min-height:170px;align-content:center}
+.row{display:flex;flex-wrap:wrap;align-items:center;row-gap:8px;min-height:40px}
+.row .lab{font-size:12px;color:var(--muted);width:36px;flex:none}
+.chip{display:inline-block;margin-right:6px;padding:4px 10px;border:2px solid var(--line);border-radius:8px;background:var(--surface);
+  font-weight:600;white-space:nowrap;max-width:240px;overflow:hidden;
+  transition:opacity .7s,max-width .7s,padding .7s,margin .7s,border-color .7s,background .7s,color .7s,transform .7s}
+.chip.glue{margin-right:0;border-top-right-radius:0;border-bottom-right-radius:0;border-right-width:0}
+.chip.glue + .chip{border-top-left-radius:0;border-bottom-left-radius:0}
+.chip.tz{color:var(--cZh)}
+.chip.tbe{color:var(--cBe)}
+.chip.ting{color:var(--cIng)}
+.chip.ghost{border-style:dashed;color:var(--muted)}
+.chip.off{opacity:0;max-width:0;padding-left:0;padding-right:0;margin-right:0;border-width:0}
+.chip.hi{border-color:var(--accent);background:var(--up-accent-soft);transform:translateY(-3px)}
+.chip.bad{border-color:var(--bad);color:var(--bad);transform:translateY(-3px)}
+.chip.good{border-color:var(--ok);color:var(--ok)}
+.chip.flash{animation:flash 1.2s ease 2}
+@keyframes flash{50%{border-color:var(--cIng);transform:scale(1.12)}}
+.note{font-size:14px;color:var(--muted);transition:opacity .7s}
+.note.off{opacity:0}
+
+/* ---------- 切换器 ---------- */
+.tabs{display:flex;flex-wrap:wrap;gap:8px}
+.show{margin-top:12px;border-radius:10px;background:var(--up-surface-2);padding:16px;min-height:130px}
+.show .sent{font-size:clamp(1.1rem,3.6vw,1.35rem);font-weight:600;margin-bottom:6px}
+.badge{display:inline-block;font-size:12px;border-radius:999px;padding:0 10px;border:1.5px solid var(--line);margin-bottom:8px}
+.badge.yes{border-color:var(--cIng);color:var(--cIng)}
+.radar{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.radar span{font-size:14px;border:1.5px solid var(--cBe);color:var(--cBe);border-radius:999px;padding:0 10px;font-weight:600}
+@media (prefers-reduced-motion: reduce){
+  .chip,.note{transition:none}
+  .chip.flash{animation:none}
+}
+
+:root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:var(--ok);--lq-bad:var(--bad)}
+/* ---------- 练习题（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+.lq{display:grid;gap:12px;margin-bottom:56px}
+.lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+.lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
+.lq-sub{margin:0;color:var(--lq-muted);font-size:14px}
+.lq-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--lq-muted);font-variant-numeric:tabular-nums}
+.lq-list{display:grid;gap:10px}
+.lq-item{background:var(--lq-surface);border:1.5px solid var(--lq-line);border-radius:10px;padding:12px 16px;display:grid;gap:10px;min-width:0;color:var(--lq-ink);text-align:left}
+.lq-item.lq-is-ok{border-color:var(--lq-ok)}
+.lq-item.lq-is-bad{border-color:var(--lq-bad)}
+.lq-q{font-size:15px;font-weight:600;line-height:1.6}
+.lq-tag{display:inline-block;font-size:11px;font-weight:500;line-height:1.6;color:var(--lq-muted);border:1px solid var(--lq-line);border-radius:999px;padding:0 8px;margin-right:8px;vertical-align:1px}
+.lq-opts,.lq-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lq .lq-opt,.lq .lq-redo{font:inherit;font-size:14px;line-height:1.4;padding:6px 14px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);cursor:pointer;text-align:left;opacity:1}
+.lq .lq-opt:hover:not(:disabled),.lq .lq-redo:hover{border-color:var(--lq-accent)}
+.lq .lq-opt:disabled{cursor:default;opacity:1}
+.lq .lq-opt.lq-right{border-color:var(--lq-ok);color:var(--lq-ok);font-weight:700}
+.lq .lq-opt.lq-wrong{border-color:var(--lq-bad);color:var(--lq-bad);text-decoration:line-through}
+.lq-fill input{font:inherit;font-size:14px;padding:6px 10px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);width:min(100%,200px)}
+.lq-fill input.lq-right{border-color:var(--lq-ok)}
+.lq-fill input.lq-wrong{border-color:var(--lq-bad)}
+.lq-why{font-size:14px;line-height:1.65;color:var(--lq-muted)}
+.lq-why:empty{display:none}
+.lq-why .lq-ok{color:var(--lq-ok)}
+.lq-why .lq-bad{color:var(--lq-bad)}
+</style>
+</head>
+<body>
+<!-- up-shell:begin（由 scripts/shell.mjs 自动生成，勿手改） -->
+<nav id="up-nav" aria-label="网站导航">
+<a class="up-home" href="/" title="Up 学习站首页"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="up-nav-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c6ef5"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#up-nav-g)"/><path d="M12 52V42a2 2 0 0 1 2-2h10V32a2 2 0 0 1 2-2h10v-8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v30z" fill="#fff"/><circle cx="43" cy="13" r="5.5" fill="#ffa94d"/></svg><span>Up 学习站</span></a>
+<span class="up-sep" aria-hidden="true">›</span><a class="up-cat" href="/english">英语</a>
+<span class="up-sep" aria-hidden="true">›</span><span class="up-title">现在进行时与 -ing</span>
+<button id="up-reset" type="button" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+</nav>
+<style>
+:root{--up-bg:#f5f6f8;--up-surface:#ffffff;--up-surface-2:#eef0f4;--up-ink:#1d2127;--up-muted:#626b78;--up-line:#dfe2e8;--up-ok:#2b8a3e;--up-bad:#d6336c;--up-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);--up-font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif;--up-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;--up-radius:12px;--up-accent:#2f9e44;--up-accent-soft:#ebfbee}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#69db7c;--up-accent-soft:#1b3222;color-scheme:dark}}
+:root[data-theme="dark"]{--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#69db7c;--up-accent-soft:#1b3222;color-scheme:dark}
+html{padding-top:52px;scroll-padding-top:64px}
+#up-nav{position:fixed;top:0;left:0;right:0;z-index:2147483000;height:52px;box-sizing:border-box;display:flex;align-items:center;gap:8px;
+padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));border-top:3px solid var(--up-accent);
+border-bottom:1px solid var(--up-line);background:color-mix(in srgb,var(--up-surface) 88%,transparent);
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:500 14px/1.2 var(--up-font);color:var(--up-ink);text-align:left}
+#up-nav a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none}
+#up-nav a:hover{color:var(--up-accent)}
+#up-nav svg{width:24px;height:24px;flex:none;display:block}
+#up-nav .up-home span{font-weight:700}
+#up-nav .up-cat{color:var(--up-accent);font-weight:600}
+#up-nav .up-sep{color:var(--up-muted);flex:none}
+#up-nav .up-title{color:var(--up-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#up-reset{margin:0 0 0 auto;flex:none;font:600 14px/1 var(--up-font);padding:8px 14px;border-radius:999px;cursor:pointer;
+border:1.5px solid var(--up-accent);background:transparent;color:var(--up-accent);transition:background .2s,color .2s}
+#up-reset:hover,#up-reset:focus-visible{background:var(--up-accent);color:var(--up-surface)}
+#up-reset:focus-visible,#up-nav a:focus-visible{outline:2px solid var(--up-accent);outline-offset:2px}
+@media (max-width:560px){#up-nav .up-home span{display:none}}
+@media print{#up-nav{display:none}html{padding-top:0}}
+</style>
+<script>
+document.getElementById('up-reset').addEventListener('click', function () {
+  if (typeof window.resetPage === 'function') window.resetPage();
+  else console.warn('本页没有定义 window.resetPage()，重置按钮无效');
+  window.scrollTo({ top: 0, behavior: 'auto' });
+});
+</script>
+<!-- up-shell:end -->
+<main>
+
+<section>
+  <h1>现在进行时与 -ing</h1>
+  <p class="lead">它俩<b>不是一个东西</b>：-ing 是动词的一种「变身形式」，现在进行时是一种「时态」。进行时<b>要用到</b> -ing，但 -ing 不只出现在进行时里。</p>
+</section>
+
+<section class="card analogy">
+  <b>生活比喻：-ing 是「轮子」，现在进行时是「整辆车」。</b><br>
+  一辆车 = 车身（<span class="be">am / is / are</span>）+ 轮子（动词<span class="ing">-ing</span>），少一样都开不动。<br>
+  但轮子不只装在汽车上——自行车、推车、行李箱也用轮子。-ing 也一样，还能当名词、跟在介词后面、当形容词。
+</section>
+
+<section class="card">
+  <h2>一个公式记住现在进行时</h2>
+  <p class="formula"><span class="be">am / is / are</span><span class="plus">+</span>动词<span class="ing">-ing</span></p>
+  <p class="muted" style="text-align:center">意思：<b>正在</b>做某事。<span class="be">be</span> 和 <span class="ing">-ing</span> 是一对，必须一起出现。</p>
+  <p style="text-align:center;margin-top:6px">I <span class="be">am</span> eat<span class="ing">ing</span>. · She <span class="be">is</span> read<span class="ing">ing</span>. · They <span class="be">are</span> play<span class="ing">ing</span>.</p>
+</section>
+
+<!-- 模块 1：为什么总忘 -ing -->
+<section>
+  <h2>为什么你总忘加 -ing？</h2>
+  <p class="muted">把中文「我在吃饭」逐字翻成英文，看看哪一块「没人提醒你」。</p>
+  <div class="card" id="m1">
+    <div class="stage">
+      <div class="row"><span class="lab">中文</span>
+        <span class="chip tz" data-id="z1">我</span><span class="chip tz" data-id="z2">在</span><span class="chip tz" data-id="z3">吃饭</span><span class="chip ghost" data-id="z4">（没有对应的字）</span>
+      </div>
+      <div class="row"><span class="lab">英文</span>
+        <span class="chip" data-id="e1">I</span><span class="chip tbe" data-id="e2">am</span><span class="chip glue" data-id="e3">eat</span><span class="chip ting" data-id="e4">ing</span><span class="chip" data-id="e5">.</span>
+      </div>
+      <div class="row"><span class="lab">错句</span>
+        <span class="chip bad" data-id="w1">I am eat. ✗ 丢了 -ing</span><span class="chip bad" data-id="w2">I eating. ✗ 丢了 be</span>
+      </div>
+    </div>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<!-- 模块 2：-ing 的四种身份 -->
+<section>
+  <h2>-ing 的四种身份：有 -ing ≠ 进行时</h2>
+  <p class="muted">点按钮切换。只有第一种是进行时，其余三种前面<b>没有</b>「正在」的意思。</p>
+  <div class="card" id="m2">
+    <div class="tabs"></div>
+    <div class="show"></div>
+    <div class="ctrl"><button type="button" class="btn" data-act="reset">↺ 重置本模块</button></div>
+  </div>
+</section>
+
+<!-- 模块 3：时间词切换器 -->
+<section>
+  <h2>自己试试：换个时间词，动词怎么变？</h2>
+  <p class="muted">同一个人、同一个动作 read。点不同的时间词，看 <span class="be">be</span> 和 <span class="ing">-ing</span> 什么时候出现。</p>
+  <div class="card" id="m3">
+    <div class="tabs"></div>
+    <div class="show"></div>
+    <div class="ctrl"><button type="button" class="btn" data-act="reset">↺ 重置本模块</button></div>
+  </div>
+</section>
+
+<!-- 模块 4：两步自检法 -->
+<section>
+  <h2>好办法：写完一句，做「两步自检」</h2>
+  <p class="muted">看到信号词 → 找 be → 看 be 右边的动词有没有 -ing；反过来，看到当谓语的 -ing → 找前面的 be。</p>
+  <div class="card" id="m4">
+    <div class="stage">
+      <div class="row">
+        <span class="chip" data-id="a1">Look!</span><span class="chip" data-id="a2">My sister</span><span class="chip tbe" data-id="a3">is</span><span class="chip" data-id="a4">play</span><span class="chip" data-id="a5">the piano.</span>
+      </div>
+      <div class="row">
+        <span class="chip" data-id="b1">She</span><span class="chip tbe" data-id="b2">is</span><span class="chip" data-id="b3">cooking</span><span class="chip" data-id="b4">dinner</span><span class="chip" data-id="b5">now.</span>
+      </div>
+    </div>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>把「忘加 -ing」改掉的 5 个习惯</h2>
+  <div class="grid2">
+    <div class="card">
+      <h3>① 信号词雷达</h3>
+      <p>看到这些词，脑子里先响一声「be + -ing」：</p>
+      <div class="radar"><span>now</span><span>right now</span><span>at the moment</span><span>Look!</span><span>Listen!</span><span>these days</span><span>currently</span><span>still</span></div>
+    </div>
+    <div class="card">
+      <h3>② 中文里的「在 / 正在 / 着 / 呢」</h3>
+      <p>中文句子有这几个字，英文多半要进行时：<br>
+      我<span class="zh">正在</span>开会<span class="zh">呢</span> → I<span class="be">'m</span> hav<span class="ing">ing</span> a meeting.</p>
+    </div>
+    <div class="card">
+      <h3>③ be 和 -ing 成对检查</h3>
+      <p>写完回扫：每个 <span class="be">am/is/are</span> 后面跟动词时，它带 <span class="ing">-ing</span> 了吗？每个当谓语的 <span class="ing">-ing</span>，前面有 <span class="be">be</span> 吗？</p>
+    </div>
+    <div class="card">
+      <h3>④ 每天 1 分钟「实况解说」</h3>
+      <p>看着身边，大声说 5 句正在发生的事：<br>
+      <span class="en">I'm typing. The cat is sleeping. It's raining.</span><br>
+      说多了，「此刻 → -ing」会变成条件反射。</p>
+    </div>
+    <div class="card">
+      <h3>⑤ 这些地方「必须 -ing」，单独背</h3>
+      <p>和时态无关，是固定搭配，最常被忘：</p>
+      <ul class="tight">
+        <li>介词后：good at swim<span class="ing">ing</span>、thanks for help<span class="ing">ing</span>、before leav<span class="ing">ing</span></li>
+        <li>enjoy / finish / mind / keep / practice / avoid + do<span class="ing">ing</span></li>
+        <li>How about / look forward to + do<span class="ing">ing</span></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>⚠ 别加过头：状态动词</h3>
+      <p>表示心理、感觉、拥有的词一般<b>不用</b>进行时：know、like、want、need、believe、understand、have（拥有）。</p>
+      <p style="margin-top:4px"><span class="x">I am knowing ✗</span> → <span class="v">I know ✓</span></p>
+    </div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>-ing 怎么拼？</h2>
+  <ul class="tight">
+    <li><b>一般直接加：</b>read → read<span class="ing">ing</span>，play → play<span class="ing">ing</span></li>
+    <li><b>不发音的 e 去掉：</b>make → mak<span class="ing">ing</span>，write → writ<span class="ing">ing</span></li>
+    <li><b>重读、以「一个元音 + 一个辅音」结尾，双写辅音：</b>run → run<b>n</b><span class="ing">ing</span>，sit → sit<b>t</b><span class="ing">ing</span>，swim → swim<b>m</b><span class="ing">ing</span>，begin → begin<b>n</b><span class="ing">ing</span></li>
+    <li><b>ie 变 y：</b>lie → ly<span class="ing">ing</span>，die → dy<span class="ing">ing</span></li>
+  </ul>
+</section>
+
+<section class="card">
+  <h2>常见误区</h2>
+  <ul class="tight">
+    <li><b>「有 -ing 就是进行时」</b>✗ —— <span class="en">I enjoy reading.</span> 里 reading 是名词（阅读），不是「正在读」。</li>
+    <li><b>「进行时 = 加 -ing」</b>✗ —— 还要有 <span class="be">am/is/are</span>。<span class="x">I reading.</span> 是错句。</li>
+    <li><b>「所有动词都能加 -ing 表示正在」</b>✗ —— know、want、like 这类状态动词通常不行。</li>
+  </ul>
+</section>
+
+<section class="card analogy">
+  <b>一句话总结：</b>-ing 是零件，现在进行时是 <span class="be">be</span> + <span class="ing">-ing</span> 拼成的整车；中文「在」有对应、-ing 没有，所以最容易丢——看到「此刻」信号或写了 <span class="be">be</span>，就回头检查 <span class="ing">-ing</span>。
+</section>
+
+<section class="lq" id="lq" aria-label="练习">
+  <div class="lq-head"><h2>练习</h2><span class="lq-score"></span></div>
+  <p class="lq-sub">学完上面的内容，来检验一下。每题作答后马上看到解析；点「重做练习」清空重来。</p>
+  <div class="lq-list"></div>
+  <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+</section>
+
+</main>
+
+<script>
+const resets = [];                                   // 每个模块的 reset()
+window.pageReset = () => resets.forEach(f => f());   // 练习组件会把它包进 window.resetPage
+
+/* ---------- 通用分步模块：每步给出各词块的状态（off 隐藏 / hi / bad / good / flash）和文字覆盖 ---------- */
+function stepper(rootId, STEPS) {
+  const root = document.getElementById(rootId);
+  const chips = [...root.querySelectorAll('.chip')];
+  const base = new Map(chips.map(c => [c, { cls: c.className, text: c.textContent }]));
+  const cap = root.querySelector('.caption'), no = root.querySelector('.stepno');
+  const btn = act => root.querySelector(`[data-act="${act}"]`);
+  const INIT = { step: 0, playing: false };          // 初始值只写这一处
+  let S = { ...INIT }, timer = null;
+  const draw = () => {
+    const st = STEPS[S.step];
+    chips.forEach(c => {
+      const b = base.get(c), id = c.dataset.id;
+      const show = st.show === '*' || st.show.includes(id);
+      c.className = b.cls + (show ? '' : ' off') + (st.cls && st.cls[id] ? ' ' + st.cls[id] : '');
+      c.textContent = (st.text && st.text[id]) || b.text;
+    });
+    cap.innerHTML = st.say; no.textContent = `${S.step + 1} / ${STEPS.length}`;
+    btn('prev').disabled = S.step === 0; btn('next').disabled = S.step === STEPS.length - 1;
+    btn('play').textContent = S.playing ? '⏸ 暂停' : '▶ 播放';
+  };
+  const stop = () => { clearInterval(timer); timer = null; S.playing = false; };
+  const go = d => { S.step = Math.max(0, Math.min(STEPS.length - 1, S.step + d)); draw(); };
+  btn('prev').onclick = () => { stop(); go(-1); };
+  btn('next').onclick = () => { stop(); go(1); };
+  btn('play').onclick = () => {
+    if (S.playing) { stop(); draw(); return; }
+    if (S.step === STEPS.length - 1) S.step = 0;
+    S.playing = true; draw();
+    timer = setInterval(() => { go(1); if (S.step === STEPS.length - 1) { stop(); draw(); } }, 2200);
+  };
+  const reset = () => { stop(); S = { ...INIT }; draw(); };
+  btn('reset').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+/* ---------- 模块 1：中文 → 英文，-ing 没有对应字 ---------- */
+stepper('m1', [
+  { show: ['z1','z2','z3'], say: '中文说「我在吃饭」。注意：中文动词「吃」<b>永远不变形</b>，过去、现在、正在都是「吃」。' },
+  { show: ['z1','z2','z3','e1'], cls: { z1: 'hi', e1: 'hi' }, say: '「我」→ <b>I</b>，一一对应。' },
+  { show: ['z1','z2','z3','e1','e2'], cls: { z2: 'hi', e2: 'hi' }, say: '「在」→ <span class="be">am</span>。中文里有个「在」提醒你，所以 be 一般不会忘。' },
+  { show: ['z1','z2','z3','e1','e2','e3'], cls: { z3: 'hi', e3: 'hi' }, say: '「吃饭」→ <b>eat</b>。到这里，中文已经翻完了……' },
+  { show: ['z1','z2','z3','z4','e1','e2','e3','e4'], cls: { z4: 'flash', e4: 'flash' }, say: '但英语还要给动词装上 <span class="ing">-ing</span>，而中文里<b>没有任何字</b>对应它——没人提醒，这就是最容易忘的原因。' },
+  { show: ['z1','z2','z3','e1','e2','e3','e4','e5'], cls: { e2: 'hi', e4: 'hi' }, say: '完整句子：I <span class="be">am</span> eat<span class="ing">ing</span>. —— <span class="be">am</span> 和 <span class="ing">-ing</span> 合起来，才等于「正在」。' },
+  { show: ['z1','z2','z3','e1','e2','e3','e4','e5','w1','w2'], cls: { e2: 'hi', e4: 'hi' }, say: '少任何一半都是错句：<span class="x">I am eat.</span>（丢 -ing，最常见）、<span class="x">I eating.</span>（丢 be）。' },
+]);
+
+/* ---------- 模块 2：-ing 的四种身份 ---------- */
+{
+  const root = document.getElementById('m2');
+  const tabs = root.querySelector('.tabs'), show = root.querySelector('.show');
+  const ROLES = [
+    { name: '① 进行时的零件', prog: true,
+      sents: ['She <span class="be">is</span> read<span class="ing">ing</span> now.', 'They <span class="be">are</span> play<span class="ing">ing</span> football.'],
+      how: '前面有 <span class="be">am/is/are</span>，意思是「正在……」。<b>只有这一种是进行时。</b>' },
+    { name: '② 当名词用', prog: false,
+      sents: ['Read<span class="ing">ing</span> is fun.', 'I enjoy read<span class="ing">ing</span>.'],
+      how: '叫「动名词」：-ing 把动作变成一件事，相当于名词「阅读」。可以当主语、宾语，没有「正在」的意思。' },
+    { name: '③ 跟在介词后', prog: false,
+      sents: ["I'm good at swimm<span class=\"ing\">ing</span>.", 'Thanks for help<span class="ing">ing</span> me.'],
+      how: 'at、for、in、of、about、before、after 这类介词后面接动词，<b>必须</b>用 -ing（其实也是动名词）。这是最常忘的「特定场景」之一。' },
+    { name: '④ 当形容词', prog: false,
+      sents: ['a sleep<span class="ing">ing</span> baby（一个正在睡的婴儿）', 'The film is bor<span class="ing">ing</span>.（这电影很无聊）'],
+      how: '-ing 用来描述名词。小心第二句：is boring 看起来像进行时，其实 boring 是形容词「无聊的」，不是「正在无聊」。' },
+  ];
+  const INIT = { idx: 0 };
+  let S = { ...INIT };
+  ROLES.forEach((r, i) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'btn'; b.textContent = r.name;
+    b.onclick = () => { S.idx = i; draw(); };
+    tabs.append(b);
+  });
+  function draw() {
+    const r = ROLES[S.idx];
+    [...tabs.children].forEach((b, i) => b.classList.toggle('on', i === S.idx));
+    show.innerHTML = `<span class="badge ${r.prog ? 'yes' : ''}">${r.prog ? '是进行时' : '不是进行时'}</span>` +
+      r.sents.map(s => `<div class="sent">${s}</div>`).join('') + `<p style="margin-top:6px">${r.how}</p>`;
+  }
+  const reset = () => { S = { ...INIT }; draw(); };
+  root.querySelector('[data-act="reset"]').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+/* ---------- 模块 3：时间词切换器 ---------- */
+{
+  const root = document.getElementById('m3');
+  const tabs = root.querySelector('.tabs'), show = root.querySelector('.show');
+  const B = s => `<span class="be">${s}</span>`, G = '<span class="ing">ing</span>';
+  const TIMES = [
+    { k: 'every day', s: 'He reads every day.', ing: false, why: '一般现在时：说<b>习惯</b>，不是此刻在做。主语是 he，加 -s，不加 -ing。' },
+    { k: 'now', s: `He ${B('is')} read${G} now.`, ing: true, why: '现在进行时：此刻正在读。<span class="be">is</span> + read<span class="ing">ing</span>。' },
+    { k: 'Look!', s: `Look! He ${B('is')} read${G}.`, ing: true, why: '「快看！」说明动作就在眼前发生 → 现在进行时。' },
+    { k: 'these days', s: `He ${B('is')} read${G} a novel these days.`, ing: true, why: '「这段时间」一直在做、还没做完的事，也用现在进行时（不一定是此刻手里拿着书）。' },
+    { k: 'yesterday', s: 'He read a book yesterday.', ing: false, why: '一般过去时：说一个已经完成的动作，不用 -ing。' },
+    { k: 'at 8 last night', s: `He ${B('was')} read${G} at 8 last night.`, ing: true, why: '过去进行时：昨晚 8 点那一刻正在读。be 变成 <span class="be">was</span>，-ing 照样要有。' },
+    { k: 'this time tomorrow', s: `He ${B('will be')} read${G} this time tomorrow.`, ing: true, why: '将来进行时：明天这时候正在读。<span class="be">will be</span> + -ing。' },
+  ];
+  const INIT = { idx: 0 };
+  let S = { ...INIT };
+  TIMES.forEach((t, i) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'btn'; b.textContent = t.k;
+    b.onclick = () => { S.idx = i; draw(); };
+    tabs.append(b);
+  });
+  function draw() {
+    const t = TIMES[S.idx];
+    [...tabs.children].forEach((b, i) => b.classList.toggle('on', i === S.idx));
+    show.innerHTML = `<span class="badge ${t.ing ? 'yes' : ''}">${t.ing ? '进行时：be + -ing' : '不用 -ing'}</span>` +
+      `<div class="sent">${t.s}</div><p>${t.why}</p>` +
+      (t.ing ? '<p class="muted" style="margin-top:6px;font-size:14px">发现了吗？凡是「正在」，be 和 -ing 总是一起出现，只是 be 会随时间变成 is / was / will be。</p>' : '');
+  }
+  const reset = () => { S = { ...INIT }; draw(); };
+  root.querySelector('[data-act="reset"]').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+/* ---------- 模块 4：两步自检法 ---------- */
+const L1 = ['a1','a2','a3','a4','a5'], L2no = ['b1','b3','b4','b5'], L2 = ['b1','b2','b3','b4','b5'];
+stepper('m4', [
+  { show: L1, say: '你刚写下一句：<span class="en">Look! My sister is play the piano.</span> 来做两步自检。' },
+  { show: L1, cls: { a1: 'hi' }, say: '先扫信号词：<b>Look!</b> → 动作正在眼前发生 → 这句应该是 <span class="be">be</span> + <span class="ing">-ing</span>。' },
+  { show: L1, cls: { a3: 'hi' }, say: '第 1 步：找 <span class="be">be</span>。找到了 <span class="be">is</span>，好。' },
+  { show: L1, cls: { a3: 'hi', a4: 'bad' }, say: '第 2 步：看 be <b>右边</b>的动词——play 没有 -ing，报警！（这就是「丢 -ing」）' },
+  { show: L1, cls: { a4: 'good' }, text: { a4: 'playing' }, say: '补上：My sister is <span class="ing">playing</span> the piano. <span class="v">✓</span>' },
+  { show: [...L1, ...L2no], cls: { a4: 'good', b3: 'hi' }, text: { a4: 'playing' }, say: '反向检查另一句：<span class="en">She cooking dinner now.</span> 看到当谓语的 <span class="ing">cooking</span>，往<b>左</b>找 be……没有！' },
+  { show: [...L1, ...L2], cls: { a4: 'good', b2: 'good', b3: 'good' }, text: { a4: 'playing' }, say: '补上 be：She <span class="be">is</span> cooking dinner now. <span class="v">✓</span> 口诀：<b>be 找 -ing，-ing 找 be</b>。' },
+]);
+
+/* ---------- 练习题数据 ---------- */
+window.LQ_ITEMS = [
+  { type: '选择', q: 'Look! The children ___ in the park.', opts: ['play', 'are playing', 'playing'], ans: 1,
+    why: 'Look! 是信号词，动作正在眼前发生，要用 be + -ing：are playing。只写 playing 缺了 be（动画 1 第 7 步的错句类型）。' },
+  { type: '判断', q: '"I enjoy reading." 用了 reading，所以这句是现在进行时。', opts: ['对', '错'], ans: 1,
+    why: '常见误区。enjoy 后面固定接 -ing，reading 在这里是名词「阅读」（动名词），句子是一般现在时：我喜欢阅读。有 -ing ≠ 进行时。' },
+  { type: '选择', q: '"She is cook dinner now." 哪里错了？', opts: ['is 应该删掉', 'cook 应该改成 cooking', 'now 应该改成 every day'], ans: 1,
+    why: 'now 说明正在做，be（is）也有了，但 be 右边的动词没带 -ing——正是「be 找 -ing」要抓的错误。应为 She is cooking dinner now.' },
+  { type: '填空', q: 'Listen! Someone ___ (sing) upstairs.（填两个词）', ans: ['is singing', "'s singing"], placeholder: '例如 is doing',
+    why: 'Listen! 是信号词；主语 someone 按单数，用 is + singing。' },
+  { type: '选择', q: 'She is good at ___.', opts: ['swim', 'swims', 'swimming'], ans: 2,
+    why: 'at 是介词，介词后面的动词必须用 -ing（动名词）。注意这里和进行时无关，swim 还要双写 m：swimming。' },
+  { type: '选择', q: '朋友打电话问你在哪，你正坐在地铁上。你说：', opts: ['I take the subway.', 'I am take the subway.', "I'm taking the subway."], ans: 2,
+    why: '迁移应用：电话里描述「此刻正在」的事，用现在进行时。A 是一般现在时（表示习惯，「我平时坐地铁」），B 丢了 -ing。' },
+  { type: '选择', q: 'I ___ the answer now.', opts: ['am knowing', 'know'], ans: 1,
+    why: '虽然有 now，但 know 是状态动词（表示心里的状态，不是动作），一般不用进行时。不要把 -ing 加过头。' },
+  { type: '选择', q: 'Every morning he ___ to school, but today he ___ the bus.', opts: ['walks / takes', 'is walking / takes', 'walks / is taking'], ans: 2,
+    why: 'every morning 说习惯 → 一般现在时 walks；today 说今天这次临时不一样、正在发生 → is taking。同一句里两种时态对比，见「时间词切换器」。' },
+  { type: '填空', q: 'run 的 -ing 形式是？', ans: ['running'], placeholder: '输入单词',
+    why: 'run 是重读的「一个元音 + 一个辅音」结尾，要双写 n 再加 -ing：running。' },
+];
+</script>
+<script>
+/* ---------- 练习题（learn 通用组件） ----------
+   题目来自 window.LQ_ITEMS：{type, q, opts, ans: 选项下标, why} 或填空题 {type, q, ans: [可接受答案…], why}
+   定义 window.resetPage()（导航条「重置」按钮调用）：先调用页面自己的 window.pageReset()，再清空练习 */
+(() => {
+  const box = document.getElementById('lq');
+  const items = window.LQ_ITEMS || [];
+  const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let answered = 0, right = 0;
+
+  function update() {
+    const all = answered === items.length;
+    score.textContent = `已答 ${answered} / ${items.length} · 答对 ${right}` +
+      (all ? (right === items.length ? ' · 全对！' : ' · 看看解析，再重做一次') : '');
+  }
+
+  function render() {
+    answered = 0; right = 0; list.innerHTML = '';
+    items.forEach((it, i) => {
+      const el = document.createElement('div');
+      el.className = 'lq-item';
+      el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
+      const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
+      const judge = (ok, answer) => {
+        answered++; if (ok) right++;
+        el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
+        why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
+        update();
+      };
+      if (it.opts) {
+        a.classList.add('lq-opts');
+        it.opts.forEach((o, j) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'lq-opt'; b.innerHTML = o;
+          b.onclick = () => {
+            a.querySelectorAll('button').forEach(x => x.disabled = true);
+            a.children[it.ans].classList.add('lq-right');
+            if (j !== it.ans) b.classList.add('lq-wrong');
+            judge(j === it.ans, it.opts[it.ans]);
+          };
+          a.append(b);
+        });
+      } else {
+        a.classList.add('lq-fill');
+        a.innerHTML = `<input type="text" autocomplete="off" spellcheck="false" placeholder="${it.placeholder || '输入答案'}" aria-label="第 ${i + 1} 题答案"><button type="button" class="lq-opt">确定</button>`;
+        const inp = a.querySelector('input'), go = a.querySelector('button');
+        const submit = () => {
+          if (!inp.value.trim()) { inp.focus(); return; }
+          inp.disabled = go.disabled = true;
+          const ok = it.ans.some(x => norm(x) === norm(inp.value));
+          inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
+          judge(ok, it.ans[0]);
+        };
+        go.onclick = submit;
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      }
+      list.append(el);
+    });
+    update();
+  }
+
+  box.querySelector('.lq-redo').addEventListener('click', render);
+  // 导航条的「重置」按钮调用它：页面各模块 + 练习题一起恢复初始状态
+  window.resetPage = () => {
+    if (typeof window.pageReset === 'function') window.pageReset();
+    render();
+  };
+  render();
+})();
+</script>
+</body>
+</html>
