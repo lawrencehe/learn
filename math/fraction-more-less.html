@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>多几分之几与少几分之几</title>
+<meta name="description" content="男生是女生的 5/6，为什么男生比女生少 1/6，女生却比男生多 1/5？用线段图动画讲清：差距相同，单位“1”（分母）换了。">
+<style>
+:root{
+  --bg:var(--up-bg); --surface:var(--up-surface); --ink:var(--up-ink); --muted:var(--up-muted); --line:var(--up-line);
+  --accent:var(--up-accent); --ok:var(--up-ok); --bad:var(--up-bad);
+  --girl:#ae3ec9; --girl-soft:#f8f0fc;
+  --boy:#1c7ed6;  --boy-soft:#e7f5ff;
+  --diff:#0c8599; --diff-soft:#e3fafc;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --girl:#e599f7; --girl-soft:#3a2342; --boy:#74c0fc; --boy-soft:#17304a; --diff:#66d9e8; --diff-soft:#123a40; }
+}
+:root[data-theme="dark"]{ --girl:#e599f7; --girl-soft:#3a2342; --boy:#74c0fc; --boy-soft:#17304a; --diff:#66d9e8; --diff-soft:#123a40; }
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 var(--up-font);padding:24px 16px 96px}
+main{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:48px}
+h1{font-size:clamp(1.6rem,4.5vw,2.3rem);line-height:1.3;margin:0 0 8px}
+h2{font-size:1.4rem;margin:0 0 8px}
+p{margin:0}
+.lead{color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--up-radius);box-shadow:var(--up-shadow);padding:16px}
+.analogy{border-left:4px solid var(--accent)}
+.btn{font:inherit;font-size:14px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--up-surface)}
+.btn.on{border-color:var(--accent);background:var(--up-accent-soft);color:var(--accent);font-weight:600}
+.btn:disabled{opacity:.45;cursor:default}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.stepno{font-family:var(--up-mono);color:var(--muted);font-size:.9rem;min-width:56px;text-align:center}
+.caption{min-height:3.4em;margin-top:10px}
+.g{color:var(--girl);font-weight:700}
+.b{color:var(--boy);font-weight:700}
+.d{color:var(--diff);font-weight:700}
+.u{color:var(--accent);font-weight:700}
+.num{font-family:var(--up-mono)}
+.fr{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;font-family:var(--up-mono);font-size:.85em;line-height:1.1;margin:0 2px}
+.fr span:first-child{border-bottom:1.5px solid currentColor;padding:0 2px}
+
+/* ---------- 线段图 ---------- */
+.stage{border-radius:10px;background:var(--up-surface-2);padding:14px 12px 12px;margin-top:12px}
+.brow{display:flex;align-items:center;gap:8px;margin:30px 0 6px}
+.blab{width:40px;flex:none;font-weight:700;text-align:right}
+.track{flex:1;display:flex;position:relative;min-width:0}
+.bar{display:flex;position:relative;border-radius:6px;outline:3px solid transparent;outline-offset:3px;transition:outline-color .6s,width .8s ease}
+.bar::before{content:attr(data-tag);position:absolute;left:0;bottom:calc(100% + 6px);font-size:12px;font-weight:700;color:var(--accent);white-space:nowrap;opacity:0;transition:opacity .6s}
+.bar.unit{outline-color:var(--accent)}
+.bar.unit::before{opacity:1}
+.cell{height:36px;border:1.5px solid var(--surface);display:flex;align-items:center;justify-content:center;font-size:12px;font-family:var(--up-mono);color:var(--up-surface);transition:background .6s,color .6s,box-shadow .6s;white-space:nowrap;overflow:hidden}
+.girl .cell{background:var(--girl)}
+.boy .cell{background:var(--boy)}
+.cell.diff{background:var(--diff)!important}
+.ghost{height:36px;border:2px dashed var(--line);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted);transition:border-color .6s,color .6s,background .6s}
+.ghost.diff{border-color:var(--diff);color:var(--diff);background:var(--diff-soft)}
+.tot{width:52px;flex:none;font-family:var(--up-mono);font-size:13px;color:var(--muted)}
+.formula{margin-top:16px;min-height:2.6em;text-align:center;font-size:1.05rem;line-height:1.6}
+@media (max-width:520px){ .cell{font-size:10px} .tot{width:40px;font-size:11px} .blab{width:32px} }
+@media (prefers-reduced-motion: reduce){ .bar,.cell,.ghost,.bar::before,.pbar>*{transition:none!important} }
+
+/* ---------- 对比卡 ---------- */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:640px){ .two{grid-template-columns:1fr} }
+.two .card{display:flex;flex-direction:column;gap:8px}
+.eq{font-family:var(--up-mono);background:var(--up-surface-2);border-radius:8px;padding:8px 12px;line-height:1.9}
+.rule{border:2px solid var(--accent);background:var(--up-accent-soft);border-radius:var(--up-radius);padding:14px 16px;text-align:center;font-size:1.08rem}
+
+/* ---------- 自己试试 ---------- */
+.sl{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.sl label{min-width:96px}
+.sl input[type=range]{flex:1;min-width:140px;accent-color:var(--accent)}
+.sl output{font-family:var(--up-mono);min-width:2.5em}
+.sents{display:grid;gap:8px;margin-top:14px}
+.sent{padding:8px 12px;border-radius:8px;border:1.5px solid var(--line);transition:border-color .4s,background .4s}
+.sent.hl{border-color:var(--accent);background:var(--up-accent-soft)}
+.sent small{color:var(--muted)}
+
+/* ---------- 价格条 ---------- */
+.ptrack{position:relative;height:44px;margin:34px 0 10px}
+.pbar>*{position:absolute;top:0;height:44px;transition:left .8s ease,width .8s ease,opacity .6s}
+.p-keep{left:0;background:var(--boy);border-radius:6px 0 0 6px}
+.p-add{background:var(--diff);border-radius:0 6px 6px 0}
+.p-cut{border:2px dashed var(--bad);border-left:none;border-radius:0 6px 6px 0}
+.p-unit{left:0;outline:3px solid var(--accent);outline-offset:3px;border-radius:6px;background:transparent}
+.p-unit::before{content:attr(data-tag);position:absolute;left:0;bottom:calc(100% + 6px);font-size:12px;font-weight:700;color:var(--accent);white-space:nowrap}
+.p-mark{width:0!important;border-left:2px dotted var(--ink);top:-6px!important;height:56px!important}
+.p-mark::after{content:'100 元';position:absolute;top:-22px;left:-20px;font-size:12px;color:var(--muted);font-family:var(--up-mono)}
+.pnum{font-family:var(--up-mono);text-align:center;font-size:1.05rem}
+
+.mis{display:grid;gap:10px}
+.mis .card{border-left:4px solid var(--bad)}
+.sum{font-size:1.1rem}
+
+:root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:var(--ok);--lq-bad:var(--bad)}
+/* ---------- 练习题（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+.lq{display:grid;gap:12px;margin-bottom:56px}
+.lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+.lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
+.lq-sub{margin:0;color:var(--lq-muted);font-size:14px}
+.lq-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--lq-muted);font-variant-numeric:tabular-nums}
+.lq-list{display:grid;gap:10px}
+.lq-item{background:var(--lq-surface);border:1.5px solid var(--lq-line);border-radius:10px;padding:12px 16px;display:grid;gap:10px;min-width:0;color:var(--lq-ink);text-align:left}
+.lq-item.lq-is-ok{border-color:var(--lq-ok)}
+.lq-item.lq-is-bad{border-color:var(--lq-bad)}
+.lq-q{font-size:15px;font-weight:600;line-height:1.6}
+.lq-tag{display:inline-block;font-size:11px;font-weight:500;line-height:1.6;color:var(--lq-muted);border:1px solid var(--lq-line);border-radius:999px;padding:0 8px;margin-right:8px;vertical-align:1px}
+.lq-opts,.lq-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lq .lq-opt,.lq .lq-redo{font:inherit;font-size:14px;line-height:1.4;padding:6px 14px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);cursor:pointer;text-align:left;opacity:1}
+.lq .lq-opt:hover:not(:disabled),.lq .lq-redo:hover{border-color:var(--lq-accent)}
+.lq .lq-opt:disabled{cursor:default;opacity:1}
+.lq .lq-opt.lq-right{border-color:var(--lq-ok);color:var(--lq-ok);font-weight:700}
+.lq .lq-opt.lq-wrong{border-color:var(--lq-bad);color:var(--lq-bad);text-decoration:line-through}
+.lq-fill input{font:inherit;font-size:14px;padding:6px 10px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);width:min(100%,200px)}
+.lq-fill input.lq-right{border-color:var(--lq-ok)}
+.lq-fill input.lq-wrong{border-color:var(--lq-bad)}
+.lq-why{font-size:14px;line-height:1.65;color:var(--lq-muted)}
+.lq-why:empty{display:none}
+.lq-why .lq-ok{color:var(--lq-ok)}
+.lq-why .lq-bad{color:var(--lq-bad)}
+</style>
+</head>
+<body>
+<!-- up-shell:begin（由 scripts/shell.mjs 自动生成，勿手改） -->
+<nav id="up-nav" aria-label="网站导航">
+<a class="up-home" href="/" title="Up 学习站首页"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="up-nav-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c6ef5"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#up-nav-g)"/><path d="M12 52V42a2 2 0 0 1 2-2h10V32a2 2 0 0 1 2-2h10v-8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v30z" fill="#fff"/><circle cx="43" cy="13" r="5.5" fill="#ffa94d"/></svg><span>Up 学习站</span></a>
+<span class="up-sep" aria-hidden="true">›</span><a class="up-cat" href="/math">数学</a>
+<span class="up-sep" aria-hidden="true">›</span><span class="up-title">多几分之几与少几分之几</span>
+<button id="up-reset" type="button" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+</nav>
+<style>
+:root{--up-bg:#f5f6f8;--up-surface:#ffffff;--up-surface-2:#eef0f4;--up-ink:#1d2127;--up-muted:#626b78;--up-line:#dfe2e8;--up-ok:#2b8a3e;--up-bad:#d6336c;--up-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);--up-font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif;--up-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;--up-radius:12px;--up-accent:#d9480f;--up-accent-soft:#fff1e8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#ff8a50;--up-accent-soft:#3a2218;color-scheme:dark}}
+:root[data-theme="dark"]{--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#ff8a50;--up-accent-soft:#3a2218;color-scheme:dark}
+html{padding-top:52px;scroll-padding-top:64px}
+#up-nav{position:fixed;top:0;left:0;right:0;z-index:2147483000;height:52px;box-sizing:border-box;display:flex;align-items:center;gap:8px;
+padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));border-top:3px solid var(--up-accent);
+border-bottom:1px solid var(--up-line);background:color-mix(in srgb,var(--up-surface) 88%,transparent);
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:500 14px/1.2 var(--up-font);color:var(--up-ink);text-align:left}
+#up-nav a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none}
+#up-nav a:hover{color:var(--up-accent)}
+#up-nav svg{width:24px;height:24px;flex:none;display:block}
+#up-nav .up-home span{font-weight:700}
+#up-nav .up-cat{color:var(--up-accent);font-weight:600}
+#up-nav .up-sep{color:var(--up-muted);flex:none}
+#up-nav .up-title{color:var(--up-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#up-reset{margin:0 0 0 auto;flex:none;font:600 14px/1 var(--up-font);padding:8px 14px;border-radius:999px;cursor:pointer;
+border:1.5px solid var(--up-accent);background:transparent;color:var(--up-accent);transition:background .2s,color .2s}
+#up-reset:hover,#up-reset:focus-visible{background:var(--up-accent);color:var(--up-surface)}
+#up-reset:focus-visible,#up-nav a:focus-visible{outline:2px solid var(--up-accent);outline-offset:2px}
+@media (max-width:560px){#up-nav .up-home span{display:none}}
+@media print{#up-nav{display:none}html{padding-top:0}}
+</style>
+<script>
+document.getElementById('up-reset').addEventListener('click', function () {
+  if (typeof window.resetPage === 'function') window.resetPage();
+  else console.warn('本页没有定义 window.resetPage()，重置按钮无效');
+  window.scrollTo({ top: 0, behavior: 'auto' });
+});
+</script>
+<!-- up-shell:end -->
+<main>
+
+<section>
+  <h1>少 <span class="fr"><span>1</span><span>6</span></span>，却多 <span class="fr"><span>1</span><span>5</span></span>？</h1>
+  <p class="lead"><span class="b">男生</span>是<span class="g">女生</span>的 <span class="fr"><span>5</span><span>6</span></span>
+    → 男生比女生<b>少 <span class="fr"><span>1</span><span>6</span></span></b>，女生比男生却<b>多 <span class="fr"><span>1</span><span>5</span></span></b>。<br>
+    「多 10 人 ⇄ 少 10 人」是对称的，为什么分数就不对称了？关键只有一句：<b>分数是「差」除以「谁」</b>。</p>
+</section>
+
+<section class="card analogy">
+  <b>生活比喻：先打 8 折，再涨 20%，回不到原价</b><br>
+  一件衣服 100 元，降价 20 元是「降了<b>原价</b>的 <span class="fr"><span>1</span><span>5</span></span>」，变成 80 元；
+  想涨回 100 元，同样是 20 元，但这次是拿 <b>80 元</b>来比：20 ÷ 80 = <span class="fr"><span>1</span><span>4</span></span>。<br>
+  差额都是 20 元，<b>拿来比的那个数</b>（分母）不一样，分数就不一样。这个「拿来比的数」叫<b class="u">单位“1”</b>。
+</section>
+
+<section>
+  <h2>一、一步一步看：同一个差距，两把尺子</h2>
+  <p class="lead">假设女生 30 人、男生 25 人。每 5 人画成 1 格（1 份）。</p>
+  <div class="card" id="demo">
+    <div class="stage">
+      <div class="brow"><span class="blab g">女生</span>
+        <div class="track"><div class="bar girl" id="gBar" data-tag="单位“1” = 女生（6 份）" style="width:100%"></div></div>
+        <span class="tot g">30 人</span></div>
+      <div class="brow"><span class="blab b">男生</span>
+        <div class="track"><div class="bar boy" id="bBar" data-tag="单位“1” = 男生（5 份）" style="width:83.333%"></div><div class="ghost" id="gGhost" style="width:16.667%"></div></div>
+        <span class="tot b">25 人</span></div>
+      <div class="formula" id="dF"></div>
+    </div>
+    <p class="caption" id="dCap"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>二、为什么人数对称，分数不对称？</h2>
+  <div class="two">
+    <div class="card">
+      <b>说「多/少几人」：只看差</b>
+      <div class="eq">差 = 30 − 25 = <span class="d">5 人</span></div>
+      <p>不管从谁的角度说，差都是 5 人。<br>所以「多 5 人 ⇄ 少 5 人」，<b>对称</b>。</p>
+    </div>
+    <div class="card">
+      <b>说「多/少几分之几」：差 ÷ 单位“1”</b>
+      <div class="eq">男比女少：<span class="d">5</span> ÷ <span class="g">30</span> = <span class="fr"><span>1</span><span>6</span></span><br>
+        女比男多：<span class="d">5</span> ÷ <span class="b">25</span> = <span class="fr"><span>1</span><span>5</span></span></div>
+      <p>分子一样，<b>分母换了人</b>，结果就不同。<br>所以<b>不对称</b>。</p>
+    </div>
+  </div>
+  <div class="rule" style="margin-top:12px">
+    比 <b class="u">谁</b> 多/少几分之几 ＝ 差 ÷ <b class="u">谁</b><br>
+    <small style="color:var(--muted)">「比」字后面的那个量，就是单位“1”，它做分母</small>
+  </div>
+</section>
+
+<section>
+  <h2>三、自己试试：改份数，看四句话怎么变</h2>
+  <p class="lead">拖动滑块改两边的份数；点按钮切换「单位“1”」，看看哪两句话是拿它当分母的。</p>
+  <div class="card" id="play">
+    <div class="sl"><label><span class="g">女生</span>份数</label><input type="range" id="pf" min="1" max="12"><output id="pfo"></output></div>
+    <div class="sl" style="margin-top:6px"><label><span class="b">男生</span>份数</label><input type="range" id="pm" min="1" max="12"><output id="pmo"></output></div>
+    <div class="ctrl"><span>单位“1”：</span>
+      <button type="button" class="btn" data-base="girl">女生</button>
+      <button type="button" class="btn" data-base="boy">男生</button></div>
+    <div class="stage">
+      <div class="brow"><span class="blab g">女生</span><div class="track"><div class="bar girl" id="pgBar" data-tag="单位“1”"></div></div></div>
+      <div class="brow"><span class="blab b">男生</span><div class="track"><div class="bar boy" id="pbBar" data-tag="单位“1”"></div></div></div>
+    </div>
+    <div class="sents" id="sents"></div>
+  </div>
+</section>
+
+<section>
+  <h2>四、生活里的同一个道理：降价再涨价</h2>
+  <p class="lead">原价 100 元，先降价 <span class="fr"><span>1</span><span>5</span></span>，再涨价 <span class="fr"><span>1</span><span>5</span></span>，能回到 100 元吗？</p>
+  <div class="card" id="price">
+    <div class="stage">
+      <div class="ptrack"><div class="pbar">
+        <div class="p-keep"></div><div class="p-add"></div><div class="p-cut"></div>
+        <div class="p-unit" data-tag="单位“1”"></div><div class="p-mark"></div>
+      </div></div>
+      <div class="pnum" id="pNum"></div>
+    </div>
+    <p class="caption" id="pCap"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>五、常见误区</h2>
+  <div class="mis">
+    <div class="card"><b>✗「男生比女生少 <span class="fr"><span>1</span><span>6</span></span>，所以女生比男生多 <span class="fr"><span>1</span><span>6</span></span>」</b><br>
+      把分数当成了人数那样「反过来照搬」。差还是 1 份，但分母从女生的 6 份变成了男生的 5 份：多 <span class="fr"><span>1</span><span>5</span></span>。</div>
+    <div class="card"><b>✗「男生是女生的 <span class="fr"><span>5</span><span>6</span></span>，所以女生是男生的 <span class="fr"><span>1</span><span>6</span></span>」</b><br>
+      「是几分之几」反过来要<b>上下颠倒</b>：女生是男生的 <span class="fr"><span>6</span><span>5</span></span>（6 份 ÷ 5 份），比 1 大，因为女生更多。</div>
+    <div class="card"><b>✗「先降 <span class="fr"><span>1</span><span>5</span></span> 再涨 <span class="fr"><span>1</span><span>5</span></span>，价格不变」</b><br>
+      两次的单位“1”不同：降价按 100 算（−20），涨价按 80 算（+16），最后是 96 元。</div>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <b>速记（只适用于「差是 1 份」的情况）</b><br>
+    A 比 B <b>少 <span class="fr"><span>1</span><span>n</span></span></b> ⇄ B 比 A <b>多 <span class="fr"><span>1</span><span>n−1</span></span></b>
+    例：少 <span class="fr"><span>1</span><span>6</span></span> ⇄ 多 <span class="fr"><span>1</span><span>5</span></span><br>
+    A 比 B <b>多 <span class="fr"><span>1</span><span>n</span></span></b> ⇄ B 比 A <b>少 <span class="fr"><span>1</span><span>n+1</span></span></b>
+    例：多 <span class="fr"><span>1</span><span>4</span></span> ⇄ 少 <span class="fr"><span>1</span><span>5</span></span><br>
+    <small style="color:var(--muted)">记不住也没关系：画出份数，用「差 ÷ 比字后面的量」现算就行。</small>
+  </div>
+</section>
+
+<section class="card sum">
+  <h2>一句话总结</h2>
+  <p>「多几人 / 少几人」只看<b class="d">差</b>，所以对称；「多几分之几 / 少几分之几」是<b class="d">差</b> ÷ <b class="u">单位“1”</b>，
+    而单位“1”永远是「比」字后面的那个量——换个说法，分母就换了人，分数自然不一样。</p>
+  <p class="lead" style="margin-top:8px">想继续练「已知少几分之几，求原来的量」？看 <a href="fraction-unit-one.html" style="color:var(--accent)">比…少几分之几</a>。</p>
+</section>
+
+<section class="lq" id="lq" aria-label="练习">
+  <div class="lq-head"><h2>练习</h2><span class="lq-score"></span></div>
+  <p class="lq-sub">学完上面的内容，来检验一下。每题作答后马上看到解析；点「重做练习」清空重来。分数用 a/b 的形式输入，如 1/7。</p>
+  <div class="lq-list"></div>
+  <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+</section>
+
+</main>
+
+<script>
+const resets = [];
+window.pageReset = () => resets.forEach(f => f());
+const F = (a, b) => `<span class="fr"><span>${a}</span><span>${b}</span></span>`;
+const gcd = (a, b) => b ? gcd(b, a % b) : a;
+const FR = (a, b) => { const g = gcd(a, b); return F(a / g, b / g); };
+
+/* 通用分步控制器 */
+function stepper(root, n, draw, ms = 1800) {
+  const btn = act => root.querySelector(`[data-act="${act}"]`), no = root.querySelector('.stepno');
+  const INIT = { step: 0, playing: false };
+  let S = { ...INIT }, timer = null;
+  const paint = () => {
+    draw(S.step);
+    no.textContent = `${S.step + 1} / ${n}`;
+    btn('prev').disabled = S.step === 0; btn('next').disabled = S.step === n - 1;
+    btn('play').textContent = S.playing ? '⏸ 暂停' : '▶ 播放';
+  };
+  const stop = () => { clearInterval(timer); timer = null; S.playing = false; };
+  const go = d => { S.step = Math.max(0, Math.min(n - 1, S.step + d)); paint(); };
+  btn('prev').onclick = () => { stop(); go(-1); };
+  btn('next').onclick = () => { stop(); go(1); };
+  btn('play').onclick = () => {
+    if (S.playing) { stop(); paint(); return; }
+    if (S.step === n - 1) S.step = 0;
+    S.playing = true; paint();
+    timer = setInterval(() => { go(1); if (S.step === n - 1) { stop(); paint(); } }, ms);
+  };
+  const reset = () => { stop(); S = { ...INIT }; paint(); };
+  btn('reset').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+/* ---------- 一、主分步动画 ---------- */
+{
+  const gBar = document.getElementById('gBar'), bBar = document.getElementById('bBar'), ghost = document.getElementById('gGhost');
+  const fEl = document.getElementById('dF'), cap = document.getElementById('dCap');
+  for (let i = 0; i < 6; i++) gBar.insertAdjacentHTML('beforeend', `<div class="cell" style="width:${100 / 6}%">5人</div>`);
+  for (let i = 0; i < 5; i++) bBar.insertAdjacentHTML('beforeend', `<div class="cell" style="width:20%">5人</div>`);
+  const g6 = gBar.children[5];
+  const STEPS = [
+    { unit: null, diff: false, f: '女生 <span class="g">6 份</span>，男生 <span class="b">5 份</span>',
+      t: '先画出来：每 1 格是 5 人。女生 6 格（30 人），男生 5 格（25 人）。' },
+    { unit: 'g', diff: false, f: `男生 ÷ 女生 = <span class="b">5 份</span> ÷ <span class="g">6 份</span> = ${F(5, 6)}`,
+      t: '「男生是女生的 5/6」：比字后面是女生，所以拿女生当尺子（单位“1”），把她们看成 6 份，男生占其中 5 份。' },
+    { unit: null, diff: true, f: '差 = <span class="g">6 份</span> − <span class="b">5 份</span> = <span class="d">1 份</span>（5 人）',
+      t: '两条线段比一比：女生多出来、男生缺的，都是同一格——差 1 份，也就是 5 人。这个差谁来看都一样。' },
+    { unit: 'g', diff: true, f: `男生比女生少：<span class="d">1 份</span> ÷ <span class="g">6 份</span> = ${F(1, 6)}`,
+      t: '「男生比女生少几分之几」：比字后面是女生 → 差要拿女生的 6 份去比。1 份占 6 份的 1/6。' },
+    { unit: 'b', diff: true, f: `女生比男生多：<span class="d">1 份</span> ÷ <span class="b">5 份</span> = ${F(1, 5)}`,
+      t: '换个说法「女生比男生多几分之几」：比字后面变成男生 → 尺子换成男生的 5 份。同样 1 份，占 5 份的 1/5。' },
+    { unit: 'b', diff: true, f: `女生 ÷ 男生 = ${F(6, 5)} = 1 + ${F(1, 5)}　·　差没变，分母 6 → 5`,
+      t: '对照一下：差始终是 1 份，变的只是分母（单位“1”）。女生是男生的 6/5，也就是男生的 1 倍再多 1/5。' },
+  ];
+  stepper(document.getElementById('demo'), STEPS.length, i => {
+    const s = STEPS[i];
+    gBar.classList.toggle('unit', s.unit === 'g');
+    bBar.classList.toggle('unit', s.unit === 'b');
+    g6.classList.toggle('diff', s.diff);
+    ghost.classList.toggle('diff', s.diff);
+    ghost.textContent = s.diff ? '缺 1 份' : '';
+    fEl.innerHTML = s.f; cap.textContent = s.t;
+  });
+}
+
+/* ---------- 三、自己试试 ---------- */
+{
+  const pf = document.getElementById('pf'), pm = document.getElementById('pm');
+  const pfo = document.getElementById('pfo'), pmo = document.getElementById('pmo');
+  const gBar = document.getElementById('pgBar'), bBar = document.getElementById('pbBar'), sents = document.getElementById('sents');
+  const baseBtns = document.querySelectorAll('#play [data-base]');
+  const INIT = { f: 6, m: 5, base: 'girl' };
+  let S = { ...INIT };
+  const cells = (bar, n, max) => {
+    bar.style.width = (n / max * 100) + '%';
+    bar.innerHTML = Array.from({ length: n }, () => `<div class="cell" style="width:${100 / n}%"></div>`).join('');
+  };
+  const draw = () => {
+    const { f, m, base } = S, max = Math.max(f, m), d = Math.abs(f - m);
+    pf.value = f; pm.value = m; pfo.textContent = f; pmo.textContent = m;
+    cells(gBar, f, max); cells(bBar, m, max);
+    gBar.classList.toggle('unit', base === 'girl'); bBar.classList.toggle('unit', base === 'boy');
+    gBar.dataset.tag = `单位“1” = 女生（${f} 份）`; bBar.dataset.tag = `单位“1” = 男生（${m} 份）`;
+    baseBtns.forEach(b => b.classList.toggle('on', b.dataset.base === base));
+    const cmp = (who, other, a, b) => d === 0 ? `<span class="${who[1]}">${who[0]}</span>和<span class="${other[1]}">${other[0]}</span>一样多`
+      : `<span class="${who[1]}">${who[0]}</span>比<span class="${other[1]}">${other[0]}</span><b>${a > b ? '多' : '少'}</b> ${FR(d, b)}　<small>差 ${d} 份 ÷ ${other[0]} ${b} 份</small>`;
+    const G = ['女生', 'g'], B = ['男生', 'b'];
+    const rows = [
+      { base: 'girl', html: `<span class="b">男生</span>是<span class="g">女生</span>的 ${FR(m, f)}　<small>${m} 份 ÷ ${f} 份</small>` },
+      { base: 'girl', html: cmp(B, G, m, f) },
+      { base: 'boy', html: `<span class="g">女生</span>是<span class="b">男生</span>的 ${FR(f, m)}　<small>${f} 份 ÷ ${m} 份</small>` },
+      { base: 'boy', html: cmp(G, B, f, m) },
+    ];
+    sents.innerHTML = rows.map(r => `<div class="sent${r.base === base ? ' hl' : ''}">${r.html}</div>`).join('');
+  };
+  pf.oninput = () => { S.f = +pf.value; draw(); };
+  pm.oninput = () => { S.m = +pm.value; draw(); };
+  baseBtns.forEach(b => b.onclick = () => { S.base = b.dataset.base; draw(); });
+  const reset = () => { S = { ...INIT }; draw(); };
+  resets.push(reset);
+  reset();
+}
+
+/* ---------- 四、降价再涨价 ---------- */
+{
+  const root = document.getElementById('price');
+  const keep = root.querySelector('.p-keep'), add = root.querySelector('.p-add'), cut = root.querySelector('.p-cut');
+  const unit = root.querySelector('.p-unit'), mark = root.querySelector('.p-mark');
+  const num = document.getElementById('pNum'), cap = document.getElementById('pCap');
+  const MAX = 110, pct = v => (v / MAX * 100) + '%';
+  const STEPS = [
+    { k: 100, a: 0, c: 0, u: 100, ut: '', n: '原价 <b>100</b> 元',
+      t: '原价 100 元。' },
+    { k: 80, a: 0, c: 20, u: 100, ut: '单位“1” = 原价 100 元', n: `100 − 100 × ${F(1, 5)} = 100 − 20 = <b>80</b> 元`,
+      t: '降价 1/5：「比原价降」，单位“1”是原价 100 元，降掉 20 元（红色虚线部分）。' },
+    { k: 80, a: 16, c: 4, u: 80, ut: '单位“1” = 现价 80 元', n: `80 + 80 × ${F(1, 5)} = 80 + 16 = <b>96</b> 元`,
+      t: '再涨价 1/5：这次是「比现价涨」，单位“1”换成了 80 元，只涨 16 元，到不了 100 元（还差 4 元）。' },
+    { k: 80, a: 20, c: 0, u: 80, ut: '单位“1” = 现价 80 元', n: `要涨回 20 元：20 ÷ 80 = ${F(1, 4)}`,
+      t: '想涨回原价，要涨同样的 20 元，但分母是 80：20 ÷ 80 = 1/4。降 1/5 ⇄ 涨 1/4，和「少 1/6 ⇄ 多 1/5」一模一样。' },
+  ];
+  stepper(root, STEPS.length, i => {
+    const s = STEPS[i];
+    keep.style.width = pct(s.k);
+    add.style.left = pct(s.k); add.style.width = pct(s.a); add.style.opacity = s.a ? 1 : 0;
+    cut.style.left = pct(s.k + s.a); cut.style.width = pct(s.c); cut.style.opacity = s.c ? 1 : 0;
+    unit.style.width = pct(s.u); unit.style.opacity = s.ut ? 1 : 0; unit.dataset.tag = s.ut;
+    mark.style.left = pct(100);
+    num.innerHTML = s.n; cap.textContent = s.t;
+  }, 2200);
+}
+
+/* ---------- 练习题 ---------- */
+window.LQ_ITEMS = [
+  { type: '选择', q: `苹果的个数是梨的 ${F(3, 4)}。苹果比梨少几分之几？`,
+    opts: [F(1, 4), F(1, 3), F(3, 4)], ans: 0,
+    why: `把梨看成 4 份（单位“1”），苹果 3 份，差 1 份。比字后面是梨 → 1 份 ÷ 4 份 = ${F(1, 4)}。` },
+  { type: '选择', q: `接上题，梨比苹果多几分之几？`,
+    opts: [F(1, 4), F(1, 3), F(4, 3)], ans: 1,
+    why: `差还是 1 份，但比字后面换成了苹果（3 份）→ 1 ÷ 3 = ${F(1, 3)}。选 ${F(1, 4)} 就是把分数「照搬反过来」的误区；${F(4, 3)} 是「梨是苹果的几分之几」。` },
+  { type: '判断', q: `甲比乙多 ${F(1, 4)}，那么乙比甲少 ${F(1, 4)}。`,
+    opts: ['对', '错'], ans: 1,
+    why: `乙 4 份，甲 5 份，差 1 份。乙比甲少：1 ÷ 5 = ${F(1, 5)}，不是 ${F(1, 4)}。` },
+  { type: '填空', q: `男生比女生少 ${F(1, 8)}，女生比男生多几分之几？`, ans: ['1/7'], placeholder: '如 1/5',
+    why: `女生 8 份，男生 7 份，差 1 份；比字后面是男生 → 1 ÷ 7 = ${F(1, 7)}。（速记：少 ${F(1, 'n')} ⇄ 多 ${F(1, 'n−1')}）` },
+  { type: '填空', q: `一个班女生 30 人，男生是女生的 ${F(5, 6)}。男生比女生少多少人？`, ans: ['5', '5人'], placeholder: '填人数',
+    why: `男生 = 30 × ${F(5, 6)} = 25 人，少 30 − 25 = 5 人。也可以直接 30 × ${F(1, 6)} = 5——单位“1”是女生，所以乘女生人数。` },
+  { type: '选择', q: `一件商品先涨价 ${F(1, 10)}，再降价 ${F(1, 10)}。现价和原价比？`,
+    opts: ['和原价一样', '比原价高', '比原价低'], ans: 2,
+    why: `设原价 100：涨 10 → 110；降价按 110 算，降 11 → 99 元，比原价低。第二次的单位“1”变大了，所以降得更多。` },
+  { type: '选择', q: `「今年产量比去年多 ${F(1, 3)}」，那么去年比今年少几分之几？`,
+    opts: [F(1, 3), F(1, 4), F(1, 2)], ans: 1,
+    why: `去年是单位“1”，看成 3 份，今年 4 份，差 1 份。反过来比字后面是今年（4 份）→ 1 ÷ 4 = ${F(1, 4)}。` },
+];
+</script>
+<script>
+/* ---------- 练习题（learn 通用组件） ---------- */
+(() => {
+  const box = document.getElementById('lq');
+  const items = window.LQ_ITEMS || [];
+  const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let answered = 0, right = 0;
+
+  function update() {
+    const all = answered === items.length;
+    score.textContent = `已答 ${answered} / ${items.length} · 答对 ${right}` +
+      (all ? (right === items.length ? ' · 全对！' : ' · 看看解析，再重做一次') : '');
+  }
+
+  function render() {
+    answered = 0; right = 0; list.innerHTML = '';
+    items.forEach((it, i) => {
+      const el = document.createElement('div');
+      el.className = 'lq-item';
+      el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
+      const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
+      const judge = (ok, answer) => {
+        answered++; if (ok) right++;
+        el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
+        why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
+        update();
+      };
+      if (it.opts) {
+        a.classList.add('lq-opts');
+        it.opts.forEach((o, j) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'lq-opt'; b.innerHTML = o;
+          b.onclick = () => {
+            a.querySelectorAll('button').forEach(x => x.disabled = true);
+            a.children[it.ans].classList.add('lq-right');
+            if (j !== it.ans) b.classList.add('lq-wrong');
+            judge(j === it.ans, it.opts[it.ans]);
+          };
+          a.append(b);
+        });
+      } else {
+        a.classList.add('lq-fill');
+        a.innerHTML = `<input type="text" autocomplete="off" spellcheck="false" placeholder="${it.placeholder || '输入答案'}" aria-label="第 ${i + 1} 题答案"><button type="button" class="lq-opt">确定</button>`;
+        const inp = a.querySelector('input'), go = a.querySelector('button');
+        const submit = () => {
+          if (!inp.value.trim()) { inp.focus(); return; }
+          inp.disabled = go.disabled = true;
+          const ok = it.ans.some(x => norm(x) === norm(inp.value));
+          inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
+          judge(ok, it.ans[0]);
+        };
+        go.onclick = submit;
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      }
+      list.append(el);
+    });
+    update();
+  }
+
+  box.querySelector('.lq-redo').addEventListener('click', render);
+  window.resetPage = () => {
+    if (typeof window.pageReset === 'function') window.pageReset();
+    render();
+  };
+  render();
+})();
+</script>
+</body>
+</html>
