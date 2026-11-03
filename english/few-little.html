@@ -18,6 +18,7 @@
   --pos: #1d8a62;     --pos-soft: #dcf2e7;
   --neg: #c2412d;     --neg-soft: #fbe3de;
   --water: #38bdf8;
+  --only: #7c3aed;    --only-soft: #ede4fd;
   --accent: var(--up-accent);
   --ok: #15803d; --bad: #c2412d;
   --font: var(--up-font);
@@ -30,6 +31,7 @@
     --pos: #4fd1a0; --pos-soft: #173a2c;
     --neg: #ff8a73; --neg-soft: #47231d;
     --water: #38bdf8;
+    --only: #c4a7ff;   --only-soft: #2d2147;
     --ok: #4ade80; --bad: #ff8a73;
     color-scheme: dark;
   }
@@ -49,6 +51,7 @@ h2 { font-size: 1.4rem; margin-bottom: 8px; }
 .U { color: var(--uncount); font-weight: 700; }
 .P { color: var(--pos); font-weight: 700; }
 .Ng { color: var(--neg); font-weight: 700; }
+.O { color: var(--only); font-weight: 700; }
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
 .card .big { font-size: 1.15rem; font-weight: 700; margin-bottom: 4px; }
@@ -110,6 +113,17 @@ button { font: inherit; cursor: pointer; }
 .tick small { display: block; font-weight: 400; }
 .tick.show { opacity: 1; }
 .pin { position: absolute; top: 40px; width: 4px; height: 22px; background: var(--accent); border-radius: 2px; transform: translateX(-50%); transition: left .8s ease; }
+
+/* 动画 5：only 搭配 */
+.chips { width: 100%; display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; font-size: 1.15rem; }
+.chip { padding: 4px 10px; border-radius: 8px; background: var(--surface); border: 1.5px solid var(--line); transition: all .6s; }
+.chip.only { border-color: var(--only); background: var(--only-soft); color: var(--only); font-weight: 700; }
+.chip.a { border-color: var(--pos); background: var(--pos-soft); color: var(--pos); font-weight: 700; }
+.chip.lit { color: var(--uncount); font-weight: 700; }
+.chip.x { border-color: var(--neg); background: var(--neg-soft); color: var(--neg); text-decoration: line-through; }
+.chip.verdict { border: none; background: none; font-weight: 700; }
+[data-scene="only"] .glass .fill { height: 18%; }
+[data-scene="only"] .person { opacity: 1; transform: none; width: auto; }
 
 /* 自己试试 */
 .pick { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
@@ -186,7 +200,8 @@ document.getElementById('up-reset').addEventListener('click', function () {
   <div class="analogy" style="margin-top:14px">
     🥛 <b>生活比喻：半杯水</b><br>
     同一杯水，乐观的人说「<b>还有一点</b>」，悲观的人说「<b>几乎没了</b>」。<br>
-    英语里的 <b>a</b> 就是这个开关：有 a = 「还有一点」😊，没有 a = 「几乎没有」😟。
+    英语里的 <b>a</b> 就是这个开关：有 a = 「还有一点」😊，没有 a = 「几乎没有」😟。<br>
+    <small>⚠️ 例外：前面有 <b>only</b> 时一律带 a（only a little / only a few），这时整体是「嫌少」，见动画 5。</small>
   </div>
 </section>
 
@@ -265,6 +280,24 @@ document.getElementById('up-reset').addEventListener('click', function () {
 </section>
 
 <section>
+  <h2>动画 5：<span class="O">only</span> 后面必须带 a</h2>
+  <p class="note">嫌少有两种说法：只用 <span class="Ng">little</span>，或者用 <span class="O">only</span> + <span class="P">a little</span>。两种说法不能混在一起用。</p>
+  <div class="stepper box" data-scene="only">
+    <div class="canvas mood">
+      <div class="person"><div class="face" id="onlyFace">🙂</div></div>
+      <div class="glass"><div class="fill"></div></div>
+      <div class="chips" id="onlyChips"></div>
+      <div class="caption" style="width:100%"></div>
+    </div>
+  </div>
+  <div class="grid" style="margin-top:12px">
+    <div class="card"><div class="big"><span class="O">only</span> → 带 a</div>only <b>a</b> little water ✅<br>only <b>a</b> few days ✅<br><small>❌ only little / ❌ only few</small></div>
+    <div class="card"><div class="big"><span class="O">very</span> → 不带 a</div>very little water ✅<br>very few people ✅<br><small>❌ very a little / ❌ very a few</small></div>
+    <div class="card"><div class="big">为什么？</div>a little / a few = 「一点 / 几个」，only 是在说「<b>仅仅</b>这么一点」。<br><small>little / few 本身已经是「几乎没有」，前面再加 only 意思就重复了。</small></div>
+  </div>
+</section>
+
+<section>
   <h2>🧪 自己试试：造个句子</h2>
   <p class="note">选一个名词，再选你的心情，看看该用哪个词。</p>
   <div class="box stepper">
@@ -272,6 +305,7 @@ document.getElementById('up-reset').addEventListener('click', function () {
     <div class="pick" id="moodPick">
       <button class="btn" data-mood="pos">😊 还有一点，够用</button>
       <button class="btn" data-mood="neg">😟 几乎没有，不够</button>
+      <button class="btn" data-mood="only">😒 只有这么一点（用 only）</button>
     </div>
     <div class="ctrl"><button class="btn" id="tryReset">↺ 重置</button></div>
     <div class="canvas" style="min-height:160px">
@@ -285,7 +319,7 @@ document.getElementById('up-reset').addEventListener('click', function () {
   <h2>📌 几个固定搭配</h2>
   <div class="grid">
     <div class="card"><div class="big">quite a few = 相当多</div>Quite a few people came.<br><small>来了不少人（不是"几个"！）</small></div>
-    <div class="card"><div class="big">only a few / only a little</div>I have only a little money.<br><small>只有一点点（强调少）</small></div>
+    <div class="card"><div class="big">only a few / only a little</div>I have only a little money.<br><small>只有一点点（嫌少）；only 后必须带 a</small></div>
     <div class="card"><div class="big">very few / very little</div>Very few students passed.<br><small>极少数人及格</small></div>
   </div>
 </section>
@@ -296,8 +330,9 @@ document.getElementById('up-reset').addEventListener('click', function () {
     <div class="card"><div class="big">❌ a few money</div><b>money</b> 是不可数名词（只能说多少钱，不能说"一个钱"），要用 <span class="U">a little</span> money。<br><small>但 coins / dollars 可数：a few dollars ✅</small></div>
     <div class="card"><div class="big">❌ 以为 few 比 a few 少很多</div>两者数量可能一样，<b>区别在态度</b>：few 偏否定（不够），a few 偏肯定（还有）。</div>
     <div class="card"><div class="big">❌ a little apples</div>apples 能数，要用 <span class="C">a few</span> apples。<br><small>a little 也可修饰形容词：I'm a little tired. 我有点累。</small></div>
+    <div class="card"><div class="big">❌ only little water</div>看到「嫌少」就去掉 a 是不对的，前面有 <span class="O">only</span> 时要带 a：only <b>a</b> little water。<br><small>这时虽然带 a，语气却是「只有这么点」。</small></div>
   </div>
-  <p class="summary" style="margin-top:18px">一句话：<b>能数用 few，不能数用 little；有 a 是"还有一点"，没 a 是"几乎没有"。</b></p>
+  <p class="summary" style="margin-top:18px">一句话：<b>能数用 few，不能数用 little；有 a 是"还有一点"，没 a 是"几乎没有"；前面有 only 时一律带 a，意思是"只有这么点"。</b></p>
 </section>
 
 <section>
@@ -401,6 +436,27 @@ makeStepper(scene('party'), [
   });
 }
 
+{
+  const root = scene('only');
+  const STEPS = [
+    { face: '😟', chips: [['There is'], ['little', 'lit'], ['water.'], ['✅', 'verdict']] },
+    { face: '😒', chips: [['There is'], ['only', 'only'], ['a', 'a'], ['little', 'lit'], ['water.'], ['✅', 'verdict']] },
+    { face: '🙅', chips: [['There is'], ['only', 'only'], ['a', 'x'], ['little', 'lit'], ['water.'], ['❌', 'verdict']] },
+    { face: '😒', chips: [['We have'], ['only', 'only'], ['a', 'a'], ['few', 'lit'], ['days left.'], ['✅', 'verdict']] },
+    { face: '💡', chips: [['little water'], ['或'], ['only', 'only'], ['a', 'a'], ['little water']] },
+  ];
+  makeStepper(root, [
+    '水只剩一点，嫌少的基本说法：There is <span class="Ng">little</span> water.',
+    '想强调「<b>只有</b>这么点」：加 <span class="O">only</span>，同时<b>要带 a</b> → only <span class="P">a</span> little water。' + note('虽然带 a，整句是嫌少的语气'),
+    '❌ 去掉 a 就错了：<s>only little water</s> 不是正确搭配。' + note('little 本身已经是「几乎没有」，再加 only 意思就重复了'),
+    '可数名词也一样：only <span class="P">a</span> few days ✅，<s>only few days</s> ❌',
+    '嫌少有两种说法，<b>二选一</b>：① <span class="Ng">little / few</span> ② <span class="O">only</span> <span class="P">a</span> little / <span class="O">only</span> <span class="P">a</span> few',
+  ], k => {
+    $('onlyFace').textContent = STEPS[k].face;
+    $('onlyChips').innerHTML = STEPS[k].chips.map(([t, c]) => `<span class="chip ${c || ''}">${t}</span>`).join('');
+  });
+}
+
 /* ---------- 自己试试 ---------- */
 {
   const NOUNS = [
@@ -422,13 +478,14 @@ makeStepper(scene('party'), [
     nounBox.querySelectorAll('[data-n]').forEach(b => b.classList.toggle('on', +b.dataset.n === st.noun));
     $('moodPick').querySelectorAll('[data-mood]').forEach(b => b.classList.toggle('on', b.dataset.mood === st.mood));
     const n = NOUNS[st.noun], pos = st.mood === 'pos';
-    const word = (pos ? 'a ' : '') + (n.c ? 'few' : 'little');
-    const cls = pos ? 'P' : 'Ng';
-    $('tryVis').textContent = n.e.repeat(n.c ? 3 : 1) + (pos ? ' 😊' : ' 😟');
+    const only = st.mood === 'only';
+    const word = (only ? 'only a ' : pos ? 'a ' : '') + (n.c ? 'few' : 'little');
+    const cls = only ? 'O' : pos ? 'P' : 'Ng';
+    $('tryVis').textContent = n.e.repeat(n.c ? 3 : 1) + (only ? ' 😒' : pos ? ' 😊' : ' 😟');
     const s = n.tpl(`<span class="${cls}">${word}</span>`);
     $('tryResult').innerHTML = `<div class="big ${cls}">${word}</div><div class="sent">${s.charAt(0).toUpperCase() + s.slice(1)}</div>
       <small>${n.w} ${n.c ? '<span class="C">能数</span> → few 家族' : '<span class="U">不能数</span> → little 家族'}；
-      ${pos ? '觉得还有一点 → 加 a' : '觉得几乎没有 → 不加 a'}</small>`;
+      ${only ? '前面有 only → 必须带 a，意思是「只有这么点」' : pos ? '觉得还有一点 → 加 a' : '觉得几乎没有 → 不加 a'}</small>`;
   }
   const reset = () => { Object.assign(st, INIT); render(); };
   $('tryReset').onclick = reset;
@@ -455,6 +512,12 @@ const QUIZ = [
     why: '见动画 3：同样来了 3 个人，失望的人说 few，满意的人说 a few（常见误区 2）。' },
   { type: '填空', text: 'I can speak ___ Japanese, so I can order food in Tokyo.（填两个词）', ans: 'a little',
     why: 'Japanese（日语）不可数；能点餐 → 还会一点 → a little。' },
+  { type: '选择', text: 'There is only ___ water left in the bottle. I’m still thirsty.', opts: ['little', 'a little', 'few', 'a few'], ans: 'a little',
+    why: 'water 不可数 → little 家族；虽然嫌水少，但前面有 only，必须带 a → only a little（见动画 5）。' },
+  { type: '判断', text: '“Hurry up! We have only few minutes left.” 这句话对吗？', opts: ['对', '错'], ans: '错',
+    why: 'only 后必须带 a：only a few minutes（常见误区 4）。' },
+  { type: '情景（迁移）', text: '你邀请了 20 人，结果只来了 3 个，你很失望。下面哪句是对的？', opts: ['Only few people came.', 'Very a few people came.', 'Only a few people came.'], ans: 'Only a few people came.',
+    why: 'only 搭配 a few；very 搭配 few（very few people came 也对）。only few 和 very a few 都是错的。' },
 ];
 const quizState = { answers: {} };
 const norm = s => s.trim().toLowerCase().replace(/\s+/g, ' ');
