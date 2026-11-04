@@ -15,11 +15,11 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = join(ROOT, 'dist');
 const SITE = 'Up 学习站';
 const CATEGORIES = [
-  { id: 'math', name: '数学', glyph: '∑', desc: '代数、几何、概率统计、微积分、线性代数' },
+  { id: 'chinese', name: '语文', glyph: '文', desc: '古诗文、文学常识、字词、阅读与写作' },
   { id: 'english', name: '英语', glyph: 'Aa', desc: '单词辨析、语法、发音、习惯用法' },
+  { id: 'math', name: '数学', glyph: '∑', desc: '代数、几何、概率统计、微积分、线性代数' },
   { id: 'model', name: 'AI 模型', glyph: 'AI', desc: '机器学习、神经网络、大模型原理' },
   { id: 'tech', name: '计算机技术', glyph: '</>', desc: '网络协议、数据结构与算法、操作系统、编程' },
-  { id: 'chinese', name: '语文', glyph: '文', desc: '古诗文、文学常识、字词、阅读与写作' },
 ];
 
 const esc = (s) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
