@@ -1,6 +1,6 @@
 ---
 name: learn-animate
-description: 当用户想弄懂某个知识时使用——"我要学习XXX""帮我解释XXX""我不理解XXX""XXX是什么""XXX和YYY的区别""XXX的原理"等任何不懂/想学的表达。按类目（math/english/model/tech）在 /home/opc/learn/<类目>/ 下从统一骨架生成一个用动画浅显讲解该知识点、接入全站导航条与重置约定、带练习题的自包含 HTML 文件，发布后把线上和本地链接交给用户。
+description: 当用户想弄懂某个知识时使用——"我要学习XXX""帮我解释XXX""我不理解XXX""XXX是什么""XXX和YYY的区别""XXX的原理"等任何不懂/想学的表达。按类目（math/english/model/tech/chinese）在 /home/opc/learn/<类目>/ 下从统一骨架生成一个用动画浅显讲解该知识点、接入全站导航条与重置约定、带练习题的自包含 HTML 文件，发布后把线上和本地链接交给用户。
 ---
 
 # learn-animate：生成动画学习页
@@ -8,7 +8,7 @@ description: 当用户想弄懂某个知识时使用——"我要学习XXX""帮�
 ## 流程
 
 1. **确定主题**：从用户的话里提炼出要学的知识点。若主题过大（如"学习机器学习"），选一个最核心的入门切口来做，并在回复里说明可以继续深入哪些子主题；不要为此反复追问。
-2. **确定类目**：按 `.claude/rules/learn-html.md` 的分类表归入 `math` / `english` / `model` / `tech` 之一。都不合适时先问用户。
+2. **确定类目**：按 `.claude/rules/learn-html.md` 的分类表归入 `math` / `english` / `model` / `tech` / `chinese` 之一。都不合适时先问用户。
 3. **查重**：`ls -R /home/opc/learn/`。已有同主题页面时，若用户想深入/补充，就在原文件上扩展；否则新建。
 4. **设计讲解脚本**（先在心里列好，不必输出给用户）：
    - 一个生活化比喻

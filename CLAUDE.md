@@ -40,6 +40,7 @@
 | english | `english/` | 英语 |
 | model | `model/` | AI 模型、机器学习、大模型 |
 | tech | `tech/` | 计算机技术、网络、数据结构与算法、编程 |
+| chinese | `chinese/` | 语文（汉语）：古诗文、文学常识、字词、阅读与写作 |
 
 都不合适时先问用户，再决定是否新增类目。
 
@@ -54,7 +55,7 @@
 
 - 线上站点：https://up.yiwei.website（Cloudflare Workers 静态资源，完全公开，无需登录）。其他 wrangler 命令用 `npm run cf -- <命令>`，例如回滚用 `npm run cf -- rollback`。
 - 部署凭据 `CLOUDFLARE_API_TOKEN`、`CLOUDFLARE_ACCOUNT_ID` 放在 `~/.config/cloudflare/up-learn.env`，由 `scripts/cf.sh` 读取，切勿读取或输出其内容。
-- 只有四个类目目录里的 `.html` 会被发布（见 `scripts/build.mjs`），网站首页（学科分类 + 搜索 + 最近更新）和各类目目录页都由该脚本自动生成，不要手写；新增类目时同步修改脚本里的 `CATEGORIES`，并在 `scripts/shell.mjs` 的 `ACCENTS` 里给它配一个主色（浅色、深色各一组）。
+- 只有各类目目录里的 `.html` 会被发布（见 `scripts/build.mjs`），网站首页（学科分类 + 搜索 + 最近更新）和各类目目录页都由该脚本自动生成，不要手写；新增类目时同步修改脚本里的 `CATEGORIES`，并在 `scripts/shell.mjs` 的 `ACCENTS` 里给它配一个主色（浅色、深色各一组）。
 - 全站外壳（导航条、`--up-*` 设计变量、类目主色）只在 `scripts/shell.mjs` 一处定义，想改导航条样式就改这里，重新 build + deploy 后全站生效。不引入前端框架。网站 logo（`site/favicon.svg`、`site/apple-touch-icon.png`）和 `site/` 下其他文件原样发布到网站根目录。
 - 发音音频：涉及读音的页面用 `npm run tts -- <类目>/<文件>.html` 生成内嵌 mp3。默认用 Google Cloud TTS Neural2（美音 en-US-Neural2-F + 英音 en-GB-Neural2-A），key 在 `~/.config/google/tts.env`（切勿读取或输出其内容）；没有 key 或加 `--engine=kokoro` 时用本地 Kokoro 模型（`~/.local/share/kokoro/`）。页面约定见 `scripts/tts.py` 开头的说明；普通单词由 Google 自行判断读音，多音词（如 close、live）要在 `audio-words` 清单里用 IPA 手动指定音标。
 - 文件名用简短的英文 kebab-case，例如 `tcp-sliding-window.html`、`rbtree.html`。生成前先 `ls` 看是否已有同主题文件。

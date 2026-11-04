@@ -1,0 +1,925 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>初中古诗文速查</title>
+<meta name="description" content="六至九年级上下册古诗文逐篇速查：作者、朝代、字、号、称号，可搜索、按年级或按作者查看，附易错点与练习。">
+<style>
+  /* 中性色映射到站点变量；内容语义色（诗/词/曲/文标签等）另配深色值 */
+  :root{
+    --ink:var(--up-ink);
+    --ink-2:color-mix(in srgb,var(--up-ink) 78%,var(--up-muted));
+    --ink-3:var(--up-muted);
+    --line:var(--up-line);
+    --line-2:color-mix(in srgb,var(--up-line) 55%,var(--up-surface));
+    --bg:var(--up-bg);
+    --card:var(--up-surface);
+    --soft:var(--up-surface-2);
+    --accent:var(--up-accent);
+    --accent-2:color-mix(in srgb,var(--up-accent) 70%,var(--up-surface));
+    --accent-soft:var(--up-accent-soft);
+    --ok:var(--up-ok); --bad:var(--up-bad);
+    --serif:"Songti SC","STSong","Noto Serif SC","Source Han Serif SC",serif;
+    --green:#2f6b52; --green-soft:#e6f0ea;
+    --blue:#3a5a78;  --blue-soft:#e8eef4;
+    --gold:#8a6a2f;  --gold-soft:#f4ece2; --gold-line:#f0e3c4;
+    --gray:#5d6470;  --gray-soft:#efeeea;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --green:#8fd3ad; --green-soft:#1d3229;
+      --blue:#9ec1e3;  --blue-soft:#1d2a38;
+      --gold:#e3c27d;  --gold-soft:#352c1c; --gold-line:#4a3d22;
+      --gray:#b3b9c2;  --gray-soft:#2a2e35;
+    }
+  }
+  :root[data-theme="dark"]{
+    --green:#8fd3ad; --green-soft:#1d3229;
+    --blue:#9ec1e3;  --blue-soft:#1d2a38;
+    --gold:#e3c27d;  --gold-soft:#352c1c; --gold-line:#4a3d22;
+    --gray:#b3b9c2;  --gray-soft:#2a2e35;
+  }
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;padding:0 16px 72px;background:var(--bg);color:var(--ink);
+    font-family:var(--up-font);font-size:15px;line-height:1.7;
+  }
+  .wrap{max-width:1120px;margin:0 auto;}
+
+  /* 页头 */
+  header.top{
+    padding:28px 0 24px;display:flex;align-items:flex-start;gap:22px;
+    border-bottom:1px solid var(--line);
+  }
+  .seal{
+    flex:0 0 auto;width:64px;height:64px;border-radius:6px;background:var(--accent);
+    color:var(--up-surface);display:flex;align-items:center;justify-content:center;
+    font-family:var(--serif);font-size:21px;line-height:1.15;
+    letter-spacing:2px;text-align:center;box-shadow:var(--up-shadow);
+  }
+  h1{margin:0 0 8px;font-family:var(--serif);font-size:29px;font-weight:700;letter-spacing:1px;}
+  .sub{margin:0;color:var(--ink-2);font-size:14px;}
+  .meta{margin-top:13px;display:flex;flex-wrap:wrap;gap:9px;font-size:12.5px;color:var(--ink-3);}
+  .meta span{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:3px 11px;}
+
+  /* 视图切换 */
+  .tabs{display:flex;gap:6px;margin-top:22px;}
+  .tab{
+    font-family:inherit;font-size:14px;color:var(--ink-2);background:transparent;
+    border:1px solid var(--line);border-bottom:none;border-radius:9px 9px 0 0;
+    padding:9px 22px;cursor:pointer;transition:.15s;
+  }
+  .tab.on{background:var(--card);color:var(--accent);font-weight:700;border-color:var(--line);}
+  .tab:hover{color:var(--accent);}
+
+  /* 工具条 */
+  .toolbar{
+    display:flex;flex-wrap:wrap;gap:12px;align-items:center;
+    background:var(--card);border:1px solid var(--line);border-top:none;
+    border-radius:0 10px 10px 10px;padding:13px 16px;
+  }
+  .search{position:relative;flex:1 1 220px;max-width:300px;color:var(--ink);}
+  .search input{
+    width:100%;padding:8px 13px 8px 33px;font-size:14px;font-family:inherit;color:var(--ink);
+    background:var(--soft);border:1px solid var(--line);border-radius:8px;outline:none;transition:.15s;
+  }
+  .search input:focus{border-color:var(--accent-2);box-shadow:0 0 0 3px var(--accent-soft);}
+  .search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);opacity:.45;}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;}
+  .chip{
+    font-family:inherit;font-size:13px;color:var(--ink-2);background:var(--soft);
+    border:1px solid var(--line);border-radius:999px;padding:5px 14px;cursor:pointer;transition:.15s;
+  }
+  .chip:hover{border-color:var(--accent-2);color:var(--accent);}
+  .chip.on{background:var(--accent);border-color:var(--accent);color:var(--up-surface);}
+
+  /* 年级区块 */
+  .grade{margin-top:38px;}
+  .grade-head{
+    display:flex;align-items:center;gap:14px;padding-bottom:10px;
+    border-bottom:2px solid var(--ink);margin-bottom:18px;
+  }
+  .grade-no{
+    width:44px;height:44px;flex:0 0 auto;border-radius:50%;
+    border:1.5px solid var(--accent);color:var(--accent);
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--serif);font-size:21px;font-weight:700;
+  }
+  .grade-name{font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:.06em;}
+  .grade-stat{margin-left:auto;font-size:12.5px;color:var(--ink-3);text-align:right;line-height:1.5;}
+  .grade-note{
+    font-size:12.5px;color:var(--gold);background:var(--gold-soft);border:1px solid var(--gold-line);
+    border-radius:8px;padding:7px 12px;margin:-6px 0 16px;
+  }
+
+  .term{margin-bottom:16px;}
+  .term-label{
+    display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin-bottom:8px;
+    font-size:13.5px;font-weight:700;color:var(--ink-2);letter-spacing:.05em;
+  }
+  .term-label i{
+    font-style:normal;display:inline-block;font-size:11.5px;font-weight:400;
+    color:var(--ink-3);background:var(--soft);border-radius:4px;padding:1px 7px;
+  }
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--up-radius);overflow:hidden;
+    box-shadow:var(--up-shadow);
+  }
+  .scroller{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;font-size:14px;min-width:780px;}
+  thead th{
+    background:var(--soft);color:var(--ink-3);font-weight:600;font-size:12px;letter-spacing:.05em;
+    text-align:left;padding:9px 13px;border-bottom:1px solid var(--line);white-space:nowrap;
+  }
+  tbody td{padding:9px 13px;border-bottom:1px solid var(--line-2);vertical-align:top;color:var(--ink-2);}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover td{background:color-mix(in srgb,var(--soft) 50%,var(--card));}
+  .work{font-family:var(--serif);font-size:15px;color:var(--ink);font-weight:600;line-height:1.5;}
+  .work small{font-family:var(--up-font);font-weight:400;font-size:12px;color:var(--ink-3);margin-left:4px;}
+  .kind{white-space:nowrap;}
+  .k{display:inline-block;font-size:11.5px;line-height:1.6;border-radius:4px;padding:0 6px;}
+  .k-shi{background:var(--gold-soft);color:var(--gold);}
+  .k-ci{background:var(--blue-soft);color:var(--blue);}
+  .k-qu{background:var(--green-soft);color:var(--green);}
+  .k-wen{background:var(--gray-soft);color:var(--gray);}
+  .aname{font-family:var(--serif);font-size:15px;font-weight:700;color:var(--ink);white-space:nowrap;}
+  .dyn{white-space:nowrap;color:var(--ink-3);font-size:13px;}
+  .zi{color:var(--accent);font-weight:600;white-space:nowrap;}
+  .hao{color:var(--green);font-size:13.5px;line-height:1.55;}
+  .na{color:var(--ink-3);opacity:.6;}
+
+  /* 作者视图 */
+  .panel[hidden]{display:none;}
+  .empty{padding:54px 20px;text-align:center;color:var(--ink-3);font-size:14px;}
+  .hint{margin:0 0 14px;font-size:12.5px;color:var(--ink-3);}
+
+  h2.sec{
+    margin:52px 0 6px;font-family:var(--serif);font-size:22px;letter-spacing:.06em;
+    display:flex;align-items:center;gap:12px;
+  }
+  h2.sec::before{content:"";width:4px;height:22px;border-radius:2px;background:var(--accent);}
+  .sec-desc{margin:0 0 18px;color:var(--ink-3);font-size:13.5px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(256px,1fr));gap:12px;}
+  .gcard{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:14px 16px;}
+  .gcard h3{margin:0 0 7px;font-size:14px;font-weight:700;color:var(--accent);letter-spacing:.04em;}
+  .gcard p{margin:0;font-size:13.5px;color:var(--ink-2);line-height:1.85;}
+
+  ol.warn{
+    list-style:none;margin:0;padding:0;counter-reset:w;
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(min(330px,100%),1fr));gap:10px;
+  }
+  ol.warn li{
+    counter-increment:w;position:relative;background:var(--card);border:1px solid var(--line);
+    border-left:3px solid var(--accent-2);border-radius:8px;padding:11px 14px 11px 42px;
+    font-size:13.5px;color:var(--ink-2);
+  }
+  ol.warn li::before{
+    content:counter(w);position:absolute;left:13px;top:11px;width:19px;height:19px;border-radius:50%;
+    background:var(--accent-soft);color:var(--accent);font-size:11.5px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;
+  }
+  ol.warn b{color:var(--ink);}
+
+  footer{
+    margin-top:52px;padding-top:18px;border-top:1px solid var(--line);
+    color:var(--ink-3);font-size:12.5px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;
+  }
+
+  @media (max-width:640px){
+    header.top{flex-direction:column;gap:14px;padding-top:20px;}
+    h1{font-size:23px;}
+    .grade-no{width:38px;height:38px;font-size:18px;}
+    .grade-name{font-size:19px;}
+    .grade-stat{display:none;}
+    .tab{padding:8px 16px;font-size:13px;}
+    h2.sec{font-size:19px;margin-top:40px;}
+  }
+  @media print{
+    body{background:#fff;padding:0;}
+    .toolbar,.tabs,.lq{display:none;}
+    .card{box-shadow:none;}
+    .grade{break-inside:avoid;}
+    tbody tr{break-inside:avoid;}
+  }
+
+  :root{--lq-surface:var(--card);--lq-ink:var(--ink);--lq-muted:var(--ink-3);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:var(--ok);--lq-bad:var(--bad);--lq-h2:22px}
+  /* ---------- 练习题（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+  .lq{display:grid;gap:12px;margin:52px 0 0}
+  .lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+  .lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
+  .lq-sub{margin:0;color:var(--lq-muted);font-size:14px}
+  .lq-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--lq-muted);font-variant-numeric:tabular-nums}
+  .lq-list{display:grid;gap:10px}
+  .lq-item{background:var(--lq-surface);border:1.5px solid var(--lq-line);border-radius:10px;padding:12px 16px;display:grid;gap:10px;min-width:0;color:var(--lq-ink);text-align:left}
+  .lq-item.lq-is-ok{border-color:var(--lq-ok)}
+  .lq-item.lq-is-bad{border-color:var(--lq-bad)}
+  .lq-q{font-size:15px;font-weight:600;line-height:1.6}
+  .lq-tag{display:inline-block;font-size:11px;font-weight:500;line-height:1.6;color:var(--lq-muted);border:1px solid var(--lq-line);border-radius:999px;padding:0 8px;margin-right:8px;vertical-align:1px}
+  .lq-opts,.lq-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .lq .lq-opt,.lq .lq-redo{font:inherit;font-size:14px;line-height:1.4;padding:6px 14px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);cursor:pointer;text-align:left;opacity:1}
+  .lq .lq-opt:hover:not(:disabled),.lq .lq-redo:hover{border-color:var(--lq-accent)}
+  .lq .lq-opt:disabled{cursor:default;opacity:1}
+  .lq .lq-opt.lq-right{border-color:var(--lq-ok);color:var(--lq-ok);font-weight:700}
+  .lq .lq-opt.lq-wrong{border-color:var(--lq-bad);color:var(--lq-bad);text-decoration:line-through}
+  .lq-fill input{font:inherit;font-size:14px;padding:6px 10px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);width:min(100%,200px)}
+  .lq-fill input.lq-right{border-color:var(--lq-ok)}
+  .lq-fill input.lq-wrong{border-color:var(--lq-bad)}
+  .lq-why{font-size:14px;line-height:1.65;color:var(--lq-muted)}
+  .lq-why:empty{display:none}
+  .lq-why .lq-ok{color:var(--lq-ok)}
+  .lq-why .lq-bad{color:var(--lq-bad)}
+</style>
+</head>
+</head>
+<body>
+<!-- up-shell:begin（由 scripts/shell.mjs 自动生成，勿手改） -->
+<nav id="up-nav" aria-label="网站导航">
+<a class="up-home" href="/" title="Up 学习站首页"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="up-nav-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c6ef5"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#up-nav-g)"/><path d="M12 52V42a2 2 0 0 1 2-2h10V32a2 2 0 0 1 2-2h10v-8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v30z" fill="#fff"/><circle cx="43" cy="13" r="5.5" fill="#ffa94d"/></svg><span>Up 学习站</span></a>
+<span class="up-sep" aria-hidden="true">›</span><a class="up-cat" href="/chinese">语文</a>
+<span class="up-sep" aria-hidden="true">›</span><span class="up-title">初中古诗文速查</span>
+<button id="up-reset" type="button" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+</nav>
+<style>
+:root{--up-bg:#f5f6f8;--up-surface:#ffffff;--up-surface-2:#eef0f4;--up-ink:#1d2127;--up-muted:#626b78;--up-line:#dfe2e8;--up-ok:#2b8a3e;--up-bad:#d6336c;--up-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);--up-font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif;--up-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;--up-radius:12px;--up-accent:#a33a2e;--up-accent-soft:#f8ece8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#f0a08f;--up-accent-soft:#3a2220;color-scheme:dark}}
+:root[data-theme="dark"]{--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#f0a08f;--up-accent-soft:#3a2220;color-scheme:dark}
+html{padding-top:52px;scroll-padding-top:64px}
+#up-nav{position:fixed;top:0;left:0;right:0;z-index:2147483000;height:52px;box-sizing:border-box;display:flex;align-items:center;gap:8px;
+padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));border-top:3px solid var(--up-accent);
+border-bottom:1px solid var(--up-line);background:color-mix(in srgb,var(--up-surface) 88%,transparent);
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:500 14px/1.2 var(--up-font);color:var(--up-ink);text-align:left}
+#up-nav a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none}
+#up-nav a:hover{color:var(--up-accent)}
+#up-nav svg{width:24px;height:24px;flex:none;display:block}
+#up-nav .up-home span{font-weight:700}
+#up-nav .up-cat{color:var(--up-accent);font-weight:600}
+#up-nav .up-sep{color:var(--up-muted);flex:none}
+#up-nav .up-title{color:var(--up-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#up-reset{margin:0 0 0 auto;flex:none;font:600 14px/1 var(--up-font);padding:8px 14px;border-radius:999px;cursor:pointer;
+border:1.5px solid var(--up-accent);background:transparent;color:var(--up-accent);transition:background .2s,color .2s}
+#up-reset:hover,#up-reset:focus-visible{background:var(--up-accent);color:var(--up-surface)}
+#up-reset:focus-visible,#up-nav a:focus-visible{outline:2px solid var(--up-accent);outline-offset:2px}
+@media (max-width:560px){#up-nav .up-home span{display:none}}
+@media print{#up-nav{display:none}html{padding-top:0}}
+</style>
+<script>
+document.getElementById('up-reset').addEventListener('click', function () {
+  if (typeof window.resetPage === 'function') window.resetPage();
+  else console.warn('本页没有定义 window.resetPage()，重置按钮无效');
+  window.scrollTo({ top: 0, behavior: 'auto' });
+});
+</script>
+<!-- up-shell:end -->
+<div class="wrap">
+
+  <header class="top">
+    <div class="seal">诗文<br>分册</div>
+    <div>
+      <h1>初中古诗文 · 分年级速查</h1>
+      <p class="sub">六年级—九年级 · 上下册逐篇对应 作者 / 朝代 / 字 / 号 / 称号</p>
+      <div class="meta">
+        <span id="statAll">— 篇</span>
+        <span>按册分块</span>
+        <span>可搜索·可按年级筛</span>
+        <span id="statAuthors">— 位作者</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab on" data-panel="grade">按年级</button>
+    <button class="tab" data-panel="author">按作者</button>
+  </div>
+
+  <div class="toolbar">
+    <div class="search">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.6-3.6"></path>
+      </svg>
+      <input id="q" type="text" placeholder="搜索篇目、作者、字、号…" autocomplete="off">
+    </div>
+    <div class="chips" id="chips">
+      <button class="chip on" data-g="all">全部</button>
+      <button class="chip" data-g="六">六年级</button>
+      <button class="chip" data-g="七">七年级</button>
+      <button class="chip" data-g="八">八年级</button>
+      <button class="chip" data-g="九">九年级</button>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-grade"></div>
+
+  <div class="panel auth-wrap" id="panel-author" hidden>
+    <p class="hint">按课内篇目数量排序；点上方"按年级"可回到分册视图。</p>
+    <div class="card">
+      <div class="scroller">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:52px;">#</th>
+              <th style="width:120px;">作者</th>
+              <th style="width:110px;">朝代</th>
+              <th style="width:96px;">字</th>
+              <th style="width:170px;">号</th>
+              <th style="width:200px;">世称 · 称号</th>
+              <th>课内篇目</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-author"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="sec">称号与并称 · 速记</h2>
+  <p class="sec-desc">"雅号＋并称"是文学常识题的高频落点，建议成组记忆。</p>
+  <div class="grid">
+    <div class="gcard">
+      <h3>诗坛雅号</h3>
+      <p>诗仙—李白　诗圣—杜甫<br>诗佛—王维　诗鬼—李贺<br>诗豪—刘禹锡　诗魔／诗王—白居易<br>诗杰—王勃　诗骨—陈子昂<br>诗囚—孟郊　诗奴—贾岛</p>
+    </div>
+    <div class="gcard">
+      <h3>两大"李杜"</h3>
+      <p>大李杜：李白 · 杜甫（盛唐）<br>小李杜：李商隐 · 杜牧（晚唐）<br><b>注意</b>：题干若说"小李杜"，答李商隐、杜牧。</p>
+    </div>
+    <div class="gcard">
+      <h3>山水田园</h3>
+      <p>王孟：王维 · 孟浩然<br>王维—"诗中有画，画中有诗"<br>陶渊明—田园诗开创者、"古今隐逸诗人之宗"</p>
+    </div>
+    <div class="gcard">
+      <h3>豪放与婉约</h3>
+      <p>苏辛：苏轼 · 辛弃疾（豪放）<br>婉约：柳永、李清照、秦观<br>李清照号易安居士，"千古第一才女"</p>
+    </div>
+    <div class="gcard">
+      <h3>唐宋八大家</h3>
+      <p>韩愈、柳宗元（唐）<br>欧阳修、苏洵、苏轼、苏辙、王安石、曾巩（宋）<br>初中涉及：韩愈、柳宗元、欧阳修、苏轼、王安石</p>
+    </div>
+    <div class="gcard">
+      <h3>其他重要并称</h3>
+      <p>初唐四杰：王勃、杨炯、卢照邻、骆宾王<br>三曹：曹操、曹丕、曹植<br>建安七子：含刘桢<br>元曲四大家：关汉卿、马致远、郑光祖、白朴<br>苏门四学士：含秦观、黄庭坚<br>中兴四大诗人：陆游、杨万里、范成大、尤袤<br>永嘉四灵：含赵师秀<br>扬州八怪：含郑燮（郑板桥）</p>
+    </div>
+  </div>
+
+  <h2 class="sec">最容易写错的 8 处</h2>
+  <p class="sec-desc">以下均为阅卷中真实高频失分点。</p>
+  <ol class="warn">
+    <li><b>刘禹锡字"梦得"</b>，不是"梦德"；世称"诗豪"、"刘宾客"。</li>
+    <li><b>王维字"摩诘"</b>（源自维摩诘居士），号摩诘居士，世称"王右丞"，不是"王右军"（那是王羲之）。</li>
+    <li><b>杜甫自号"少陵野老"</b>，世称"杜工部""杜少陵"；"樊川居士"是杜牧，别混。</li>
+    <li><b>李商隐号"玉谿生"</b>（也作玉溪生），另有"樊南生"；两个号都考过。</li>
+    <li><b>陶渊明一名潜，字元亮</b>，私谥"靖节"，自号"五柳先生"——四个信息常被拆开考。</li>
+    <li><b>范仲淹谥"文正"</b>；欧阳修、苏轼、张养浩谥"文忠"；王安石谥"文"。别串。</li>
+    <li><b>李清照只称"号易安居士"</b>，字不详（旧说字"漱玉"不可靠），答题时不要硬编字。</li>
+    <li><b>马致远号"东篱"</b>，"元曲四大家"之一；《天净沙·秋思》被誉为"秋思之祖"。</li>
+  </ol>
+
+  <section class="lq" id="lq" aria-label="练习">
+    <div class="lq-head"><h2>练习</h2><span class="lq-score"></span></div>
+    <p class="lq-sub">查完上面的表，来检验一下。每题作答后马上看到解析；点「重做练习」清空重来。</p>
+    <div class="lq-list"></div>
+    <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+  </section>
+
+  <footer>
+    <span>六、七、八、九年级 · 上下册逐篇整理</span>
+    <span>生卒年、字号以通行文学史说法为准；标注"—"者为史无确载</span>
+  </footer>
+</div>
+
+<script>
+/* ============ 作者库：朝代 / 字 / 号 / 世称 ============ */
+var AUTHORS = {
+  '曹操':   {d:'东汉末·魏', z:'孟德', h:'小字阿瞒', t:'魏武帝 · 三曹'},
+  '曹植':   {d:'三国·魏',   z:'子建', h:'', t:'陈思王 · 三曹'},
+  '刘桢':   {d:'东汉',      z:'公干', h:'', t:'建安七子'},
+  '陶渊明': {d:'东晋',      z:'元亮', h:'五柳先生', t:'靖节先生 · 隐逸诗人之宗'},
+  '王勃':   {d:'唐·初唐',   z:'子安', h:'', t:'初唐四杰之首 · 诗杰'},
+  '陈子昂': {d:'唐·初唐',   z:'伯玉', h:'', t:'陈拾遗 · 诗骨'},
+  '王绩':   {d:'唐·初唐',   z:'无功', h:'东皋子', t:''},
+  '孟浩然': {d:'唐·盛唐',   z:'浩然', h:'', t:'孟襄阳 · 王孟'},
+  '王维':   {d:'唐·盛唐',   z:'摩诘', h:'摩诘居士', t:'诗佛 · 王右丞'},
+  '李白':   {d:'唐·盛唐',   z:'太白', h:'青莲居士', t:'诗仙 · 谪仙人'},
+  '杜甫':   {d:'唐·盛唐',   z:'子美', h:'少陵野老', t:'诗圣 · 杜工部'},
+  '岑参':   {d:'唐·盛唐',   z:'', h:'', t:'岑嘉州 · 高岑'},
+  '崔颢':   {d:'唐·盛唐',   z:'', h:'', t:''},
+  '王湾':   {d:'唐·盛唐',   z:'', h:'', t:''},
+  '常建':   {d:'唐·盛唐',   z:'', h:'', t:''},
+  '李益':   {d:'唐·中唐',   z:'君虞', h:'', t:'边塞诗人'},
+  '韩愈':   {d:'唐·中唐',   z:'退之', h:'', t:'韩昌黎 · 唐宋八大家之首'},
+  '刘禹锡': {d:'唐·中唐',   z:'梦得', h:'', t:'诗豪 · 刘宾客'},
+  '白居易': {d:'唐·中唐',   z:'乐天', h:'香山居士 · 醉吟先生', t:'诗魔／诗王 · 白太傅'},
+  '柳宗元': {d:'唐·中唐',   z:'子厚', h:'', t:'柳河东 · 柳柳州 · 唐宋八大家'},
+  '刘长卿': {d:'唐·中唐',   z:'文房', h:'', t:'刘随州 · 五言长城'},
+  '李贺':   {d:'唐·中唐',   z:'长吉', h:'', t:'诗鬼'},
+  '韩翃':   {d:'唐·中唐',   z:'君平', h:'', t:'大历十才子'},
+  '孟郊':   {d:'唐·中唐',   z:'东野', h:'', t:'诗囚'},
+  '王建':   {d:'唐·中唐',   z:'仲初', h:'', t:'张王乐府（与张籍并称）'},
+  '杜牧':   {d:'唐·晚唐',   z:'牧之', h:'樊川居士', t:'小杜 · 小李杜'},
+  '李商隐': {d:'唐·晚唐',   z:'义山', h:'玉谿生 · 樊南生', t:'小李杜'},
+  '温庭筠': {d:'唐·晚唐',   z:'飞卿', h:'', t:'温八叉 · 花间词派鼻祖'},
+  '许浑':   {d:'唐·晚唐',   z:'用晦', h:'', t:''},
+  '范仲淹': {d:'北宋',      z:'希文', h:'', t:'范文正公 · 谥文正'},
+  '晏殊':   {d:'北宋',      z:'同叔', h:'', t:'晏元献 · 北宋倚声家初祖'},
+  '欧阳修': {d:'北宋',      z:'永叔', h:'醉翁 · 六一居士', t:'欧阳文忠公 · 唐宋八大家'},
+  '王安石': {d:'北宋',      z:'介甫', h:'半山', t:'王荆公 · 唐宋八大家'},
+  '苏轼':   {d:'北宋',      z:'子瞻', h:'东坡居士', t:'苏东坡 · 唐宋八大家 · 苏辛'},
+  '秦观':   {d:'北宋',      z:'少游 · 太虚', h:'淮海居士', t:'苏门四学士 · 婉约派'},
+  '黄庭坚': {d:'北宋',      z:'鲁直', h:'山谷道人', t:'苏门四学士 · 江西诗派宗主'},
+  '王观':   {d:'北宋',      z:'通叟', h:'', t:''},
+  '司马光': {d:'北宋',      z:'君实', h:'迂叟', t:'司马文正公 · 《资治通鉴》主编'},
+  '周敦颐': {d:'北宋',      z:'茂叔', h:'濂溪先生', t:'理学开山'},
+  '沈括':   {d:'北宋',      z:'存中', h:'梦溪丈人', t:'《梦溪笔谈》作者'},
+  '李清照': {d:'宋·两宋之交', z:'', h:'易安居士', t:'千古第一才女 · 婉约宗主'},
+  '朱敦儒': {d:'宋·两宋之交', z:'希真', h:'岩壑', t:'洛中八俊'},
+  '陈与义': {d:'宋·两宋之交', z:'去非', h:'简斋', t:'江西诗派'},
+  '陆游':   {d:'南宋',      z:'务观', h:'放翁', t:'中兴四大诗人'},
+  '杨万里': {d:'南宋',      z:'廷秀', h:'诚斋', t:'诚斋体 · 中兴四大诗人'},
+  '辛弃疾': {d:'南宋',      z:'幼安', h:'稼轩', t:'词中之龙 · 苏辛'},
+  '叶绍翁': {d:'南宋',      z:'嗣宗', h:'靖逸', t:'江湖诗派'},
+  '赵师秀': {d:'南宋',      z:'紫芝', h:'灵秀 · 天乐', t:'永嘉四灵之首'},
+  '文天祥': {d:'南宋末',    z:'宋瑞 · 履善', h:'文山', t:'文文山 · 爱国诗人'},
+  '马致远': {d:'元',        z:'千里', h:'东篱', t:'元曲四大家 · 曲状元'},
+  '张养浩': {d:'元',        z:'希孟', h:'云庄', t:'张文忠公'},
+  '王磐':   {d:'明',        z:'鸿渐', h:'西楼', t:'散曲家'},
+  '于谦':   {d:'明',        z:'廷益', h:'节庵', t:'于忠肃公'},
+  '宋濂':   {d:'明初',      z:'景濂', h:'潜溪', t:'宋文宪公 · 开国文臣之首'},
+  '魏学洢': {d:'明末',      z:'子敬', h:'', t:''},
+  '夏完淳': {d:'明末',      z:'存古', h:'', t:'少年抗清英雄'},
+  '张岱':   {d:'明末清初',  z:'宗子 · 石公', h:'陶庵 · 蝶庵居士', t:'晚明小品大家'},
+  '纳兰性德':{d:'清',       z:'容若', h:'楞伽山人', t:'清词三大家'},
+  '郑燮':   {d:'清',        z:'克柔', h:'板桥', t:'郑板桥 · 扬州八怪'},
+  '蒲松龄': {d:'清',        z:'留仙 · 剑臣', h:'柳泉居士', t:'聊斋先生'},
+  '纪昀':   {d:'清',        z:'晓岚', h:'石云 · 观弈道人', t:'纪文达公'},
+  '龚自珍': {d:'清',        z:'璱人', h:'定庵（定盦）', t:'龚定庵'},
+  '谭嗣同': {d:'清',        z:'复生', h:'壮飞', t:'戊戌六君子'},
+  '秋瑾':   {d:'清末',      z:'竞雄', h:'鉴湖女侠', t:'民主革命志士'},
+  '孔子':   {d:'春秋·鲁',   z:'仲尼', h:'名丘', t:'至圣先师 · 儒家创始人'},
+  '左丘明': {d:'春秋·鲁',   z:'', h:'', t:'《左传》相传作者'},
+  '孟子':   {d:'战国·邹',   z:'子舆', h:'名轲', t:'亚圣'},
+  '庄子':   {d:'战国·宋',   z:'名周', h:'', t:'道家代表 · 南华真人'},
+  '列子':   {d:'战国·郑',   z:'名御寇', h:'', t:'道家'},
+  '刘向':   {d:'西汉',      z:'子政', h:'', t:'《战国策》编订者'},
+  '司马迁': {d:'西汉',      z:'子长', h:'', t:'史圣 · 《史记》作者'},
+  '刘义庆': {d:'南朝·宋',   z:'', h:'', t:'《世说新语》编者'},
+  '陶弘景': {d:'南朝·梁',   z:'通明', h:'华阳隐居', t:'山中宰相'},
+  '吴均':   {d:'南朝·梁',   z:'叔庠', h:'', t:'吴均体'},
+  '郦道元': {d:'北魏',      z:'善长', h:'', t:'《水经注》作者'},
+  '诸葛亮': {d:'三国·蜀',   z:'孔明', h:'卧龙', t:'武乡侯 · 忠武侯'},
+  '佚名':   {d:'',          z:'', h:'', t:'无名氏'}
+};
+
+/* ============ 分册篇目 ============ */
+/* k: 诗 / 词 / 曲 / 文 / 民歌   s: 出处  d: 朝代（佚名时用）*/
+var BOOKS = [
+  { g:'六', term:'上', src:'统编版小学语文六年级上册', note:'小升初衔接；若使用五四学制初中六年级教材，篇目略有出入', items:[
+    {t:'宿建德江', k:'诗', a:'孟浩然'},
+    {t:'六月二十七日望湖楼醉书', k:'诗', a:'苏轼'},
+    {t:'西江月·夜行黄沙道中', k:'词', a:'辛弃疾'},
+    {t:'浪淘沙（九曲黄河万里沙）', k:'诗', a:'刘禹锡'},
+    {t:'江南春', k:'诗', a:'杜牧'},
+    {t:'书湖阴先生壁', k:'诗', a:'王安石'},
+    {t:'伯牙鼓琴', k:'文', a:'佚名', s:'《吕氏春秋》', d:'先秦'},
+    {t:'书戴嵩画牛', k:'文', a:'苏轼'}
+  ]},
+  { g:'六', term:'下', src:'统编版小学语文六年级下册', items:[
+    {t:'寒食', k:'诗', a:'韩翃'},
+    {t:'迢迢牵牛星', k:'诗', a:'佚名', s:'《古诗十九首》', d:'东汉'},
+    {t:'十五夜望月', k:'诗', a:'王建'},
+    {t:'游子吟', k:'诗', a:'孟郊'},
+    {t:'马诗', k:'诗', a:'李贺'},
+    {t:'石灰吟', k:'诗', a:'于谦'},
+    {t:'竹石', k:'诗', a:'郑燮'},
+    {t:'采薇（节选）', k:'诗', a:'佚名', s:'《诗经》', d:'先秦'},
+    {t:'春夜喜雨', k:'诗', a:'杜甫'},
+    {t:'早春呈水部张十八员外', k:'诗', a:'韩愈'},
+    {t:'江上渔者', k:'诗', a:'范仲淹'},
+    {t:'泊船瓜洲', k:'诗', a:'王安石'},
+    {t:'游园不值', k:'诗', a:'叶绍翁'},
+    {t:'卜算子·送鲍浩然之浙东', k:'词', a:'王观'},
+    {t:'浣溪沙（游蕲水清泉寺）', k:'词', a:'苏轼'},
+    {t:'清平乐（春归何处）', k:'词', a:'黄庭坚'},
+    {t:'学弈', k:'文', a:'佚名', s:'《孟子》', d:'战国'},
+    {t:'两小儿辩日', k:'文', a:'佚名', s:'《列子》', d:'战国'}
+  ]},
+
+  { g:'七', term:'上', src:'部编版七年级上册', items:[
+    {t:'观沧海', k:'诗', a:'曹操'},
+    {t:'闻王昌龄左迁龙标遥有此寄', k:'诗', a:'李白'},
+    {t:'次北固山下', k:'诗', a:'王湾'},
+    {t:'天净沙·秋思', k:'曲', a:'马致远'},
+    {t:'峨眉山月歌', k:'诗', a:'李白'},
+    {t:'江南逢李龟年', k:'诗', a:'杜甫'},
+    {t:'行军九日思长安故园', k:'诗', a:'岑参'},
+    {t:'夜上受降城闻笛', k:'诗', a:'李益'},
+    {t:'秋词（其一）', k:'诗', a:'刘禹锡'},
+    {t:'夜雨寄北', k:'诗', a:'李商隐'},
+    {t:'十一月四日风雨大作（其二）', k:'诗', a:'陆游'},
+    {t:'潼关', k:'诗', a:'谭嗣同'},
+    {t:'咏雪', k:'文', a:'刘义庆'},
+    {t:'陈太丘与友期行', k:'文', a:'刘义庆'},
+    {t:'《论语》十二章', k:'文', a:'孔子'},
+    {t:'诫子书', k:'文', a:'诸葛亮'},
+    {t:'狼', k:'文', a:'蒲松龄'},
+    {t:'穿井得一人', k:'文', a:'佚名', s:'《吕氏春秋》', d:'先秦'},
+    {t:'杞人忧天', k:'文', a:'佚名', s:'《列子》', d:'战国'}
+  ]},
+  { g:'七', term:'下', src:'部编版七年级下册', items:[
+    {t:'木兰诗', k:'民歌', a:'佚名', s:'北朝民歌', d:'北朝'},
+    {t:'登幽州台歌', k:'诗', a:'陈子昂'},
+    {t:'望岳', k:'诗', a:'杜甫'},
+    {t:'登飞来峰', k:'诗', a:'王安石'},
+    {t:'游山西村', k:'诗', a:'陆游'},
+    {t:'己亥杂诗（其五）', k:'诗', a:'龚自珍'},
+    {t:'竹里馆', k:'诗', a:'王维'},
+    {t:'春夜洛城闻笛', k:'诗', a:'李白'},
+    {t:'逢入京使', k:'诗', a:'岑参'},
+    {t:'晚春', k:'诗', a:'韩愈'},
+    {t:'泊秦淮', k:'诗', a:'杜牧'},
+    {t:'贾生', k:'诗', a:'李商隐'},
+    {t:'过松源晨炊漆公店', k:'诗', a:'杨万里'},
+    {t:'约客', k:'诗', a:'赵师秀'},
+    {t:'孙权劝学', k:'文', a:'司马光'},
+    {t:'卖油翁', k:'文', a:'欧阳修'},
+    {t:'陋室铭', k:'文', a:'刘禹锡'},
+    {t:'爱莲说', k:'文', a:'周敦颐'},
+    {t:'活板', k:'文', a:'沈括'},
+    {t:'河中石兽', k:'文', a:'纪昀'}
+  ]},
+
+  { g:'八', term:'上', src:'部编版八年级上册', items:[
+    {t:'野望', k:'诗', a:'王绩'},
+    {t:'黄鹤楼', k:'诗', a:'崔颢'},
+    {t:'使至塞上', k:'诗', a:'王维'},
+    {t:'渡荆门送别', k:'诗', a:'李白'},
+    {t:'钱塘湖春行', k:'诗', a:'白居易'},
+    {t:'庭中有奇树', k:'诗', a:'佚名', s:'《古诗十九首》', d:'东汉'},
+    {t:'龟虽寿', k:'诗', a:'曹操'},
+    {t:'赠从弟（其二）', k:'诗', a:'刘桢'},
+    {t:'梁甫行', k:'诗', a:'曹植'},
+    {t:'浣溪沙（一曲新词酒一杯）', k:'词', a:'晏殊'},
+    {t:'采桑子（轻舟短棹西湖好）', k:'词', a:'欧阳修'},
+    {t:'相见欢（金陵城上西楼）', k:'词', a:'朱敦儒'},
+    {t:'如梦令（常记溪亭日暮）', k:'词', a:'李清照'},
+    {t:'饮酒（其五）', k:'诗', a:'陶渊明'},
+    {t:'春望', k:'诗', a:'杜甫'},
+    {t:'雁门太守行', k:'诗', a:'李贺'},
+    {t:'赤壁', k:'诗', a:'杜牧'},
+    {t:'渔家傲（天接云涛连晓雾）', k:'词', a:'李清照'},
+    {t:'三峡', k:'文', a:'郦道元'},
+    {t:'答谢中书书', k:'文', a:'陶弘景'},
+    {t:'记承天寺夜游', k:'文', a:'苏轼'},
+    {t:'与朱元思书', k:'文', a:'吴均'},
+    {t:'得道多助，失道寡助', k:'文', a:'孟子'},
+    {t:'富贵不能淫', k:'文', a:'孟子'},
+    {t:'生于忧患，死于安乐', k:'文', a:'孟子'},
+    {t:'愚公移山', k:'文', a:'列子'},
+    {t:'周亚夫军细柳', k:'文', a:'司马迁'}
+  ]},
+  { g:'八', term:'下', src:'部编版八年级下册', items:[
+    {t:'关雎', k:'诗', a:'佚名', s:'《诗经》', d:'先秦'},
+    {t:'蒹葭', k:'诗', a:'佚名', s:'《诗经》', d:'先秦'},
+    {t:'式微', k:'诗', a:'佚名', s:'《诗经》', d:'先秦'},
+    {t:'子衿', k:'诗', a:'佚名', s:'《诗经》', d:'先秦'},
+    {t:'送杜少府之任蜀州', k:'诗', a:'王勃'},
+    {t:'望洞庭湖赠张丞相', k:'诗', a:'孟浩然'},
+    {t:'题破山寺后禅院', k:'诗', a:'常建'},
+    {t:'送友人', k:'诗', a:'李白'},
+    {t:'卜算子·黄州定慧院寓居作', k:'词', a:'苏轼'},
+    {t:'卜算子·咏梅', k:'词', a:'陆游'},
+    {t:'茅屋为秋风所破歌', k:'诗', a:'杜甫'},
+    {t:'卖炭翁', k:'诗', a:'白居易'},
+    {t:'石壕吏', k:'诗', a:'杜甫'},
+    {t:'白雪歌送武判官归京', k:'诗', a:'岑参'},
+    {t:'桃花源记', k:'文', a:'陶渊明'},
+    {t:'小石潭记', k:'文', a:'柳宗元'},
+    {t:'核舟记', k:'文', a:'魏学洢'},
+    {t:'北冥有鱼', k:'文', a:'庄子'},
+    {t:'虽有嘉肴', k:'文', a:'佚名', s:'《礼记》', d:'先秦'},
+    {t:'大道之行也', k:'文', a:'佚名', s:'《礼记》', d:'先秦'},
+    {t:'马说', k:'文', a:'韩愈'}
+  ]},
+
+  { g:'九', term:'上', src:'部编版九年级上册', items:[
+    {t:'行路难（其一）', k:'诗', a:'李白'},
+    {t:'酬乐天扬州初逢席上见赠', k:'诗', a:'刘禹锡'},
+    {t:'水调歌头（明月几时有）', k:'词', a:'苏轼'},
+    {t:'月夜忆舍弟', k:'诗', a:'杜甫'},
+    {t:'长沙过贾谊宅', k:'诗', a:'刘长卿'},
+    {t:'左迁至蓝关示侄孙湘', k:'诗', a:'韩愈'},
+    {t:'商山早行', k:'诗', a:'温庭筠'},
+    {t:'咸阳城东楼', k:'诗', a:'许浑'},
+    {t:'无题（相见时难别亦难）', k:'诗', a:'李商隐'},
+    {t:'行香子（树绕村庄）', k:'词', a:'秦观'},
+    {t:'丑奴儿·书博山道中壁', k:'词', a:'辛弃疾'},
+    {t:'岳阳楼记', k:'文', a:'范仲淹'},
+    {t:'醉翁亭记', k:'文', a:'欧阳修'},
+    {t:'湖心亭看雪', k:'文', a:'张岱'}
+  ]},
+  { g:'九', term:'下', src:'部编版九年级下册', items:[
+    {t:'渔家傲·秋思', k:'词', a:'范仲淹'},
+    {t:'江城子·密州出猎', k:'词', a:'苏轼'},
+    {t:'破阵子·为陈同甫赋壮词以寄之', k:'词', a:'辛弃疾'},
+    {t:'满江红·小住京华', k:'词', a:'秋瑾'},
+    {t:'定风波（莫听穿林打叶声）', k:'词', a:'苏轼'},
+    {t:'临江仙·夜登小阁忆洛中旧游', k:'词', a:'陈与义'},
+    {t:'太常引·建康中秋夜为吕叔潜赋', k:'词', a:'辛弃疾'},
+    {t:'浣溪沙·身向云山那畔行', k:'词', a:'纳兰性德'},
+    {t:'南乡子·登京口北固亭有怀', k:'词', a:'辛弃疾'},
+    {t:'过零丁洋', k:'诗', a:'文天祥'},
+    {t:'山坡羊·潼关怀古', k:'曲', a:'张养浩'},
+    {t:'朝天子·咏喇叭', k:'曲', a:'王磐'},
+    {t:'别云间', k:'诗', a:'夏完淳'},
+    {t:'鱼我所欲也', k:'文', a:'孟子'},
+    {t:'唐雎不辱使命', k:'文', a:'刘向'},
+    {t:'送东阳马生序', k:'文', a:'宋濂'},
+    {t:'曹刿论战', k:'文', a:'左丘明'},
+    {t:'邹忌讽齐王纳谏', k:'文', a:'刘向'},
+    {t:'出师表', k:'文', a:'诸葛亮'}
+  ]}
+];
+
+var GRADE_NAME = {'六':'六年级','七':'七年级','八':'八年级','九':'九年级'};
+var KIND_CLASS = {'诗':'k-shi','词':'k-ci','曲':'k-qu','文':'k-wen','民歌':'k-shi'};
+var ORDER = ['六','七','八','九'];
+
+var state = { panel:'grade', grade:'all', q:'' };
+
+function esc(s){
+  return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function authorOf(name){ return AUTHORS[name] || {d:'', z:'', h:'', t:''}; }
+function dynastyOf(it){
+  if (it.d) return it.d;
+  var a = authorOf(it.a);
+  return a.d || '—';
+}
+function match(it){
+  if (!state.q) return true;
+  var a = authorOf(it.a);
+  var hay = [it.t, it.a, it.s || '', a.d, a.z, a.h, a.t].join(' ').toLowerCase();
+  return hay.indexOf(state.q) > -1;
+}
+function kindTag(k){
+  return '<span class="k ' + (KIND_CLASS[k] || 'k-wen') + '">' + k + '</span>';
+}
+
+/* ---------- 渲染：年级视图 ---------- */
+function renderGrade(){
+  var html = '';
+  ORDER.forEach(function(g){
+    if (state.grade !== 'all' && state.grade !== g) return;
+
+    var blocks = BOOKS.filter(function(b){ return b.g === g; });
+
+    // 先算命中数量
+    var hitTotal = 0, stat = {诗:0, 词:0, 曲:0, 文:0, 民歌:0};
+    blocks.forEach(function(b){
+      b.items.forEach(function(it){
+        if (match(it)) { hitTotal++; stat[it.k] = (stat[it.k] || 0) + 1; }
+      });
+    });
+    if (!hitTotal) return;
+
+    var statTxt = [];
+    ['诗','词','曲','民歌','文'].forEach(function(k){
+      if (stat[k]) statTxt.push(k + ' ' + stat[k]);
+    });
+
+    html += '<section class="grade">';
+    html += '<div class="grade-head">';
+    html += '<div class="grade-no">' + g + '</div>';
+    html += '<div class="grade-name">' + GRADE_NAME[g] + '</div>';
+    html += '<div class="grade-stat">共 ' + hitTotal + ' 篇<br>' + statTxt.join(' · ') + '</div>';
+    html += '</div>';
+
+    blocks.forEach(function(b){
+      var rows = b.items.filter(match).map(function(it){
+        var a = authorOf(it.a);
+        var src = it.s ? '<small>' + esc(it.s) + '</small>' : '';
+        return '<tr>'
+          + '<td class="work">' + esc(it.t) + '</td>'
+          + '<td class="kind">' + kindTag(it.k) + '</td>'
+          + '<td class="aname">' + esc(it.a) + src + '</td>'
+          + '<td class="dyn">' + esc(dynastyOf(it)) + '</td>'
+          + '<td class="' + (a.z ? 'zi' : 'na') + '">' + (a.z ? esc(a.z) : '—') + '</td>'
+          + '<td class="' + (a.h || a.t ? 'hao' : 'na') + '">' + (a.h || a.t ? esc([a.h, a.t].filter(Boolean).join(' · ')) : '—') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      if (!rows) return;
+
+      html += '<div class="term">';
+      html += '<div class="term-label">' + GRADE_NAME[g] + b.term + '册 <i>' + esc(b.src) + '</i></div>';
+      if (b.note) html += '<div class="grade-note">提示：' + esc(b.note) + '</div>';
+      html += '<div class="card"><div class="scroller"><table>';
+      html += '<thead><tr><th style="width:250px;">篇目</th><th style="width:56px;">类</th>'
+           +  '<th style="width:130px;">作者</th><th style="width:100px;">朝代</th>'
+           +  '<th style="width:96px;">字</th><th>号 · 世称称号</th></tr></thead>';
+      html += '<tbody>' + rows + '</tbody></table></div></div>';
+      html += '</div>';
+    });
+
+    html += '</section>';
+  });
+
+  if (!html) html = '<div class="empty">没有匹配的篇目，换个关键词试试</div>';
+  document.getElementById('panel-grade').innerHTML = html;
+}
+
+/* ---------- 渲染：作者视图 ---------- */
+function buildAuthorIndex(){
+  var map = {};
+  BOOKS.forEach(function(b){
+    b.items.forEach(function(it){
+      var key = it.a;
+      if (key === '佚名') return;          // 无名氏不计入作者榜
+      if (!map[key]) map[key] = {a:key, works:[], n:0};
+      map[key].works.push(it.t);
+      map[key].n++;
+    });
+  });
+  return Object.keys(map).map(function(k){ return map[k]; })
+    .sort(function(x, y){
+      if (y.n !== x.n) return y.n - x.n;
+      return x.a.localeCompare(y.a, 'zh');
+    });
+}
+
+function anonCount(){
+  var n = 0;
+  BOOKS.forEach(function(b){
+    b.items.forEach(function(it){ if (it.a === '佚名') n++; });
+  });
+  return n;
+}
+
+function renderAuthor(){
+  var list = buildAuthorIndex().filter(function(row){
+    if (!state.q) return true;
+    var a = authorOf(row.a);
+    var hay = [row.a, a.d, a.z, a.h, a.t, row.works.join(' ')].join(' ').toLowerCase();
+    return hay.indexOf(state.q) > -1;
+  });
+
+  var rows = list.map(function(row, i){
+    var a = authorOf(row.a);
+    return '<tr>'
+      + '<td class="dyn">' + String(i + 1).padStart(2, '0') + '</td>'
+      + '<td class="aname">' + esc(row.a) + '</td>'
+      + '<td class="dyn">' + esc(a.d || '—') + '</td>'
+      + '<td class="' + (a.z ? 'zi' : 'na') + '">' + (a.z ? esc(a.z) : '—') + '</td>'
+      + '<td class="' + (a.h ? 'hao' : 'na') + '">' + (a.h ? esc(a.h) : '—') + '</td>'
+      + '<td style="font-size:13px;">' + (a.t ? esc(a.t) : '<span class="na">—</span>') + '</td>'
+      + '<td class="works" style="font-size:13px;line-height:1.65;">' + esc(row.works.join('、')) + '</td>'
+      + '</tr>';
+  }).join('');
+
+  document.getElementById('tbody-author').innerHTML = rows ||
+    '<tr><td colspan="7" class="empty">没有匹配的作者</td></tr>';
+  document.getElementById('statAuthors').textContent = buildAuthorIndex().length + ' 位作者 · ' + anonCount() + ' 篇佚名';
+}
+
+/* ---------- 统计 ---------- */
+function initStats(){
+  var total = 0;
+  BOOKS.forEach(function(b){ total += b.items.length; });
+  document.getElementById('statAll').textContent = total + ' 篇';
+  document.getElementById('statAuthors').textContent = buildAuthorIndex().length + ' 位作者 · ' + anonCount() + ' 篇佚名';
+}
+
+/* ---------- 交互 ---------- */
+var q = document.getElementById('q');
+q.addEventListener('input', function(){
+  state.q = q.value.trim().toLowerCase();
+  renderGrade();
+  renderAuthor();
+});
+
+function setGrade(g){
+  Array.prototype.forEach.call(document.getElementById('chips').children, function(c){
+    c.classList.toggle('on', c.getAttribute('data-g') === g);
+  });
+  state.grade = g;
+  renderGrade();
+}
+document.getElementById('chips').addEventListener('click', function(e){
+  var b = e.target.closest('.chip');
+  if (!b) return;
+  setGrade(b.getAttribute('data-g'));
+});
+
+function setPanel(p){
+  state.panel = p;
+  Array.prototype.forEach.call(document.querySelectorAll('.tab'), function(t){
+    t.classList.toggle('on', t.getAttribute('data-panel') === p);
+  });
+  document.getElementById('panel-grade').hidden = (p !== 'grade');
+  document.getElementById('panel-author').hidden = (p !== 'author');
+  document.getElementById('chips').style.display = (p === 'grade') ? 'flex' : 'none';
+  q.placeholder = (p === 'grade') ? '搜索篇目、作者、字、号…' : '搜索作者、字、号、篇目…';
+}
+Array.prototype.forEach.call(document.querySelectorAll('.tab'), function(tab){
+  tab.addEventListener('click', function(){ setPanel(tab.getAttribute('data-panel')); });
+});
+
+/* ---------- 重置：回到刚打开时的样子（练习组件会把它包进 window.resetPage） ---------- */
+window.pageReset = function(){
+  q.value = ''; state.q = '';
+  setPanel('grade');
+  setGrade('all');
+  renderAuthor();
+};
+
+initStats();
+window.pageReset();
+
+/* ---------- 练习题 ---------- */
+window.LQ_ITEMS = [
+  { type:'选择', q:'世称"诗豪"的是哪位诗人？', opts:['李白','刘禹锡','杜甫','李贺'], ans:1,
+    why:'刘禹锡（字梦得）世称"诗豪"、"刘宾客"。李白是诗仙，杜甫是诗圣，李贺是诗鬼。' },
+  { type:'判断', q:'王维字摩诘，世称"王右军"。', opts:['对','错'], ans:1,
+    why:'常见误区：王维世称"王右丞"（做过尚书右丞）；"王右军"是书法家王羲之。见「最容易写错的 8 处」第 2 条。' },
+  { type:'选择', q:'题干说"小李杜"，指的是哪两位？', opts:['李白、杜甫','李商隐、杜牧','李贺、杜荀鹤','李清照、杜甫'], ans:1,
+    why:'大李杜是盛唐的李白、杜甫；小李杜是晚唐的李商隐、杜牧。' },
+  { type:'填空', q:'《陋室铭》的作者刘禹锡，字＿＿。', ans:['梦得'], placeholder:'两个字',
+    why:'刘禹锡字"梦得"，常被误写成"梦德"。' },
+  { type:'选择', q:'《天净沙·秋思》属于哪种体裁？', opts:['诗','词','曲','文'], ans:2,
+    why:'"天净沙"是元曲曲牌，作者马致远（号东篱），本篇被誉为"秋思之祖"。看到"天净沙""山坡羊""朝天子"这类曲牌，就是元曲。' },
+  { type:'填空', q:'陶渊明，一名潜，字元亮，自号＿＿＿＿。', ans:['五柳先生'], placeholder:'四个字',
+    why:'陶渊明自号"五柳先生"（出自《五柳先生传》），私谥"靖节"。名、字、号、谥常被拆开考。' },
+  { type:'迁移', q:'某位作者号"东坡居士"，谥"文忠"，是"唐宋八大家"之一。下列篇目中哪篇出自他手？', opts:['《岳阳楼记》','《醉翁亭记》','《记承天寺夜游》','《爱莲说》'], ans:2,
+    why:'号东坡居士的是苏轼，《记承天寺夜游》是他贬居黄州时所作。《岳阳楼记》是范仲淹（谥文正），《醉翁亭记》是欧阳修（也谥文忠、号醉翁——别被"文忠"带偏），《爱莲说》是周敦颐。' },
+];
+</script>
+<script>
+/* ---------- 练习题（learn 通用组件） ---------- */
+(() => {
+  const box = document.getElementById('lq');
+  const items = window.LQ_ITEMS || [];
+  const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let answered = 0, right = 0;
+
+  function update() {
+    const all = answered === items.length;
+    score.textContent = `已答 ${answered} / ${items.length} · 答对 ${right}` +
+      (all ? (right === items.length ? ' · 全对！' : ' · 看看解析，再重做一次') : '');
+  }
+
+  function render() {
+    answered = 0; right = 0; list.innerHTML = '';
+    items.forEach((it, i) => {
+      const el = document.createElement('div');
+      el.className = 'lq-item';
+      el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
+      const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
+      const judge = (ok, answer) => {
+        answered++; if (ok) right++;
+        el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
+        why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
+        update();
+      };
+      if (it.opts) {
+        a.classList.add('lq-opts');
+        it.opts.forEach((o, j) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'lq-opt'; b.innerHTML = o;
+          b.onclick = () => {
+            a.querySelectorAll('button').forEach(x => x.disabled = true);
+            a.children[it.ans].classList.add('lq-right');
+            if (j !== it.ans) b.classList.add('lq-wrong');
+            judge(j === it.ans, it.opts[it.ans]);
+          };
+          a.append(b);
+        });
+      } else {
+        a.classList.add('lq-fill');
+        a.innerHTML = `<input type="text" autocomplete="off" spellcheck="false" placeholder="${it.placeholder || '输入答案'}" aria-label="第 ${i + 1} 题答案"><button type="button" class="lq-opt">确定</button>`;
+        const inp = a.querySelector('input'), go = a.querySelector('button');
+        const submit = () => {
+          if (!inp.value.trim()) { inp.focus(); return; }
+          inp.disabled = go.disabled = true;
+          const ok = it.ans.some(x => norm(x) === norm(inp.value));
+          inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
+          judge(ok, it.ans[0]);
+        };
+        go.onclick = submit;
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      }
+      list.append(el);
+    });
+    update();
+  }
+
+  box.querySelector('.lq-redo').addEventListener('click', render);
+  window.resetPage = () => {
+    if (typeof window.pageReset === 'function') window.pageReset();
+    render();
+  };
+  render();
+})();
+</script>
+</body>
+</html>

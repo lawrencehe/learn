@@ -9,6 +9,7 @@ export const ACCENTS = {
   english: { light: ['#2f9e44', '#ebfbee'], dark: ['#69db7c', '#1b3222'] },
   model: { light: ['#7048e8', '#f3f0ff'], dark: ['#b197fc', '#2a2445'] },
   tech: { light: ['#1c7ed6', '#e7f5ff'], dark: ['#74c0fc', '#17304a'] },
+  chinese: { light: ['#a33a2e', '#f8ece8'], dark: ['#f0a08f', '#3a2220'] },
 };
 
 // 全站中性色 + 字体。学习页用 var(--up-*)，不要自己再定义一套背景/文字/边框色。
