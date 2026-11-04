@@ -204,6 +204,78 @@
     tbody tr{break-inside:avoid;}
   }
 
+  /* ---------- 记忆口诀 ---------- */
+  .mn{display:block;margin-top:5px;font-family:var(--up-font);font-size:12.5px;font-weight:400;line-height:1.55;color:var(--gold);white-space:normal}
+  .mn::before{content:"💡 ";}
+  body.no-mn .mn{display:none}
+  .mn-col{min-width:240px}
+  body.no-mn .mn-col{display:none}
+  .chip.mn-toggle{margin-left:auto}
+  .chip.mn-toggle.on{background:var(--gold-soft);border-color:var(--gold);color:var(--gold)}
+  .tipbar{margin-top:16px;font-size:13px;color:var(--ink-2);background:var(--gold-soft);border:1px solid var(--gold-line);border-radius:10px;padding:9px 14px}
+  .tipbar a{color:var(--accent)}
+
+  /* 名与字：翻卡片 */
+  .rel-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(250px,100%),1fr));gap:12px}
+  .rel{background:var(--card);border:1px solid var(--line);border-radius:var(--up-radius);padding:14px 16px;display:grid;gap:10px;align-content:start}
+  .rel h3{margin:0;font-size:15px;color:var(--accent)}
+  .rel p{margin:0;font-size:13px;color:var(--ink-3)}
+  .flips{display:grid;gap:8px}
+  .flip{font:inherit;text-align:left;cursor:pointer;border:1.5px dashed var(--line);background:var(--soft);color:var(--ink);border-radius:10px;padding:8px 12px;min-height:44px;transition:background .6s,border-color .6s}
+  .flip .f-name{font-family:var(--serif);font-weight:700;font-size:15px}
+  .flip .f-zi{font-family:var(--serif);font-weight:700;color:var(--accent);opacity:0;transition:opacity .6s}
+  .flip .f-why{display:block;font-size:12.5px;color:var(--ink-2);line-height:1.55;max-height:0;overflow:hidden;opacity:0;transition:max-height .6s,opacity .6s}
+  .flip .f-ask{font-size:12px;color:var(--ink-3)}
+  .flip.open{border-style:solid;border-color:var(--accent-2);background:var(--card)}
+  .flip.open .f-zi{opacity:1}
+  .flip.open .f-why{max-height:6em;opacity:1;margin-top:4px}
+  .flip.open .f-ask{display:none}
+  .hao-tips{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:12px;margin-top:12px}
+
+  /* 朝代时间轴 */
+  .tl-card{background:var(--card);border:1px solid var(--line);border-radius:var(--up-radius);box-shadow:var(--up-shadow);padding:16px}
+  .song{font-family:var(--serif);font-size:14px;line-height:1.9;color:var(--ink-2);background:var(--soft);border-radius:10px;padding:10px 14px;margin-bottom:14px}
+  .song b{color:var(--accent)}
+  .tl{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(118px,1fr);gap:8px;overflow-x:auto;padding:4px 2px 10px;position:relative}
+  .era{border:1.5px solid var(--line);border-top:4px solid var(--line);border-radius:10px;padding:8px;background:var(--card);transition:opacity .6s,border-color .6s,transform .6s;display:flex;flex-direction:column;gap:6px}
+  .era h4{margin:0;font-family:var(--serif);font-size:15px;white-space:nowrap}
+  .era .yrs{font-size:11px;color:var(--ink-3);font-family:var(--up-mono)}
+  .tl.focus .era{opacity:.35}
+  .tl.focus .era.on{opacity:1;border-color:var(--accent);transform:translateY(-3px)}
+  .who{display:flex;flex-wrap:wrap;gap:5px}
+  .who button{font:inherit;font-family:var(--serif);font-size:13px;padding:2px 8px;border-radius:999px;border:1px solid var(--line);background:var(--soft);color:var(--ink);cursor:pointer}
+  .who button:hover{border-color:var(--accent)}
+  .who button.sel{background:var(--accent);border-color:var(--accent);color:var(--up-surface)}
+  .tl-cap{min-height:3.4em;margin-top:10px;font-size:14.5px;line-height:1.7}
+  .tl-cap b{color:var(--accent);font-family:var(--serif);font-size:16px}
+  .ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+  .btn{font:inherit;font-size:14px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+  .btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--up-surface)}
+  .btn.primary:hover{color:var(--up-surface)}
+  .btn:disabled{opacity:.45;cursor:default}
+  .stepno{font-family:var(--up-mono);color:var(--ink-3);font-size:13px;min-width:56px;text-align:center}
+  .who-card{margin-top:12px;border:1.5px solid var(--accent-2);border-radius:10px;padding:12px 14px;background:var(--accent-soft)}
+  .who-card[hidden]{display:none}
+  .who-card h4{margin:0 0 6px;font-family:var(--serif);font-size:18px}
+  .who-card dl{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;margin:0;font-size:13.5px}
+  .who-card dt{color:var(--ink-3)}
+  .who-card dd{margin:0;color:var(--ink)}
+  .who-card .mn{font-size:14px;margin-top:8px}
+
+  /* 抽卡自测 */
+  .fc{background:var(--card);border:1px solid var(--line);border-radius:var(--up-radius);box-shadow:var(--up-shadow);padding:16px;display:grid;gap:12px}
+  .fc-face{min-height:170px;border-radius:12px;background:var(--soft);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:16px;text-align:center;cursor:pointer;transition:transform .6s}
+  .fc-face.turn{transform:rotateY(90deg)}
+  .fc-name{font-family:var(--serif);font-size:34px;font-weight:700;letter-spacing:4px}
+  .fc-hint{font-size:13px;color:var(--ink-3)}
+  .fc-back{display:grid;gap:4px;font-size:14px;max-width:560px}
+  .fc-back b{color:var(--accent)}
+  .fc-back .mn{font-size:14px}
+  @media (prefers-reduced-motion: reduce){
+    .flip,.flip *,.era,.fc-face{transition:none!important}
+  }
+
   :root{--lq-surface:var(--card);--lq-ink:var(--ink);--lq-muted:var(--ink-3);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:var(--ok);--lq-bad:var(--bad);--lq-h2:22px}
   /* ---------- 练习题（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
   .lq{display:grid;gap:12px;margin:52px 0 0}
@@ -288,6 +360,8 @@ document.getElementById('up-reset').addEventListener('click', function () {
     </div>
   </header>
 
+  <p class="tipbar">💡 表里每位作者下面那行小字是<b>记忆口诀</b>（可在工具条关掉做自测）。再往下有三件记忆工具：<a href="#sec-rel">名和字的四种关系</a> · <a href="#sec-tl">朝代时间轴</a> · <a href="#sec-fc">抽卡自测</a>。</p>
+
   <div class="tabs">
     <button class="tab on" data-panel="grade">按年级</button>
     <button class="tab" data-panel="author">按作者</button>
@@ -307,6 +381,7 @@ document.getElementById('up-reset').addEventListener('click', function () {
       <button class="chip" data-g="八">八年级</button>
       <button class="chip" data-g="九">九年级</button>
     </div>
+    <button type="button" class="chip mn-toggle on" id="mnToggle" aria-pressed="true" title="显示 / 隐藏每位作者下方的记忆口诀">💡 口诀：开</button>
   </div>
 
   <div class="panel" id="panel-grade"></div>
@@ -325,11 +400,51 @@ document.getElementById('up-reset').addEventListener('click', function () {
               <th style="width:170px;">号</th>
               <th style="width:200px;">世称 · 称号</th>
               <th>课内篇目</th>
+              <th class="mn-col">💡 记忆口诀</th>
             </tr>
           </thead>
           <tbody id="tbody-author"></tbody>
         </table>
       </div>
+    </div>
+  </div>
+
+  <h2 class="sec" id="sec-rel">记"字"的窍门：字是名的注解</h2>
+  <p class="sec-desc">古人成年后取"字"，字和名在意思上总是挂钩的。认出它们是哪种关系，就不用死记。点卡片翻开。</p>
+  <div class="rel-grid" id="relGrid"></div>
+  <div class="hao-tips">
+    <div class="gcard"><h3>"号"多半是地名、书房名、爱好</h3><p>住的地方：东坡（苏轼）、稼轩（辛弃疾）、香山（白居易）、少陵（杜甫）、青莲（李白）、樊川（杜牧）、濂溪（周敦颐）、板桥（郑燮）<br>书房 / 心志：诚斋（杨万里）、放翁（陆游）、醉翁 / 六一（欧阳修）、五柳（陶渊明）</p></div>
+    <div class="gcard"><h3>"世称"多半是官职或籍贯</h3><p>官职：杜工部、王右丞、陈拾遗、刘宾客、白太傅<br>籍贯 / 郡望：韩昌黎、柳河东、孟襄阳<br>做官的地方：柳柳州、岑嘉州、刘随州</p></div>
+    <div class="gcard"><h3>谥号：死后朝廷给的评语</h3><p>"文正"最高：范仲淹、司马光<br>"文忠"：欧阳修、苏轼、张养浩<br>口诀：<b>正是范司马，忠是欧苏张</b></p></div>
+  </div>
+
+  <h2 class="sec" id="sec-tl">朝代时间轴：先把人放进对的格子</h2>
+  <p class="sec-desc">朝代记混，是因为脑子里没有"格子"。先背朝代歌，再一格一格看谁住在里面。点"播放"逐个朝代看口诀，点任意名字看详情。</p>
+  <div class="tl-card" id="tlBox">
+    <div class="song">朝代歌：<b>夏商与西周</b>，东周分两段；<b>春秋和战国</b>，一统秦两汉；<b>三分魏蜀吴</b>，二晋前后延；<b>南北朝并立</b>，隋唐五代传；<b>宋元明清后</b>，皇朝至此完。</div>
+    <div class="tl" id="tl"></div>
+    <p class="tl-cap" id="tlCap"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno" id="tlNo"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+    <div class="who-card" id="whoCard" hidden></div>
+  </div>
+
+  <h2 class="sec" id="sec-fc">抽卡自测：先想，再翻</h2>
+  <p class="sec-desc">只看名字，先在心里说出朝代、字、号，再点卡片翻面核对。主动回忆比反复看表记得牢得多。</p>
+  <div class="fc" id="fcBox">
+    <div class="fc-face" id="fcFace" role="button" tabindex="0" aria-label="点击翻面"></div>
+    <div class="ctrl" style="margin-top:0">
+      <button type="button" class="btn" data-act="prev">◀ 上一张</button>
+      <span class="stepno" id="fcNo"></span>
+      <button type="button" class="btn" data-act="next">下一张 ▶</button>
+      <button type="button" class="btn primary" data-act="flip">翻面</button>
+      <button type="button" class="btn" data-act="shuffle">🔀 打乱</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
     </div>
   </div>
 
@@ -469,6 +584,115 @@ var AUTHORS = {
   '诸葛亮': {d:'三国·蜀',   z:'孔明', h:'卧龙', t:'武乡侯 · 忠武侯'},
   '佚名':   {d:'',          z:'', h:'', t:'无名氏'}
 };
+
+/* ============ 记忆口诀（字的来路 / 号的来历 / 一个钩子） ============ */
+var MNEMO = {
+  '曹操':'"操"守与品"德"挂钩：有操守才有德 → 孟德；小名阿瞒',
+  '曹植':'栽"植"、"建"造，都是往上立起来 → 子建；七步成诗的那位',
+  '刘桢':'"桢"和"干"都是筑墙时撑着的木柱（桢干）→ 公干',
+  '陶渊明':'"明"就是"亮" → 元亮；门前种五棵柳 → 五柳先生；采菊东篱下',
+  '王勃':'勃然而起，求个心安：一动一静 → 子安；《滕王阁序》写于二十多岁',
+  '陈子昂':'子昂昂首，腰佩美玉 → 伯玉；做过右拾遗 → 陈拾遗；风骨刚健 → 诗骨',
+  '王绩':'有"绩"却说"无功"：反着取字 → 无功；隐居东皋 → 东皋子',
+  '孟浩然':'名浩，字浩然，最好记；襄阳人 → 孟襄阳；与王维合称王孟',
+  '王维':'名"维"+字"摩诘" = 维摩诘（佛经里的居士）→ 诗佛；官尚书右丞 → 王右丞',
+  '李白':'母亲梦太白金星而生 → 太白；青莲乡长大 → 青莲居士；贺知章叫他"谪仙人"',
+  '杜甫':'"甫"是古代男子的美称 → 子美；家近长安少陵 → 少陵野老；做过工部员外郎 → 杜工部',
+  '岑参':'做过嘉州刺史 → 岑嘉州；"忽如一夜春风来，千树万树梨花开"',
+  '崔颢':'一首《黄鹤楼》让李白搁笔："眼前有景道不得，崔颢题诗在上头"',
+  '王湾':'只凭一句"海日生残夜，江春入旧年"留名',
+  '常建':'"曲径通幽处，禅房花木深"——成语"曲径通幽"就出自他',
+  '李益':'伯"益"是"虞"舜的大臣 → 君虞；边塞诗人，"一夜征人尽望乡"',
+  '韩愈':'"愈"是更进一步，"退之"是退一步：反着取字，提醒自己别冒进；郡望昌黎 → 韩昌黎',
+  '刘禹锡':'母亲梦见大禹赐（锡）子 → 禹锡、梦得；"梦得"不是"梦德"！',
+  '白居易':'居处平易就能乐天知命 → 乐天；晚年住洛阳香山 → 香山居士',
+  '柳宗元':'宗元做人厚道 → 子厚；河东人 → 柳河东；做柳州刺史 → 柳柳州',
+  '刘长卿':'字文房（文房四宝）；做过随州刺史 → 刘随州；五言诗写得好 → 五言长城',
+  '李贺':'"贺"喜、"吉"祥，同义 → 长吉；诗风奇诡 → 诗鬼',
+  '韩翃':'"春城无处不飞花"——皇帝读了《寒食》亲自点他当官',
+  '孟郊':'城"郊"就是"野"外 → 东野；苦吟不停 → 诗囚（郊寒岛瘦）',
+  '王建':'"建"立就是开"初" → 仲初；写《十五夜望月》"今夜月明人尽望"',
+  '杜牧':'名牧，字牧之，最好记；住樊川别墅 → 樊川居士；和李商隐并称小李杜',
+  '李商隐':'"商"山四皓"隐"居山中，是有"义"之人 → 商隐、义山；号玉谿生',
+  '温庭筠':'叉八次手就写成八韵 → 温八叉；花间词派鼻祖',
+  '许浑':'"浑"浊和"晦"暗，都是不清亮 → 用晦；"山雨欲来风满楼"',
+  '范仲淹':'希望文治天下 → 希文；"先天下之忧而忧" → 谥文正（最高的谥号）',
+  '晏殊':'"殊"是不同，偏叫"同叔"：反着取字；《浣溪沙》"无可奈何花落去"',
+  '欧阳修':'"修"长、"永"久，同义 → 永叔；六一 = 一万卷书、一千卷金石、一琴、一棋、一壶酒，加一个老翁',
+  '王安石':'安稳如石，"介"然坚定 → 介甫；封荆国公 → 王荆公；晚号半山',
+  '苏轼':'扶着车前横木（轼）向前望（瞻）→ 子瞻；在黄州东坡种地 → 东坡居士',
+  '秦观':'出"游"去"观"景 → 少游；号淮海居士；婉约派',
+  '黄庭坚':'"坚"定正"直" → 鲁直；号山谷道人；苏门四学士之一',
+  '王观':'看（观）得"通"透 → 通叟；"才始送春归，又送君归去"',
+  '司马光':'光明而实在 → 君实；就是砸缸的那个司马光；主编《资治通鉴》',
+  '周敦颐':'住濂溪 → 濂溪先生；《爱莲说》"出淤泥而不染"',
+  '沈括':'"括"进来、"存"在其"中" → 存中；退居梦溪园写《梦溪笔谈》',
+  '李清照':'号易安居士：取陶渊明"审容膝之易安"（小屋也住得安）；千古第一才女',
+  '朱敦儒':'敦厚的儒者，希望求真 → 希真；"金陵城上西楼"',
+  '陈与义':'亲近"义"、离开"非" → 去非；号简斋',
+  '陆游':'出"游"就要"观"景 → 务观；被人说颓"放"，干脆自号放翁',
+  '杨万里':'书房叫"诚斋" → 号诚斋，诗风叫诚斋体；"接天莲叶无穷碧"',
+  '辛弃疾':'抛"弃"疾病才平"安" → 幼安；田边小屋"稼轩" → 号稼轩；苏辛豪放',
+  '叶绍翁':'"绍"和"嗣"都是继承，同义 → 嗣宗；"春色满园关不住"',
+  '赵师秀':'号灵秀，和徐照（灵晖）、徐玑（灵渊）、翁卷（灵舒）四个"灵"→ 永嘉四灵',
+  '文天祥':'"天"降"祥"瑞 → 宋瑞；号文山；"人生自古谁无死，留取丹心照汗青"',
+  '马致远':'马"致远"、行"千里"：名和字连起来就是一句话；号东篱（采菊东篱下）',
+  '张养浩':'孟子说"吾善养吾浩然之气"：想学孟子 → 养浩、希孟；号云庄',
+  '王磐':'《周易》"鸿渐于磐"（大雁飞到磐石上）→ 磐、鸿渐；号西楼',
+  '于谦':'"满招损，谦受益" → 谦、廷益；《石灰吟》"要留清白在人间"',
+  '宋濂':'名濂，字景濂，最好记；《送东阳马生序》讲苦学',
+  '魏学洢':'《核舟记》：一枚桃核雕出苏东坡游赤壁',
+  '夏完淳':'完全淳朴、"存"留"古"风 → 存古；十五岁抗清，十七岁就义',
+  '张岱':'"岱"是泰山，又称岱宗 → 宗子；泰山多石 → 石公；号陶庵',
+  '纳兰性德':'本性有德，自然能宽容 → 容若；号楞伽山人；清词三大家',
+  '郑燮':'"燮"是调和，"克柔"是能柔和 → 克柔；号板桥；画竹写《竹石》',
+  '蒲松龄':'松树长寿，像留住了神仙 → 留仙；号柳泉居士；《聊斋志异》',
+  '纪昀':'"昀"是日光，"晓"是天刚亮 → 晓岚；就是"铁齿铜牙纪晓岚"',
+  '龚自珍':'"珍"贵美玉，"璱"是玉色鲜亮 → 璱人；号定庵；"落红不是无情物"',
+  '谭嗣同':'小时候染病昏死三天又活过来 → 字复生；戊戌六君子',
+  '秋瑾':'"瑾"是美玉；要与男儿"竞雄" → 竞雄；号鉴湖女侠',
+  '孔子':'排行老二（仲），母亲在尼丘山祈祷 → 名丘、字仲尼',
+  '左丘明':'司马迁说"左丘失明，厥有《国语》"；相传作《左传》',
+  '孟子':'"轲"是车轴，"舆"是车厢，都和车有关 → 子舆；亚圣',
+  '庄子':'名周，相传字子休；庄周梦蝶；《北冥有鱼》出自《庄子·逍遥游》',
+  '列子':'名御寇（抵御强盗）；《愚公移山》出自《列子》',
+  '刘向':'编订《战国策》的人，所以《唐雎不辱使命》《邹忌讽齐王纳谏》都署他',
+  '司马迁':'"迁"是远行，"长"是远 → 子长；二十岁壮游天下，后写《史记》',
+  '刘义庆':'南朝宋的王爷，编《世说新语》（咏雪、陈太丘与友期行）',
+  '陶弘景':'"弘景"是大光，大光自然"通明" → 通明；隐居山中仍被皇帝请教 → 山中宰相',
+  '吴均':'《与朱元思书》"风烟俱净，天山共色"——清秀的"吴均体"',
+  '郦道元':'《周易》"元者，善之长也"→ 道元、善长；《三峡》出自他的《水经注》',
+  '诸葛亮':'"亮"就是"明"，"孔"是很 → 孔明（很明亮）；号卧龙'
+};
+
+/* ============ 名与字的四种关系（翻卡片） ============ */
+var RELS = [
+  { h:'① 同义：字把名再说一遍', p:'名和字意思一样或相近。', list:[
+    ['诸葛亮','孔明','亮 = 明'], ['陶渊明','元亮','明 = 亮'], ['欧阳修','永叔','修（长）= 永（久）'], ['孟郊','东野','郊 = 野'], ['叶绍翁','嗣宗','绍 = 嗣（继承）'] ]},
+  { h:'② 反义：字和名唱反调', p:'用相反的意思互相提醒。', list:[
+    ['韩愈','退之','愈（更进）↔ 退'], ['晏殊','同叔','殊（不同）↔ 同'], ['王绩','无功','绩（功绩）↔ 无功'] ]},
+  { h:'③ 连读：名和字连成一句话', p:'把名和字放在一起读，就是一个画面。', list:[
+    ['苏轼','子瞻','扶着车前横木（轼）向前望（瞻）'], ['马致远','千里','马行千里，致远'], ['孟轲','子舆','车轴（轲）配车厢（舆）'], ['辛弃疾','幼安','弃掉疾病，得到平安'] ]},
+  { h:'④ 典故：出自经典或家里的故事', p:'记住故事，名和字一起带出来。', list:[
+    ['王维','摩诘','佛经里的"维摩诘"居士'], ['张养浩','希孟','孟子"善养吾浩然之气"'], ['于谦','廷益','"满招损，谦受益"'], ['郦道元','善长','《周易》"元者，善之长也"'], ['刘禹锡','梦得','母亲梦见大禹赐子'] ]}
+];
+
+/* ============ 朝代时间轴（含每格口诀） ============ */
+var ERAS = [
+  { n:'先秦', y:'~前221', a:['孔子','左丘明','孟子','庄子','列子'], s:'<b>孔孟庄列左丘明</b>：诸子百家的时代，课内全是散文（《论语》《孟子》《庄子》《列子》），诗只有《诗经》。' },
+  { n:'两汉', y:'前202–220', a:['司马迁','刘向'], s:'<b>两位"司"书人</b>：司马迁写《史记》，刘向编《战国策》。' },
+  { n:'汉末魏晋', y:'196–420', a:['曹操','曹植','刘桢','诸葛亮','陶渊明'], s:'<b>三曹七子诸葛亮，东晋还有陶渊明</b>：建安风骨 + 《出师表》+ 田园诗。' },
+  { n:'南北朝', y:'420–589', a:['刘义庆','陶弘景','吴均','郦道元'], s:'<b>一本《世说》两封信，一部《水经》写三峡</b>：《答谢中书书》（陶弘景）、《与朱元思书》（吴均）。' },
+  { n:'初唐', y:'618–712', a:['王绩','王勃','陈子昂'], s:'<b>两王一陈开唐诗</b>：王绩《野望》、王勃"海内存知己"、陈子昂"念天地之悠悠"。' },
+  { n:'盛唐', y:'713–765', a:['李白','杜甫','王维','孟浩然','岑参','崔颢','王湾','常建'], s:'<b>李杜王孟岑，崔湾常建跟</b>：诗仙、诗圣、诗佛都在这里，唐诗最高峰。' },
+  { n:'中唐', y:'766–835', a:['韩愈','柳宗元','刘禹锡','白居易','李贺','孟郊','李益','刘长卿','韩翃','王建'], s:'<b>韩柳古文，刘白唱和，诗鬼诗囚</b>：韩愈柳宗元写散文，刘禹锡白居易是好友（"酬乐天"）。' },
+  { n:'晚唐', y:'836–907', a:['杜牧','李商隐','温庭筠','许浑'], s:'<b>小李杜，温八叉</b>：李商隐、杜牧并称小李杜；温庭筠开花间词。' },
+  { n:'北宋', y:'960–1127', a:['范仲淹','晏殊','欧阳修','王安石','苏轼','司马光','周敦颐','沈括','秦观','黄庭坚','王观'], s:'<b>范欧王苏，周沈司马，苏门秦黄</b>：岳阳楼、醉翁亭、东坡都在北宋。' },
+  { n:'南宋', y:'1127–1279', a:['李清照','朱敦儒','陈与义','陆游','杨万里','辛弃疾','叶绍翁','赵师秀','文天祥'], s:'<b>易安放翁稼轩，诚斋四灵天祥</b>：李清照、朱敦儒、陈与义生活在两宋之交，被归到这一格。' },
+  { n:'元', y:'1271–1368', a:['马致远','张养浩'], s:'<b>元曲二人</b>：马致远"枯藤老树昏鸦"，张养浩"兴，百姓苦；亡，百姓苦"。' },
+  { n:'明', y:'1368–1644', a:['宋濂','于谦','王磐','魏学洢','张岱','夏完淳'], s:'<b>于谦石灰、宋濂马生、王磐喇叭、核舟、湖心亭、别云间</b>：明朝一人一篇。' },
+  { n:'清', y:'1644–1912', a:['纳兰性德','蒲松龄','郑燮','纪昀','龚自珍','谭嗣同','秋瑾'], s:'<b>纳兰聊斋郑板桥，纪昀龚谭秋瑾</b>：后三位处在清末，诗里多是家国之忧。' }
+];
 
 /* ============ 分册篇目 ============ */
 /* k: 诗 / 词 / 曲 / 文 / 民歌   s: 出处  d: 朝代（佚名时用）*/
@@ -658,7 +882,7 @@ function dynastyOf(it){
 function match(it){
   if (!state.q) return true;
   var a = authorOf(it.a);
-  var hay = [it.t, it.a, it.s || '', a.d, a.z, a.h, a.t].join(' ').toLowerCase();
+  var hay = [it.t, it.a, it.s || '', a.d, a.z, a.h, a.t, MNEMO[it.a] || ''].join(' ').toLowerCase();
   return hay.indexOf(state.q) > -1;
 }
 function kindTag(k){
@@ -704,7 +928,8 @@ function renderGrade(){
           + '<td class="aname">' + esc(it.a) + src + '</td>'
           + '<td class="dyn">' + esc(dynastyOf(it)) + '</td>'
           + '<td class="' + (a.z ? 'zi' : 'na') + '">' + (a.z ? esc(a.z) : '—') + '</td>'
-          + '<td class="' + (a.h || a.t ? 'hao' : 'na') + '">' + (a.h || a.t ? esc([a.h, a.t].filter(Boolean).join(' · ')) : '—') + '</td>'
+          + '<td class="' + (a.h || a.t ? 'hao' : 'na') + '">' + (a.h || a.t ? esc([a.h, a.t].filter(Boolean).join(' · ')) : '—')
+          + (MNEMO[it.a] ? '<span class="mn">' + esc(MNEMO[it.a]) + '</span>' : '') + '</td>'
           + '</tr>';
       }).join('');
 
@@ -759,7 +984,7 @@ function renderAuthor(){
   var list = buildAuthorIndex().filter(function(row){
     if (!state.q) return true;
     var a = authorOf(row.a);
-    var hay = [row.a, a.d, a.z, a.h, a.t, row.works.join(' ')].join(' ').toLowerCase();
+    var hay = [row.a, a.d, a.z, a.h, a.t, row.works.join(' '), MNEMO[row.a] || ''].join(' ').toLowerCase();
     return hay.indexOf(state.q) > -1;
   });
 
@@ -773,11 +998,12 @@ function renderAuthor(){
       + '<td class="' + (a.h ? 'hao' : 'na') + '">' + (a.h ? esc(a.h) : '—') + '</td>'
       + '<td style="font-size:13px;">' + (a.t ? esc(a.t) : '<span class="na">—</span>') + '</td>'
       + '<td class="works" style="font-size:13px;line-height:1.65;">' + esc(row.works.join('、')) + '</td>'
+      + '<td class="mn-col"><span class="mn">' + esc(MNEMO[row.a] || '') + '</span></td>'
       + '</tr>';
   }).join('');
 
   document.getElementById('tbody-author').innerHTML = rows ||
-    '<tr><td colspan="7" class="empty">没有匹配的作者</td></tr>';
+    '<tr><td colspan="8" class="empty">没有匹配的作者</td></tr>';
   document.getElementById('statAuthors').textContent = buildAuthorIndex().length + ' 位作者 · ' + anonCount() + ' 篇佚名';
 }
 
@@ -824,12 +1050,157 @@ Array.prototype.forEach.call(document.querySelectorAll('.tab'), function(tab){
   tab.addEventListener('click', function(){ setPanel(tab.getAttribute('data-panel')); });
 });
 
+/* ---------- 口诀开关 ---------- */
+var mnBtn = document.getElementById('mnToggle');
+function setMn(on){
+  state.mn = on;
+  document.body.classList.toggle('no-mn', !on);
+  mnBtn.classList.toggle('on', on);
+  mnBtn.setAttribute('aria-pressed', on);
+  mnBtn.textContent = on ? '💡 口诀：开' : '💡 口诀：关';
+}
+mnBtn.addEventListener('click', function(){ setMn(!state.mn); });
+
+var resets = [];
+var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+function worksOf(name){
+  var w = [];
+  BOOKS.forEach(function(b){ b.items.forEach(function(it){ if (it.a === name) w.push(it.t); }); });
+  return w.join('、');
+}
+
+/* ---------- 名与字：翻卡片 ---------- */
+(function(){
+  var grid = document.getElementById('relGrid');
+  grid.innerHTML = RELS.map(function(r){
+    return '<div class="rel"><h3>' + r.h + '</h3><p>' + r.p + '</p><div class="flips">' +
+      r.list.map(function(x){
+        return '<button type="button" class="flip"><span class="f-name">' + x[0] + '</span> → 字 <span class="f-zi">' + x[1] + '</span>'
+          + ' <span class="f-ask">（猜猜看，点开）</span><span class="f-why">' + x[2] + '</span></button>';
+      }).join('') + '</div></div>';
+  }).join('');
+  grid.addEventListener('click', function(e){
+    var b = e.target.closest('.flip'); if (b) b.classList.toggle('open');
+  });
+  resets.push(function(){
+    Array.prototype.forEach.call(grid.querySelectorAll('.flip.open'), function(b){ b.classList.remove('open'); });
+  });
+})();
+
+/* ---------- 朝代时间轴：分步 + 点名看详情 ---------- */
+(function(){
+  var box = document.getElementById('tlBox'), tl = document.getElementById('tl');
+  var cap = document.getElementById('tlCap'), no = document.getElementById('tlNo'), card = document.getElementById('whoCard');
+  var btn = function(a){ return box.querySelector('[data-act="' + a + '"]'); };
+  tl.innerHTML = ERAS.map(function(e, i){
+    return '<div class="era" data-i="' + i + '"><h4>' + e.n + '</h4><span class="yrs">' + e.y + '</span><div class="who">'
+      + e.a.map(function(n){ return '<button type="button" data-a="' + n + '">' + n + '</button>'; }).join('') + '</div></div>';
+  }).join('');
+  var eras = tl.querySelectorAll('.era');
+  var INIT = { step:-1, playing:false, who:'' };   // step -1 = 总览
+  var S = Object.assign({}, INIT), timer = null;
+  function draw(){
+    tl.classList.toggle('focus', S.step >= 0);
+    Array.prototype.forEach.call(eras, function(el, i){ el.classList.toggle('on', i === S.step); });
+    if (S.step >= 0) {
+      cap.innerHTML = '<b>' + ERAS[S.step].n + '</b>　' + ERAS[S.step].s;
+      var el = eras[S.step];
+      tl.scrollTo({ left: el.offsetLeft - tl.clientWidth / 2 + el.offsetWidth / 2, behavior: reduce ? 'auto' : 'smooth' });
+    } else {
+      cap.innerHTML = '总览：13 个格子，从左到右就是时间顺序。点"下一步"从先秦开始，一格一格过。';
+      tl.scrollTo({ left: 0 });
+    }
+    no.textContent = (S.step < 0 ? '总览' : (S.step + 1) + ' / ' + ERAS.length);
+    btn('prev').disabled = S.step < 0;
+    btn('next').disabled = S.step === ERAS.length - 1;
+    btn('play').textContent = S.playing ? '⏸ 暂停' : '▶ 播放';
+    Array.prototype.forEach.call(tl.querySelectorAll('.who button'), function(b){ b.classList.toggle('sel', b.getAttribute('data-a') === S.who); });
+    if (S.who) {
+      var a = authorOf(S.who);
+      card.hidden = false;
+      card.innerHTML = '<h4>' + esc(S.who) + '</h4><dl>'
+        + '<dt>朝代</dt><dd>' + esc(a.d || '—') + '</dd>'
+        + '<dt>字</dt><dd>' + esc(a.z || '—') + '</dd>'
+        + '<dt>号</dt><dd>' + esc(a.h || '—') + '</dd>'
+        + '<dt>称号</dt><dd>' + esc(a.t || '—') + '</dd>'
+        + '<dt>课内</dt><dd>' + esc(worksOf(S.who)) + '</dd></dl>'
+        + '<span class="mn">' + esc(MNEMO[S.who] || '') + '</span>';
+    } else { card.hidden = true; card.innerHTML = ''; }
+  }
+  function stop(){ clearInterval(timer); timer = null; S.playing = false; }
+  function go(d){ S.step = Math.max(-1, Math.min(ERAS.length - 1, S.step + d)); draw(); }
+  btn('prev').onclick = function(){ stop(); go(-1); };
+  btn('next').onclick = function(){ stop(); go(1); };
+  btn('play').onclick = function(){
+    if (S.playing) { stop(); draw(); return; }
+    if (S.step === ERAS.length - 1) S.step = -1;
+    S.playing = true; go(1);
+    timer = setInterval(function(){ go(1); if (S.step === ERAS.length - 1) { stop(); draw(); } }, reduce ? 4000 : 3200);
+  };
+  tl.addEventListener('click', function(e){
+    var b = e.target.closest('.who button'); if (!b) return;
+    var n = b.getAttribute('data-a');
+    stop();
+    S.who = (S.who === n) ? '' : n;
+    if (S.who) S.step = +b.closest('.era').getAttribute('data-i');   // 同时聚焦到他所在的朝代
+    draw();
+  });
+  function reset(){ stop(); S = Object.assign({}, INIT); draw(); }
+  btn('reset').onclick = reset;
+  resets.push(reset);
+})();
+
+/* ---------- 抽卡自测 ---------- */
+(function(){
+  var box = document.getElementById('fcBox'), face = document.getElementById('fcFace'), no = document.getElementById('fcNo');
+  var btn = function(a){ return box.querySelector('[data-act="' + a + '"]'); };
+  var BASE = [];
+  ERAS.forEach(function(e){ e.a.forEach(function(n){ BASE.push(n); }); });   // 默认按时间顺序
+  var S = { order:BASE.slice(), i:0, back:false }, busy = false;
+  function draw(){
+    var n = S.order[S.i], a = authorOf(n);
+    if (!S.back) {
+      face.innerHTML = '<div class="fc-name">' + esc(n) + '</div><div class="fc-hint">先说出：朝代？字？号？然后点我翻面</div>';
+    } else {
+      face.innerHTML = '<div class="fc-back"><div><b>' + esc(n) + '</b>　' + esc(a.d || '—') + '</div>'
+        + '<div>字：<b>' + esc(a.z || '—') + '</b>　号：<b>' + esc(a.h || '—') + '</b></div>'
+        + '<div>' + esc(a.t || '') + '</div><div style="color:var(--ink-3)">课内：' + esc(worksOf(n)) + '</div>'
+        + '<span class="mn">' + esc(MNEMO[n] || '') + '</span></div>';
+    }
+    no.textContent = (S.i + 1) + ' / ' + S.order.length;
+    btn('prev').disabled = S.i === 0;
+    btn('next').disabled = S.i === S.order.length - 1;
+    btn('flip').textContent = S.back ? '翻回正面' : '翻面';
+  }
+  function flip(){
+    if (busy) return;
+    if (reduce) { S.back = !S.back; draw(); return; }
+    busy = true; face.classList.add('turn');
+    setTimeout(function(){ S.back = !S.back; draw(); face.classList.remove('turn'); busy = false; }, 600);
+  }
+  face.addEventListener('click', flip);
+  face.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); } });
+  btn('flip').onclick = flip;
+  btn('prev').onclick = function(){ S.i--; S.back = false; draw(); };
+  btn('next').onclick = function(){ S.i++; S.back = false; draw(); };
+  btn('shuffle').onclick = function(){
+    var o = BASE.slice();
+    for (var k = o.length - 1; k > 0; k--) { var j = Math.floor(Math.random() * (k + 1)); var t = o[k]; o[k] = o[j]; o[j] = t; }
+    S = { order:o, i:0, back:false }; draw();
+  };
+  function reset(){ busy = false; face.classList.remove('turn'); S = { order:BASE.slice(), i:0, back:false }; draw(); }
+  btn('reset').onclick = reset;
+  resets.push(reset);
+})();
+
 /* ---------- 重置：回到刚打开时的样子（练习组件会把它包进 window.resetPage） ---------- */
 window.pageReset = function(){
   q.value = ''; state.q = '';
+  setMn(true);
   setPanel('grade');
   setGrade('all');
   renderAuthor();
+  resets.forEach(function(f){ f(); });
 };
 
 initStats();
@@ -851,6 +1222,10 @@ window.LQ_ITEMS = [
     why:'陶渊明自号"五柳先生"（出自《五柳先生传》），私谥"靖节"。名、字、号、谥常被拆开考。' },
   { type:'迁移', q:'某位作者号"东坡居士"，谥"文忠"，是"唐宋八大家"之一。下列篇目中哪篇出自他手？', opts:['《岳阳楼记》','《醉翁亭记》','《记承天寺夜游》','《爱莲说》'], ans:2,
     why:'号东坡居士的是苏轼，《记承天寺夜游》是他贬居黄州时所作。《岳阳楼记》是范仲淹（谥文正），《醉翁亭记》是欧阳修（也谥文忠、号醉翁——别被"文忠"带偏），《爱莲说》是周敦颐。' },
+  { type:'选择', q:'韩愈字"退之"。"愈"（更进一步）和"退"是哪种关系？', opts:['同义','反义','连读成一句话','出自典故'], ans:1,
+    why:'"愈"有更进、超过的意思，"退之"偏说退一步——反着取字，见「记"字"的窍门」第 ② 类。晏殊字同叔、王绩字无功也是这一类。' },
+  { type:'迁移', q:'按"字是名的注解"推一推：下列哪组名与字最可能是<b>同义</b>关系？', opts:['名"亮"，字"孔明"','名"愈"，字"退之"','名"轼"，字"子瞻"','名"禹锡"，字"梦得"'], ans:0,
+    why:'"亮"和"明"意思相同，是同义。愈—退是反义；轼—瞻连读成"扶轼而瞻"；禹锡—梦得出自"梦见大禹赐子"的故事。' },
 ];
 </script>
 <script>
