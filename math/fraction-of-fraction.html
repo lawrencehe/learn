@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>分数的分数</title>
+<meta name="description" content="集装箱 20 吨货，服装占 5/12，服装里童装占 3/8：其它服装比童装多几分之几、占总货物几分之几、有多少吨？用方格图动画讲清“谁的几分之几”，单位“1”一换，算法就换。">
+<style>
+:root{
+  --bg:var(--up-bg); --surface:var(--up-surface); --ink:var(--up-ink); --muted:var(--up-muted); --line:var(--up-line);
+  --accent:var(--up-accent); --ok:var(--up-ok); --bad:var(--up-bad);
+  --cloth:#74b0e8;   /* 服装（未细分） */
+  --kid:#e64980;     /* 童装 */
+  --oth:#1c64c0;     /* 其它服装 */
+  --rest:#dfe3e8;    /* 非服装货物 */
+  --box:#c9d3dd;     /* 整箱（尚未划分） */
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --cloth:#4f86bd; --kid:#f783ac; --oth:#74c0fc; --rest:#2e3540; --box:#46505c; }
+}
+:root[data-theme="dark"]{ --cloth:#4f86bd; --kid:#f783ac; --oth:#74c0fc; --rest:#2e3540; --box:#46505c; }
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 var(--up-font);padding:24px 16px 96px}
+main{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:48px}
+h1{font-size:clamp(1.7rem,4.5vw,2.4rem);line-height:1.25;margin:0 0 8px}
+h2{font-size:1.4rem;margin:0 0 8px}
+h3{font-size:1.05rem;margin:0 0 6px}
+p{margin:0}
+.lead{color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--up-radius);box-shadow:var(--up-shadow);padding:16px}
+.analogy{border-left:4px solid var(--accent)}
+.problem{border-left:4px solid var(--oth)}
+.problem ol{margin:8px 0 0;padding-left:1.4em}
+.btn{font:inherit;font-size:14px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--up-surface)}
+.btn.on{border-color:var(--accent);background:var(--up-accent-soft);color:var(--accent);font-weight:700}
+.btn:disabled{opacity:.45;cursor:default}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.stepno{font-family:var(--up-mono);color:var(--muted);font-size:.9rem;min-width:56px;text-align:center}
+.caption{min-height:3.4em;margin-top:10px}
+.formula{margin-top:8px;padding:10px 12px;border-radius:8px;background:var(--up-surface-2);font-family:var(--up-mono);font-size:15px;line-height:2;min-height:3em;overflow-x:auto}
+.muted{color:var(--muted)}
+.k{color:var(--kid);font-weight:700}
+.o{color:var(--oth);font-weight:700}
+.c{color:var(--cloth);font-weight:700}
+.u1{display:inline-block;border:1.5px dashed var(--accent);color:var(--accent);border-radius:6px;padding:0 6px;font-weight:700;font-family:var(--up-font)}
+
+/* 分数竖排 */
+.fr{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.15;font-family:var(--up-mono);margin:0 2px}
+.fr>span:first-child{border-bottom:1.5px solid currentColor;padding:0 3px}
+.fr>span{padding:0 3px}
+
+/* 方格图 */
+.gwrap{margin-top:12px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.grid{display:grid;gap:2px;width:100%;max-width:560px;padding:6px;border-radius:10px;background:var(--up-surface-2);position:relative}
+.cell{aspect-ratio:1/1;min-width:0;border-radius:3px;background:var(--box);transition:background .7s ease,opacity .7s ease,box-shadow .7s ease,transform .7s ease}
+.cell.rest{background:var(--rest)}
+.cell.cloth{background:var(--cloth)}
+.cell.kid{background:var(--kid)}
+.cell.oth{background:var(--oth)}
+.cell.dim{opacity:.28}
+.cell.mark{box-shadow:0 0 0 2px var(--accent) inset;transform:scale(.86)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted);justify-content:center}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:4px}
+.glabel{font-size:13px;color:var(--muted);font-family:var(--up-mono)}
+
+.tabs{display:flex;flex-wrap:wrap;gap:8px}
+.mis{display:grid;gap:12px}
+.mis .card{border-left:4px solid var(--bad)}
+.mis .wrong{color:var(--bad);text-decoration:line-through;font-family:var(--up-mono)}
+.mis .right{color:var(--ok);font-family:var(--up-mono);font-weight:700}
+
+.try-in{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center}
+.try-in label{display:flex;align-items:center;gap:6px;font-size:15px}
+.try-in input{font:inherit;font-family:var(--up-mono);width:64px;padding:4px 6px;border-radius:6px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink)}
+.out{display:grid;gap:6px;margin-top:12px}
+.out div{padding:8px 12px;border-radius:8px;background:var(--up-surface-2);font-size:15px;overflow-x:auto}
+.summary{border-left:4px solid var(--ok);font-size:1.05rem}
+@media (prefers-reduced-motion: reduce){.cell{transition:none}}
+
+:root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:var(--ok);--lq-bad:var(--bad)}
+/* ---------- 练习题（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+.lq{display:grid;gap:12px;margin-bottom:56px}
+.lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+.lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
+.lq-sub{margin:0;color:var(--lq-muted);font-size:14px}
+.lq-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--lq-muted);font-variant-numeric:tabular-nums}
+.lq-list{display:grid;gap:10px}
+.lq-item{background:var(--lq-surface);border:1.5px solid var(--lq-line);border-radius:10px;padding:12px 16px;display:grid;gap:10px;min-width:0;color:var(--lq-ink);text-align:left}
+.lq-item.lq-is-ok{border-color:var(--lq-ok)}
+.lq-item.lq-is-bad{border-color:var(--lq-bad)}
+.lq-q{font-size:15px;font-weight:600;line-height:1.6}
+.lq-tag{display:inline-block;font-size:11px;font-weight:500;line-height:1.6;color:var(--lq-muted);border:1px solid var(--lq-line);border-radius:999px;padding:0 8px;margin-right:8px;vertical-align:1px}
+.lq-opts,.lq-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lq .lq-opt,.lq .lq-redo{font:inherit;font-size:14px;line-height:1.4;padding:6px 14px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);cursor:pointer;text-align:left;opacity:1}
+.lq .lq-opt:hover:not(:disabled),.lq .lq-redo:hover{border-color:var(--lq-accent)}
+.lq .lq-opt:disabled{cursor:default;opacity:1}
+.lq .lq-opt.lq-right{border-color:var(--lq-ok);color:var(--lq-ok);font-weight:700}
+.lq .lq-opt.lq-wrong{border-color:var(--lq-bad);color:var(--lq-bad);text-decoration:line-through}
+.lq-fill input{font:inherit;font-size:14px;padding:6px 10px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);width:min(100%,200px)}
+.lq-fill input.lq-right{border-color:var(--lq-ok)}
+.lq-fill input.lq-wrong{border-color:var(--lq-bad)}
+.lq-why{font-size:14px;line-height:1.65;color:var(--lq-muted)}
+.lq-why:empty{display:none}
+.lq-why .lq-ok{color:var(--lq-ok)}
+.lq-why .lq-bad{color:var(--lq-bad)}
+
+</style>
+</head>
+<body>
+<!-- up-shell:begin（由 scripts/shell.mjs 自动生成，勿手改） -->
+<nav id="up-nav" aria-label="网站导航">
+<a class="up-home" href="/" title="Up 学习站首页"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="up-nav-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c6ef5"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#up-nav-g)"/><path d="M12 52V42a2 2 0 0 1 2-2h10V32a2 2 0 0 1 2-2h10v-8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v30z" fill="#fff"/><circle cx="43" cy="13" r="5.5" fill="#ffa94d"/></svg><span>Up 学习站</span></a>
+<span class="up-sep" aria-hidden="true">›</span><a class="up-cat" href="/math">数学</a>
+<span class="up-sep" aria-hidden="true">›</span><span class="up-title">分数的分数</span>
+<button id="up-reset" type="button" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+</nav>
+<style>
+:root{--up-bg:#f5f6f8;--up-surface:#ffffff;--up-surface-2:#eef0f4;--up-ink:#1d2127;--up-muted:#626b78;--up-line:#dfe2e8;--up-ok:#2b8a3e;--up-bad:#d6336c;--up-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);--up-font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif;--up-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;--up-radius:12px;--up-accent:#d9480f;--up-accent-soft:#fff1e8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#ff8a50;--up-accent-soft:#3a2218;color-scheme:dark}}
+:root[data-theme="dark"]{--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#ff8a50;--up-accent-soft:#3a2218;color-scheme:dark}
+html{padding-top:52px;scroll-padding-top:64px}
+#up-nav{position:fixed;top:0;left:0;right:0;z-index:2147483000;height:52px;box-sizing:border-box;display:flex;align-items:center;gap:8px;
+padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));border-top:3px solid var(--up-accent);
+border-bottom:1px solid var(--up-line);background:color-mix(in srgb,var(--up-surface) 88%,transparent);
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:500 14px/1.2 var(--up-font);color:var(--up-ink);text-align:left}
+#up-nav a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none}
+#up-nav a:hover{color:var(--up-accent)}
+#up-nav svg{width:24px;height:24px;flex:none;display:block}
+#up-nav .up-home span{font-weight:700}
+#up-nav .up-cat{color:var(--up-accent);font-weight:600}
+#up-nav .up-sep{color:var(--up-muted);flex:none}
+#up-nav .up-title{color:var(--up-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#up-reset{margin:0 0 0 auto;flex:none;font:600 14px/1 var(--up-font);padding:8px 14px;border-radius:999px;cursor:pointer;
+border:1.5px solid var(--up-accent);background:transparent;color:var(--up-accent);transition:background .2s,color .2s}
+#up-reset:hover,#up-reset:focus-visible{background:var(--up-accent);color:var(--up-surface)}
+#up-reset:focus-visible,#up-nav a:focus-visible{outline:2px solid var(--up-accent);outline-offset:2px}
+@media (max-width:560px){#up-nav .up-home span{display:none}}
+@media print{#up-nav{display:none}html{padding-top:0}}
+</style>
+<script>
+document.getElementById('up-reset').addEventListener('click', function () {
+  if (typeof window.resetPage === 'function') window.resetPage();
+  else console.warn('本页没有定义 window.resetPage()，重置按钮无效');
+  window.scrollTo({ top: 0, behavior: 'auto' });
+});
+</script>
+<!-- up-shell:end -->
+<main>
+
+<section>
+  <h1>分数的分数：集装箱里的服装</h1>
+  <p class="lead">这道题难在：三个分数，单位“1”各不相同。看清“谁的几分之几”，题就拆开了。</p>
+</section>
+
+<section class="card problem">
+  <b>原题</b><br>
+  一个集装箱有 <b>20 吨</b>货物，货物总量的 <span class="c"><span class="fr"><span>5</span><span>12</span></span></span> 是服装；在服装类货物中，童装占 <span class="k"><span class="fr"><span>3</span><span>8</span></span></span>。
+  <ol>
+    <li>其它服装比童装多几分之几？</li>
+    <li>其它服装占总货物的几分之几？</li>
+    <li>其它服装共多少吨？</li>
+  </ol>
+</section>
+
+<section class="card analogy">
+  <b>生活比喻：大箱子套小箱子</b><br>
+  集装箱是大箱子，服装是里面的一个<b>小箱子</b>。“童装占 3/8”说的是<b>小箱子</b>的 3/8，不是大箱子的。<br>
+  所以想说“占大箱子的几分之几”，要先进小箱子（×5/12），再取其中一份（×5/8）。
+</section>
+
+<section>
+  <h2>一步一步看：把 20 吨画成 96 个格子</h2>
+  <p class="muted">横着切 12 列（对应 5/12 的分母），竖着切 8 行（对应 3/8 的分母），一共 12×8 = 96 格。</p>
+  <div class="card" id="demo">
+    <div class="gwrap">
+      <div class="grid" data-grid></div>
+      <div class="legend">
+        <span><i style="background:var(--kid)"></i>童装</span>
+        <span><i style="background:var(--oth)"></i>其它服装</span>
+        <span><i style="background:var(--cloth)"></i>服装</span>
+        <span><i style="background:var(--rest)"></i>非服装货物</span>
+      </div>
+    </div>
+    <p class="caption"></p>
+    <div class="formula"></div>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>三问，三个单位“1”</h2>
+  <p class="muted">点一问，图上虚线框出的就是这一问的单位“1”（拿谁来比）。</p>
+  <div class="card" id="qs">
+    <div class="tabs">
+      <button type="button" class="btn" data-q="0">① 多几分之几</button>
+      <button type="button" class="btn" data-q="1">② 占总货物几分之几</button>
+      <button type="button" class="btn" data-q="2">③ 多少吨</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+    <div class="gwrap"><div class="grid" data-grid></div></div>
+    <p class="caption"></p>
+    <div class="formula"></div>
+  </div>
+</section>
+
+<section>
+  <h2>常见误区</h2>
+  <div class="mis">
+    <div class="card">
+      <h3>误区 1：把 3/8 当成“占总货物的 3/8”</h3>
+      <span class="wrong">童装 = 20 × 3/8 = 7.5 吨</span><br>
+      3/8 是<b>服装</b>的 3/8。正确：<span class="right">20 × 5/12 × 3/8 = 25/8 吨</span>
+    </div>
+    <div class="card">
+      <h3>误区 2：多几分之几 = 直接相减</h3>
+      <span class="wrong">5/8 − 3/8 = 1/4</span><br>
+      1/4 只是“多出的部分占<b>服装</b>的几分之几”。题目问“比童装多”，单位“1”是<b>童装</b>，要再除以童装：<span class="right">1/4 ÷ 3/8 = 2/3</span>
+    </div>
+    <div class="card">
+      <h3>误区 3：其它服装占总货物 = 1 − 3/8</h3>
+      <span class="wrong">1 − 3/8 = 5/8</span><br>
+      5/8 是占<b>服装</b>的。换成“占总货物”，还要乘服装的占比：<span class="right">5/12 × 5/8 = 25/96</span>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>自己试试：换几个数</h2>
+  <p class="muted">改总量和两个分数，方格图和三问答案跟着变。分母最大 12。</p>
+  <div class="card" id="try">
+    <div class="try-in">
+      <label>总量 <input type="number" data-k="T" min="1" max="999"> 吨</label>
+      <label>服装占总量 <input type="number" data-k="a" min="1" max="11"> / <input type="number" data-k="b" min="2" max="12"></label>
+      <label>童装占服装 <input type="number" data-k="c" min="1" max="11"> / <input type="number" data-k="d" min="2" max="12"></label>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+    <div class="gwrap"><div class="grid" data-grid></div><div class="glabel"></div></div>
+    <div class="out"></div>
+  </div>
+</section>
+
+<section class="card summary">
+  <b>一句话总结：</b>先问“这是<b>谁</b>的几分之几”。跨层就<b>连乘</b>（5/12 × 5/8）；比多少就用<b>差 ÷ 被比的那个</b>（差 ÷ 童装）。<br>
+  <span class="muted" style="font-size:.95rem">想专门练“多几分之几 / 少几分之几”？看 <a href="fraction-more-less.html" style="color:var(--accent)">多几分之几与少几分之几</a>。</span>
+</section>
+
+<section class="lq" id="lq" aria-label="练习">
+  <div class="lq-head"><h2>练习</h2><span class="lq-score"></span></div>
+  <p class="lq-sub">学完上面的内容，来检验一下。每题作答后马上看到解析；点「重做练习」清空重来。分数用 a/b 写，如 2/3。</p>
+  <div class="lq-list"></div>
+  <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+</section>
+
+</main>
+
+<script>
+const resets = [];
+window.pageReset = () => resets.forEach(f => f());
+
+/* ---------- 工具：分数、方格图 ---------- */
+const gcd = (a, b) => { a = Math.abs(a); b = Math.abs(b); while (b) [a, b] = [b, a % b]; return a || 1; };
+const red = (n, d) => { const g = gcd(n, d); return [n / g, d / g]; };
+const F = (n, d) => { [n, d] = red(n, d); return d === 1 ? `${n}` : `<span class="fr"><span>${n}</span><span>${d}</span></span>`; };
+const Fm = (n, d) => {  // 带分数说明
+  [n, d] = red(n, d);
+  if (d === 1 || n < d) return F(n, d);
+  const w = Math.floor(n / d), r = n % d;
+  return `${F(n, d)} = ${w}${r ? '又' + F(r, d) : ''}`;
+};
+function makeGrid(el) {
+  let cols = 0, rows = 0, cells = [];
+  return {
+    build(c, r) {
+      if (c === cols && r === rows) return;
+      cols = c; rows = r; el.innerHTML = ''; cells = [];
+      el.style.gridTemplateColumns = `repeat(${c}, 1fr)`;
+      for (let y = 0; y < r; y++) for (let x = 0; x < c; x++) {
+        const d = document.createElement('div'); d.className = 'cell'; el.append(d); cells.push({ d, x, y });
+      }
+    },
+    paint(fn) { cells.forEach(({ d, x, y }) => { d.className = 'cell ' + (fn(x, y) || ''); }); }
+  };
+}
+/* 按题意给格子分类：前 a 列是服装；服装里前 c 行是童装 */
+const kind = (x, y, a, c) => x >= a ? 'rest' : (y < c ? 'kid' : 'oth');
+
+/* ---------- 模块 1：分步动画 ---------- */
+{
+  const root = document.getElementById('demo');
+  const cap = root.querySelector('.caption'), no = root.querySelector('.stepno'), fm = root.querySelector('.formula');
+  const btn = act => root.querySelector(`[data-act="${act}"]`);
+  const G = makeGrid(root.querySelector('[data-grid]')); G.build(12, 8);
+  const sep = (x, y, on) => on ? ((x === 5 ? ' cs' : '') + (on > 1 && y === 3 && x < 5 ? ' rs' : '')) : '';
+  // 第 6 步要框出“多出来”的 10 格：其它服装里前 2 行 × 5 列
+  const STEPS = [
+    { paint: () => '', text: '整个集装箱 20 吨，画成 96 个小格。整箱就是最开始的单位“1”。',
+      f: '20 吨 = 96 格 &nbsp;→&nbsp; 每格 20 ÷ 96 = ' + F(5, 24) + ' 吨' },
+    { paint: (x, y) => (x < 5 ? 'cloth' : 'rest') + sep(x, y, 1), text: '服装占总货物的 5/12：12 列里取 5 列。这时单位“1”是总货物。',
+      f: '服装 = 20 × ' + F(5, 12) + ' = ' + Fm(25, 3) + ' 吨（5 列 × 8 行 = 40 格）' },
+    { paint: (x, y) => kind(x, y, 5, 3) + sep(x, y, 2), text: '童装占服装的 3/8：只在服装这 5 列里，8 行取 3 行。单位“1”换成了服装！',
+      f: '童装占服装 ' + F(3, 8) + '，其它服装占服装 1 − ' + F(3, 8) + ' = ' + F(5, 8) },
+    { paint: (x, y) => { const k = kind(x, y, 5, 3); return (k === 'oth' ? 'oth' : k + ' dim') + sep(x, y, 2); },
+      text: '第②问：其它服装有 5 列 × 5 行 = 25 格，整箱 96 格。所以占总货物 25/96。',
+      f: F(5, 12) + ' × ' + F(5, 8) + ' = ' + F(25, 96) + '（25 格 ÷ 96 格）' },
+    { paint: (x, y) => { const k = kind(x, y, 5, 3); return (k === 'oth' ? 'oth' : k + ' dim') + sep(x, y, 2); },
+      text: '第③问：25 格，每格 5/24 吨，或者直接 20 吨 × 25/96。',
+      f: '20 × ' + F(25, 96) + ' = ' + Fm(125, 24) + ' 吨 ≈ 5.21 吨' },
+    { paint: (x, y) => { const k = kind(x, y, 5, 3); return (k === 'rest' ? 'rest dim' : k) + (k === 'oth' && y < 5 ? ' mark' : '') + sep(x, y, 2); },
+      text: '第①问：童装 15 格，其它服装 25 格，多 10 格（框出的格子）。拿童装 15 格当单位“1”：10 ÷ 15 = 2/3。',
+      f: '(' + F(5, 8) + ' − ' + F(3, 8) + ') ÷ ' + F(3, 8) + ' = ' + F(2, 8) + ' ÷ ' + F(3, 8) + ' = ' + F(2, 3) + '&nbsp; 即 (25 − 15) ÷ 15 = ' + F(2, 3) },
+  ];
+  const INIT = { step: 0, playing: false };
+  let S = { ...INIT }, timer = null;
+  const draw = () => {
+    const s = STEPS[S.step];
+    G.paint(s.paint);
+    cap.textContent = s.text; fm.innerHTML = s.f; no.textContent = `${S.step + 1} / ${STEPS.length}`;
+    btn('prev').disabled = S.step === 0; btn('next').disabled = S.step === STEPS.length - 1;
+    btn('play').textContent = S.playing ? '⏸ 暂停' : '▶ 播放';
+  };
+  const stop = () => { clearInterval(timer); timer = null; S.playing = false; };
+  const go = d => { S.step = Math.max(0, Math.min(STEPS.length - 1, S.step + d)); draw(); };
+  btn('prev').onclick = () => { stop(); go(-1); };
+  btn('next').onclick = () => { stop(); go(1); };
+  btn('play').onclick = () => {
+    if (S.playing) { stop(); draw(); return; }
+    if (S.step === STEPS.length - 1) S.step = 0;
+    S.playing = true; draw();
+    timer = setInterval(() => { go(1); if (S.step === STEPS.length - 1) { stop(); draw(); } }, 2600);
+  };
+  const reset = () => { stop(); S = { ...INIT }; draw(); };
+  btn('reset').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+/* ---------- 模块 2：三问三个单位“1” ---------- */
+{
+  const root = document.getElementById('qs');
+  const cap = root.querySelector('.caption'), fm = root.querySelector('.formula');
+  const G = makeGrid(root.querySelector('[data-grid]')); G.build(12, 8);
+  const base = (x, y) => kind(x, y, 5, 3) + (x === 5 ? ' cs' : '') + (y === 3 && x < 5 ? ' rs' : '');
+  const Q = [
+    { paint: (x, y) => { const k = kind(x, y, 5, 3); return base(x, y) + (k === 'rest' ? ' dim' : '') + (k === 'kid' ? ' mark' : ''); },
+      text: '“其它服装比<b>童装</b>多几分之几”——“比”字后面是谁，谁就是单位“1”：<span class="u1">童装</span>。20 吨和 5/12 在这一问里根本用不上。',
+      f: '多的 ÷ 童装 = (' + F(5, 8) + ' − ' + F(3, 8) + ') ÷ ' + F(3, 8) + ' = ' + F(2, 3) },
+    { paint: (x, y) => base(x, y) + ' mark' + (kind(x, y, 5, 3) === 'oth' ? '' : ' dim'),
+      text: '“占<b>总货物</b>的几分之几”——单位“1”是 <span class="u1">总货物</span>（整箱）。其它服装是“服装的 5/8”，服装又是“总货物的 5/12”，跨了两层，连乘。',
+      f: F(5, 12) + ' × ' + F(5, 8) + ' = ' + F(25, 96) },
+    { paint: (x, y) => base(x, y) + (kind(x, y, 5, 3) === 'oth' ? ' mark' : ' dim'),
+      text: '“共多少吨”——求具体数量：<span class="u1">总量 20 吨</span> × 它占总货物的分率（第②问的答案）。',
+      f: '20 × ' + F(25, 96) + ' = ' + Fm(125, 24) + ' 吨 &nbsp;（也可：20 × ' + F(5, 12) + ' − 20 × ' + F(5, 12) + ' × ' + F(3, 8) + ' = ' + F(25, 3) + ' − ' + F(25, 8) + ' = ' + F(125, 24) + '）' },
+  ];
+  const tabs = [...root.querySelectorAll('[data-q]')];
+  const INIT = { q: 0 };
+  let S = { ...INIT };
+  const draw = () => {
+    const q = Q[S.q];
+    tabs.forEach((b, i) => b.classList.toggle('on', i === S.q));
+    G.paint(q.paint); cap.innerHTML = q.text; fm.innerHTML = q.f;
+  };
+  tabs.forEach((b, i) => b.onclick = () => { S.q = i; draw(); });
+  const reset = () => { S = { ...INIT }; draw(); };
+  root.querySelector('[data-act="reset"]').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+/* ---------- 模块 3：自己试试 ---------- */
+{
+  const root = document.getElementById('try');
+  const inputs = [...root.querySelectorAll('input[data-k]')];
+  const G = makeGrid(root.querySelector('[data-grid]'));
+  const label = root.querySelector('.glabel'), out = root.querySelector('.out');
+  const INIT = { T: 20, a: 5, b: 12, c: 3, d: 8 };
+  let S = { ...INIT };
+  const clampAll = () => {
+    S.T = Math.max(1, Math.min(999, Math.round(S.T) || 1));
+    S.b = Math.max(2, Math.min(12, Math.round(S.b) || 2));
+    S.d = Math.max(2, Math.min(12, Math.round(S.d) || 2));
+    S.a = Math.max(1, Math.min(S.b - 1, Math.round(S.a) || 1));
+    S.c = Math.max(1, Math.min(S.d - 1, Math.round(S.c) || 1));
+  };
+  const draw = () => {
+    const { T, a, b, c, d } = S;
+    inputs.forEach(i => { i.value = S[i.dataset.k]; });
+    G.build(b, d);
+    G.paint((x, y) => kind(x, y, a, c) + (x === a ? ' cs' : '') + (y === c && x < a ? ' rs' : ''));
+    label.textContent = `${b} 列 × ${d} 行 = ${b * d} 格；童装 ${a * c} 格，其它服装 ${a * (d - c)} 格`;
+    const oth = d - c, diff = oth - c;
+    let q1;
+    if (diff > 0) q1 = `其它服装比童装<b>多</b> (${F(oth, d)} − ${F(c, d)}) ÷ ${F(c, d)} = <b>${F(diff, c)}</b>`;
+    else if (diff < 0) q1 = `其它服装比童装<b>少</b> (${F(c, d)} − ${F(oth, d)}) ÷ ${F(c, d)} = <b>${F(-diff, c)}</b>（这回是童装更多）`;
+    else q1 = '其它服装和童装<b>一样多</b>，多 0';
+    out.innerHTML =
+      `<div>① ${q1}</div>` +
+      `<div>② 其它服装占总货物：${F(a, b)} × ${F(oth, d)} = <b>${F(a * oth, b * d)}</b></div>` +
+      `<div>③ 其它服装：${T} × ${F(a * oth, b * d)} = <b>${Fm(T * a * oth, b * d)}</b> 吨</div>`;
+  };
+  inputs.forEach(i => i.addEventListener('change', () => { S[i.dataset.k] = Number(i.value); clampAll(); draw(); }));
+  const reset = () => { S = { ...INIT }; draw(); };
+  root.querySelector('[data-act="reset"]').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+/* ---------- 练习题 ---------- */
+window.LQ_ITEMS = [
+  { type: '选择', q: '“在服装类货物中，童装占 3/8”，这里的单位“1”是？', opts: ['集装箱里的全部货物', '服装类货物', '童装'], ans: 1,
+    why: '“在服装类货物中”已经点明：3/8 是服装的 3/8。对应动画第 3 步——只在服装那 5 列里取 3 行。' },
+  { type: '判断', q: '其它服装比童装多：5/8 − 3/8 = 1/4。', opts: ['对', '错'], ans: 1,
+    why: '1/4 是“多出的部分占服装的几分之几”。问的是比<b>童装</b>多几分之几，要用多的 ÷ 童装：1/4 ÷ 3/8 = 2/3。格子上看：多 10 格，童装 15 格，10/15 = 2/3。' },
+  { type: '选择', q: '其它服装占总货物的几分之几？', opts: ['5/8', '25/96', '1/4', '7/12'], ans: 1,
+    why: '其它服装占服装 5/8，服装占总货物 5/12，跨两层要连乘：5/12 × 5/8 = 25/96。选 5/8 是忘了换单位“1”（误区 3）。' },
+  { type: '填空', q: '童装有多少吨？（写分数或小数）', ans: ['25/8', '3.125', '3又1/8', '3又8分之1', '3+1/8'], placeholder: '如 25/8',
+    why: '20 × 5/12 × 3/8 = 25/8 = 3.125 吨。如果算成 20 × 3/8 = 7.5 吨，就是把 3/8 当成了总货物的（误区 1）。' },
+  { type: '选择', q: '反过来问：童装比其它服装<b>少</b>几分之几？', opts: ['2/3', '2/5', '1/4', '3/5'], ans: 1,
+    why: '“比其它服装”——单位“1”变成其它服装（25 格）。少 10 格，10 ÷ 25 = 2/5。差距一样，比的对象换了，分母就换了，所以不是 2/3。' },
+  { type: '计算', q: '其它服装比童装多多少<b>吨</b>？（写分数）', ans: ['25/12', '2又1/12', '2又12分之1', '2+1/12', '50/24'], placeholder: '如 25/12',
+    why: '其它服装 125/24 吨，童装 25/8 = 75/24 吨，相差 50/24 = 25/12 吨。也可用 10 格 × 每格 5/24 吨 = 50/24 = 25/12 吨。注意问“多少吨”是数量，问“多几分之几”才是分率 2/3。' },
+  { type: '迁移', q: '果园有 240 棵树，其中果树占 3/4；果树中苹果树占 2/9。苹果树有多少棵？', ans: ['40'], placeholder: '填数字',
+    why: '同一个结构：2/9 是果树的 2/9。240 × 3/4 × 2/9 = 180 × 2/9 = 40 棵。' },
+];
+</script>
+<script>
+/* ---------- 练习题（learn 通用组件） ----------
+   题目来自 window.LQ_ITEMS：{type, q, opts, ans: 选项下标, why} 或填空题 {type, q, ans: [可接受答案…], why}
+   定义 window.resetPage()（导航条「重置」按钮调用）：先调用页面自己的 window.pageReset()，再清空练习 */
+(() => {
+  const box = document.getElementById('lq');
+  const items = window.LQ_ITEMS || [];
+  const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let answered = 0, right = 0;
+
+  function update() {
+    const all = answered === items.length;
+    score.textContent = `已答 ${answered} / ${items.length} · 答对 ${right}` +
+      (all ? (right === items.length ? ' · 全对！' : ' · 看看解析，再重做一次') : '');
+  }
+
+  function render() {
+    answered = 0; right = 0; list.innerHTML = '';
+    items.forEach((it, i) => {
+      const el = document.createElement('div');
+      el.className = 'lq-item';
+      el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
+      const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
+      const judge = (ok, answer) => {
+        answered++; if (ok) right++;
+        el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
+        why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
+        update();
+      };
+      if (it.opts) {
+        a.classList.add('lq-opts');
+        it.opts.forEach((o, j) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'lq-opt'; b.innerHTML = o;
+          b.onclick = () => {
+            a.querySelectorAll('button').forEach(x => x.disabled = true);
+            a.children[it.ans].classList.add('lq-right');
+            if (j !== it.ans) b.classList.add('lq-wrong');
+            judge(j === it.ans, it.opts[it.ans]);
+          };
+          a.append(b);
+        });
+      } else {
+        a.classList.add('lq-fill');
+        a.innerHTML = `<input type="text" autocomplete="off" spellcheck="false" placeholder="${it.placeholder || '输入答案'}" aria-label="第 ${i + 1} 题答案"><button type="button" class="lq-opt">确定</button>`;
+        const inp = a.querySelector('input'), go = a.querySelector('button');
+        const submit = () => {
+          if (!inp.value.trim()) { inp.focus(); return; }
+          inp.disabled = go.disabled = true;
+          const ok = it.ans.some(x => norm(x) === norm(inp.value));
+          inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
+          judge(ok, it.ans[0]);
+        };
+        go.onclick = submit;
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      }
+      list.append(el);
+    });
+    update();
+  }
+
+  box.querySelector('.lq-redo').addEventListener('click', render);
+  // 导航条的「重置」按钮调用它：页面各模块 + 练习题一起恢复初始状态
+  window.resetPage = () => {
+    if (typeof window.pageReset === 'function') window.pageReset();
+    render();
+  };
+  render();
+})();
+</script>
+
+</body>
+</html>
