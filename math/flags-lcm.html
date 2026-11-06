@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>改插彩旗：公倍数与植树</title>
+<meta name="description" content="试卷2 第 27 题：原来每 14 米插一面彩旗，改成每 21 米，包括两端共 16 面不用动，路长多少米？用两排彩旗重合的动画讲清“不动的旗每隔最小公倍数 42 米一面”和“16 面旗只有 15 段”，答案 630 米，附滑块和环形、公交发车等变式。">
+<style>
+/* ---------- 页面变量：中性色映射到站点变量，只为内容另加语义色 ---------- */
+:root{
+  --bg:var(--up-bg); --surface:var(--up-surface); --ink:var(--up-ink); --muted:var(--up-muted); --line:var(--up-line);
+  --accent:var(--up-accent); --ok:var(--up-ok); --bad:var(--up-bad);
+  --c1:#1c7ed6; --c2:#7048e8;
+  --old:#1c7ed6; --new:#7048e8; --keep:#e8590c;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --c1:#74c0fc; --c2:#b197fc; --old:#74c0fc; --new:#b197fc; --keep:#ffa94d; }
+}
+:root[data-theme="dark"]{ --c1:#74c0fc; --c2:#b197fc; --old:#74c0fc; --new:#b197fc; --keep:#ffa94d; }
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 var(--up-font);padding:24px 16px 96px}
+main{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:48px}
+h1{font-size:clamp(1.7rem,4.5vw,2.4rem);line-height:1.25;margin:0 0 8px}
+h2{font-size:1.4rem;margin:0 0 8px}
+p{margin:0}
+.lead{color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--up-radius);box-shadow:var(--up-shadow);padding:16px}
+.analogy{border-left:4px solid var(--accent)}
+.btn{font:inherit;font-size:14px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--up-surface)}
+.btn:disabled{opacity:.45;cursor:default}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.stepno{font-family:var(--up-mono);color:var(--muted);font-size:.9rem;min-width:56px;text-align:center}
+
+/* ---------- 本组页面共用 ---------- */
+.stage{border-radius:10px;background:var(--up-surface-2);margin-top:12px;overflow:hidden}
+.stage svg{display:block;width:100%;height:auto}
+.caption{min-height:3.6em;margin-top:10px}
+.btn.on{border-color:var(--accent);background:var(--up-accent-soft);color:var(--accent);font-weight:700}
+.problem{border-left:4px solid var(--c1)}
+.problem .src{font-size:.85rem;color:var(--muted)}
+.warn{border-left:4px solid var(--bad)}
+.sum{border-left:4px solid var(--ok)}
+.mono,.k{font-family:var(--up-mono)}
+.fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;font-size:.82em;line-height:1.15;margin:0 2px;font-family:var(--up-mono)}
+.fr>i{font-style:normal;padding:0 2px}
+.fr>i:first-child{border-bottom:1.5px solid currentColor}
+.sec-lead{color:var(--muted);margin-bottom:12px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.recipe{counter-reset:r;list-style:none;padding:0;margin:8px 0 0;display:grid;gap:8px}
+.recipe li{counter-increment:r;padding-left:34px;position:relative}
+.recipe li::before{content:counter(r);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--up-surface);font:700 13px/24px var(--up-mono);text-align:center}
+.tbl{width:100%;border-collapse:collapse;font-size:.92rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+.tbl th{background:var(--up-surface-2)}
+.tblwrap{overflow-x:auto}
+.hl{background:var(--up-accent-soft);color:var(--accent);border-radius:4px;padding:0 3px;font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.readout{font-family:var(--up-mono);margin-top:10px;line-height:1.8}
+.ok-t{color:var(--ok);font-weight:700}.bad-t{color:var(--bad);font-weight:700}
+input[type=range]{width:min(100%,320px);accent-color:var(--accent)}
+label.sl{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px}
+svg text{font-family:var(--up-font);fill:var(--ink)}
+svg .mono{font-family:var(--up-mono)}
+.fade{transition:opacity .7s ease}
+@media (prefers-reduced-motion: reduce){.fade,svg *{transition:none!important}}
+.card p,.caption,.readout,.lq-q,.lq-why{overflow-wrap:anywhere}
+
+.qtext{background:var(--up-surface-2);border-radius:10px;padding:12px 14px;margin-top:12px;line-height:1.9;min-height:6.5em}
+.qtext .hl{transition:background .6s}
+.goto{display:inline-block;margin-top:6px;font-weight:700;color:var(--accent)}
+.tcard h3{margin:0 0 4px;font-size:1.05rem}
+.tcard p{font-size:.95rem}
+.tcard .no{font:700 .85rem var(--up-mono);color:var(--muted)}
+.big{font-size:1.15rem;font-family:var(--up-mono)}
+:root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:var(--ok);--lq-bad:var(--bad)}
+/* ---------- 练习题（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+.lq{display:grid;gap:12px;margin-bottom:56px}
+.lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+.lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
+.lq-sub{margin:0;color:var(--lq-muted);font-size:14px}
+.lq-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--lq-muted);font-variant-numeric:tabular-nums}
+.lq-list{display:grid;gap:10px}
+.lq-item{background:var(--lq-surface);border:1.5px solid var(--lq-line);border-radius:10px;padding:12px 16px;display:grid;gap:10px;min-width:0;color:var(--lq-ink);text-align:left}
+.lq-item.lq-is-ok{border-color:var(--lq-ok)}
+.lq-item.lq-is-bad{border-color:var(--lq-bad)}
+.lq-q{font-size:15px;font-weight:600;line-height:1.6}
+.lq-tag{display:inline-block;font-size:11px;font-weight:500;line-height:1.6;color:var(--lq-muted);border:1px solid var(--lq-line);border-radius:999px;padding:0 8px;margin-right:8px;vertical-align:1px}
+.lq-opts,.lq-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lq .lq-opt,.lq .lq-redo{font:inherit;font-size:14px;line-height:1.4;padding:6px 14px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);cursor:pointer;text-align:left;opacity:1}
+.lq .lq-opt:hover:not(:disabled),.lq .lq-redo:hover{border-color:var(--lq-accent)}
+.lq .lq-opt:disabled{cursor:default;opacity:1}
+.lq .lq-opt.lq-right{border-color:var(--lq-ok);color:var(--lq-ok);font-weight:700}
+.lq .lq-opt.lq-wrong{border-color:var(--lq-bad);color:var(--lq-bad);text-decoration:line-through}
+.lq-fill input{font:inherit;font-size:14px;padding:6px 10px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);width:min(100%,200px)}
+.lq-fill input.lq-right{border-color:var(--lq-ok)}
+.lq-fill input.lq-wrong{border-color:var(--lq-bad)}
+.lq-why{font-size:14px;line-height:1.65;color:var(--lq-muted)}
+.lq-why:empty{display:none}
+.lq-why .lq-ok{color:var(--lq-ok)}
+.lq-why .lq-bad{color:var(--lq-bad)}
+.road .rd{stroke:var(--muted);stroke-width:4;stroke-linecap:round}
+.road .po{stroke:var(--old);stroke-width:2}
+.road .pn{stroke:var(--new);stroke-width:2}
+.road .fo{fill:var(--old)}
+.road .fn{fill:var(--new)}
+.road .kp{fill:var(--keep)}
+.road .kl{stroke:var(--keep);stroke-width:3}
+.road .seg{stroke:var(--keep);stroke-width:2;fill:none}
+.road text{font:13px var(--up-mono);fill:var(--muted)}
+.road .lab{font:700 14px var(--up-font)}
+.road .lo{fill:var(--old)} .road .ln{fill:var(--new)} .road .lk{fill:var(--keep)}
+.road .big{font:700 20px var(--up-mono);fill:var(--keep)}
+.road .kp,.road .kl{animation:pop .8s ease}
+@keyframes pop{from{opacity:0}}
+@media (prefers-reduced-motion: reduce){.road .kp,.road .kl{animation:none}}
+.mis{display:grid;gap:12px}
+.mis .card{border-left:4px solid var(--bad)}
+.wrong-t{color:var(--bad);text-decoration:line-through;font-family:var(--up-mono)}
+.right-t{color:var(--ok);font-family:var(--up-mono);font-weight:700}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.9rem;margin-top:8px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+</style>
+</head>
+<body>
+<!-- up-shell:begin（由 scripts/shell.mjs 自动生成，勿手改） -->
+<nav id="up-nav" aria-label="网站导航">
+<a class="up-home" href="/" title="Up 学习站首页"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="up-nav-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c6ef5"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#up-nav-g)"/><path d="M12 52V42a2 2 0 0 1 2-2h10V32a2 2 0 0 1 2-2h10v-8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v30z" fill="#fff"/><circle cx="43" cy="13" r="5.5" fill="#ffa94d"/></svg><span>Up 学习站</span></a>
+<span class="up-sep" aria-hidden="true">›</span><a class="up-cat" href="/math">数学</a>
+<span class="up-sep" aria-hidden="true">›</span><span class="up-title">改插彩旗：公倍数与植树</span>
+<button id="up-reset" type="button" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+</nav>
+<style>
+:root{--up-bg:#f5f6f8;--up-surface:#ffffff;--up-surface-2:#eef0f4;--up-ink:#1d2127;--up-muted:#626b78;--up-line:#dfe2e8;--up-ok:#2b8a3e;--up-bad:#d6336c;--up-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);--up-font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif;--up-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;--up-radius:12px;--up-accent:#d9480f;--up-accent-soft:#fff1e8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#ff8a50;--up-accent-soft:#3a2218;color-scheme:dark}}
+:root[data-theme="dark"]{--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#ff8a50;--up-accent-soft:#3a2218;color-scheme:dark}
+html{padding-top:52px;scroll-padding-top:64px}
+#up-nav{position:fixed;top:0;left:0;right:0;z-index:2147483000;height:52px;box-sizing:border-box;display:flex;align-items:center;gap:8px;
+padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));border-top:3px solid var(--up-accent);
+border-bottom:1px solid var(--up-line);background:color-mix(in srgb,var(--up-surface) 88%,transparent);
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:500 14px/1.2 var(--up-font);color:var(--up-ink);text-align:left}
+#up-nav a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none}
+#up-nav a:hover{color:var(--up-accent)}
+#up-nav svg{width:24px;height:24px;flex:none;display:block}
+#up-nav .up-home span{font-weight:700}
+#up-nav .up-cat{color:var(--up-accent);font-weight:600}
+#up-nav .up-sep{color:var(--up-muted);flex:none}
+#up-nav .up-title{color:var(--up-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#up-reset{margin:0 0 0 auto;flex:none;font:600 14px/1 var(--up-font);padding:8px 14px;border-radius:999px;cursor:pointer;
+border:1.5px solid var(--up-accent);background:transparent;color:var(--up-accent);transition:background .2s,color .2s}
+#up-reset:hover,#up-reset:focus-visible{background:var(--up-accent);color:var(--up-surface)}
+#up-reset:focus-visible,#up-nav a:focus-visible{outline:2px solid var(--up-accent);outline-offset:2px}
+@media (max-width:560px){#up-nav .up-home span{display:none}}
+@media print{#up-nav{display:none}html{padding-top:0}}
+</style>
+<script>
+document.getElementById('up-reset').addEventListener('click', function () {
+  if (typeof window.resetPage === 'function') window.resetPage();
+  else console.warn('本页没有定义 window.resetPage()，重置按钮无效');
+  window.scrollTo({ top: 0, behavior: 'auto' });
+});
+</script>
+<!-- up-shell:end -->
+<main>
+
+<section>
+  <h1>改插彩旗：公倍数与植树</h1>
+  <p class="lead">试卷2 第 27 题由两个小知识拼成：<b>不用动的旗在哪里</b>（公倍数）+ <b>几面旗有几段</b>（植树问题）。两步各错一点，答案就差 42 米。<br><a href="exam2-review.html" style="color:var(--accent)">← 试卷2错题总览</a></p>
+</section>
+
+<section class="card problem">
+  <span class="src">原题 · 试卷2 第 27 题</span><br>
+  为了迎接国庆节的到来，需要在笔直的公路一侧插上彩旗，原来每 14 米插一面彩旗，现在改成每 21 米插一面彩旗。在施工过程中发现，包括两端的彩旗在内，一共有 16 面彩旗不需要移动，这条路长多少米？
+  <p style="margin-top:6px">卷面第一次 <span class="wrong-t">42 × 16 = 672</span> → 订正 <span class="right-t">42 × (16 − 1) = 630 米</span>。订正是对的，下面把“为什么”讲透。</p>
+</section>
+
+<section class="card analogy">
+  <b>生活比喻：两个人沿路走，一个每步 14 米，一个每步 21 米</b><br>
+  两人从同一个起点出发，各自在脚印处插旗。<b>两人的脚印重合</b>的地方，旗就不用动——那正是 14 和 21 的<b>公倍数</b>：42、84、126……
+</section>
+
+<section>
+  <h2>一步一步看整条路</h2>
+  <div class="card road" id="demo">
+    <div class="stage"><svg viewBox="0 0 680 230" role="img" aria-label="公路上新旧两排彩旗"></svg></div>
+    <div class="legend"><span><i style="background:var(--old)"></i>原来的旗（每 14 米）</span><span><i style="background:var(--new)"></i>现在的旗（每 21 米）</span><span><i style="background:var(--keep)"></i>不用动的旗</span></div>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>植树问题：旗数和段数</h2>
+  <p class="sec-lead">像手指和指缝：5 根手指只有 4 个指缝。</p>
+  <div class="tblwrap"><table class="tbl">
+    <tr><th>情况</th><th>旗（树）数 和 段数</th><th>例子：一段 42 米，路长 630 米</th></tr>
+    <tr><td>两端都插（本题）</td><td><b>旗数 = 段数 + 1</b></td><td>15 段 → 16 面</td></tr>
+    <tr><td>只插一端</td><td>旗数 = 段数</td><td>15 段 → 15 面</td></tr>
+    <tr><td>两端都不插</td><td>旗数 = 段数 − 1</td><td>15 段 → 14 面</td></tr>
+    <tr><td>环形（首尾相接）</td><td>旗数 = 段数</td><td>周长 630 → 15 面</td></tr>
+  </table></div>
+</section>
+
+<section>
+  <h2>自己试试：换间距、换不动的旗数</h2>
+  <div class="card road" id="try">
+    <label class="sl">原来每 <b class="k" data-o>14</b> 米 <input type="range" min="2" max="30" value="14" data-r="o"></label>
+    <label class="sl">现在每 <b class="k" data-o>21</b> 米 <input type="range" min="2" max="30" value="21" data-r="n"></label>
+    <label class="sl">不用动的旗（含两端）<b class="k" data-o>16</b> 面 <input type="range" min="2" max="20" value="16" data-r="k"></label>
+    <div class="stage"><svg viewBox="0 0 680 120" role="img" aria-label="按设置画出的彩旗"></svg></div>
+    <div class="readout"></div>
+    <div class="ctrl"><button type="button" class="btn" data-act="reset2">↺ 恢复原题</button></div>
+  </div>
+</section>
+
+<section>
+  <h2>常见误区</h2>
+  <div class="mis">
+    <div class="card"><b>误区 1：旗数当段数。</b><br><span class="wrong-t">42 × 16 = 672</span>。16 面旗之间只有 <b>15 段</b>，路长 = 42 × 15 = <span class="right-t">630</span>。拿不准就画 3 面旗数一数：只有 2 段。</div>
+    <div class="card"><b>误区 2：用 14 × 21 = 294 当间隔。</b><br>294 也是公倍数，但 42、84… 处的旗也不用动。<b>相邻</b>两面不动的旗相隔的是<b>最小</b>公倍数 42。</div>
+    <div class="card"><b>误区 3：环形照搬“+1”。</b><br>环形跑道首尾相接，起点那面旗就是终点那面，旗数 = 段数，不用再 +1 或 −1。</div>
+  </div>
+</section>
+
+<section class="card sum">
+  <b>一句话总结：</b>不动的旗每隔<b>最小公倍数</b>出现一次；两端都有旗时，<b>段数 = 旗数 − 1</b>，路长 = 最小公倍数 × 段数。
+</section>
+
+<section class="lq" id="lq" aria-label="练习">
+  <div class="lq-head"><h2>练习</h2><span class="lq-score"></span></div>
+  <p class="lq-sub">每题作答后马上看到解析；点「重做练习」清空重来。分数写成 a/b（如 2/3），负数用 -（如 -4/3）。</p>
+  <div class="lq-list"></div>
+  <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+</section>
+
+</main>
+
+<script>
+const resets = [];                                   // 每个模块的 reset()
+window.pageReset = () => resets.forEach(f => f());   // 练习组件会把它包进 window.resetPage
+const F = (a, b) => `<span class="fr"><i>${a}</i><i>${b}</i></span>`;   // 竖排分数
+/* 通用分步模块：render(step) 负责画图并返回说明文字 */
+function stepper(id, n, render, ms = 1800) {
+  const root = document.getElementById(id);
+  const cap = root.querySelector('.caption'), no = root.querySelector('.stepno');
+  const btn = a => root.querySelector(`[data-act="${a}"]`);
+  let step = 0, timer = null;
+  const draw = () => {
+    cap.innerHTML = render(step) || '';
+    no.textContent = `${step + 1} / ${n}`;
+    btn('prev').disabled = step === 0; btn('next').disabled = step === n - 1;
+    btn('play').textContent = timer ? '⏸ 暂停' : '▶ 播放';
+  };
+  const stop = () => { clearInterval(timer); timer = null; };
+  const go = d => { step = Math.max(0, Math.min(n - 1, step + d)); draw(); };
+  btn('prev').onclick = () => { stop(); go(-1); };
+  btn('next').onclick = () => { stop(); go(1); };
+  btn('play').onclick = () => {
+    if (timer) { stop(); draw(); return; }
+    if (step === n - 1) step = 0;
+    timer = setInterval(() => { go(1); if (step === n - 1) { stop(); draw(); } }, ms);
+    draw();
+  };
+  const reset = () => { stop(); step = 0; draw(); };
+  btn('reset').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+const gcd = (a, b) => b ? gcd(b, a % b) : a;
+const lcm = (a, b) => a / gcd(a, b) * b;
+// 在 svg 里画一条路：L 米，原间距 o，新间距 n，显示哪些层
+function roadSVG(L, o, n, show, W = 680, y0 = 60, extra = '') {
+  const x0 = 24, x1 = W - 24, sc = (x1 - x0) / L, X = m => (x0 + m * sc).toFixed(1);
+  const lc = lcm(o, n);
+  let h = `<line class="rd" x1="${x0}" y1="${y0}" x2="${x1}" y2="${y0}"/>`;
+  if (show.old) for (let m = 0; m <= L + 1e-9; m += o) { const k = show.keep && m % lc === 0; h += `<g class="fade"><line class="${k ? 'kl' : 'po'}" x1="${X(m)}" y1="${y0}" x2="${X(m)}" y2="${y0 - 26}"/><path class="${k ? 'kp' : 'fo'}" d="M${X(m)} ${y0 - 26}h9l-3 4 3 4h-9z"/></g>`; }
+  if (show.new) for (let m = 0; m <= L + 1e-9; m += n) { const k = show.keep && m % lc === 0; h += `<g class="fade"><line class="${k ? 'kl' : 'pn'}" x1="${X(m)}" y1="${y0}" x2="${X(m)}" y2="${y0 + 26}"/><path class="${k ? 'kp' : 'fn'}" d="M${X(m)} ${y0 + 26}h9l-3-4 3-4h-9z"/></g>`; }
+  return h + extra(X, lc);
+}
+{
+  const root = document.getElementById('demo');
+  const svg = root.querySelector('svg');
+  const L = 630, o = 14, n = 21;
+  const label = (X, lc, upto) => { let s = ''; for (let i = 0; i * lc <= L && i < upto; i++) s += `<text class="lk" x="${X(i * lc)}" y="112" text-anchor="middle" style="font-size:11px">${i + 1}</text>`; return s; };
+  const segs = (X, lc) => { let s = ''; for (let i = 0; i < L / lc; i++) s += `<path class="seg" d="M${X(i * lc)} 124 q${(X((i + 1) * lc) - X(i * lc)) / 2} 14 ${X((i + 1) * lc) - X(i * lc)} 0"/>`; return s; };
+  const S = [
+    { show: { old: 1 }, ex: () => `<text class="lab lo" x="24" y="20">原来：每 14 米一面，两端都有</text>`, c: '原来的旗（蓝）从起点开始，每 14 米一面，插在 0、14、28、42、56……米处。' },
+    { show: { old: 1, new: 1 }, ex: () => `<text class="lab ln" x="24" y="20">现在：每 21 米一面（画在路下方）</text>`, c: '现在要改成每 21 米一面（紫），插在 0、21、42、63、84……米处。' },
+    { show: { old: 1, new: 1, keep: 1 }, ex: () => `<text class="lab lk" x="24" y="20">两排重合 → 不用动：0、42、84、126……</text>`, c: '既是 14 的倍数、又是 21 的倍数的位置，旗<b>不用动</b>（橙）。14 = 2 × 7，21 = 3 × 7，最小公倍数 = 2 × 3 × 7 = <b>42</b>：每隔 42 米就有一面不用动的旗。' },
+    { show: { old: 1, new: 1, keep: 1 }, ex: (X, lc) => `<text class="lab lk" x="24" y="20">数一数不用动的旗：1、2、3……16</text>` + label(X, lc, 16), c: '包括两端，一共 <b>16 面</b>不用动的旗——从第 1 面数到第 16 面。' },
+    { show: { keep: 1, old: 0, new: 0 }, ex: (X, lc) => { let s = `<line class="rd" x1="24" y1="60" x2="656" y2="60"/>`; for (let i = 0; i <= 15; i++) s += `<line class="kl" x1="${X(i * lc)}" y1="60" x2="${X(i * lc)}" y2="34"/><path class="kp" d="M${X(i * lc)} 34h9l-3 4 3 4h-9z"/>`; return s + label(X, lc, 16) + segs(X, lc) + `<text class="lab lk" x="24" y="20">16 面旗之间只有 15 段</text><text class="big" x="340" y="200" text-anchor="middle">42 × (16 − 1) = 630 米</text>`; }, c: '只看橙色的旗：16 面旗把路分成 <b>16 − 1 = 15 段</b>，每段 42 米。路长 = 42 × 15 = <b>630 米</b>。' },
+    { show: {}, ex: () => { const X = m => 120 + m * 4.4; let s = `<line class="rd" x1="${X(0)}" y1="90" x2="${X(84)}" y2="90"/>`; [0, 42, 84].forEach((m, i) => s += `<line class="kl" x1="${X(m)}" y1="90" x2="${X(m)}" y2="58"/><path class="kp" d="M${X(m)} 58h12l-4 5 4 5h-12z"/><text class="lk" x="${X(m)}" y="112" text-anchor="middle">${i + 1}</text>`); [0, 42].forEach(m => s += `<path class="seg" d="M${X(m)} 124 q92 18 185 0"/><text x="${X(m + 21)}" y="152" text-anchor="middle">42 米</text>`); return s + `<text class="lab lk" x="24" y="20">缩小来看：3 面旗，只有 2 段</text><text class="big" x="340" y="200" text-anchor="middle" style="fill:var(--bad)">16 × 42 = 672 ✗（多算了 1 段）</text>`; }, c: '卷面第一次写的 42 × 16 错在哪？看 3 面旗：只有 2 段，路长 84 米，不是 3 × 42。<b>两端都有旗时，段数比旗数少 1。</b>' },
+  ];
+  stepper('demo', S.length, i => {
+    const s = S[i];
+    const x0 = 24, sc = (656 - 24) / L, X = m => (x0 + m * sc).toFixed(1);
+    svg.innerHTML = (s.show.old || s.show.new ? roadSVG(L, o, n, s.show, 680, 60, () => '') : '') + s.ex(X, 42);
+    return s.c;
+  }, 2800);
+}
+
+{
+  const root = document.getElementById('try');
+  const svg = root.querySelector('svg'), out = root.querySelector('.readout');
+  const R = k => root.querySelector(`[data-r="${k}"]`);
+  const INIT = { o: 14, n: 21, k: 16 };
+  const draw = () => {
+    const o = +R('o').value, n = +R('n').value, k = +R('k').value;
+    root.querySelectorAll('[data-o]').forEach((b, i) => b.textContent = [o, n, k][i]);
+    const lc = lcm(o, n), L = lc * (k - 1);
+    svg.innerHTML = roadSVG(L, o, n, { old: 1, new: 1, keep: 1 }, 680, 60, () => '');
+    out.innerHTML = `最小公倍数 [${o}, ${n}] = <b>${lc}</b>　段数 = ${k} − 1 = ${k - 1}<br>路长 = ${lc} × ${k - 1} = <b class="ok-t">${L} 米</b><br>原来共 ${L} ÷ ${o} + 1 = ${L / o + 1} 面，现在共 ${L} ÷ ${n} + 1 = ${L / n + 1} 面`;
+  };
+  ['o', 'n', 'k'].forEach(k => R(k).addEventListener('input', draw));
+  const reset = () => { for (const k in INIT) R(k).value = INIT[k]; draw(); };
+  root.querySelector('[data-act="reset2"]').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+window.LQ_ITEMS = [
+  { type: '填空', q: '14 和 21 的最小公倍数是多少？', ans: ['42'], placeholder: '填数字', why: '14 = 2 × 7，21 = 3 × 7，最小公倍数 = 2 × 3 × 7 = 42。' },
+  { type: '判断', q: '16 面不用动的旗（含两端），每两面之间 42 米，所以路长 = 16 × 42 = 672 米。', opts: ['对', '错'], ans: 1, why: '16 面旗只有 15 段：42 × 15 = 630 米。两端都有旗，段数 = 旗数 − 1。' },
+  { type: '填空', q: '第 27 题的路长 630 米，原来每 14 米一面（两端都插），原来一共插了多少面？', ans: ['46'], placeholder: '填数字', why: '630 ÷ 14 = 45 段，两端都插：45 + 1 = 46 面。' },
+  { type: '填空', q: '一条路原来每 6 米种一棵树，改成每 8 米一棵，包括两端共有 9 棵不用移动。路长多少米？', ans: ['192'], placeholder: '填数字', why: '最小公倍数 [6, 8] = 24，9 棵 → 8 段，24 × 8 = 192 米。' },
+  { type: '填空', q: '一条路长 840 米，原来每 12 米插一面旗，改成每 20 米一面，两端都插。有多少面旗不用动？', ans: ['15'], placeholder: '填数字', why: '最小公倍数 [12, 20] = 60，840 ÷ 60 = 14 段，两端都有：14 + 1 = 15 面。' },
+  { type: '选择', q: '环形跑道一圈 360 米，原来每 12 米插一面旗，改成每 18 米一面。有多少面旗不用动？', opts: ['9', '10', '11', '20'], ans: 1, why: '最小公倍数 [12, 18] = 36，360 ÷ 36 = 10 段。环形首尾相接，旗数 = 段数 = 10，不用 +1。' },
+  { type: '填空', q: '1 路车每 6 分钟发一班，2 路车每 8 分钟发一班，7:00 两车同时发车，下一次同时发车是几点几分？（写成 7:24 这样）', ans: ['7:24', '7：24', '7点24分', '7时24分'], placeholder: '如 7:00', why: '同一个道理换了场景：同时发车的时刻间隔 = 最小公倍数 [6, 8] = 24 分钟，所以是 7:24。' },
+  { type: '填空', q: '第 27 题改插后一共 31 面旗（630 ÷ 21 + 1），其中 16 面不用动。还要在新位置上插多少面？', ans: ['15'], placeholder: '填数字', why: '31 − 16 = 15 面要插在新位置；原来的 46 面中有 46 − 16 = 30 面要拔掉（或挪走）。' },
+];
+</script>
+<script>
+/* ---------- 练习题（learn 通用组件） ----------
+   题目来自 window.LQ_ITEMS：{type, q, opts, ans: 选项下标, why} 或填空题 {type, q, ans: [可接受答案…], why}
+   定义 window.resetPage()（导航条「重置」按钮调用）：先调用页面自己的 window.pageReset()，再清空练习 */
+(() => {
+  const box = document.getElementById('lq');
+  const items = window.LQ_ITEMS || [];
+  const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let answered = 0, right = 0;
+
+  function update() {
+    const all = answered === items.length;
+    score.textContent = `已答 ${answered} / ${items.length} · 答对 ${right}` +
+      (all ? (right === items.length ? ' · 全对！' : ' · 看看解析，再重做一次') : '');
+  }
+
+  function render() {
+    answered = 0; right = 0; list.innerHTML = '';
+    items.forEach((it, i) => {
+      const el = document.createElement('div');
+      el.className = 'lq-item';
+      el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
+      const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
+      const judge = (ok, answer) => {
+        answered++; if (ok) right++;
+        el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
+        why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
+        update();
+      };
+      if (it.opts) {
+        a.classList.add('lq-opts');
+        it.opts.forEach((o, j) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'lq-opt'; b.innerHTML = o;
+          b.onclick = () => {
+            a.querySelectorAll('button').forEach(x => x.disabled = true);
+            a.children[it.ans].classList.add('lq-right');
+            if (j !== it.ans) b.classList.add('lq-wrong');
+            judge(j === it.ans, it.opts[it.ans]);
+          };
+          a.append(b);
+        });
+      } else {
+        a.classList.add('lq-fill');
+        a.innerHTML = `<input type="text" autocomplete="off" spellcheck="false" placeholder="${it.placeholder || '输入答案'}" aria-label="第 ${i + 1} 题答案"><button type="button" class="lq-opt">确定</button>`;
+        const inp = a.querySelector('input'), go = a.querySelector('button');
+        const submit = () => {
+          if (!inp.value.trim()) { inp.focus(); return; }
+          inp.disabled = go.disabled = true;
+          const ok = it.ans.some(x => norm(x) === norm(inp.value));
+          inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
+          judge(ok, it.ans[0]);
+        };
+        go.onclick = submit;
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      }
+      list.append(el);
+    });
+    update();
+  }
+
+  box.querySelector('.lq-redo').addEventListener('click', render);
+  // 导航条的「重置」按钮调用它：页面各模块 + 练习题一起恢复初始状态
+  window.resetPage = () => {
+    if (typeof window.pageReset === 'function') window.pageReset();
+    render();
+  };
+  render();
+})();
+</script>
+</body>
+</html>

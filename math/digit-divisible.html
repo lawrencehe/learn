@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>被每个数字整除的最大数</title>
+<meta name="description" content="试卷2 第 14 题：从 1~6 六张卡片里挑几张排成最大的多位数，要能被组成它的每个数字整除。用“考官检查”动画讲清整除特征、5 和偶数不能同台、数字和凑成 3 的倍数、去掉哪张卡最划算，答案 6432。">
+<style>
+/* ---------- 页面变量：中性色映射到站点变量，只为内容另加语义色 ---------- */
+:root{
+  --bg:var(--up-bg); --surface:var(--up-surface); --ink:var(--up-ink); --muted:var(--up-muted); --line:var(--up-line);
+  --accent:var(--up-accent); --ok:var(--up-ok); --bad:var(--up-bad);
+  --c1:#1c7ed6; --c2:#7048e8;
+  --card:#e7f5ff; --pass:#2b8a3e; --fail:#d6336c;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --c1:#74c0fc; --c2:#b197fc; --card:#1c2f40; --pass:#69db7c; --fail:#ff6b9a; }
+}
+:root[data-theme="dark"]{ --c1:#74c0fc; --c2:#b197fc; --card:#1c2f40; --pass:#69db7c; --fail:#ff6b9a; }
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 var(--up-font);padding:24px 16px 96px}
+main{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:48px}
+h1{font-size:clamp(1.7rem,4.5vw,2.4rem);line-height:1.25;margin:0 0 8px}
+h2{font-size:1.4rem;margin:0 0 8px}
+p{margin:0}
+.lead{color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--up-radius);box-shadow:var(--up-shadow);padding:16px}
+.analogy{border-left:4px solid var(--accent)}
+.btn{font:inherit;font-size:14px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--up-surface)}
+.btn:disabled{opacity:.45;cursor:default}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.stepno{font-family:var(--up-mono);color:var(--muted);font-size:.9rem;min-width:56px;text-align:center}
+
+/* ---------- 本组页面共用 ---------- */
+.stage{border-radius:10px;background:var(--up-surface-2);margin-top:12px;overflow:hidden}
+.stage svg{display:block;width:100%;height:auto}
+.caption{min-height:3.6em;margin-top:10px}
+.btn.on{border-color:var(--accent);background:var(--up-accent-soft);color:var(--accent);font-weight:700}
+.problem{border-left:4px solid var(--c1)}
+.problem .src{font-size:.85rem;color:var(--muted)}
+.warn{border-left:4px solid var(--bad)}
+.sum{border-left:4px solid var(--ok)}
+.mono,.k{font-family:var(--up-mono)}
+.fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;font-size:.82em;line-height:1.15;margin:0 2px;font-family:var(--up-mono)}
+.fr>i{font-style:normal;padding:0 2px}
+.fr>i:first-child{border-bottom:1.5px solid currentColor}
+.sec-lead{color:var(--muted);margin-bottom:12px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.recipe{counter-reset:r;list-style:none;padding:0;margin:8px 0 0;display:grid;gap:8px}
+.recipe li{counter-increment:r;padding-left:34px;position:relative}
+.recipe li::before{content:counter(r);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--up-surface);font:700 13px/24px var(--up-mono);text-align:center}
+.tbl{width:100%;border-collapse:collapse;font-size:.92rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+.tbl th{background:var(--up-surface-2)}
+.tblwrap{overflow-x:auto}
+.hl{background:var(--up-accent-soft);color:var(--accent);border-radius:4px;padding:0 3px;font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.readout{font-family:var(--up-mono);margin-top:10px;line-height:1.8}
+.ok-t{color:var(--ok);font-weight:700}.bad-t{color:var(--bad);font-weight:700}
+input[type=range]{width:min(100%,320px);accent-color:var(--accent)}
+label.sl{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px}
+svg text{font-family:var(--up-font);fill:var(--ink)}
+svg .mono{font-family:var(--up-mono)}
+.fade{transition:opacity .7s ease}
+@media (prefers-reduced-motion: reduce){.fade,svg *{transition:none!important}}
+.card p,.caption,.readout,.lq-q,.lq-why{overflow-wrap:anywhere}
+
+.qtext{background:var(--up-surface-2);border-radius:10px;padding:12px 14px;margin-top:12px;line-height:1.9;min-height:6.5em}
+.qtext .hl{transition:background .6s}
+.goto{display:inline-block;margin-top:6px;font-weight:700;color:var(--accent)}
+.tcard h3{margin:0 0 4px;font-size:1.05rem}
+.tcard p{font-size:.95rem}
+.tcard .no{font:700 .85rem var(--up-mono);color:var(--muted)}
+.big{font-size:1.15rem;font-family:var(--up-mono)}
+:root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:var(--ok);--lq-bad:var(--bad)}
+/* ---------- 练习题（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+.lq{display:grid;gap:12px;margin-bottom:56px}
+.lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+.lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
+.lq-sub{margin:0;color:var(--lq-muted);font-size:14px}
+.lq-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--lq-muted);font-variant-numeric:tabular-nums}
+.lq-list{display:grid;gap:10px}
+.lq-item{background:var(--lq-surface);border:1.5px solid var(--lq-line);border-radius:10px;padding:12px 16px;display:grid;gap:10px;min-width:0;color:var(--lq-ink);text-align:left}
+.lq-item.lq-is-ok{border-color:var(--lq-ok)}
+.lq-item.lq-is-bad{border-color:var(--lq-bad)}
+.lq-q{font-size:15px;font-weight:600;line-height:1.6}
+.lq-tag{display:inline-block;font-size:11px;font-weight:500;line-height:1.6;color:var(--lq-muted);border:1px solid var(--lq-line);border-radius:999px;padding:0 8px;margin-right:8px;vertical-align:1px}
+.lq-opts,.lq-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lq .lq-opt,.lq .lq-redo{font:inherit;font-size:14px;line-height:1.4;padding:6px 14px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);cursor:pointer;text-align:left;opacity:1}
+.lq .lq-opt:hover:not(:disabled),.lq .lq-redo:hover{border-color:var(--lq-accent)}
+.lq .lq-opt:disabled{cursor:default;opacity:1}
+.lq .lq-opt.lq-right{border-color:var(--lq-ok);color:var(--lq-ok);font-weight:700}
+.lq .lq-opt.lq-wrong{border-color:var(--lq-bad);color:var(--lq-bad);text-decoration:line-through}
+.lq-fill input{font:inherit;font-size:14px;padding:6px 10px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);width:min(100%,200px)}
+.lq-fill input.lq-right{border-color:var(--lq-ok)}
+.lq-fill input.lq-wrong{border-color:var(--lq-bad)}
+.lq-why{font-size:14px;line-height:1.65;color:var(--lq-muted)}
+.lq-why:empty{display:none}
+.lq-why .lq-ok{color:var(--lq-ok)}
+.lq-why .lq-bad{color:var(--lq-bad)}
+.cards svg .cd{animation:pop .7s ease}
+@keyframes pop{from{opacity:.2}}
+@media (prefers-reduced-motion: reduce){.cards svg .cd{animation:none}}
+.cards svg .cd rect{fill:var(--card);stroke:var(--c1);stroke-width:2}
+.cards svg .cd.hot rect{stroke:var(--accent);stroke-width:3.5}
+.cards svg .cd.dim{opacity:.25}
+.cards svg .cd text{font:700 44px var(--up-mono);fill:var(--ink)}
+.cards svg .x{stroke:var(--fail);stroke-width:5;stroke-linecap:round}
+.cards svg .num{font:700 46px var(--up-mono);fill:var(--accent)}
+.cards svg .sub{font:15px var(--up-font);fill:var(--muted)}
+.checks{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;min-height:36px}
+.ck{font:600 13px var(--up-font);padding:4px 10px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface)}
+.ck.ok{border-color:var(--pass);color:var(--pass)}
+.ck.no{border-color:var(--fail);color:var(--fail)}
+.pick{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.pick button{font:700 22px var(--up-mono);width:48px;height:58px;border-radius:8px;border:2px solid var(--line);background:var(--surface);color:var(--muted);cursor:pointer}
+.pick button.on{border-color:var(--c1);background:var(--card);color:var(--ink)}
+.mis{display:grid;gap:12px}
+.mis .card{border-left:4px solid var(--bad)}
+.wrong-t{color:var(--bad);text-decoration:line-through;font-family:var(--up-mono)}
+.right-t{color:var(--ok);font-family:var(--up-mono);font-weight:700}
+</style>
+</head>
+<body>
+<!-- up-shell:begin（由 scripts/shell.mjs 自动生成，勿手改） -->
+<nav id="up-nav" aria-label="网站导航">
+<a class="up-home" href="/" title="Up 学习站首页"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="up-nav-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c6ef5"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#up-nav-g)"/><path d="M12 52V42a2 2 0 0 1 2-2h10V32a2 2 0 0 1 2-2h10v-8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v30z" fill="#fff"/><circle cx="43" cy="13" r="5.5" fill="#ffa94d"/></svg><span>Up 学习站</span></a>
+<span class="up-sep" aria-hidden="true">›</span><a class="up-cat" href="/math">数学</a>
+<span class="up-sep" aria-hidden="true">›</span><span class="up-title">被每个数字整除的最大数</span>
+<button id="up-reset" type="button" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+</nav>
+<style>
+:root{--up-bg:#f5f6f8;--up-surface:#ffffff;--up-surface-2:#eef0f4;--up-ink:#1d2127;--up-muted:#626b78;--up-line:#dfe2e8;--up-ok:#2b8a3e;--up-bad:#d6336c;--up-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);--up-font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif;--up-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;--up-radius:12px;--up-accent:#d9480f;--up-accent-soft:#fff1e8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#ff8a50;--up-accent-soft:#3a2218;color-scheme:dark}}
+:root[data-theme="dark"]{--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#ff8a50;--up-accent-soft:#3a2218;color-scheme:dark}
+html{padding-top:52px;scroll-padding-top:64px}
+#up-nav{position:fixed;top:0;left:0;right:0;z-index:2147483000;height:52px;box-sizing:border-box;display:flex;align-items:center;gap:8px;
+padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));border-top:3px solid var(--up-accent);
+border-bottom:1px solid var(--up-line);background:color-mix(in srgb,var(--up-surface) 88%,transparent);
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:500 14px/1.2 var(--up-font);color:var(--up-ink);text-align:left}
+#up-nav a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none}
+#up-nav a:hover{color:var(--up-accent)}
+#up-nav svg{width:24px;height:24px;flex:none;display:block}
+#up-nav .up-home span{font-weight:700}
+#up-nav .up-cat{color:var(--up-accent);font-weight:600}
+#up-nav .up-sep{color:var(--up-muted);flex:none}
+#up-nav .up-title{color:var(--up-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#up-reset{margin:0 0 0 auto;flex:none;font:600 14px/1 var(--up-font);padding:8px 14px;border-radius:999px;cursor:pointer;
+border:1.5px solid var(--up-accent);background:transparent;color:var(--up-accent);transition:background .2s,color .2s}
+#up-reset:hover,#up-reset:focus-visible{background:var(--up-accent);color:var(--up-surface)}
+#up-reset:focus-visible,#up-nav a:focus-visible{outline:2px solid var(--up-accent);outline-offset:2px}
+@media (max-width:560px){#up-nav .up-home span{display:none}}
+@media print{#up-nav{display:none}html{padding-top:0}}
+</style>
+<script>
+document.getElementById('up-reset').addEventListener('click', function () {
+  if (typeof window.resetPage === 'function') window.resetPage();
+  else console.warn('本页没有定义 window.resetPage()，重置按钮无效');
+  window.scrollTo({ top: 0, behavior: 'auto' });
+});
+</script>
+<!-- up-shell:end -->
+<main>
+
+<section>
+  <h1>被每个数字整除的最大数</h1>
+  <p class="lead">试卷2 第 14 题。组成这个数的<b>每一张卡片都是一位考官</b>，这个数必须通过所有考官的检查。先弄清每位考官查什么，再决定让谁上场。<br><a href="exam2-review.html" style="color:var(--accent)">← 试卷2错题总览</a></p>
+</section>
+
+<section class="card problem">
+  <span class="src">原题 · 试卷2 第 14 题</span><br>
+  有 6 张卡片，上面分别写 1、2、3、4、5、6，从这六张卡片中拿出若干张，排成一个尽可能大的多位数，并使这个多位数能被组成它的所有数整除，这个多位数是＿＿。
+  <p style="margin-top:6px">卷面答案 <span class="wrong-t">615</span>（615 是奇数，过不了考官 6）→ 正确答案 <span class="right-t">6432</span></p>
+</section>
+
+<section class="card analogy">
+  <b>生活比喻：每张卡片是一位考官</b><br>
+  选了哪几张卡，就请了哪几位考官；排好的数要让<b>每一位</b>考官点头（能整除）才算合格。<br>
+  请的考官越多，数位越多、数越大，但也越难全部过关——所以要<b>挑考官</b>。
+</section>
+
+<section class="card">
+  <h2>先认识六位考官（整除特征）</h2>
+  <div class="tblwrap"><table class="tbl">
+    <tr><th>考官</th><th>他检查什么</th><th>例子</th></tr>
+    <tr><td class="k">1</td><td>什么都不查，永远通过</td><td>—</td></tr>
+    <tr><td class="k">2</td><td><b>末位</b>是偶数</td><td>6432 末位 2 ✓</td></tr>
+    <tr><td class="k">3</td><td><b>各位数字之和</b>是 3 的倍数</td><td>6+4+3+2 = 15 ✓</td></tr>
+    <tr><td class="k">4</td><td><b>末两位</b>组成的数是 4 的倍数</td><td>…32，32 ÷ 4 = 8 ✓</td></tr>
+    <tr><td class="k">5</td><td><b>末位</b>是 0 或 5（这里没有 0，只能是 5）</td><td>315 ✓</td></tr>
+    <tr><td class="k">6</td><td>同时过 2 和 3：<b>偶数</b>且数字和是 3 的倍数</td><td>615 是奇数 ✗</td></tr>
+  </table></div>
+</section>
+
+<section>
+  <h2>一步一步解第 14 题</h2>
+  <div class="card cards" id="demo">
+    <div class="stage"><svg viewBox="0 0 680 250" role="img" aria-label="六张卡片与考官检查"></svg></div>
+    <div class="checks"></div>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>解题四步</h2>
+  <ol class="recipe">
+    <li><b>找冲突：</b>有 5 就要末位是 5 → 数是奇数 → 2、4、6 全部过不了。<b>5 和偶数卡不能同台</b>，分两路。</li>
+    <li><b>凑 3 的倍数：</b>有 3 或 6 上场，数字和就必须是 3 的倍数；不是就去掉一张卡来凑。</li>
+    <li><b>去卡要划算：</b>位数一样时，去掉<b>最小</b>的那张，留下的数字更大。</li>
+    <li><b>从大到小排，再调末尾：</b>先按大到小排，再检查 2、4、5 这些“看末尾”的考官，不行就调换最后几位。</li>
+  </ol>
+</section>
+
+<section>
+  <h2>自己试试：换一组卡片</h2>
+  <p class="sec-lead">点卡片选上 / 取消（最多 7 张）。下面会列出“直接从大到小排”的检查结果，以及电脑把所有挑法、排法都试一遍后找到的最大合格数。</p>
+  <div class="card" id="try">
+    <div class="pick"></div>
+    <div class="readout"></div>
+    <div class="ctrl"><button type="button" class="btn" data-act="reset2">↺ 恢复成 1~6</button></div>
+  </div>
+</section>
+
+<section>
+  <h2>常见误区</h2>
+  <div class="mis">
+    <div class="card"><b>误区 1：只盯住 5 和 1，忘了 6 也是考官。</b><br><span class="wrong-t">615</span> 里有 6，6 要求是偶数，615 是奇数，不合格。每放一张卡，就多一位考官要过。</div>
+    <div class="card"><b>误区 2：觉得卡片越多越好，五张偶数路线全上。</b><br>1+2+3+4+6 = 16，不是 3 的倍数，考官 3 和 6 都不点头，必须去掉一张。</div>
+    <div class="card"><b>误区 3：去掉哪张都一样。</b><br>去 1（和 15）或去 4（和 12）都能凑 3 的倍数，但去 4 只能得 6312，去 1 能得 <span class="right-t">6432</span>——去最小的那张。</div>
+  </div>
+</section>
+
+<section class="card sum">
+  <b>一句话总结：</b>每张卡都是考官——先找<b>冲突</b>（5 与偶数不同台），再用<b>数字和</b>凑 3 的倍数，去掉最小的卡，从大到小排好后检查末尾。
+</section>
+
+<section class="lq" id="lq" aria-label="练习">
+  <div class="lq-head"><h2>练习</h2><span class="lq-score"></span></div>
+  <p class="lq-sub">每题作答后马上看到解析；点「重做练习」清空重来。分数写成 a/b（如 2/3），负数用 -（如 -4/3）。</p>
+  <div class="lq-list"></div>
+  <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+</section>
+
+</main>
+
+<script>
+const resets = [];                                   // 每个模块的 reset()
+window.pageReset = () => resets.forEach(f => f());   // 练习组件会把它包进 window.resetPage
+const F = (a, b) => `<span class="fr"><i>${a}</i><i>${b}</i></span>`;   // 竖排分数
+/* 通用分步模块：render(step) 负责画图并返回说明文字 */
+function stepper(id, n, render, ms = 1800) {
+  const root = document.getElementById(id);
+  const cap = root.querySelector('.caption'), no = root.querySelector('.stepno');
+  const btn = a => root.querySelector(`[data-act="${a}"]`);
+  let step = 0, timer = null;
+  const draw = () => {
+    cap.innerHTML = render(step) || '';
+    no.textContent = `${step + 1} / ${n}`;
+    btn('prev').disabled = step === 0; btn('next').disabled = step === n - 1;
+    btn('play').textContent = timer ? '⏸ 暂停' : '▶ 播放';
+  };
+  const stop = () => { clearInterval(timer); timer = null; };
+  const go = d => { step = Math.max(0, Math.min(n - 1, step + d)); draw(); };
+  btn('prev').onclick = () => { stop(); go(-1); };
+  btn('next').onclick = () => { stop(); go(1); };
+  btn('play').onclick = () => {
+    if (timer) { stop(); draw(); return; }
+    if (step === n - 1) step = 0;
+    timer = setInterval(() => { go(1); if (step === n - 1) { stop(); draw(); } }, ms);
+    draw();
+  };
+  const reset = () => { stop(); step = 0; draw(); };
+  btn('reset').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+const NS = 'http://www.w3.org/2000/svg';
+const ok = (v, d) => v % d === 0;
+function checkHTML(numStr, digits) {
+  const v = +numStr;
+  return [...new Set(digits)].sort((a, b) => a - b).map(d => {
+    const pass = ok(v, d);
+    return `<span class="ck ${pass ? 'ok' : 'no'}">考官 ${d} ${pass ? '✓' : '✗'}</span>`;
+  }).join('');
+}
+{
+  const root = document.getElementById('demo');
+  const svg = root.querySelector('svg'), chk = root.querySelector('.checks');
+  // st: 每张卡 'on' | 'dim' | 'out' | 'hot'
+  const S = [
+    { st: 'on on on on on on', num: '', sub: '六张卡片：1 2 3 4 5 6', d: [], c: '目标：<b>位数尽量多、数尽量大</b>，还要能被组成它的每个数字整除。能不能六张全上？' },
+    { st: 'on hot on hot hot hot', num: '?????5', sub: '有 5 → 末位必须是 5 → 奇数', d: [], c: '考官 5 要求末位是 5，这个数就是<b>奇数</b>；可考官 2、4、6 都要求偶数——<b>5 和 2、4、6 不能同台</b>。只能分两条路走。' },
+    { st: 'hot out hot out hot out', num: '315', sub: '路线①：带 5，只能用 1、3、5', d: [1, 3, 5], c: '路线① 带上 5：偶数卡全部下场，只剩 1、3、5。数字和 9 是 3 的倍数 ✓，末位放 5，最大是 <b>315</b>（三位数）。' },
+    { st: 'on on on on out on', num: '64321', sub: '路线②：不带 5，试 1 2 3 4 6', d: [1, 2, 3, 4, 6], c: '路线② 不带 5：五张都上，1+2+3+4+6 = <b>16</b>，不是 3 的倍数，考官 3 和 6 不点头（而且 64321 是奇数）。' },
+    { st: 'dim on on on out on', num: '6432', sub: '去掉 1：2+3+4+6 = 15 ✓', d: [2, 3, 4, 6], c: '去掉一张卡让和变成 3 的倍数：去 1 → 15 ✓，去 4 → 12 ✓，去别的都不行。位数一样，去掉<b>更小的 1</b>，留下 6、4、3、2。' },
+    { st: 'out hot hot hot out hot', num: '6432', sub: '从大到小排：6432', d: [2, 3, 4, 6], c: '从大到小排成 6432：末位 2 是偶数 ✓；末两位 32 ÷ 4 = 8 ✓；数字和 15 ✓；既是偶数又过 3，考官 6 ✓。<b>全部通过！</b>' },
+    { st: 'out hot hot hot out hot', num: '6432 > 315', sub: '四位数胜过三位数', d: [2, 3, 4, 6], c: '两条路比一比：6432（四位）&gt; 315（三位）。答案 <b>6432</b>。卷面的 615 带 5 又带 6，一开始就犯了“5 和偶数同台”的规。' },
+  ];
+  const draw = i => {
+    const s = S[i], st = s.st.split(' ');
+    let h = '';
+    st.forEach((k, j) => {
+      const x = 28 + j * 108;
+      h += `<g class="cd ${k === 'dim' || k === 'out' ? 'dim' : ''} ${k === 'hot' ? 'hot' : ''}"><rect x="${x}" y="16" width="84" height="104" rx="10"/><text x="${x + 42}" y="84" text-anchor="middle">${j + 1}</text></g>`;
+      if (k === 'out') h += `<line class="x" x1="${x + 12}" y1="28" x2="${x + 72}" y2="108"/><line class="x" x1="${x + 72}" y1="28" x2="${x + 12}" y2="108"/>`;
+    });
+    h += `<text class="num" x="340" y="196" text-anchor="middle">${s.num}</text><text class="sub" x="340" y="232" text-anchor="middle">${s.sub}</text>`;
+    svg.innerHTML = h;
+    chk.innerHTML = s.d.length ? checkHTML(s.num.split(' ')[0], s.d) : '';
+    return s.c;
+  };
+  stepper('demo', S.length, draw, 2600);
+}
+
+{
+  const root = document.getElementById('try');
+  const pick = root.querySelector('.pick'), out = root.querySelector('.readout');
+  const INIT = [1, 2, 3, 4, 5, 6];
+  let sel = new Set(INIT);
+  const perms = a => a.length <= 1 ? [a] : a.flatMap((x, i) => perms([...a.slice(0, i), ...a.slice(i + 1)]).map(p => [x, ...p]));
+  function best(cards) {
+    let b = 0, bd = null;
+    for (let m = 1; m < (1 << cards.length); m++) {
+      const d = cards.filter((_, i) => m >> i & 1);
+      if (d.length < 2) continue;
+      for (const p of perms(d)) { const v = +p.join(''); if (v > b && d.every(x => v % x === 0)) { b = v; bd = d; } }
+    }
+    return [b, bd];
+  }
+  function draw() {
+    pick.innerHTML = '';
+    for (let d = 1; d <= 9; d++) {
+      const b = document.createElement('button');
+      b.type = 'button'; b.textContent = d; b.className = sel.has(d) ? 'on' : '';
+      b.setAttribute('aria-pressed', sel.has(d));
+      b.onclick = () => { if (sel.has(d)) sel.delete(d); else if (sel.size < 7) sel.add(d); draw(); };
+      pick.append(b);
+    }
+    const cards = [...sel].sort((a, b) => b - a);
+    if (cards.length < 2) { out.innerHTML = '至少选 2 张卡片。'; return; }
+    const desc = cards.join(''), sum = cards.reduce((a, b) => a + b, 0);
+    const [b, bd] = best(cards);
+    out.innerHTML = `全上、从大到小排：<b>${desc}</b>（数字和 ${sum}）<div class="checks">${checkHTML(desc, cards)}</div>` +
+      (b ? `最大合格数：<b class="ok-t">${b}</b>（用了 ${bd.slice().sort((x, y) => x - y).join('、')}）` : '<span class="bad-t">两位及以上的合格数一个也没有。</span>');
+  }
+  const reset = () => { sel = new Set(INIT); draw(); };
+  root.querySelector('[data-act="reset2"]').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+window.LQ_ITEMS = [
+  { type: '选择', q: '判断一个数能不能被 4 整除，看它的哪部分？', opts: ['末位', '末两位', '各位数字之和', '首位'], ans: 1, why: '末两位组成的数是 4 的倍数即可，例如 6432 看 32，32 ÷ 4 = 8 ✓。' },
+  { type: '判断', q: '615 能被 6、1、5 整除，所以第 14 题答 615 是对的。', opts: ['对', '错'], ans: 1, why: '能被 6 整除必须是偶数，615 是奇数，过不了考官 6。这正是“5 和偶数卡不能同台”。' },
+  { type: '选择', q: '1~6 六张卡里，如果这个数用了 5，下面哪组卡一定不能再用？', opts: ['1 和 3', '2、4、6', '只有 6', '都可以用'], ans: 1, why: '用了 5 → 末位是 5 → 奇数 → 2、4、6 都要求偶数，全部不行。' },
+  { type: '选择', q: '用 2、3、4、6 四张卡全部排成合格的数，最大是哪个？', opts: ['6423', '6342', '6432', '4632'], ans: 2, why: '6423 是奇数 ✗；6342 末两位 42 不是 4 的倍数 ✗；4632 合格但比 6432 小；6432 末两位 32 ✓、偶数 ✓、和 15 ✓。' },
+  { type: '填空', q: '换成 1、2、3、4、5 五张卡，同样要求，最大的多位数是多少？', ans: ['432'], placeholder: '填数字', why: '带 5 只能用 1、3、5 → 315；不带 5：1+2+3+4 = 10 不是 3 的倍数，去掉 1 → 2、3、4 和为 9 ✓，排成 432（32 ÷ 4 ✓）。432 &gt; 315。' },
+  { type: '填空', q: '换成 1、3、5、7 四张卡（全是奇数），最大的多位数是多少？', ans: ['735'], placeholder: '填数字', why: '没有偶数，5 可以放心上场，末位放 5。四张和 16 不是 3 的倍数（3 不点头），去掉 1 → 3、5、7 和 15 ✓，排成 735 = 7 × 105 ✓。迁移：冲突不存在时，5 就不用躲。' },
+  { type: '填空', q: '换成 1、2、3、5、6 五张卡，最大的多位数是多少？', ans: ['6312'], placeholder: '填数字', why: '带 5 只能用 1、3、5 → 315；不带 5：1+2+3+6 = 12 ✓，四张全上。从大到小 6321 是奇数 ✗，把偶数 2 调到末位：6312，6312 ÷ 6 = 1052 ✓。' },
+  { type: '判断', q: '第 14 题里，去掉 4 留下 1、2、3、6 也能凑成 3 的倍数，但得到的数比 6432 小。', opts: ['对', '错'], ans: 0, why: '1+2+3+6 = 12 ✓，最大合格数是 6312 &lt; 6432。位数相同时，去掉最小的卡最划算。' },
+];
+</script>
+<script>
+/* ---------- 练习题（learn 通用组件） ----------
+   题目来自 window.LQ_ITEMS：{type, q, opts, ans: 选项下标, why} 或填空题 {type, q, ans: [可接受答案…], why}
+   定义 window.resetPage()（导航条「重置」按钮调用）：先调用页面自己的 window.pageReset()，再清空练习 */
+(() => {
+  const box = document.getElementById('lq');
+  const items = window.LQ_ITEMS || [];
+  const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let answered = 0, right = 0;
+
+  function update() {
+    const all = answered === items.length;
+    score.textContent = `已答 ${answered} / ${items.length} · 答对 ${right}` +
+      (all ? (right === items.length ? ' · 全对！' : ' · 看看解析，再重做一次') : '');
+  }
+
+  function render() {
+    answered = 0; right = 0; list.innerHTML = '';
+    items.forEach((it, i) => {
+      const el = document.createElement('div');
+      el.className = 'lq-item';
+      el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
+      const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
+      const judge = (ok, answer) => {
+        answered++; if (ok) right++;
+        el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
+        why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
+        update();
+      };
+      if (it.opts) {
+        a.classList.add('lq-opts');
+        it.opts.forEach((o, j) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'lq-opt'; b.innerHTML = o;
+          b.onclick = () => {
+            a.querySelectorAll('button').forEach(x => x.disabled = true);
+            a.children[it.ans].classList.add('lq-right');
+            if (j !== it.ans) b.classList.add('lq-wrong');
+            judge(j === it.ans, it.opts[it.ans]);
+          };
+          a.append(b);
+        });
+      } else {
+        a.classList.add('lq-fill');
+        a.innerHTML = `<input type="text" autocomplete="off" spellcheck="false" placeholder="${it.placeholder || '输入答案'}" aria-label="第 ${i + 1} 题答案"><button type="button" class="lq-opt">确定</button>`;
+        const inp = a.querySelector('input'), go = a.querySelector('button');
+        const submit = () => {
+          if (!inp.value.trim()) { inp.focus(); return; }
+          inp.disabled = go.disabled = true;
+          const ok = it.ans.some(x => norm(x) === norm(inp.value));
+          inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
+          judge(ok, it.ans[0]);
+        };
+        go.onclick = submit;
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      }
+      list.append(el);
+    });
+    update();
+  }
+
+  box.querySelector('.lq-redo').addEventListener('click', render);
+  // 导航条的「重置」按钮调用它：页面各模块 + 练习题一起恢复初始状态
+  window.resetPage = () => {
+    if (typeof window.pageReset === 'function') window.pageReset();
+    render();
+  };
+  render();
+})();
+</script>
+</body>
+</html>

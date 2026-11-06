@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>分子变化求原分数</title>
+<meta name="description" content="试卷1第23题：分子加减不同的数得到两个结果，求原分数。用蛋糕条动画讲差值法（分母不变，两结果相减）和加m减m的平均法，附随机出题机和同类练习。">
+<style>
+/* ---------- 页面变量：中性色映射到站点变量，只为内容另加语义色 ---------- */
+:root{
+  --bg:var(--up-bg); --surface:var(--up-surface); --ink:var(--up-ink); --muted:var(--up-muted); --line:var(--up-line);
+  --accent:var(--up-accent); --ok:var(--up-ok); --bad:var(--up-bad);
+  --c1:#1c7ed6; --c2:#7048e8;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --c1:#74c0fc; --c2:#b197fc; }
+}
+:root[data-theme="dark"]{ --c1:#74c0fc; --c2:#b197fc; }
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 var(--up-font);padding:24px 16px 96px}
+main{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:48px}
+h1{font-size:clamp(1.7rem,4.5vw,2.4rem);line-height:1.25;margin:0 0 8px}
+h2{font-size:1.4rem;margin:0 0 8px}
+p{margin:0}
+.lead{color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--up-radius);box-shadow:var(--up-shadow);padding:16px}
+.analogy{border-left:4px solid var(--accent)}
+.btn{font:inherit;font-size:14px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--up-surface)}
+.btn:disabled{opacity:.45;cursor:default}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.stepno{font-family:var(--up-mono);color:var(--muted);font-size:.9rem;min-width:56px;text-align:center}
+
+/* ---------- 本组页面共用 ---------- */
+.stage{border-radius:10px;background:var(--up-surface-2);margin-top:12px;overflow:hidden}
+.stage svg{display:block;width:100%;height:auto}
+.caption{min-height:3.6em;margin-top:10px}
+.btn.on{border-color:var(--accent);background:var(--up-accent-soft);color:var(--accent);font-weight:700}
+.problem{border-left:4px solid var(--c1)}
+.problem .src{font-size:.85rem;color:var(--muted)}
+.warn{border-left:4px solid var(--bad)}
+.sum{border-left:4px solid var(--ok)}
+.mono,.k{font-family:var(--up-mono)}
+.fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;font-size:.82em;line-height:1.15;margin:0 2px;font-family:var(--up-mono)}
+.fr>i{font-style:normal;padding:0 2px}
+.fr>i:first-child{border-bottom:1.5px solid currentColor}
+.sec-lead{color:var(--muted);margin-bottom:12px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.recipe{counter-reset:r;list-style:none;padding:0;margin:8px 0 0;display:grid;gap:8px}
+.recipe li{counter-increment:r;padding-left:34px;position:relative}
+.recipe li::before{content:counter(r);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--up-surface);font:700 13px/24px var(--up-mono);text-align:center}
+.tbl{width:100%;border-collapse:collapse;font-size:.92rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+.tbl th{background:var(--up-surface-2)}
+.tblwrap{overflow-x:auto}
+.hl{background:var(--up-accent-soft);color:var(--accent);border-radius:4px;padding:0 3px;font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.readout{font-family:var(--up-mono);margin-top:10px;line-height:1.8}
+.ok-t{color:var(--ok);font-weight:700}.bad-t{color:var(--bad);font-weight:700}
+input[type=range]{width:min(100%,320px);accent-color:var(--accent)}
+label.sl{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px}
+svg text{font-family:var(--up-font);fill:var(--ink)}
+svg .mono{font-family:var(--up-mono)}
+.fade{transition:opacity .7s ease}
+@media (prefers-reduced-motion: reduce){.fade,svg *{transition:none!important}}
+.card p,.caption,.readout,.lq-q,.lq-why{overflow-wrap:anywhere}
+
+.qtext{background:var(--up-surface-2);border-radius:10px;padding:12px 14px;margin-top:12px;line-height:1.9;min-height:6.5em}
+.qtext .hl{transition:background .6s}
+.goto{display:inline-block;margin-top:6px;font-weight:700;color:var(--accent)}
+.tcard h3{margin:0 0 4px;font-size:1.05rem}
+.tcard p{font-size:.95rem}
+.tcard .no{font:700 .85rem var(--up-mono);color:var(--muted)}
+.big{font-size:1.15rem;font-family:var(--up-mono)}
+:root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:var(--ok);--lq-bad:var(--bad)}
+/* ---------- 练习题（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+.lq{display:grid;gap:12px;margin-bottom:56px}
+.lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+.lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
+.lq-sub{margin:0;color:var(--lq-muted);font-size:14px}
+.lq-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--lq-muted);font-variant-numeric:tabular-nums}
+.lq-list{display:grid;gap:10px}
+.lq-item{background:var(--lq-surface);border:1.5px solid var(--lq-line);border-radius:10px;padding:12px 16px;display:grid;gap:10px;min-width:0;color:var(--lq-ink);text-align:left}
+.lq-item.lq-is-ok{border-color:var(--lq-ok)}
+.lq-item.lq-is-bad{border-color:var(--lq-bad)}
+.lq-q{font-size:15px;font-weight:600;line-height:1.6}
+.lq-tag{display:inline-block;font-size:11px;font-weight:500;line-height:1.6;color:var(--lq-muted);border:1px solid var(--lq-line);border-radius:999px;padding:0 8px;margin-right:8px;vertical-align:1px}
+.lq-opts,.lq-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lq .lq-opt,.lq .lq-redo{font:inherit;font-size:14px;line-height:1.4;padding:6px 14px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);cursor:pointer;text-align:left;opacity:1}
+.lq .lq-opt:hover:not(:disabled),.lq .lq-redo:hover{border-color:var(--lq-accent)}
+.lq .lq-opt:disabled{cursor:default;opacity:1}
+.lq .lq-opt.lq-right{border-color:var(--lq-ok);color:var(--lq-ok);font-weight:700}
+.lq .lq-opt.lq-wrong{border-color:var(--lq-bad);color:var(--lq-bad);text-decoration:line-through}
+.lq-fill input{font:inherit;font-size:14px;padding:6px 10px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);width:min(100%,200px)}
+.lq-fill input.lq-right{border-color:var(--lq-ok)}
+.lq-fill input.lq-wrong{border-color:var(--lq-bad)}
+.lq-why{font-size:14px;line-height:1.65;color:var(--lq-muted)}
+.lq-why:empty{display:none}
+.lq-why .lq-ok{color:var(--lq-ok)}
+.lq-why .lq-bad{color:var(--lq-bad)}
+</style>
+</head>
+<body>
+<!-- up-shell:begin（由 scripts/shell.mjs 自动生成，勿手改） -->
+<nav id="up-nav" aria-label="网站导航">
+<a class="up-home" href="/" title="Up 学习站首页"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="up-nav-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c6ef5"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#up-nav-g)"/><path d="M12 52V42a2 2 0 0 1 2-2h10V32a2 2 0 0 1 2-2h10v-8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v30z" fill="#fff"/><circle cx="43" cy="13" r="5.5" fill="#ffa94d"/></svg><span>Up 学习站</span></a>
+<span class="up-sep" aria-hidden="true">›</span><a class="up-cat" href="/math">数学</a>
+<span class="up-sep" aria-hidden="true">›</span><span class="up-title">分子变化求原分数</span>
+<button id="up-reset" type="button" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+</nav>
+<style>
+:root{--up-bg:#f5f6f8;--up-surface:#ffffff;--up-surface-2:#eef0f4;--up-ink:#1d2127;--up-muted:#626b78;--up-line:#dfe2e8;--up-ok:#2b8a3e;--up-bad:#d6336c;--up-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);--up-font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif;--up-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;--up-radius:12px;--up-accent:#d9480f;--up-accent-soft:#fff1e8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#ff8a50;--up-accent-soft:#3a2218;color-scheme:dark}}
+:root[data-theme="dark"]{--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#ff8a50;--up-accent-soft:#3a2218;color-scheme:dark}
+html{padding-top:52px;scroll-padding-top:64px}
+#up-nav{position:fixed;top:0;left:0;right:0;z-index:2147483000;height:52px;box-sizing:border-box;display:flex;align-items:center;gap:8px;
+padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));border-top:3px solid var(--up-accent);
+border-bottom:1px solid var(--up-line);background:color-mix(in srgb,var(--up-surface) 88%,transparent);
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:500 14px/1.2 var(--up-font);color:var(--up-ink);text-align:left}
+#up-nav a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none}
+#up-nav a:hover{color:var(--up-accent)}
+#up-nav svg{width:24px;height:24px;flex:none;display:block}
+#up-nav .up-home span{font-weight:700}
+#up-nav .up-cat{color:var(--up-accent);font-weight:600}
+#up-nav .up-sep{color:var(--up-muted);flex:none}
+#up-nav .up-title{color:var(--up-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#up-reset{margin:0 0 0 auto;flex:none;font:600 14px/1 var(--up-font);padding:8px 14px;border-radius:999px;cursor:pointer;
+border:1.5px solid var(--up-accent);background:transparent;color:var(--up-accent);transition:background .2s,color .2s}
+#up-reset:hover,#up-reset:focus-visible{background:var(--up-accent);color:var(--up-surface)}
+#up-reset:focus-visible,#up-nav a:focus-visible{outline:2px solid var(--up-accent);outline-offset:2px}
+@media (max-width:560px){#up-nav .up-home span{display:none}}
+@media print{#up-nav{display:none}html{padding-top:0}}
+</style>
+<script>
+document.getElementById('up-reset').addEventListener('click', function () {
+  if (typeof window.resetPage === 'function') window.resetPage();
+  else console.warn('本页没有定义 window.resetPage()，重置按钮无效');
+  window.scrollTo({ top: 0, behavior: 'auto' });
+});
+</script>
+<!-- up-shell:end -->
+<style>
+:root{--y:#1c7ed6;--add:#2f9e44;--cut:#e8590c;--diff:#f59f00}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--y:#74c0fc;--add:#8ce99a;--cut:#ffa94d;--diff:#ffd43b}}
+:root[data-theme="dark"]{--y:#74c0fc;--add:#8ce99a;--cut:#ffa94d;--diff:#ffd43b}
+.drv{font-family:var(--up-mono);background:var(--up-surface-2);border-radius:10px;padding:10px 14px;margin-top:10px;line-height:2.1;min-height:7em}
+.drv div{opacity:.75}.drv div.new{opacity:1;font-weight:700}
+svg rect.bar{transition:width .8s ease, x .8s ease}
+.g{opacity:0;transition:opacity .7s}.g.on{opacity:1}
+.diff-t{color:var(--diff);font-weight:700}
+.genq{background:var(--up-surface-2);border-radius:10px;padding:12px 14px;margin-top:10px;line-height:2}
+.genin{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+.genin input{font:inherit;font-size:15px;padding:6px 10px;border-radius:8px;border:1.5px solid var(--line);background:transparent;color:var(--ink);width:120px}
+.okbox{color:var(--ok);font-weight:700}.badbox{color:var(--bad);font-weight:700}
+</style>
+<main>
+<section>
+  <h1>分子变化，求原分数</h1>
+  <p class="lead">试卷1 第 23 题（阅读理解）。分子加加减减，<b>分母始终不变</b>——所以两个结果一相减，分子的变化量就和分母对上了。<br><a href="exam1-review.html" style="color:var(--accent)">← 试卷1错题总览</a></p>
+</section>
+
+<section class="card problem">
+  <p class="src">原题（试卷1 第 23 题）</p>
+  <p><b>例</b>：一个分数，如果分子加上 3，结果是 1/6；如果分子加上 8，结果是 1/4，求原来这个分数。（答案 7/60）</p>
+  <p>① 一个分数，如果分子减去 6，结果是 1/6；如果分子加上 3，结果是 7/15，求原来这个分数。　<b>答案：11/30</b></p>
+  <p>② 一个分数，如果分子加上一个数 m，结果是 1/2；如果分子减去这个数 m，结果是 1/3，求原来这个分数。　<b>答案：5/12</b></p>
+  <p style="margin-top:6px;color:var(--muted)">卷面上：① 第一次把 −6 当成了 +6 来减（3/x − 6/x），订正后得到 11/30 ✓。② 结果 5/12 对了，但被打了“？”：过程里 m 怎么处理没写清楚。下面给出更好讲清楚的两种方法。</p>
+</section>
+
+<section class="card analogy">
+  <b>生活比喻：同一个蛋糕，多拿几块。</b><br>
+  一个蛋糕切成若干块（分母），你拿了几块（分子）。多拿 3 块，占整个的 1/6；多拿 8 块，占整个的 1/4。<br>
+  后一次比前一次<b>多拿了 5 块</b>，占的比例多了 1/4 − 1/6 = 1/12——原来<b>5 块就是整个蛋糕的 1/12</b>，蛋糕一共 60 块！
+</section>
+
+<section>
+  <h2>一步一步看：用“蛋糕条”解题</h2>
+  <p class="sec-lead">选一道题，按步骤看。长条是整个蛋糕（分母），蓝色是分子。</p>
+  <div class="card" id="demo">
+    <div class="chips" id="scn"></div>
+    <div class="stage"><svg viewBox="0 0 480 160" id="sv1" role="img" aria-label="蛋糕条：分子变化与分母"></svg></div>
+    <div class="drv" id="drv"></div>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>方法：两种情况</h2>
+  <p style="margin-top:4px"><b>A. 两个变化量都知道（例题、第①题）：差值法</b></p>
+  <ol class="recipe">
+    <li><b>两个结果相减</b>（大减小）：分母不变，差 = 分子变化量的差 ÷ 分母。例：1/4 − 1/6 = 1/12 ↔ 8 − 3 = 5 块。</li>
+    <li><b>求分母</b>：分母 = 变化量的差 ÷ 结果的差 = 5 ÷ 1/12 = 60。注意“减 6”和“加 3”相差 3 − (−6) = <b>9</b>，不是 3。</li>
+    <li><b>求分子</b>：分子 = 分母 × 任一结果 − 那次的变化量：60 × 1/6 − 3 = 7。最后<b>代回去验算</b>。</li>
+  </ol>
+  <p style="margin-top:12px"><b>B. 加 m、减 m（第②题）：平均法</b></p>
+  <ol class="recipe">
+    <li>加 m 和减 m 一样多，原分子正好在两次结果的<b>正中间</b>。</li>
+    <li>原分数 = 两个结果的平均数：(1/2 + 1/3) ÷ 2 = 5/6 ÷ 2 = <b>5/12</b>。m 不用知道，最后也会被约掉。</li>
+  </ol>
+</section>
+
+<section>
+  <h2>自己试试：出题机</h2>
+  <p class="sec-lead">每次随机出一道同类题，先自己算，再点「看解法」对答案。答案写成 分子/分母，如 7/60。</p>
+  <div class="card" id="gen">
+    <div class="genq" id="genq"></div>
+    <div class="genin"><input type="text" id="genin" placeholder="如 7/60" autocomplete="off" aria-label="出题机答案"><button type="button" class="btn primary" id="gencheck">检查</button><button type="button" class="btn" id="genshow">看解法</button><button type="button" class="btn" id="gennext">换一题</button></div>
+    <div class="readout" id="genout"></div>
+    <div class="ctrl"><button type="button" class="btn" id="genreset">↺ 重置本模块</button></div>
+  </div>
+</section>
+
+<section class="card warn">
+  <h2>常见误区</h2>
+  <ol style="margin:6px 0 0;padding-left:1.3em;display:grid;gap:6px">
+    <li><b>“减 6”“加 3”相差算成 3</b>：从 −6 到 +3 相差 9 块，要用 3 − (−6) = 9。</li>
+    <li><b>把 1/x 当成答案</b>：算出 1/x = 1/60 只是“每块占 1/60”，还要求分子。</li>
+    <li><b>原分数约分</b>：例题答案是 7/60，就写 7/60。如果原分数能约分（如 6/14），也要写原样，否则“分子加几”就不对了。</li>
+    <li><b>不会处理 m</b>：m 没给数，不代表求不出。加 m 减 m 互相抵消，取平均就行。</li>
+  </ol>
+</section>
+
+<section class="card sum">
+  <b>一句话总结：</b>分子变、分母不变时，<b>两个结果相减，分子变化的差就对上了结果的差</b>，由此求出分母，再求分子；遇到“加 m、减 m”，原分数就是两个结果的<b>平均数</b>。
+</section>
+
+<section class="lq" id="lq" aria-label="练习">
+  <div class="lq-head"><h2>练习</h2><span class="lq-score"></span></div>
+  <p class="lq-sub">分数答案写成 分子/分母，如 7/60。</p>
+  <div class="lq-list"></div>
+  <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+</section>
+</main>
+
+<script>
+const resets = [];
+window.pageReset = () => resets.forEach(f => f());
+const F = (a, b) => `<span class="fr"><i>${a}</i><i>${b}</i></span>`;
+const NS = 'http://www.w3.org/2000/svg';
+const E = (t, at = {}, txt) => { const e = document.createElementNS(NS, t); for (const k in at) e.setAttribute(k, at[k]); if (txt != null) e.textContent = txt; return e; };
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function stepper(id, n, render, ms = 2400) {
+  const root = document.getElementById(id);
+  const cap = root.querySelector('.caption'), no = root.querySelector('.stepno');
+  const btn = a => root.querySelector(`[data-act="${a}"]`);
+  let step = 0, timer = null;
+  const draw = () => {
+    cap.innerHTML = render(step) || '';
+    no.textContent = `${step + 1} / ${n}`;
+    btn('prev').disabled = step === 0; btn('next').disabled = step === n - 1;
+    btn('play').textContent = timer ? '⏸ 暂停' : '▶ 播放';
+  };
+  const stop = () => { clearInterval(timer); timer = null; };
+  const go = d => { step = Math.max(0, Math.min(n - 1, step + d)); draw(); };
+  btn('prev').onclick = () => { stop(); go(-1); };
+  btn('next').onclick = () => { stop(); go(1); };
+  btn('play').onclick = () => {
+    if (timer) { stop(); draw(); return; }
+    if (step === n - 1) step = 0;
+    timer = setInterval(() => { go(1); if (step === n - 1) { stop(); draw(); } }, ms);
+    draw();
+  };
+  const reset = () => { stop(); step = 0; draw(); };
+  btn('reset').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+const gcd = (a, b) => b ? gcd(b, a % b) : Math.abs(a);
+const red = (p, q) => { const g = gcd(p, q); return [p / g, q / g]; };
+const FS = (p, q) => { const [a, b] = red(p, q); return F(a, b); };
+const sg = d => d > 0 ? `加上 ${d}` : `减去 ${-d}`;
+
+/* ---------- 分步：蛋糕条 ---------- */
+{
+  const SC = {
+    ex: { name: '例题', x: 60, y: 7, d: [3, 8] },
+    q1: { name: '第①题', x: 30, y: 11, d: [-6, 3] },
+    q2: { name: '第②题（加 m 减 m）', x: 12, y: 5, d: [1, -1], m: true }
+  };
+  const INIT = { sc: 'ex' };
+  let S = { ...INIT };
+  const sv = document.getElementById('sv1'), drv = document.getElementById('drv'), scn = document.getElementById('scn');
+  let api;
+  Object.entries(SC).forEach(([k, v]) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn'; b.dataset.k = k; b.textContent = v.name; b.onclick = () => { S.sc = k; api.restart(); }; scn.append(b); });
+  const X0 = 20, W = 440, BY = 60, BH = 40;
+  // 静态骨架
+  const outline = E('rect', { x: X0, y: BY, width: W, height: BH, fill: 'var(--up-surface)', stroke: 'var(--muted)', 'stroke-width': 1.5, rx: 4 });
+  const base = E('rect', { class: 'bar', x: X0, y: BY, width: 0, height: BH, fill: 'var(--y)', opacity: .85 });
+  const hl = E('rect', { class: 'bar', x: X0, y: BY, width: 0, height: BH, fill: 'var(--diff)', opacity: .9 });
+  const grid = E('g', { class: 'g' }); const marks = E('g'); const labels = E('g');
+  sv.append(outline, base, hl, grid, marks, labels);
+  const cx = (n, sc) => X0 + W * n / sc.x;
+  const setBar = (r, a, b, sc) => { r.setAttribute('x', cx(a, sc)); r.setAttribute('width', Math.max(0, cx(b, sc) - cx(a, sc))); };
+  const mark = (n, txt, sc, up = true, col = 'var(--ink)') => {
+    marks.append(E('line', { x1: cx(n, sc), y1: BY - 8, x2: cx(n, sc), y2: BY + BH + 8, stroke: col, 'stroke-width': 2, 'stroke-dasharray': '4 3' }));
+    marks.append(E('text', { x: cx(n, sc), y: up ? BY - 14 : BY + BH + 24, 'text-anchor': 'middle', 'font-size': 13, 'font-weight': 700, style: `fill:${col}` }, txt));
+  };
+  const fr = (p, q) => red(p, q).join('/');
+  function render(s) {
+    const sc = SC[S.sc], { x, y, d } = sc;
+    scn.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.k === S.sc));
+    grid.textContent = ''; marks.textContent = ''; labels.textContent = '';
+    for (let i = 1; i < x; i++) grid.append(E('line', { x1: cx(i, sc), y1: BY, x2: cx(i, sc), y2: BY + BH, stroke: 'var(--up-surface)', 'stroke-width': x > 40 ? .8 : 1.5 }));
+    const n1 = y + d[0], n2 = y + d[1], lo = Math.min(n1, n2), hi = Math.max(n1, n2);
+    const r1 = fr(n1, x), r2 = fr(n2, x);
+    let fill = y, hlr = [0, 0], showGrid = false, txt, lines;
+    const L0 = sc.m ? `原分数 y/x：(y + m)/x = 1/2，(y − m)/x = 1/3` : `原分数 y/x：(y ${d[0] > 0 ? '+' : '−'} ${Math.abs(d[0])})/x = ${r1}，(y ${d[1] > 0 ? '+' : '−'} ${Math.abs(d[1])})/x = ${r2}`;
+    labels.append(E('text', { x: X0, y: 140, 'font-size': 12, style: 'fill:var(--muted)' }, (!sc.m && s >= 4) || (sc.m && s >= 5) ? `整条 = ${sc.m ? '12m' : x} 块` : '整条 = 分母 x 块（还不知道多少）'));
+    if (!sc.m) {
+      const dd = hi - lo, rd = red(hi * 1, x), rl = red(lo, x);
+      const [dp, dq] = red(dd, x);
+      if (s === 0) { txt = '第 1 步：分母（整个蛋糕）不知道有几块，蓝色是分子。分子怎么变，<b>蛋糕本身不变</b>。'; lines = [L0]; }
+      if (s === 1) { fill = n1; mark(n1, r1, sc); txt = `第 2 步：分子${sg(d[0])}，蓝色正好占整条的 <b>${r1}</b>。`; lines = [L0, `分子${sg(d[0])} → 占 ${r1}`]; }
+      if (s === 2) { fill = n2; mark(n1, r1, sc); mark(n2, r2, sc, false); txt = `第 3 步：分子${sg(d[1])}，蓝色占 <b>${r2}</b>。两次的分母是同一个！`; lines = [L0, `分子${sg(d[0])} → 占 ${r1}`, `分子${sg(d[1])} → 占 ${r2}`]; }
+      if (s >= 3) { fill = hi; hlr = [lo, hi]; mark(lo, fr(lo, x), sc); mark(hi, fr(hi, x), sc, false); }
+      if (s === 3) { txt = `第 4 步：两次相差的那一段（黄色）：块数差 ${hi === n2 ? d[1] : d[0]} − ${(hi === n2 ? d[0] : d[1]) < 0 ? '(−' + -(hi === n2 ? d[0] : d[1]) + ')' : (hi === n2 ? d[0] : d[1])} = <b>${dd} 块</b>，占的比例差 ${fr(hi, x)} − ${fr(lo, x)} = <b>${dp}/${dq}</b>。`; lines = [L0, `相差 ${dd} 块 ↔ ${fr(hi, x)} − ${fr(lo, x)} = ${dp}/${dq}`]; }
+      if (s === 4) { showGrid = true; txt = `第 5 步：${dd} 块占整条的 ${dp}/${dq}，整条 = ${dd} ÷ ${dp}/${dq} = <b>${x} 块</b>，也就是分母 x = ${x}。`; lines = [L0, `相差 ${dd} 块 ↔ ${dp}/${dq}`, `x = ${dd} ÷ ${dp}/${dq} = ${x}`]; }
+      if (s === 5) { showGrid = true; fill = y; hlr = [0, 0]; mark(n1, r1, sc); mark(n2, r2, sc, false);
+        txt = `第 6 步：分子 = ${x} × ${r1} ${d[0] > 0 ? '−' : '+'} ${Math.abs(d[0])} = <b>${y}</b>，原分数是 <b>${y}/${x}</b>。验算：(${y} ${d[0] > 0 ? '+' : '−'} ${Math.abs(d[0])})/${x} = ${n1}/${x} = ${r1} ✓，${n2}/${x} = ${r2} ✓。`;
+        lines = [L0, `x = ${x}`, `y = ${x} × ${r1} ${d[0] > 0 ? '−' : '+'} ${Math.abs(d[0])} = ${y}　→ 原分数 ${y}/${x}`]; }
+    } else {
+      if (s === 0) { txt = '第 1 步：分子 y、分母 x、m 都不知道。别慌，先画出来。'; lines = [L0]; }
+      if (s === 1) { fill = 6; mark(6, '1/2', sc); txt = '第 2 步：分子加 m，蓝色占整条的 <b>1/2</b>。'; lines = [L0, '加 m → 1/2']; }
+      if (s === 2) { fill = 4; mark(6, '1/2', sc); mark(4, '1/3', sc, false); txt = '第 3 步：分子减 m，蓝色占 <b>1/3</b>。'; lines = [L0, '加 m → 1/2', '减 m → 1/3']; }
+      if (s === 3) { fill = 6; hlr = [4, 6]; mark(6, '1/2', sc); mark(4, '1/3', sc, false); mark(5, 'y', sc, true, 'var(--y)');
+        txt = '第 4 步：从原分子 y 往右多 m，往左少 m，<b>一样远</b>——原分子正好在 1/3 和 1/2 的<b>正中间</b>。'; lines = [L0, '原分子在 1/3 与 1/2 正中间']; }
+      if (s === 4) { fill = 5; mark(6, '1/2', sc); mark(4, '1/3', sc, false);
+        txt = '第 5 步：取平均：(1/2 + 1/3) ÷ 2 = 5/6 ÷ 2 = <b>5/12</b>。也可以两式相加：2y/x = 5/6，y/x = 5/12。'; lines = [L0, '(1/2 + 1/3) ÷ 2 = 5/6 ÷ 2 = 5/12']; }
+      if (s === 5) { fill = 5; showGrid = true; hlr = [4, 6]; mark(6, '1/2', sc); mark(4, '1/3', sc, false);
+        txt = '第 6 步：也可以用差值法：黄色 2m 占 1/2 − 1/3 = 1/6，整条 = 12m，分子 = 12m × 1/2 − m = 5m，5m/12m = <b>5/12</b>。m = 1 是 5/12，m = 2 是 10/24，约分后都是 5/12。';
+        lines = [L0, '2m ↔ 1/6 → x = 12m', 'y = 6m − m = 5m → 5m/12m = 5/12']; }
+    }
+    setBar(base, 0, fill, sc); setBar(hl, hlr[0], hlr[1], sc);
+    grid.classList.toggle('on', showGrid);
+    drv.innerHTML = lines.map((l, i) => `<div class="${i === lines.length - 1 ? 'new' : ''}">${l}</div>`).join('');
+    return txt;
+  }
+  // stepper 只管步号；场景切换时重置到第 1 步
+  api = { restart: () => document.querySelector('#demo [data-act="reset"]').click() };
+  stepper('demo', 6, render, 2800);
+  resets.push(() => { S = { ...INIT }; api.restart(); });
+}
+
+/* ---------- 出题机 ---------- */
+{
+  const XS = [12, 15, 18, 20, 24, 28, 30, 36, 40, 42, 45, 48, 56, 60];
+  const INITP = { t: 'd', x: 40, y: 3, d: [2, 7] };
+  let P = INITP, shown = false;
+  const q = document.getElementById('genq'), inp = document.getElementById('genin'), out = document.getElementById('genout');
+  const ri = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+  function make() {
+    for (let k = 0; k < 500; k++) {
+      const x = XS[ri(0, XS.length - 1)], y = ri(1, x - 1);
+      if (gcd(y, x) !== 1) continue;
+      if (Math.random() < 0.3) {
+        const m = ri(1, 6);
+        if (y - m <= 0 || y + m > x || gcd(y + m, x) === 1 || gcd(y - m, x) === 1) continue;
+        return { t: 'm', x, y, m };
+      }
+      const d1 = ri(-8, 8), d2 = ri(-8, 10);
+      if (!d1 || !d2 || d1 === d2) continue;
+      const n1 = y + d1, n2 = y + d2;
+      if (n1 <= 0 || n2 <= 0 || n1 > x || n2 > x || gcd(n1, x) === 1 || gcd(n2, x) === 1) continue;
+      return { t: 'd', x, y, d: [d1, d2] };
+    }
+    return INITP;
+  }
+  function draw() {
+    const { x, y } = P;
+    if (P.t === 'd') q.innerHTML = `一个分数，如果分子${sg(P.d[0])}，结果是 ${FS(y + P.d[0], x)}；如果分子${sg(P.d[1])}，结果是 ${FS(y + P.d[1], x)}。求原来这个分数。`;
+    else q.innerHTML = `一个分数，如果分子加上一个数 m，结果是 ${FS(y + P.m, x)}；如果分子减去这个数 m，结果是 ${FS(y - P.m, x)}。求原来这个分数。`;
+    out.innerHTML = shown ? solve() : '';
+  }
+  function solve() {
+    const { x, y } = P;
+    if (P.t === 'm') {
+      const [a1, b1] = red(y + P.m, x), [a2, b2] = red(y - P.m, x), [s1, s2] = red(2 * y, x);
+      return `平均法：(${a1}/${b1} + ${a2}/${b2}) ÷ 2 = ${s1}/${s2} ÷ 2 = <b>${y}/${x}</b>`;
+    }
+    const [n1, n2] = [y + P.d[0], y + P.d[1]], lo = Math.min(n1, n2), hi = Math.max(n1, n2);
+    const dd = hi - lo, [dp, dq] = red(dd, x), [r1a, r1b] = red(n1, x);
+    const hiD = n1 > n2 ? P.d[0] : P.d[1], loD = n1 > n2 ? P.d[1] : P.d[0];
+    return `① 结果相减：${red(hi, x).join('/')} − ${red(lo, x).join('/')} = ${dp}/${dq}；变化量相差 ${hiD < 0 ? '−' + -hiD : hiD} − ${loD < 0 ? '(−' + -loD + ')' : loD} = ${dd}<br>② 分母 = ${dd} ÷ ${dp}/${dq} = ${x}<br>③ 分子 = ${x} × ${r1a}/${r1b} ${P.d[0] > 0 ? '−' : '+'} ${Math.abs(P.d[0])} = ${y}，原分数 <b>${y}/${x}</b>`;
+  }
+  document.getElementById('gencheck').onclick = () => {
+    const m = inp.value.replace(/\s/g, '').match(/^(\d+)\/(\d+)$/);
+    if (!m) { out.innerHTML = '<span class="badbox">请写成 分子/分母，例如 7/60。</span>'; return; }
+    const [a, b] = [+m[1], +m[2]];
+    const ok = a === P.y && b === P.x;
+    out.innerHTML = ok ? '<span class="okbox">✓ 正确！</span> ' + solve() : `<span class="badbox">✗ 不对。</span>代回去验算一下：分子${P.t === 'm' ? '加 m 和减 m' : '两次变化'}后，能不能得到题目里的两个结果？想看过程就点「看解法」。`;
+  };
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('gencheck').click(); });
+  document.getElementById('genshow').onclick = () => { shown = true; draw(); };
+  document.getElementById('gennext').onclick = () => { P = make(); shown = false; inp.value = ''; draw(); };
+  const reset = () => { P = INITP; shown = false; inp.value = ''; draw(); };
+  document.getElementById('genreset').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+window.LQ_ITEMS = [
+  { type: '选择', q: '例题里，为什么可以把 (y + 8)/x 和 (y + 3)/x 两个结果相减？', opts: ['因为分子相同', '因为分母相同，相减后正好是 5/x', '因为两个结果都是分数'], ans: 1, why: '两次只改了分子，分母 x 不变。同分母相减：(y + 8)/x − (y + 3)/x = 5/x，而它又等于 1/4 − 1/6 = 1/12，所以 x = 60（动画第 4~5 步）。' },
+  { type: '填空', q: '一个分数，分子加上 3 得 1/6；分子加上 5 得 1/4。原分数是？', ans: ['1/24'], placeholder: '如 7/60', why: '相差 5 − 3 = 2 块 ↔ 1/4 − 1/6 = 1/12，分母 = 2 ÷ 1/12 = 24；分子 = 24 × 1/6 − 3 = 1。原分数 <b>1/24</b>。验算：4/24 = 1/6 ✓，6/24 = 1/4 ✓。' },
+  { type: '填空', q: '一个分数，分子减去 4 得 1/4；分子加上 3 得 3/5。原分数是？', ans: ['9/20'], placeholder: '如 7/60', why: '变化量相差 3 − (−4) = <b>7</b>（不是 3 − 4）。3/5 − 1/4 = 7/20，分母 = 7 ÷ 7/20 = 20；分子 = 20 × 1/4 + 4 = 9。原分数 <b>9/20</b>。' },
+  { type: '填空', q: '一个分数，分子加上 5 得 1/2；分子减去 3 得 1/4。原分数是？', ans: ['11/32'], placeholder: '如 7/60', why: '相差 5 − (−3) = 8 ↔ 1/2 − 1/4 = 1/4，分母 = 8 ÷ 1/4 = 32；分子 = 32 × 1/2 − 5 = 11。原分数 <b>11/32</b>。验算：16/32 = 1/2 ✓，8/32 = 1/4 ✓。' },
+  { type: '判断', q: '<b>常见误区</b>：例题中算出 1/x = 1/60，所以原来的分数就是 1/60。', opts: ['对', '错'], ans: 1, why: '1/x = 1/60 只说明分母是 60（每块占 1/60），分子还要再求：60 × 1/6 − 3 = 7，原分数是 7/60。' },
+  { type: '选择', q: '一个分数，分子加上 m 得 2/3，分子减去 m 得 1/2。原分数是？', opts: ['1/6', '7/12', '5/6', '求不出来，因为不知道 m'], ans: 1, why: '加 m、减 m 一样多，原分数在两个结果正中间：(2/3 + 1/2) ÷ 2 = 7/6 ÷ 2 = <b>7/12</b>。m 不需要知道。' },
+  { type: '判断', q: '第②题中 m 没有给出具体数值，所以原来的分数没法确定。', opts: ['对', '错'], ans: 1, why: '分母是 12m、分子是 5m，m 是多少都约成 5/12。两式相加，m 直接抵消：2y/x = 1/2 + 1/3。' },
+  { type: '填空', q: '<b>迁移（换成分母变）</b>：一个分数，分子不变，分母加上 4 得 1/3；分母减去 2 得 1/2。原分数是？（不要约分）', ans: ['6/14'], placeholder: '如 7/60', why: '这回<b>分子不变</b>，就比较分母：分母 + 4 是分子的 3 倍，分母 − 2 是分子的 2 倍。两者相差 4 − (−2) = 6，正好是 1 倍分子，所以分子 = 6，分母 = 6 × 3 − 4 = 14。原分数 <b>6/14</b>。验算：6/18 = 1/3 ✓，6/12 = 1/2 ✓。若约成 3/7，分母加 4 得 3/11，就不对了。' }
+];
+</script>
+<script>
+/* ---------- 练习题（learn 通用组件） ----------
+   题目来自 window.LQ_ITEMS：{type, q, opts, ans: 选项下标, why} 或填空题 {type, q, ans: [可接受答案…], why}
+   定义 window.resetPage()（导航条「重置」按钮调用）：先调用页面自己的 window.pageReset()，再清空练习 */
+(() => {
+  const box = document.getElementById('lq');
+  const items = window.LQ_ITEMS || [];
+  const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let answered = 0, right = 0;
+
+  function update() {
+    const all = answered === items.length;
+    score.textContent = `已答 ${answered} / ${items.length} · 答对 ${right}` +
+      (all ? (right === items.length ? ' · 全对！' : ' · 看看解析，再重做一次') : '');
+  }
+
+  function render() {
+    answered = 0; right = 0; list.innerHTML = '';
+    items.forEach((it, i) => {
+      const el = document.createElement('div');
+      el.className = 'lq-item';
+      el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
+      const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
+      const judge = (ok, answer) => {
+        answered++; if (ok) right++;
+        el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
+        why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
+        update();
+      };
+      if (it.opts) {
+        a.classList.add('lq-opts');
+        it.opts.forEach((o, j) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'lq-opt'; b.innerHTML = o;
+          b.onclick = () => {
+            a.querySelectorAll('button').forEach(x => x.disabled = true);
+            a.children[it.ans].classList.add('lq-right');
+            if (j !== it.ans) b.classList.add('lq-wrong');
+            judge(j === it.ans, it.opts[it.ans]);
+          };
+          a.append(b);
+        });
+      } else {
+        a.classList.add('lq-fill');
+        a.innerHTML = `<input type="text" autocomplete="off" spellcheck="false" placeholder="${it.placeholder || '输入答案'}" aria-label="第 ${i + 1} 题答案"><button type="button" class="lq-opt">确定</button>`;
+        const inp = a.querySelector('input'), go = a.querySelector('button');
+        const submit = () => {
+          if (!inp.value.trim()) { inp.focus(); return; }
+          inp.disabled = go.disabled = true;
+          const ok = it.ans.some(x => norm(x) === norm(inp.value));
+          inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
+          judge(ok, it.ans[0]);
+        };
+        go.onclick = submit;
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      }
+      list.append(el);
+    });
+    update();
+  }
+
+  box.querySelector('.lq-redo').addEventListener('click', render);
+  // 导航条的「重置」按钮调用它：页面各模块 + 练习题一起恢复初始状态
+  window.resetPage = () => {
+    if (typeof window.pageReset === 'function') window.pageReset();
+    render();
+  };
+  render();
+})();
+</script>
+</body>
+</html>

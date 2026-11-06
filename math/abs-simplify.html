@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>数轴化简绝对值</title>
+<meta name="description" content="试卷1第20题：根据数轴上点的位置化简 |b+c|−|a−c| 这类含式子的绝对值。动画演示先判号、再脱绝对值号、再去括号合并，附判号实验室和同类练习。">
+<style>
+/* ---------- 页面变量：中性色映射到站点变量，只为内容另加语义色 ---------- */
+:root{
+  --bg:var(--up-bg); --surface:var(--up-surface); --ink:var(--up-ink); --muted:var(--up-muted); --line:var(--up-line);
+  --accent:var(--up-accent); --ok:var(--up-ok); --bad:var(--up-bad);
+  --c1:#1c7ed6; --c2:#7048e8;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --c1:#74c0fc; --c2:#b197fc; }
+}
+:root[data-theme="dark"]{ --c1:#74c0fc; --c2:#b197fc; }
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 var(--up-font);padding:24px 16px 96px}
+main{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:48px}
+h1{font-size:clamp(1.7rem,4.5vw,2.4rem);line-height:1.25;margin:0 0 8px}
+h2{font-size:1.4rem;margin:0 0 8px}
+p{margin:0}
+.lead{color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--up-radius);box-shadow:var(--up-shadow);padding:16px}
+.analogy{border-left:4px solid var(--accent)}
+.btn{font:inherit;font-size:14px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--up-surface)}
+.btn:disabled{opacity:.45;cursor:default}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.stepno{font-family:var(--up-mono);color:var(--muted);font-size:.9rem;min-width:56px;text-align:center}
+
+/* ---------- 本组页面共用 ---------- */
+.stage{border-radius:10px;background:var(--up-surface-2);margin-top:12px;overflow:hidden}
+.stage svg{display:block;width:100%;height:auto}
+.caption{min-height:3.6em;margin-top:10px}
+.btn.on{border-color:var(--accent);background:var(--up-accent-soft);color:var(--accent);font-weight:700}
+.problem{border-left:4px solid var(--c1)}
+.problem .src{font-size:.85rem;color:var(--muted)}
+.warn{border-left:4px solid var(--bad)}
+.sum{border-left:4px solid var(--ok)}
+.mono,.k{font-family:var(--up-mono)}
+.fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;font-size:.82em;line-height:1.15;margin:0 2px;font-family:var(--up-mono)}
+.fr>i{font-style:normal;padding:0 2px}
+.fr>i:first-child{border-bottom:1.5px solid currentColor}
+.sec-lead{color:var(--muted);margin-bottom:12px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.recipe{counter-reset:r;list-style:none;padding:0;margin:8px 0 0;display:grid;gap:8px}
+.recipe li{counter-increment:r;padding-left:34px;position:relative}
+.recipe li::before{content:counter(r);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--up-surface);font:700 13px/24px var(--up-mono);text-align:center}
+.tbl{width:100%;border-collapse:collapse;font-size:.92rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+.tbl th{background:var(--up-surface-2)}
+.tblwrap{overflow-x:auto}
+.hl{background:var(--up-accent-soft);color:var(--accent);border-radius:4px;padding:0 3px;font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.readout{font-family:var(--up-mono);margin-top:10px;line-height:1.8}
+.ok-t{color:var(--ok);font-weight:700}.bad-t{color:var(--bad);font-weight:700}
+input[type=range]{width:min(100%,320px);accent-color:var(--accent)}
+label.sl{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px}
+svg text{font-family:var(--up-font);fill:var(--ink)}
+svg .mono{font-family:var(--up-mono)}
+.fade{transition:opacity .7s ease}
+@media (prefers-reduced-motion: reduce){.fade,svg *{transition:none!important}}
+.card p,.caption,.readout,.lq-q,.lq-why{overflow-wrap:anywhere}
+
+.qtext{background:var(--up-surface-2);border-radius:10px;padding:12px 14px;margin-top:12px;line-height:1.9;min-height:6.5em}
+.qtext .hl{transition:background .6s}
+.goto{display:inline-block;margin-top:6px;font-weight:700;color:var(--accent)}
+.tcard h3{margin:0 0 4px;font-size:1.05rem}
+.tcard p{font-size:.95rem}
+.tcard .no{font:700 .85rem var(--up-mono);color:var(--muted)}
+.big{font-size:1.15rem;font-family:var(--up-mono)}
+:root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:var(--ok);--lq-bad:var(--bad)}
+/* ---------- 练习题（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+.lq{display:grid;gap:12px;margin-bottom:56px}
+.lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+.lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
+.lq-sub{margin:0;color:var(--lq-muted);font-size:14px}
+.lq-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--lq-muted);font-variant-numeric:tabular-nums}
+.lq-list{display:grid;gap:10px}
+.lq-item{background:var(--lq-surface);border:1.5px solid var(--lq-line);border-radius:10px;padding:12px 16px;display:grid;gap:10px;min-width:0;color:var(--lq-ink);text-align:left}
+.lq-item.lq-is-ok{border-color:var(--lq-ok)}
+.lq-item.lq-is-bad{border-color:var(--lq-bad)}
+.lq-q{font-size:15px;font-weight:600;line-height:1.6}
+.lq-tag{display:inline-block;font-size:11px;font-weight:500;line-height:1.6;color:var(--lq-muted);border:1px solid var(--lq-line);border-radius:999px;padding:0 8px;margin-right:8px;vertical-align:1px}
+.lq-opts,.lq-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lq .lq-opt,.lq .lq-redo{font:inherit;font-size:14px;line-height:1.4;padding:6px 14px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);cursor:pointer;text-align:left;opacity:1}
+.lq .lq-opt:hover:not(:disabled),.lq .lq-redo:hover{border-color:var(--lq-accent)}
+.lq .lq-opt:disabled{cursor:default;opacity:1}
+.lq .lq-opt.lq-right{border-color:var(--lq-ok);color:var(--lq-ok);font-weight:700}
+.lq .lq-opt.lq-wrong{border-color:var(--lq-bad);color:var(--lq-bad);text-decoration:line-through}
+.lq-fill input{font:inherit;font-size:14px;padding:6px 10px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);width:min(100%,200px)}
+.lq-fill input.lq-right{border-color:var(--lq-ok)}
+.lq-fill input.lq-wrong{border-color:var(--lq-bad)}
+.lq-why{font-size:14px;line-height:1.65;color:var(--lq-muted)}
+.lq-why:empty{display:none}
+.lq-why .lq-ok{color:var(--lq-ok)}
+.lq-why .lq-bad{color:var(--lq-bad)}
+</style>
+</head>
+<body>
+<!-- up-shell:begin（由 scripts/shell.mjs 自动生成，勿手改） -->
+<nav id="up-nav" aria-label="网站导航">
+<a class="up-home" href="/" title="Up 学习站首页"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="up-nav-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c6ef5"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#up-nav-g)"/><path d="M12 52V42a2 2 0 0 1 2-2h10V32a2 2 0 0 1 2-2h10v-8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v30z" fill="#fff"/><circle cx="43" cy="13" r="5.5" fill="#ffa94d"/></svg><span>Up 学习站</span></a>
+<span class="up-sep" aria-hidden="true">›</span><a class="up-cat" href="/math">数学</a>
+<span class="up-sep" aria-hidden="true">›</span><span class="up-title">数轴化简绝对值</span>
+<button id="up-reset" type="button" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+</nav>
+<style>
+:root{--up-bg:#f5f6f8;--up-surface:#ffffff;--up-surface-2:#eef0f4;--up-ink:#1d2127;--up-muted:#626b78;--up-line:#dfe2e8;--up-ok:#2b8a3e;--up-bad:#d6336c;--up-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);--up-font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif;--up-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;--up-radius:12px;--up-accent:#d9480f;--up-accent-soft:#fff1e8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#ff8a50;--up-accent-soft:#3a2218;color-scheme:dark}}
+:root[data-theme="dark"]{--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#ff8a50;--up-accent-soft:#3a2218;color-scheme:dark}
+html{padding-top:52px;scroll-padding-top:64px}
+#up-nav{position:fixed;top:0;left:0;right:0;z-index:2147483000;height:52px;box-sizing:border-box;display:flex;align-items:center;gap:8px;
+padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));border-top:3px solid var(--up-accent);
+border-bottom:1px solid var(--up-line);background:color-mix(in srgb,var(--up-surface) 88%,transparent);
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:500 14px/1.2 var(--up-font);color:var(--up-ink);text-align:left}
+#up-nav a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none}
+#up-nav a:hover{color:var(--up-accent)}
+#up-nav svg{width:24px;height:24px;flex:none;display:block}
+#up-nav .up-home span{font-weight:700}
+#up-nav .up-cat{color:var(--up-accent);font-weight:600}
+#up-nav .up-sep{color:var(--up-muted);flex:none}
+#up-nav .up-title{color:var(--up-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#up-reset{margin:0 0 0 auto;flex:none;font:600 14px/1 var(--up-font);padding:8px 14px;border-radius:999px;cursor:pointer;
+border:1.5px solid var(--up-accent);background:transparent;color:var(--up-accent);transition:background .2s,color .2s}
+#up-reset:hover,#up-reset:focus-visible{background:var(--up-accent);color:var(--up-surface)}
+#up-reset:focus-visible,#up-nav a:focus-visible{outline:2px solid var(--up-accent);outline-offset:2px}
+@media (max-width:560px){#up-nav .up-home span{display:none}}
+@media print{#up-nav{display:none}html{padding-top:0}}
+</style>
+<script>
+document.getElementById('up-reset').addEventListener('click', function () {
+  if (typeof window.resetPage === 'function') window.resetPage();
+  else console.warn('本页没有定义 window.resetPage()，重置按钮无效');
+  window.scrollTo({ top: 0, behavior: 'auto' });
+});
+</script>
+<!-- up-shell:end -->
+<style>
+:root{--pos:#1c7ed6;--neg:#7048e8;--dist:#0ca678}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--pos:#74c0fc;--neg:#b197fc;--dist:#63e6be}}
+:root[data-theme="dark"]{--pos:#74c0fc;--neg:#b197fc;--dist:#63e6be}
+.drv{font-family:var(--up-mono);background:var(--up-surface-2);border-radius:10px;padding:10px 14px;margin-top:10px;line-height:2;min-height:11em}
+.drv div{opacity:.55;transition:opacity .6s}
+.drv div.new{opacity:1;font-weight:700}
+.drv div.old{opacity:.8}
+.pos-t{color:var(--pos);font-weight:700}.neg-t{color:var(--neg);font-weight:700}
+.draw{stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1s ease}
+.draw.on{stroke-dashoffset:0}
+.g{opacity:0;transition:opacity .7s}
+.g.on{opacity:1}
+.exprs{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.box2{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin-top:8px}
+.box2 .card{box-shadow:none}
+</style>
+<main>
+<section>
+  <h1>根据数轴化简绝对值</h1>
+  <p class="lead">试卷1 第 20 题。看到 |b + c| 这种“绝对值号里装着式子”，不能直接把竖线擦掉。秘诀一句话：<b>先看里面是正是负，再决定怎么脱掉绝对值号</b>。<br><a href="exam1-review.html" style="color:var(--accent)">← 试卷1错题总览</a></p>
+</section>
+
+<section class="card problem">
+  <p class="src">原题（试卷1 第 20 题）</p>
+  <p>有理数 a、b、c 在数轴上对应的点如图所示（从左到右依次是 c、a、0、b），已知 |c| &gt; |b| &gt; |a|，化简：|b + c| − |a − c|。</p>
+  <p style="margin-top:6px"><b>答案：−a − b</b></p>
+  <p style="margin-top:6px;color:var(--muted)">卷面上：第一次直接擦掉竖线写成 b + c − a − c（错）；第二次推到了 −b − a，可“答”里抄成了 −b − c。思路对了一半，最后一步也要核对。</p>
+</section>
+
+<section class="card analogy">
+  <b>生活比喻：绝对值号是一台“去负号机”。</b><br>
+  放进去一个<b>正数</b>，原样出来；放进去一个<b>负数</b>，它会把负号去掉再吐出来，也就是“套一个负号翻成正的”：|−5| = −(−5) = 5。<br>
+  所以机器里装着式子时，要先弄清楚<b>这个式子算出来是正还是负</b>，才知道机器会不会给它“翻面”。
+</section>
+
+<section>
+  <h2>一步一步看：先判号，再脱壳</h2>
+  <p class="sec-lead">为了看清楚，取一组满足条件的数：c = −6，a = −1，b = 4（|c| = 6 &gt; |b| = 4 &gt; |a| = 1）。</p>
+  <div class="card" id="demo">
+    <div class="stage"><svg viewBox="0 0 480 228" id="sv1" role="img" aria-label="数轴上的 c、a、0、b 与判号箭头"></svg></div>
+    <div class="drv" id="drv"></div>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>方法：三步走</h2>
+  <ol class="recipe">
+    <li><b>看图判号</b>：逐个判断绝对值号里的式子是正还是负（判号口诀见下）。</li>
+    <li><b>脱绝对值号，一律先加括号</b>：里面是正 → |式子| = (式子)；里面是负 → |式子| = −(式子)。</li>
+    <li><b>去括号、合并</b>：括号前是负号，括号里每一项都要变号；最后把能抵消的抵消掉。</li>
+  </ol>
+  <div class="box2">
+    <div class="card"><b>加法 p + q 怎么判号</b><br>同号：跟着它们的符号。<br>一正一负：<b>跟着离 0 远的那个</b>（绝对值大的）。<br>例：b + c，c 离 0 更远 → 负。</div>
+    <div class="card"><b>减法 p − q 怎么判号</b><br>看数轴左右：<b>右边的减左边的 → 正</b>；左边的减右边的 → 负。<br>例：a − c，a 在 c 右边 → 正。</div>
+  </div>
+</section>
+
+<section>
+  <h2>自己试试：判号实验室</h2>
+  <p class="sec-lead">拖动滑块改 a、b、c 的位置，再点一个式子。箭头从起点出发，落在 0 右边就是正，左边就是负。</p>
+  <div class="card" id="lab">
+    <label class="sl">a = <b class="mono" id="va"></b><input type="range" id="ra" min="-8" max="8" step="1"></label>
+    <label class="sl">b = <b class="mono" id="vb"></b><input type="range" id="rb" min="-8" max="8" step="1"></label>
+    <label class="sl">c = <b class="mono" id="vc"></b><input type="range" id="rc" min="-8" max="8" step="1"></label>
+    <div class="exprs" id="exprs"></div>
+    <div class="stage"><svg viewBox="0 0 480 150" id="sv2" role="img" aria-label="判号实验室数轴"></svg></div>
+    <div class="readout" id="labout"></div>
+    <div class="ctrl"><button type="button" class="btn" id="labreset">↺ 重置本模块</button></div>
+  </div>
+</section>
+
+<section class="card warn">
+  <h2>常见误区</h2>
+  <ol style="margin:6px 0 0;padding-left:1.3em;display:grid;gap:6px">
+    <li><b>直接擦掉竖线</b>：|b + c| 写成 b + c。只有里面是正的（或 0）才能这么做。</li>
+    <li><b>翻面时忘了加括号</b>：|b + c| = −b + c ✗，应该是 −(b + c) = −b − c，<b>每一项</b>都变号。</li>
+    <li><b>减号后面的绝对值也要加括号</b>：− |a − c| = −(a − c) = −a <b>+</b> c，写成 −a − c 就错了。</li>
+    <li><b>判号只看字母前面的符号</b>：b + c 看起来“全是加号”，但 c 本身是负数，结果是正是负要看数轴。</li>
+  </ol>
+</section>
+
+<section class="card sum">
+  <b>一句话总结：</b>绝对值号里是式子时，<b>先用数轴判号</b>（加法看谁离 0 远，减法看谁在右边），<b>正的原样加括号，负的前面添负号再加括号</b>，最后去括号合并。
+</section>
+
+<section class="lq" id="lq" aria-label="练习">
+  <div class="lq-head"><h2>练习</h2><span class="lq-score"></span></div>
+  <p class="lq-sub">第 1~4 题都用原题的图：从左到右 c、a、0、b，且 |c| &gt; |b| &gt; |a|。字母答案按“先写 a 再写 b、c”的顺序填，如 -a-b。</p>
+  <div class="lq-list"></div>
+  <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+</section>
+</main>
+
+<script>
+const resets = [];
+window.pageReset = () => resets.forEach(f => f());
+const F = (a, b) => `<span class="fr"><i>${a}</i><i>${b}</i></span>`;
+const NS = 'http://www.w3.org/2000/svg';
+const E = (t, at = {}, txt) => { const e = document.createElementNS(NS, t); for (const k in at) e.setAttribute(k, at[k]); if (txt != null) e.textContent = txt; return e; };
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function stepper(id, n, render, ms = 2400) {
+  const root = document.getElementById(id);
+  const cap = root.querySelector('.caption'), no = root.querySelector('.stepno');
+  const btn = a => root.querySelector(`[data-act="${a}"]`);
+  let step = 0, timer = null;
+  const draw = () => {
+    cap.innerHTML = render(step) || '';
+    no.textContent = `${step + 1} / ${n}`;
+    btn('prev').disabled = step === 0; btn('next').disabled = step === n - 1;
+    btn('play').textContent = timer ? '⏸ 暂停' : '▶ 播放';
+  };
+  const stop = () => { clearInterval(timer); timer = null; };
+  const go = d => { step = Math.max(0, Math.min(n - 1, step + d)); draw(); };
+  btn('prev').onclick = () => { stop(); go(-1); };
+  btn('next').onclick = () => { stop(); go(1); };
+  btn('play').onclick = () => {
+    if (timer) { stop(); draw(); return; }
+    if (step === n - 1) step = 0;
+    timer = setInterval(() => { go(1); if (step === n - 1) { stop(); draw(); } }, ms);
+    draw();
+  };
+  const reset = () => { stop(); step = 0; draw(); };
+  btn('reset').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+/* ---------- 分步：判号 → 脱壳 → 去括号 ---------- */
+{
+  const sv = document.getElementById('sv1'), drv = document.getElementById('drv');
+  const X = v => 290 + 24 * v;
+  sv.append(E('line', { x1: 14, y1: 100, x2: 470, y2: 100, stroke: 'currentColor', 'stroke-width': 2, style: 'color:var(--muted)' }));
+  sv.append(E('polygon', { points: '470,94 480,100 470,106', fill: 'var(--muted)' }));
+  for (let v = -11; v <= 7; v++) sv.append(E('line', { x1: X(v), y1: 95, x2: X(v), y2: 105, stroke: 'var(--muted)', 'stroke-width': v === 0 ? 2 : 1 }));
+  const pts = [['c', -6, 'var(--neg)'], ['a', -1, 'var(--neg)'], ['0', 0, 'var(--muted)'], ['b', 4, 'var(--pos)']];
+  pts.forEach(([n, v, col]) => {
+    sv.append(E('circle', { cx: X(v), cy: 100, r: n === '0' ? 4 : 7, fill: col }));
+    sv.append(E('text', { x: X(v), y: 126, 'text-anchor': 'middle', 'font-size': 16, 'font-weight': 700, style: `fill:${col}` }, n));
+  });
+  // 距离条
+  const dist = E('g', { class: 'g' });
+  [[-6, 0, 30, '|c| = 6 最远'], [0, 4, 30, '|b| = 4'], [-1, 0, 58, '|a| = 1']].forEach(([p, q, y, t]) => {
+    dist.append(E('line', { x1: X(p), y1: y, x2: X(q), y2: y, stroke: 'var(--dist)', 'stroke-width': 4, 'stroke-linecap': 'round' }));
+    dist.append(E('text', { x: (X(p) + X(q)) / 2, y: y - 7, 'text-anchor': 'middle', 'font-size': 13, style: 'fill:var(--dist)' }, t));
+  });
+  sv.append(dist);
+  // 箭头 1：b + c，从 b 往左走 6
+  const ar = (x1, x2, y, col, label) => {
+    const g = E('g', { class: 'g' });
+    const p = E('path', { d: `M${x1} ${y} H${x2}`, stroke: col, 'stroke-width': 3, fill: 'none', pathLength: 1, class: 'draw' });
+    const dir = x2 < x1 ? 1 : -1;
+    g.append(p, E('polygon', { points: `${x2},${y} ${x2 + 9 * dir},${y - 6} ${x2 + 9 * dir},${y + 6}`, fill: col }),
+      E('text', { x: 240, y: y + 22, 'text-anchor': 'middle', 'font-size': 13, style: `fill:${col}` }, label));
+    sv.append(g); return [g, p];
+  };
+  const A1 = ar(X(4), X(-2), 146, 'var(--neg)', 'b + c：从 b 往左走 6 格，停在 0 左边 → 负');
+  const A2 = ar(X(-6), X(-1), 192, 'var(--pos)', 'a − c：从 c 走到 a 是向右 → 正');
+  const LINES = [
+    '|b + c| − |a − c|',
+    `判号：b + c <span class="neg-t">&lt; 0</span>`,
+    `判号：b + c <span class="neg-t">&lt; 0</span>，a − c <span class="pos-t">&gt; 0</span>`,
+    `= <span class="neg-t">−(b + c)</span> − <span class="pos-t">(a − c)</span>`,
+    '= −b − c − a + c',
+    '= −a − b<br><span style="font-weight:400;color:var(--muted)">验算：|4 − 6| − |−1 + 6| = 2 − 5 = −3，−(−1) − 4 = −3 ✓</span>'
+  ];
+  const SHOW = [[0], [0, 1], [0, 2], [0, 2, 3], [0, 2, 3, 4], [0, 2, 3, 4, 5]];
+  const TXT = [
+    '第 1 步：读图。从左到右是 c、a、0、b，所以 c、a 是负数，b 是正数。再看离 0 的距离：c 最远，a 最近。',
+    '第 2 步：判断 b + c。一正一负相加，结果跟着<b>离 0 远的那个</b>。c 比 b 离 0 远，所以 b + c 是<b>负数</b>。',
+    '第 3 步：判断 a − c。a 在 c 的右边，“右减左”是<b>正数</b>。（a、c 都是负的，不影响这个判断。）',
+    '第 4 步：脱绝对值号。负的：前面添负号，<b>整个式子加括号</b>：|b + c| = −(b + c)。正的：原样加括号：|a − c| = (a − c)，它前面原来的减号保留。',
+    '第 5 步：去括号。−(b + c) = −b − c；−(a − c) = −a <b>+ c</b>（减号后的括号，里面每一项都变号）。',
+    '第 6 步：合并。−c 和 +c 抵消，剩下 <b>−a − b</b>。代入 c = −6、a = −1、b = 4 验算，两边都等于 −3。'
+  ];
+  stepper('demo', 6, s => {
+    dist.classList.toggle('on', s >= 0);
+    [A1, A2].forEach(([g, p], i) => { const on = s >= i + 1; g.classList.toggle('on', on); p.classList.toggle('on', on); });
+    const sh = SHOW[s];
+    drv.innerHTML = sh.map((k, i) => `<div class="${i === sh.length - 1 ? 'new' : 'old'}">${LINES[k]}</div>`).join('');
+    return TXT[s];
+  });
+}
+
+/* ---------- 判号实验室 ---------- */
+{
+  const INIT = { a: -1, b: 4, c: -6, ex: 'b+c' };
+  let S = { ...INIT };
+  const sv = document.getElementById('sv2'), out = document.getElementById('labout');
+  const R = { a: document.getElementById('ra'), b: document.getElementById('rb'), c: document.getElementById('rc') };
+  const EX = ['b+c', 'a-c', 'a+b', 'a+c', 'b-a', 'c-b', 'b-c'];
+  const exBox = document.getElementById('exprs');
+  const show = s => s.replace('-', ' − ').replace('+', ' + ');
+  EX.forEach(e => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn'; b.dataset.ex = e; b.textContent = `|${show(e)}|`; b.onclick = () => { S.ex = e; draw(); }; exBox.append(b); });
+  const X = v => 240 + 26 * v;
+  const n = v => v < 0 ? `(−${-v})` : `${v}`;
+  const m = v => v < 0 ? `−${-v}` : `${v}`;
+  function draw() {
+    ['a', 'b', 'c'].forEach(k => { R[k].value = S[k]; document.getElementById('v' + k).textContent = m(S[k]); });
+    exBox.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.ex === S.ex));
+    const [p, op, q] = [S.ex[0], S.ex[1], S.ex[2]], P = S[p], Q = S[q];
+    const val = op === '+' ? P + Q : P - Q;
+    sv.textContent = '';
+    sv.append(E('line', { x1: 12, y1: 70, x2: 468, y2: 70, stroke: 'var(--muted)', 'stroke-width': 2 }));
+    for (let v = -8; v <= 8; v++) {
+      sv.append(E('line', { x1: X(v), y1: 65, x2: X(v), y2: 75, stroke: 'var(--muted)', 'stroke-width': v === 0 ? 2 : 1 }));
+      if (v % 2 === 0) sv.append(E('text', { x: X(v), y: 92, 'text-anchor': 'middle', 'font-size': 11, class: 'mono', style: 'fill:var(--muted)' }, m(v)));
+    }
+    // 箭头：加法从 p 出发走 q；减法从 q 走到 p
+    const [s0, s1] = op === '+' ? [P, P + Q] : [Q, P];
+    const col = val > 0 ? 'var(--pos)' : val < 0 ? 'var(--neg)' : 'var(--muted)';
+    if (s0 !== s1) {
+      const dir = s1 < s0 ? 1 : -1;
+      sv.append(E('path', { d: `M${X(s0)} 120 H${X(Math.max(-8.6, Math.min(8.6, s1)))}`, stroke: col, 'stroke-width': 3 }));
+      const xe = X(Math.max(-8.6, Math.min(8.6, s1)));
+      sv.append(E('polygon', { points: `${xe},120 ${xe + 9 * dir},114 ${xe + 9 * dir},126`, fill: col }));
+    }
+    // 点（同位置时错开标签）
+    const used = {};
+    ['c', 'a', 'b'].forEach(k => {
+      const v = S[k]; const k2 = used[v] = (used[v] || 0) + 1;
+      const col2 = v > 0 ? 'var(--pos)' : v < 0 ? 'var(--neg)' : 'var(--muted)';
+      sv.append(E('circle', { cx: X(v), cy: 70, r: 6, fill: col2 }));
+      sv.append(E('text', { x: X(v), y: 55 - (k2 - 1) * 16, 'text-anchor': 'middle', 'font-size': 15, 'font-weight': 700, style: `fill:${col2}` }, k));
+    });
+    let why;
+    if (op === '+') {
+      if (P === 0 || Q === 0) why = '有一个是 0，结果就跟另一个同号';
+      else if ((P > 0) === (Q > 0)) why = `同号相加，跟着它们的符号（都是${P > 0 ? '正' : '负'}的）`;
+      else if (Math.abs(P) === Math.abs(Q)) why = '一正一负、离 0 一样远，正好抵消为 0';
+      else why = `一正一负，跟着离 0 远的 ${Math.abs(P) > Math.abs(Q) ? p : q}`;
+    } else {
+      why = P > Q ? `${p} 在 ${q} 右边，右减左 → 正` : P < Q ? `${p} 在 ${q} 左边，左减右 → 负` : `${p}、${q} 重合，差为 0`;
+    }
+    const e = show(S.ex);
+    const sign = val > 0 ? '<span class="pos-t">&gt; 0</span>' : val < 0 ? '<span class="neg-t">&lt; 0</span>' : '= 0';
+    const res = val >= 0 ? `|${e}| = (${e})` : `|${e}| = <span class="neg-t">−(${e})</span>`;
+    out.innerHTML = `${e} = ${n(P)} ${op === '+' ? '+' : '−'} ${n(Q)} = ${m(val)} ${sign}<br>判号理由：${why}<br>脱壳：${res}${val === 0 ? '（为 0 时两种写法都对）' : ''}`;
+  }
+  ['a', 'b', 'c'].forEach(k => R[k].oninput = () => { S[k] = +R[k].value; draw(); });
+  const reset = () => { S = { ...INIT }; draw(); };
+  document.getElementById('labreset').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+window.LQ_ITEMS = [
+  { type: '选择', q: '（原图）b + c 是正数还是负数？', opts: ['正数，因为中间是加号', '负数，因为 c 比 b 离 0 远', '无法判断'], ans: 1, why: '一正一负相加，结果跟着离 0 远的那个。|c| &gt; |b|，所以 b + c &lt; 0。“中间是加号”不能说明结果是正的——c 本身是负数（动画第 2 步）。' },
+  { type: '判断', q: '（原图）|a − c| = c − a。', opts: ['对', '错'], ans: 1, why: 'a 在 c 右边，a − c 是正数，绝对值号直接去掉：|a − c| = a − c。c − a 是负数，绝对值不可能是负的。' },
+  { type: '选择', q: '（原图）化简 |c − b|。', opts: ['c − b', 'b − c', '−b − c', 'b + c'], ans: 1, why: 'c 在 b 左边，“左减右”是负数，所以 |c − b| = −(c − b) = −c + b = b − c。' },
+  { type: '填空', q: '（原图）化简 |a + b|。（a + b 的符号要自己判断）', ans: ['a+b', 'b+a'], placeholder: '如 -a-b', why: '一正一负，b 离 0 比 a 远（|b| &gt; |a|），所以 a + b &gt; 0，绝对值号直接去掉：|a + b| = a + b。' },
+  { type: '选择', q: '<b>常见误区</b>：小明化简 |b + c| − |a − c| 写成 −b − c − a − c = −a − b − 2c。他错在哪一步？', opts: ['b + c 的符号判断错了', '− |a − c| 脱壳后没加括号，c 前面的符号没变', '没有错'], ans: 1, why: '− |a − c| = −(a − c) = −a <b>+</b> c。减号后面接括号，里面每一项都要变号；漏了括号，+c 就错写成了 −c（动画第 5 步）。' },
+  { type: '填空', q: '<b>换个图</b>：数轴上从左到右依次是 a、b、0、c，且 |a| &gt; |c|。化简 |a + c| + |b − c| − |a − b|。', ans: ['-2b'], placeholder: '如 -a-b', why: 'a + c：一正一负，a 离 0 更远 → 负，|a + c| = −a − c。b − c：b 在 c 左边 → 负，|b − c| = c − b。a − b：a 在 b 左边 → 负，|a − b| = b − a，前面是减号：−(b − a) = −b + a。合起来：−a − c + c − b − b + a = <b>−2b</b>。' },
+  { type: '填空', q: '<b>迁移</b>：当 −2 &lt; x &lt; 3 时，化简 |x − 3| + |x + 2|，结果是一个数，填这个数。', ans: ['5'], placeholder: '填一个数', why: 'x &lt; 3，所以 x − 3 &lt; 0，|x − 3| = 3 − x；x &gt; −2，所以 x + 2 &gt; 0，|x + 2| = x + 2。相加：3 − x + x + 2 = <b>5</b>。在数轴上就是：x 在 −2 和 3 之间时，到 3 的距离加到 −2 的距离，正好是这段的长度 5。' },
+  { type: '填空', q: '已知 a &lt; 0，化简 |a| + a。', ans: ['0'], placeholder: '填结果', why: 'a 是负数，|a| = −a，所以 |a| + a = −a + a = <b>0</b>。' }
+];
+</script>
+<script>
+/* ---------- 练习题（learn 通用组件） ----------
+   题目来自 window.LQ_ITEMS：{type, q, opts, ans: 选项下标, why} 或填空题 {type, q, ans: [可接受答案…], why}
+   定义 window.resetPage()（导航条「重置」按钮调用）：先调用页面自己的 window.pageReset()，再清空练习 */
+(() => {
+  const box = document.getElementById('lq');
+  const items = window.LQ_ITEMS || [];
+  const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let answered = 0, right = 0;
+
+  function update() {
+    const all = answered === items.length;
+    score.textContent = `已答 ${answered} / ${items.length} · 答对 ${right}` +
+      (all ? (right === items.length ? ' · 全对！' : ' · 看看解析，再重做一次') : '');
+  }
+
+  function render() {
+    answered = 0; right = 0; list.innerHTML = '';
+    items.forEach((it, i) => {
+      const el = document.createElement('div');
+      el.className = 'lq-item';
+      el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
+      const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
+      const judge = (ok, answer) => {
+        answered++; if (ok) right++;
+        el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
+        why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
+        update();
+      };
+      if (it.opts) {
+        a.classList.add('lq-opts');
+        it.opts.forEach((o, j) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'lq-opt'; b.innerHTML = o;
+          b.onclick = () => {
+            a.querySelectorAll('button').forEach(x => x.disabled = true);
+            a.children[it.ans].classList.add('lq-right');
+            if (j !== it.ans) b.classList.add('lq-wrong');
+            judge(j === it.ans, it.opts[it.ans]);
+          };
+          a.append(b);
+        });
+      } else {
+        a.classList.add('lq-fill');
+        a.innerHTML = `<input type="text" autocomplete="off" spellcheck="false" placeholder="${it.placeholder || '输入答案'}" aria-label="第 ${i + 1} 题答案"><button type="button" class="lq-opt">确定</button>`;
+        const inp = a.querySelector('input'), go = a.querySelector('button');
+        const submit = () => {
+          if (!inp.value.trim()) { inp.focus(); return; }
+          inp.disabled = go.disabled = true;
+          const ok = it.ans.some(x => norm(x) === norm(inp.value));
+          inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
+          judge(ok, it.ans[0]);
+        };
+        go.onclick = submit;
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      }
+      list.append(el);
+    });
+    update();
+  }
+
+  box.querySelector('.lq-redo').addEventListener('click', render);
+  // 导航条的「重置」按钮调用它：页面各模块 + 练习题一起恢复初始状态
+  window.resetPage = () => {
+    if (typeof window.pageReset === 'function') window.pageReset();
+    render();
+  };
+  render();
+})();
+</script>
+</body>
+</html>

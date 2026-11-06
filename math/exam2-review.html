@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>试卷2错题题型归纳</title>
+<meta name="description" content="试卷2 第 14、27、29 题归成三种题型：被每个数字整除的最大数（整除特征 + 挑卡片）、改插彩旗（最小公倍数 + 植树问题）、数值转换机（读框、分岔、递推填表）。每类给出信号词、方法和易错点，并链接到专门讲解和练习的页面。">
+<style>
+/* ---------- 页面变量：中性色映射到站点变量，只为内容另加语义色 ---------- */
+:root{
+  --bg:var(--up-bg); --surface:var(--up-surface); --ink:var(--up-ink); --muted:var(--up-muted); --line:var(--up-line);
+  --accent:var(--up-accent); --ok:var(--up-ok); --bad:var(--up-bad);
+  --c1:#1c7ed6; --c2:#7048e8;
+  
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --c1:#74c0fc; --c2:#b197fc;  }
+}
+:root[data-theme="dark"]{ --c1:#74c0fc; --c2:#b197fc;  }
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 var(--up-font);padding:24px 16px 96px}
+main{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:48px}
+h1{font-size:clamp(1.7rem,4.5vw,2.4rem);line-height:1.25;margin:0 0 8px}
+h2{font-size:1.4rem;margin:0 0 8px}
+p{margin:0}
+.lead{color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--up-radius);box-shadow:var(--up-shadow);padding:16px}
+.analogy{border-left:4px solid var(--accent)}
+.btn{font:inherit;font-size:14px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--up-surface)}
+.btn:disabled{opacity:.45;cursor:default}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.stepno{font-family:var(--up-mono);color:var(--muted);font-size:.9rem;min-width:56px;text-align:center}
+
+/* ---------- 本组页面共用 ---------- */
+.stage{border-radius:10px;background:var(--up-surface-2);margin-top:12px;overflow:hidden}
+.stage svg{display:block;width:100%;height:auto}
+.caption{min-height:3.6em;margin-top:10px}
+.btn.on{border-color:var(--accent);background:var(--up-accent-soft);color:var(--accent);font-weight:700}
+.problem{border-left:4px solid var(--c1)}
+.problem .src{font-size:.85rem;color:var(--muted)}
+.warn{border-left:4px solid var(--bad)}
+.sum{border-left:4px solid var(--ok)}
+.mono,.k{font-family:var(--up-mono)}
+.fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;font-size:.82em;line-height:1.15;margin:0 2px;font-family:var(--up-mono)}
+.fr>i{font-style:normal;padding:0 2px}
+.fr>i:first-child{border-bottom:1.5px solid currentColor}
+.sec-lead{color:var(--muted);margin-bottom:12px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.recipe{counter-reset:r;list-style:none;padding:0;margin:8px 0 0;display:grid;gap:8px}
+.recipe li{counter-increment:r;padding-left:34px;position:relative}
+.recipe li::before{content:counter(r);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--up-surface);font:700 13px/24px var(--up-mono);text-align:center}
+.tbl{width:100%;border-collapse:collapse;font-size:.92rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+.tbl th{background:var(--up-surface-2)}
+.tblwrap{overflow-x:auto}
+.hl{background:var(--up-accent-soft);color:var(--accent);border-radius:4px;padding:0 3px;font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.readout{font-family:var(--up-mono);margin-top:10px;line-height:1.8}
+.ok-t{color:var(--ok);font-weight:700}.bad-t{color:var(--bad);font-weight:700}
+input[type=range]{width:min(100%,320px);accent-color:var(--accent)}
+label.sl{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px}
+svg text{font-family:var(--up-font);fill:var(--ink)}
+svg .mono{font-family:var(--up-mono)}
+.fade{transition:opacity .7s ease}
+@media (prefers-reduced-motion: reduce){.fade,svg *{transition:none!important}}
+.card p,.caption,.readout,.lq-q,.lq-why{overflow-wrap:anywhere}
+
+.qtext{background:var(--up-surface-2);border-radius:10px;padding:12px 14px;margin-top:12px;line-height:1.9;min-height:6.5em}
+.qtext .hl{transition:background .6s}
+.goto{display:inline-block;margin-top:6px;font-weight:700;color:var(--accent)}
+.tcard h3{margin:0 0 4px;font-size:1.05rem}
+.tcard p{font-size:.95rem}
+.tcard .no{font:700 .85rem var(--up-mono);color:var(--muted)}
+.big{font-size:1.15rem;font-family:var(--up-mono)}
+:root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:var(--ok);--lq-bad:var(--bad)}
+/* ---------- 练习题（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+.lq{display:grid;gap:12px;margin-bottom:56px}
+.lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+.lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
+.lq-sub{margin:0;color:var(--lq-muted);font-size:14px}
+.lq-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--lq-muted);font-variant-numeric:tabular-nums}
+.lq-list{display:grid;gap:10px}
+.lq-item{background:var(--lq-surface);border:1.5px solid var(--lq-line);border-radius:10px;padding:12px 16px;display:grid;gap:10px;min-width:0;color:var(--lq-ink);text-align:left}
+.lq-item.lq-is-ok{border-color:var(--lq-ok)}
+.lq-item.lq-is-bad{border-color:var(--lq-bad)}
+.lq-q{font-size:15px;font-weight:600;line-height:1.6}
+.lq-tag{display:inline-block;font-size:11px;font-weight:500;line-height:1.6;color:var(--lq-muted);border:1px solid var(--lq-line);border-radius:999px;padding:0 8px;margin-right:8px;vertical-align:1px}
+.lq-opts,.lq-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lq .lq-opt,.lq .lq-redo{font:inherit;font-size:14px;line-height:1.4;padding:6px 14px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);cursor:pointer;text-align:left;opacity:1}
+.lq .lq-opt:hover:not(:disabled),.lq .lq-redo:hover{border-color:var(--lq-accent)}
+.lq .lq-opt:disabled{cursor:default;opacity:1}
+.lq .lq-opt.lq-right{border-color:var(--lq-ok);color:var(--lq-ok);font-weight:700}
+.lq .lq-opt.lq-wrong{border-color:var(--lq-bad);color:var(--lq-bad);text-decoration:line-through}
+.lq-fill input{font:inherit;font-size:14px;padding:6px 10px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);width:min(100%,200px)}
+.lq-fill input.lq-right{border-color:var(--lq-ok)}
+.lq-fill input.lq-wrong{border-color:var(--lq-bad)}
+.lq-why{font-size:14px;line-height:1.65;color:var(--lq-muted)}
+.lq-why:empty{display:none}
+.lq-why .lq-ok{color:var(--lq-ok)}
+.lq-why .lq-bad{color:var(--lq-bad)}
+.qtext{background:var(--up-surface-2);border-radius:10px;padding:12px 14px;margin-top:12px;line-height:1.9;min-height:6.5em}
+.goto{display:inline-block;margin-top:6px;font-weight:700;color:var(--accent)}
+.tcard h3{margin:0 0 4px;font-size:1.05rem}
+.tcard p{font-size:.95rem}
+.tcard .no{font:700 .85rem var(--up-mono);color:var(--muted)}
+</style>
+</head>
+<body>
+<!-- up-shell:begin（由 scripts/shell.mjs 自动生成，勿手改） -->
+<nav id="up-nav" aria-label="网站导航">
+<a class="up-home" href="/" title="Up 学习站首页"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="up-nav-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c6ef5"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#up-nav-g)"/><path d="M12 52V42a2 2 0 0 1 2-2h10V32a2 2 0 0 1 2-2h10v-8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v30z" fill="#fff"/><circle cx="43" cy="13" r="5.5" fill="#ffa94d"/></svg><span>Up 学习站</span></a>
+<span class="up-sep" aria-hidden="true">›</span><a class="up-cat" href="/math">数学</a>
+<span class="up-sep" aria-hidden="true">›</span><span class="up-title">试卷2错题题型归纳</span>
+<button id="up-reset" type="button" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+</nav>
+<style>
+:root{--up-bg:#f5f6f8;--up-surface:#ffffff;--up-surface-2:#eef0f4;--up-ink:#1d2127;--up-muted:#626b78;--up-line:#dfe2e8;--up-ok:#2b8a3e;--up-bad:#d6336c;--up-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);--up-font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif;--up-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;--up-radius:12px;--up-accent:#d9480f;--up-accent-soft:#fff1e8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#ff8a50;--up-accent-soft:#3a2218;color-scheme:dark}}
+:root[data-theme="dark"]{--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#ff8a50;--up-accent-soft:#3a2218;color-scheme:dark}
+html{padding-top:52px;scroll-padding-top:64px}
+#up-nav{position:fixed;top:0;left:0;right:0;z-index:2147483000;height:52px;box-sizing:border-box;display:flex;align-items:center;gap:8px;
+padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));border-top:3px solid var(--up-accent);
+border-bottom:1px solid var(--up-line);background:color-mix(in srgb,var(--up-surface) 88%,transparent);
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:500 14px/1.2 var(--up-font);color:var(--up-ink);text-align:left}
+#up-nav a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none}
+#up-nav a:hover{color:var(--up-accent)}
+#up-nav svg{width:24px;height:24px;flex:none;display:block}
+#up-nav .up-home span{font-weight:700}
+#up-nav .up-cat{color:var(--up-accent);font-weight:600}
+#up-nav .up-sep{color:var(--up-muted);flex:none}
+#up-nav .up-title{color:var(--up-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#up-reset{margin:0 0 0 auto;flex:none;font:600 14px/1 var(--up-font);padding:8px 14px;border-radius:999px;cursor:pointer;
+border:1.5px solid var(--up-accent);background:transparent;color:var(--up-accent);transition:background .2s,color .2s}
+#up-reset:hover,#up-reset:focus-visible{background:var(--up-accent);color:var(--up-surface)}
+#up-reset:focus-visible,#up-nav a:focus-visible{outline:2px solid var(--up-accent);outline-offset:2px}
+@media (max-width:560px){#up-nav .up-home span{display:none}}
+@media print{#up-nav{display:none}html{padding-top:0}}
+</style>
+<script>
+document.getElementById('up-reset').addEventListener('click', function () {
+  if (typeof window.resetPage === 'function') window.resetPage();
+  else console.warn('本页没有定义 window.resetPage()，重置按钮无效');
+  window.scrollTo({ top: 0, behavior: 'auto' });
+});
+</script>
+<!-- up-shell:end -->
+<main>
+
+<section>
+  <h1>试卷2错题题型归纳</h1>
+  <p class="lead">第 14、27、29 题各属一种固定题型。先学会<b>认出信号词</b>，再套<b>对应的方法</b>。每类都有一页专门的动画讲解和同类练习，点链接进入。<br><a href="exam3-review.html" style="color:var(--accent)">→ 试卷3错题总览</a>　<a href="exam5-review.html" style="color:var(--accent)">→ 试卷5错题总览</a></p>
+</section>
+
+<section>
+  <h2>一步一步：从关键词认出题型</h2>
+  <p class="sec-lead">读题时先圈出橙色的“信号词”，题型就出来了。</p>
+  <div class="card" id="demo">
+    <div class="qtext" id="qt"></div>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>三种题型速查</h2>
+  <div class="grid2" style="margin-top:8px">
+    <div class="card tcard"><span class="no">第 14 题</span><h3>① 被每个数字整除的最大数</h3>
+      <p><b>信号：</b>“能被组成它的所有数整除”“尽可能大的多位数”</p>
+      <p><b>方法：</b>每张卡是一位考官 → 找冲突（5 和偶数不能同台）→ 数字和凑 3 的倍数，去掉最小的卡 → 从大到小排，再调末尾。</p>
+      <p><b>坑：</b>615 忘了考官 6 要偶数；五张全上和是 16。</p>
+      <a class="goto" href="digit-divisible.html">去学：被每个数字整除的最大数 →</a></div>
+    <div class="card tcard"><span class="no">第 27 题</span><h3>② 改插彩旗：公倍数 + 植树</h3>
+      <p><b>信号：</b>“原来每 14 米……现在改成每 21 米”“不需要移动”“包括两端”</p>
+      <p><b>方法：</b>不动的旗每隔<b>最小公倍数</b>一面；两端都有：段数 = 旗数 − 1；路长 = 公倍数 × 段数。</p>
+      <p><b>坑：</b>42 × 16（旗数当段数）；环形不用 −1。</p>
+      <a class="goto" href="flags-lcm.html">去学：改插彩旗：公倍数与植树 →</a></div>
+    <div class="card tcard"><span class="no">第 29 题</span><h3>③ 数值转换机</h3>
+      <p><b>信号：</b>“输入→框→输出”的流程图、“大于 1 / 小于等于 1”、“增大 1，则结果为原来的 3 倍”</p>
+      <p><b>方法：</b>每个框照字面算一次；分岔先比大小再选路；递推规则画成表格一格一格走。</p>
+      <p><b>坑：</b>“−½”当成乘；从 1 到 6 只走 5 步；带分数先化简再乘。</p>
+      <a class="goto" href="number-machine.html">去学：数值转换机 →</a></div>
+    <div class="card tcard"><span class="no">相关旧页面</span><h3>打基础可以回看</h3>
+      <p><a class="goto" href="gcd-lcm-apply.html" style="margin:0">公因数公倍数应用题（路灯、数灯口诀）</a></p>
+      <p><a class="goto" href="cycle-program.html" style="margin:0">运算程序找周期</a></p>
+      <p><a class="goto" href="negative-numbers.html" style="margin:0">负数的运算（减负得正）</a></p>
+      <p><a class="goto" href="absolute-value.html" style="margin:0">绝对值与相反数</a></p></div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>答案对照</h2>
+  <div class="tblwrap"><table class="tbl">
+    <tr><th>题号</th><th>正确答案</th><th>关键一步</th></tr>
+    <tr><td>14</td><td>6432</td><td>5 与 2、4、6 不能同台；1+2+3+4+6 = 16，去掉 1 → 15；6432 末两位 32 ÷ 4 ✓</td></tr>
+    <tr><td>27</td><td>630 米</td><td>[14, 21] = 42；16 面旗 → 15 段；42 × 15</td></tr>
+    <tr><td>29</td><td>(1) <span class="fr"><i>13</i><i>8</i></span>　(2) <span class="fr"><i>26</i><i>3</i></span> 和 3　(3) 243<span class="fr"><i>2</i><i>3</i></span></td><td>4 − ½ + ⅜ − 2¼；<span class="fr"><i>4</i><i>5</i></span> ≤ 1 走下路，×2<span class="fr"><i>17</i><i>34</i></span> = ×<span class="fr"><i>5</i><i>2</i></span>；3⁵ + 5 × <span class="fr"><i>2</i><i>15</i></span></td></tr>
+  </table></div>
+</section>
+
+<section class="card sum">
+  <b>一句话总结：</b>三道题都要<b>数清楚</b>：数清有几位考官要过、数清几面旗有几段、数清转换机走了几步。
+</section>
+
+<section class="lq" id="lq" aria-label="练习">
+  <div class="lq-head"><h2>练习</h2><span class="lq-score"></span></div>
+  <p class="lq-sub">每题作答后马上看到解析；点「重做练习」清空重来。分数写成 a/b（如 2/3），负数用 -（如 -4/3）。</p>
+  <div class="lq-list"></div>
+  <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+</section>
+
+</main>
+
+<script>
+const resets = [];                                   // 每个模块的 reset()
+window.pageReset = () => resets.forEach(f => f());   // 练习组件会把它包进 window.resetPage
+const F = (a, b) => `<span class="fr"><i>${a}</i><i>${b}</i></span>`;   // 竖排分数
+/* 通用分步模块：render(step) 负责画图并返回说明文字 */
+function stepper(id, n, render, ms = 1800) {
+  const root = document.getElementById(id);
+  const cap = root.querySelector('.caption'), no = root.querySelector('.stepno');
+  const btn = a => root.querySelector(`[data-act="${a}"]`);
+  let step = 0, timer = null;
+  const draw = () => {
+    cap.innerHTML = render(step) || '';
+    no.textContent = `${step + 1} / ${n}`;
+    btn('prev').disabled = step === 0; btn('next').disabled = step === n - 1;
+    btn('play').textContent = timer ? '⏸ 暂停' : '▶ 播放';
+  };
+  const stop = () => { clearInterval(timer); timer = null; };
+  const go = d => { step = Math.max(0, Math.min(n - 1, step + d)); draw(); };
+  btn('prev').onclick = () => { stop(); go(-1); };
+  btn('next').onclick = () => { stop(); go(1); };
+  btn('play').onclick = () => {
+    if (timer) { stop(); draw(); return; }
+    if (step === n - 1) step = 0;
+    timer = setInterval(() => { go(1); if (step === n - 1) { stop(); draw(); } }, ms);
+    draw();
+  };
+  const reset = () => { stop(); step = 0; draw(); };
+  btn('reset').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+{
+  const qt = document.getElementById('qt');
+  const Hh = (s, on) => on ? `<span class="hl">${s}</span>` : s;
+  const Q = [
+    { t: n => `14. 有 6 张卡片，上面分别写 1、2、3、4、5、6，从中拿出若干张，排成一个${Hh('尽可能大的多位数', n)}，并使这个多位数${Hh('能被组成它的所有数整除', n)}……`, c: '题型 ① <b>整除特征 + 挑卡片</b>：每张卡都是一位考官，先找冲突，再凑数字和。答案 6432。' },
+    { t: n => `27. ……${Hh('原来每 14 米', n)}插一面彩旗，${Hh('现在改成每 21 米', n)}插一面彩旗……${Hh('包括两端', n)}的彩旗在内，一共有 16 面彩旗${Hh('不需要移动', n)}，这条路长多少米？`, c: '题型 ② <b>公倍数 + 植树</b>：不动的旗每隔 [14, 21] = 42 米；16 面旗 15 段 → 630 米。' },
+    { t: n => `29. ……${Hh('输入 a → a×a → −½ → +0.375 → −|−2¼| → 输出', n)}……结果${Hh('大于 1', n)}……${Hh('小于等于 1', n)}……A 输入自然数${Hh('增大 1，则输出结果为原来的 3 倍', n)}……`, c: '题型 ③ <b>数值转换机</b>：照框计算、先比大小再选路、递推规则一格一格走（从 1 到 6 走 5 步）。' },
+  ];
+  stepper('demo', Q.length * 2, i => {
+    const q = Q[i >> 1], on = i % 2 === 1;
+    qt.innerHTML = q.t(on);
+    return on ? q.c : `第 ${(i >> 1) + 1} 道：先读一遍，你能找出“信号词”吗？点「下一步」揭晓。`;
+  }, 2400);
+}
+
+window.LQ_ITEMS = [
+  { type: '选择', q: '“甲每 8 分钟跑一圈，乙每 12 分钟跑一圈，同时从起点出发，多少分钟后再次在起点相遇？”和哪道题是同一题型？', opts: ['第 14 题', '第 27 题', '第 29 题'], ans: 1, why: '都是找“同时重合”的地方：最小公倍数 [8, 12] = 24 分钟。' },
+  { type: '填空', q: '一条路两端都栽树，每隔 10 米一棵，共 21 棵。路长多少米？', ans: ['200'], placeholder: '填数字', why: '21 棵 → 20 段，10 × 20 = 200 米。和第 27 题一样，段数 = 棵数 − 1。' },
+  { type: '判断', q: '一个数能被 6 整除，只要它的数字和是 3 的倍数就行。', opts: ['对', '错'], ans: 1, why: '6 = 2 × 3，还必须是偶数。第 14 题的 615 就栽在这里。' },
+  { type: '填空', q: '用 1、2、4 三张卡全部排成一个能被 1、2、4 都整除的三位数，最大是多少？', ans: ['412'], placeholder: '填数字', why: '要被 4 整除，看末两位：421 是奇数 ✗，412 末两位 12 ÷ 4 = 3 ✓。（241、214 等都更小或不合格）' },
+  { type: '填空', q: '转换机：输入 x → ×(−3) → −(−4) → 输出。输入 2，输出多少？', ans: ['-2', '−2'], placeholder: '如 -2', why: '2 × (−3) = −6；−(−4) 就是 +4：−6 + 4 = −2。' },
+  { type: '填空', q: '规则：C(1) = 1，以后每次 C(n) = C(n−1) × 3。C(5) = ？', ans: ['81'], placeholder: '填数字', why: '从 1 到 5 走 4 步：1 × 3⁴ = 81。不是 3⁵。' },
+];
+</script>
+<script>
+/* ---------- 练习题（learn 通用组件） ----------
+   题目来自 window.LQ_ITEMS：{type, q, opts, ans: 选项下标, why} 或填空题 {type, q, ans: [可接受答案…], why}
+   定义 window.resetPage()（导航条「重置」按钮调用）：先调用页面自己的 window.pageReset()，再清空练习 */
+(() => {
+  const box = document.getElementById('lq');
+  const items = window.LQ_ITEMS || [];
+  const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let answered = 0, right = 0;
+
+  function update() {
+    const all = answered === items.length;
+    score.textContent = `已答 ${answered} / ${items.length} · 答对 ${right}` +
+      (all ? (right === items.length ? ' · 全对！' : ' · 看看解析，再重做一次') : '');
+  }
+
+  function render() {
+    answered = 0; right = 0; list.innerHTML = '';
+    items.forEach((it, i) => {
+      const el = document.createElement('div');
+      el.className = 'lq-item';
+      el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
+      const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
+      const judge = (ok, answer) => {
+        answered++; if (ok) right++;
+        el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
+        why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
+        update();
+      };
+      if (it.opts) {
+        a.classList.add('lq-opts');
+        it.opts.forEach((o, j) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'lq-opt'; b.innerHTML = o;
+          b.onclick = () => {
+            a.querySelectorAll('button').forEach(x => x.disabled = true);
+            a.children[it.ans].classList.add('lq-right');
+            if (j !== it.ans) b.classList.add('lq-wrong');
+            judge(j === it.ans, it.opts[it.ans]);
+          };
+          a.append(b);
+        });
+      } else {
+        a.classList.add('lq-fill');
+        a.innerHTML = `<input type="text" autocomplete="off" spellcheck="false" placeholder="${it.placeholder || '输入答案'}" aria-label="第 ${i + 1} 题答案"><button type="button" class="lq-opt">确定</button>`;
+        const inp = a.querySelector('input'), go = a.querySelector('button');
+        const submit = () => {
+          if (!inp.value.trim()) { inp.focus(); return; }
+          inp.disabled = go.disabled = true;
+          const ok = it.ans.some(x => norm(x) === norm(inp.value));
+          inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
+          judge(ok, it.ans[0]);
+        };
+        go.onclick = submit;
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      }
+      list.append(el);
+    });
+    update();
+  }
+
+  box.querySelector('.lq-redo').addEventListener('click', render);
+  // 导航条的「重置」按钮调用它：页面各模块 + 练习题一起恢复初始状态
+  window.resetPage = () => {
+    if (typeof window.pageReset === 'function') window.pageReset();
+    render();
+  };
+  render();
+})();
+</script>
+</body>
+</html>

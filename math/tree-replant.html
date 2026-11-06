@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>植树改栽问题</title>
+<meta name="description" content="试卷1第22题：原来每15米挖坑、改成每25米栽树，哪些坑能留下？用最小公倍数找重合位置，动画演示900米路上的旧坑、新树与重合点，附改栽计算器和同类练习。">
+<style>
+/* ---------- 页面变量：中性色映射到站点变量，只为内容另加语义色 ---------- */
+:root{
+  --bg:var(--up-bg); --surface:var(--up-surface); --ink:var(--up-ink); --muted:var(--up-muted); --line:var(--up-line);
+  --accent:var(--up-accent); --ok:var(--up-ok); --bad:var(--up-bad);
+  --c1:#1c7ed6; --c2:#7048e8;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --c1:#74c0fc; --c2:#b197fc; }
+}
+:root[data-theme="dark"]{ --c1:#74c0fc; --c2:#b197fc; }
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 var(--up-font);padding:24px 16px 96px}
+main{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:48px}
+h1{font-size:clamp(1.7rem,4.5vw,2.4rem);line-height:1.25;margin:0 0 8px}
+h2{font-size:1.4rem;margin:0 0 8px}
+p{margin:0}
+.lead{color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--up-radius);box-shadow:var(--up-shadow);padding:16px}
+.analogy{border-left:4px solid var(--accent)}
+.btn{font:inherit;font-size:14px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--up-surface)}
+.btn:disabled{opacity:.45;cursor:default}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.stepno{font-family:var(--up-mono);color:var(--muted);font-size:.9rem;min-width:56px;text-align:center}
+
+/* ---------- 本组页面共用 ---------- */
+.stage{border-radius:10px;background:var(--up-surface-2);margin-top:12px;overflow:hidden}
+.stage svg{display:block;width:100%;height:auto}
+.caption{min-height:3.6em;margin-top:10px}
+.btn.on{border-color:var(--accent);background:var(--up-accent-soft);color:var(--accent);font-weight:700}
+.problem{border-left:4px solid var(--c1)}
+.problem .src{font-size:.85rem;color:var(--muted)}
+.warn{border-left:4px solid var(--bad)}
+.sum{border-left:4px solid var(--ok)}
+.mono,.k{font-family:var(--up-mono)}
+.fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;font-size:.82em;line-height:1.15;margin:0 2px;font-family:var(--up-mono)}
+.fr>i{font-style:normal;padding:0 2px}
+.fr>i:first-child{border-bottom:1.5px solid currentColor}
+.sec-lead{color:var(--muted);margin-bottom:12px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.recipe{counter-reset:r;list-style:none;padding:0;margin:8px 0 0;display:grid;gap:8px}
+.recipe li{counter-increment:r;padding-left:34px;position:relative}
+.recipe li::before{content:counter(r);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--up-surface);font:700 13px/24px var(--up-mono);text-align:center}
+.tbl{width:100%;border-collapse:collapse;font-size:.92rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+.tbl th{background:var(--up-surface-2)}
+.tblwrap{overflow-x:auto}
+.hl{background:var(--up-accent-soft);color:var(--accent);border-radius:4px;padding:0 3px;font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.readout{font-family:var(--up-mono);margin-top:10px;line-height:1.8}
+.ok-t{color:var(--ok);font-weight:700}.bad-t{color:var(--bad);font-weight:700}
+input[type=range]{width:min(100%,320px);accent-color:var(--accent)}
+label.sl{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px}
+svg text{font-family:var(--up-font);fill:var(--ink)}
+svg .mono{font-family:var(--up-mono)}
+.fade{transition:opacity .7s ease}
+@media (prefers-reduced-motion: reduce){.fade,svg *{transition:none!important}}
+.card p,.caption,.readout,.lq-q,.lq-why{overflow-wrap:anywhere}
+
+.qtext{background:var(--up-surface-2);border-radius:10px;padding:12px 14px;margin-top:12px;line-height:1.9;min-height:6.5em}
+.qtext .hl{transition:background .6s}
+.goto{display:inline-block;margin-top:6px;font-weight:700;color:var(--accent)}
+.tcard h3{margin:0 0 4px;font-size:1.05rem}
+.tcard p{font-size:.95rem}
+.tcard .no{font:700 .85rem var(--up-mono);color:var(--muted)}
+.big{font-size:1.15rem;font-family:var(--up-mono)}
+:root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:var(--ok);--lq-bad:var(--bad)}
+/* ---------- 练习题（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+.lq{display:grid;gap:12px;margin-bottom:56px}
+.lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+.lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
+.lq-sub{margin:0;color:var(--lq-muted);font-size:14px}
+.lq-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--lq-muted);font-variant-numeric:tabular-nums}
+.lq-list{display:grid;gap:10px}
+.lq-item{background:var(--lq-surface);border:1.5px solid var(--lq-line);border-radius:10px;padding:12px 16px;display:grid;gap:10px;min-width:0;color:var(--lq-ink);text-align:left}
+.lq-item.lq-is-ok{border-color:var(--lq-ok)}
+.lq-item.lq-is-bad{border-color:var(--lq-bad)}
+.lq-q{font-size:15px;font-weight:600;line-height:1.6}
+.lq-tag{display:inline-block;font-size:11px;font-weight:500;line-height:1.6;color:var(--lq-muted);border:1px solid var(--lq-line);border-radius:999px;padding:0 8px;margin-right:8px;vertical-align:1px}
+.lq-opts,.lq-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lq .lq-opt,.lq .lq-redo{font:inherit;font-size:14px;line-height:1.4;padding:6px 14px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);cursor:pointer;text-align:left;opacity:1}
+.lq .lq-opt:hover:not(:disabled),.lq .lq-redo:hover{border-color:var(--lq-accent)}
+.lq .lq-opt:disabled{cursor:default;opacity:1}
+.lq .lq-opt.lq-right{border-color:var(--lq-ok);color:var(--lq-ok);font-weight:700}
+.lq .lq-opt.lq-wrong{border-color:var(--lq-bad);color:var(--lq-bad);text-decoration:line-through}
+.lq-fill input{font:inherit;font-size:14px;padding:6px 10px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);width:min(100%,200px)}
+.lq-fill input.lq-right{border-color:var(--lq-ok)}
+.lq-fill input.lq-wrong{border-color:var(--lq-bad)}
+.lq-why{font-size:14px;line-height:1.65;color:var(--lq-muted)}
+.lq-why:empty{display:none}
+.lq-why .lq-ok{color:var(--lq-ok)}
+.lq-why .lq-bad{color:var(--lq-bad)}
+</style>
+</head>
+<body>
+<!-- up-shell:begin（由 scripts/shell.mjs 自动生成，勿手改） -->
+<nav id="up-nav" aria-label="网站导航">
+<a class="up-home" href="/" title="Up 学习站首页"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="up-nav-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c6ef5"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#up-nav-g)"/><path d="M12 52V42a2 2 0 0 1 2-2h10V32a2 2 0 0 1 2-2h10v-8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v30z" fill="#fff"/><circle cx="43" cy="13" r="5.5" fill="#ffa94d"/></svg><span>Up 学习站</span></a>
+<span class="up-sep" aria-hidden="true">›</span><a class="up-cat" href="/math">数学</a>
+<span class="up-sep" aria-hidden="true">›</span><span class="up-title">植树改栽问题</span>
+<button id="up-reset" type="button" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+</nav>
+<style>
+:root{--up-bg:#f5f6f8;--up-surface:#ffffff;--up-surface-2:#eef0f4;--up-ink:#1d2127;--up-muted:#626b78;--up-line:#dfe2e8;--up-ok:#2b8a3e;--up-bad:#d6336c;--up-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);--up-font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif;--up-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;--up-radius:12px;--up-accent:#d9480f;--up-accent-soft:#fff1e8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#ff8a50;--up-accent-soft:#3a2218;color-scheme:dark}}
+:root[data-theme="dark"]{--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#ff8a50;--up-accent-soft:#3a2218;color-scheme:dark}
+html{padding-top:52px;scroll-padding-top:64px}
+#up-nav{position:fixed;top:0;left:0;right:0;z-index:2147483000;height:52px;box-sizing:border-box;display:flex;align-items:center;gap:8px;
+padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));border-top:3px solid var(--up-accent);
+border-bottom:1px solid var(--up-line);background:color-mix(in srgb,var(--up-surface) 88%,transparent);
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:500 14px/1.2 var(--up-font);color:var(--up-ink);text-align:left}
+#up-nav a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none}
+#up-nav a:hover{color:var(--up-accent)}
+#up-nav svg{width:24px;height:24px;flex:none;display:block}
+#up-nav .up-home span{font-weight:700}
+#up-nav .up-cat{color:var(--up-accent);font-weight:600}
+#up-nav .up-sep{color:var(--up-muted);flex:none}
+#up-nav .up-title{color:var(--up-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#up-reset{margin:0 0 0 auto;flex:none;font:600 14px/1 var(--up-font);padding:8px 14px;border-radius:999px;cursor:pointer;
+border:1.5px solid var(--up-accent);background:transparent;color:var(--up-accent);transition:background .2s,color .2s}
+#up-reset:hover,#up-reset:focus-visible{background:var(--up-accent);color:var(--up-surface)}
+#up-reset:focus-visible,#up-nav a:focus-visible{outline:2px solid var(--up-accent);outline-offset:2px}
+@media (max-width:560px){#up-nav .up-home span{display:none}}
+@media print{#up-nav{display:none}html{padding-top:0}}
+</style>
+<script>
+document.getElementById('up-reset').addEventListener('click', function () {
+  if (typeof window.resetPage === 'function') window.resetPage();
+  else console.warn('本页没有定义 window.resetPage()，重置按钮无效');
+  window.scrollTo({ top: 0, behavior: 'auto' });
+});
+</script>
+<!-- up-shell:end -->
+<style>
+:root{--old:#e8590c;--new:#1c7ed6;--keep:#2f9e44}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--old:#ffa94d;--new:#74c0fc;--keep:#8ce99a}}
+:root[data-theme="dark"]{--old:#ffa94d;--new:#74c0fc;--keep:#8ce99a}
+.old-t{color:var(--old);font-weight:700}.new-t{color:var(--new);font-weight:700}.keep-t{color:var(--keep);font-weight:700}
+svg .mk{transition:opacity .7s, transform .7s}
+.seg{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px}
+</style>
+<main>
+<section>
+  <h1>植树改栽：哪些坑能留下</h1>
+  <p class="lead">试卷1 第 22 题。原来每 15 米一个坑，改成每 25 米一棵，哪些坑还能用？答案藏在 <b>15 和 25 的公倍数</b>里：<b>两种间隔“撞在一起”的位置，坑才能留下</b>。<br><a href="exam1-review.html" style="color:var(--accent)">← 试卷1错题总览</a></p>
+</section>
+
+<section class="card problem">
+  <p class="src">原题（试卷1 第 22 题）</p>
+  <p>在一条长 900 米的路一边，每 15 米栽一棵树，两端各栽一棵，挖好坑后，为了更有利于树苗的生长，现需要改成每 25 米栽一棵树，这样原来有几个挖好的坑要填掉？</p>
+  <p style="margin-top:6px"><b>答案：48 个</b>（原来 61 个坑，能留下 13 个）</p>
+  <p style="margin-top:6px;color:var(--muted)">卷面第一次：900 ÷ 15 = 60，再 +2 = 62（两端都栽只 +1）；又用 60 − 38 求“填掉的”——新树的位置大多不在旧坑上，不能直接相减。订正后的 61 − 13 = 48 是对的。</p>
+</section>
+
+<section class="card analogy">
+  <b>生活比喻：两个人沿路走，脚步大小不一样。</b><br>
+  小橙一步 15 米，小蓝一步 25 米，同时从起点出发。他们的脚印什么时候踩在同一个地方？第一次是 75 米处（15 和 25 的最小公倍数），之后每隔 75 米踩到一起一次。<br>
+  旧坑是小橙的脚印，新树是小蓝的脚印——<b>两人都踩过的地方，坑才能接着用</b>。
+</section>
+
+<section>
+  <h2>一步一步看</h2>
+  <p class="sec-lead">上面是整条 900 米的路，下面把开头 150 米放大，看得更清楚。</p>
+  <div class="card" id="demo">
+    <div class="stage"><svg viewBox="0 0 480 250" id="sv1" role="img" aria-label="900 米路上的旧坑、新树和重合位置"></svg></div>
+    <div class="readout" id="tally"></div>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>方法：四步走（两端都栽）</h2>
+  <ol class="recipe">
+    <li><b>原来的坑数</b>：段数 + 1。900 ÷ 15 = 60 段 → 61 个坑。</li>
+    <li><b>重合的间隔</b>：求两个间隔的<b>最小公倍数</b>。15 = 3 × 5，25 = 5 × 5，[15, 25] = 75 米。</li>
+    <li><b>能留下的坑</b>：按 75 米再“栽一次”：900 ÷ 75 = 12 段 → 13 个（起点 0 米也算）。</li>
+    <li><b>要填掉的</b>：61 − 13 = <b>48 个</b>。顺便：新树 900 ÷ 25 + 1 = 37 棵，要新挖 37 − 13 = 24 个坑。</li>
+  </ol>
+  <div class="tblwrap" style="margin-top:12px"><table class="tbl">
+    <tr><th>栽法</th><th>棵数（坑数）</th><th>例：900 米、每 75 米</th></tr>
+    <tr><td>两端都栽</td><td>段数 + 1</td><td>12 + 1 = 13</td></tr>
+    <tr><td>只栽一端</td><td>段数</td><td>12</td></tr>
+    <tr><td>两端都不栽</td><td>段数 − 1</td><td>12 − 1 = 11</td></tr>
+    <tr><td>环形（围一圈）</td><td>段数</td><td>12</td></tr>
+  </table></div>
+</section>
+
+<section>
+  <h2>自己试试：改栽计算器</h2>
+  <p class="sec-lead">换间隔、换路长、换栽法，看重合的位置怎么变。路长会自动取公倍数的整数倍，保证两种栽法都刚好栽到头。</p>
+  <div class="card" id="lab">
+    <div class="seg">原来每 <span class="chips" id="ca"></span> 米</div>
+    <div class="seg">改成每 <span class="chips" id="cb"></span> 米</div>
+    <label class="sl">路长 = 最小公倍数 × <b class="mono" id="vk"></b><input type="range" id="rk" min="1" max="12" step="1"></label>
+    <div class="seg">栽法：<span class="chips" id="cm"></span></div>
+    <div class="stage"><svg viewBox="0 0 480 110" id="sv2" role="img" aria-label="改栽计算器示意图"></svg></div>
+    <div class="readout" id="labout"></div>
+    <div class="ctrl"><button type="button" class="btn" id="labreset">↺ 重置本模块</button></div>
+  </div>
+</section>
+
+<section class="card warn">
+  <h2>常见误区</h2>
+  <ol style="margin:6px 0 0;padding-left:1.3em;display:grid;gap:6px">
+    <li><b>两端都栽却 +2</b>：60 段路有 61 个端点，不是 62 个。画一小段试试：2 段路，3 棵树。</li>
+    <li><b>新旧棵数直接相减</b>：61 − 37 = 24 只是“少了几棵”，不是“填了几个坑”。新树大多栽在新挖的位置上，旧坑能不能留只看<b>位置是否重合</b>。</li>
+    <li><b>把两数相乘当公倍数</b>：15 × 25 = 375 是公倍数，但不是最小的。15 和 25 有公因数 5，最小公倍数是 75。</li>
+    <li><b>忘了起点</b>：重合位置 0、75、150 … 900，0 米处也是一个，所以是 12 + 1 = 13。</li>
+  </ol>
+</section>
+
+<section class="card sum">
+  <b>一句话总结：</b>改栽问题 = <b>植树问题 × 最小公倍数</b>。能留下的坑在两种间隔的最小公倍数位置上，用同样的“段数 + 1”数出来；填掉的 = 原坑 − 留下的，新挖的 = 新坑 − 留下的。
+</section>
+
+<section class="lq" id="lq" aria-label="练习">
+  <div class="lq-head"><h2>练习</h2><span class="lq-score"></span></div>
+  <p class="lq-sub">同类型题目，由易到难。填空题只填数字。</p>
+  <div class="lq-list"></div>
+  <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+</section>
+</main>
+
+<script>
+const resets = [];
+window.pageReset = () => resets.forEach(f => f());
+const F = (a, b) => `<span class="fr"><i>${a}</i><i>${b}</i></span>`;
+const NS = 'http://www.w3.org/2000/svg';
+const E = (t, at = {}, txt) => { const e = document.createElementNS(NS, t); for (const k in at) e.setAttribute(k, at[k]); if (txt != null) e.textContent = txt; return e; };
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function stepper(id, n, render, ms = 2400) {
+  const root = document.getElementById(id);
+  const cap = root.querySelector('.caption'), no = root.querySelector('.stepno');
+  const btn = a => root.querySelector(`[data-act="${a}"]`);
+  let step = 0, timer = null;
+  const draw = () => {
+    cap.innerHTML = render(step) || '';
+    no.textContent = `${step + 1} / ${n}`;
+    btn('prev').disabled = step === 0; btn('next').disabled = step === n - 1;
+    btn('play').textContent = timer ? '⏸ 暂停' : '▶ 播放';
+  };
+  const stop = () => { clearInterval(timer); timer = null; };
+  const go = d => { step = Math.max(0, Math.min(n - 1, step + d)); draw(); };
+  btn('prev').onclick = () => { stop(); go(-1); };
+  btn('next').onclick = () => { stop(); go(1); };
+  btn('play').onclick = () => {
+    if (timer) { stop(); draw(); return; }
+    if (step === n - 1) step = 0;
+    timer = setInterval(() => { go(1); if (step === n - 1) { stop(); draw(); } }, ms);
+    draw();
+  };
+  const reset = () => { stop(); step = 0; draw(); };
+  btn('reset').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+const gcd = (a, b) => b ? gcd(b, a % b) : a;
+const lcm = (a, b) => a / gcd(a, b) * b;
+
+/* ---------- 分步：900 米全景 + 前 150 米放大 ---------- */
+{
+  const sv = document.getElementById('sv1'), tally = document.getElementById('tally');
+  const L = 900, X = m => 20 + m * 440 / L, Z = m => 30 + m * 420 / 150;
+  // 全景
+  sv.append(E('text', { x: 20, y: 18, 'font-size': 12, style: 'fill:var(--muted)' }, '整条路 900 米'));
+  sv.append(E('line', { x1: 20, y1: 60, x2: 460, y2: 60, stroke: 'var(--muted)', 'stroke-width': 3 }));
+  sv.append(E('rect', { x: X(0) - 2, y: 30, width: X(150) - X(0) + 4, height: 46, fill: 'none', stroke: 'var(--muted)', 'stroke-dasharray': '3 3' }));
+  sv.append(E('path', { d: `M${X(0)} 76 L30 120 M${X(150)} 76 L450 120`, stroke: 'var(--muted)', 'stroke-dasharray': '3 3', fill: 'none' }));
+  // 放大
+  sv.append(E('line', { x1: 30, y1: 180, x2: 450, y2: 180, stroke: 'var(--muted)', 'stroke-width': 3 }));
+  for (let m = 0; m <= 150; m += 5) sv.append(E('line', { x1: Z(m), y1: 177, x2: Z(m), y2: 183, stroke: 'var(--muted)' }));
+  sv.append(E('text', { x: 30, y: 245, 'font-size': 12, style: 'fill:var(--muted)' }, '放大：前 150 米'));
+  const OLD = [], NEW = [], KEEP = [];
+  const mk = (arr, cls, el) => { el.setAttribute('class', 'mk'); el.style.opacity = 0; arr.push(el); sv.append(el); return el; };
+  for (let m = 0; m <= L; m += 15) {
+    mk(OLD, 'o', E('circle', { cx: X(m), cy: 66, r: 2.6, fill: 'var(--old)' })).dataset.m = m;
+  }
+  for (let m = 0; m <= L; m += 25) mk(NEW, 'n', E('rect', { x: X(m) - 1.5, y: 40, width: 3, height: 14, fill: 'var(--new)' })).dataset.m = m;
+  for (let m = 0; m <= L; m += 75) mk(KEEP, 'k', E('circle', { cx: X(m), cy: 60, r: 6, fill: 'none', stroke: 'var(--keep)', 'stroke-width': 2.5 }));
+  // 放大里的标记
+  const ZO = [], ZN = [], ZK = [];
+  for (let m = 0; m <= 150; m += 15) {
+    const g = E('g'); g.append(E('ellipse', { cx: Z(m), cy: 194, rx: 9, ry: 5, fill: 'var(--old)' }));
+    g.append(E('text', { x: Z(m), y: 222, 'text-anchor': 'middle', 'font-size': 11, class: 'mono', style: 'fill:var(--old)' }, m));
+    g.dataset.m = m; mk(ZO, '', g);
+  }
+  for (let m = 0; m <= 150; m += 25) {
+    const g = E('g'); g.append(E('path', { d: `M${Z(m)} 168 L${Z(m) - 8} 156 L${Z(m)} 136 L${Z(m) + 8} 156 Z`, fill: 'var(--new)' }));
+    g.append(E('text', { x: Z(m), y: 130, 'text-anchor': 'middle', 'font-size': 11, class: 'mono', style: 'fill:var(--new)' }, m));
+    mk(ZN, '', g);
+  }
+  for (let m = 0; m <= 150; m += 75) mk(ZK, '', E('rect', { x: Z(m) - 13, y: 124, width: 26, height: 104, rx: 8, fill: 'none', stroke: 'var(--keep)', 'stroke-width': 2.5 }));
+  const vis = (arr, on, f) => arr.forEach(e => e.style.opacity = on ? (f ? f(e) : 1) : 0);
+  const TX = [
+    ['第 1 步：一条 900 米的路，两端都要栽。先别急着算，看看路是什么样子。', ''],
+    ['第 2 步：每 15 米挖一个坑。900 ÷ 15 = 60 段，两端都栽，坑数 = 段数 + 1 = <b>61 个</b>（不是 +2）。', '<span class="old-t">● 旧坑 61 个</span>'],
+    ['第 3 步：改成每 25 米一棵：900 ÷ 25 = 36 段 → 37 棵。放大图里看：大部分新树<b>没落在旧坑上</b>（25、50、100、125 都不是 15 的倍数）。', '<span class="old-t">● 旧坑 61</span>　<span class="new-t">◆ 新树 37</span>'],
+    ['第 4 步：既是 15 的倍数、又是 25 的倍数的位置才重合，也就是 <b>75 的倍数</b>：0、75、150 … 900。900 ÷ 75 = 12 段 → <b>13 个</b>坑能留下。', '<span class="old-t">● 旧坑 61</span>　<span class="new-t">◆ 新树 37</span>　<span class="keep-t">○ 重合 13</span>'],
+    ['第 5 步：没被圈住的旧坑都要填掉：61 − 13 = <b>48 个</b>。', '<span class="old-t">要填掉：61 − 13 = 48 个</span>'],
+    ['第 6 步：顺便算新挖的：37 − 13 = 24 个。注意：61 − 37 = 24 碰巧也是 24，但它表示“少栽了几棵”，不是填掉的坑数！', '<span class="keep-t">留下 13</span>　<span class="old-t">填掉 48</span>　<span class="new-t">新挖 24</span>']
+  ];
+  stepper('demo', 6, s => {
+    const kept = e => e.dataset.m % 75 === 0;
+    vis(OLD, s >= 1, s >= 4 ? (e => kept(e) ? 1 : 0.18) : null);
+    vis(ZO, s >= 1, s >= 4 ? (e => kept(e) ? 1 : 0.18) : null);
+    vis(NEW, s >= 2);
+    vis(ZN, s >= 2); vis(KEEP, s >= 3); vis(ZK, s >= 3);
+    tally.innerHTML = TX[s][1] || '&nbsp;';
+    return TX[s][0];
+  }, 2800);
+}
+
+/* ---------- 改栽计算器 ---------- */
+{
+  const AS = [10, 12, 15, 20, 24, 30], BS = [15, 18, 20, 25, 30, 40];
+  const MODES = [['both', '两端都栽'], ['one', '只栽一端'], ['none', '两端都不栽'], ['ring', '环形']];
+  const INIT = { a: 15, b: 25, k: 12, mode: 'both' };
+  let S = { ...INIT };
+  const sv = document.getElementById('sv2'), out = document.getElementById('labout'), rk = document.getElementById('rk');
+  const chips = (id, list, key, fmt = v => v) => {
+    const box = document.getElementById(id);
+    list.forEach(v => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn'; b.dataset.v = v; b.textContent = fmt(v); b.onclick = () => { S[key] = v; draw(); }; box.append(b); });
+    return box;
+  };
+  const ca = chips('ca', AS, 'a'), cb = chips('cb', BS, 'b');
+  const cm = document.getElementById('cm');
+  MODES.forEach(([v, t]) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn'; b.dataset.v = v; b.textContent = t; b.onclick = () => { S.mode = v; draw(); }; cm.append(b); });
+  const cnt = (L, d, mode) => { const seg = L / d; return mode === 'both' ? seg + 1 : mode === 'none' ? seg - 1 : seg; };
+  const has = (m, L, mode) => mode === 'both' ? true : mode === 'none' ? (m > 0 && m < L) : (m < L);
+  function draw() {
+    ca.querySelectorAll('button').forEach(b => b.classList.toggle('on', +b.dataset.v === S.a));
+    cb.querySelectorAll('button').forEach(b => b.classList.toggle('on', +b.dataset.v === S.b));
+    cm.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === S.mode));
+    rk.value = S.k; document.getElementById('vk').textContent = S.k;
+    const l = lcm(S.a, S.b), L = l * S.k;
+    const X = m => 20 + m * 440 / L;
+    sv.textContent = '';
+    sv.append(E('line', { x1: 20, y1: 60, x2: 460, y2: 60, stroke: 'var(--muted)', 'stroke-width': 3 }));
+    if (S.mode === 'ring') sv.append(E('text', { x: 240, y: 104, 'text-anchor': 'middle', 'font-size': 11, style: 'fill:var(--muted)' }, '环形：把这条线首尾接成一圈，终点就是起点'));
+    const ro = L / S.a > 120;
+    for (let m = 0; m <= L; m += S.a) if (has(m, L, S.mode)) sv.append(E('circle', { cx: X(m), cy: 68, r: ro ? 1.6 : 3, fill: 'var(--old)', opacity: m % l === 0 ? 1 : .45 }));
+    for (let m = 0; m <= L; m += S.b) if (has(m, L, S.mode)) sv.append(E('rect', { x: X(m) - 1.5, y: 40, width: 3, height: 14, fill: 'var(--new)' }));
+    for (let m = 0; m <= L; m += l) if (has(m, L, S.mode)) sv.append(E('circle', { cx: X(m), cy: 60, r: 6, fill: 'none', stroke: 'var(--keep)', 'stroke-width': 2.5 }));
+    sv.append(E('text', { x: 20, y: 22, 'font-size': 12, class: 'mono', style: 'fill:var(--muted)' }, `路长 ${L} 米`));
+    const o = cnt(L, S.a, S.mode), n = cnt(L, S.b, S.mode), k = cnt(L, l, S.mode);
+    const add = { both: ' + 1', one: '', none: ' − 1', ring: '' }[S.mode];
+    const g = gcd(S.a, S.b);
+    out.innerHTML = `最小公倍数 [${S.a}, ${S.b}] = ${S.a} × ${S.b} ÷ ${g} = <b>${l}</b> 米${g > 1 ? `（${S.a} 和 ${S.b} 有公因数 ${g}，不能直接相乘）` : ''}<br>` +
+      `<span class="old-t">原坑</span> ${L} ÷ ${S.a}${add} = ${o}　<span class="new-t">新树</span> ${L} ÷ ${S.b}${add} = ${n}<br>` +
+      `<span class="keep-t">能留下</span> ${L} ÷ ${l}${add} = <b>${k}</b>　→　要填掉 ${o} − ${k} = <b>${o - k}</b> 个，要新挖 ${n} − ${k} = <b>${n - k}</b> 个`;
+  }
+  rk.oninput = () => { S.k = +rk.value; draw(); };
+  const reset = () => { S = { ...INIT }; draw(); };
+  document.getElementById('labreset').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+window.LQ_ITEMS = [
+  { type: '选择', q: '一条 600 米的路，每 20 米栽一棵树，两端都栽，一共栽几棵？', opts: ['30 棵', '31 棵', '32 棵'], ans: 1, why: '600 ÷ 20 = 30 段，两端都栽：段数 + 1 = 31 棵。+2 是常见错误——两端的两棵已经包含在“段数 + 1”里了。' },
+  { type: '判断', q: '原来每 15 米一个坑、改成每 25 米一棵，两种位置每隔 375 米才重合一次。', opts: ['对', '错'], ans: 1, why: '15 和 25 有公因数 5，最小公倍数是 15 × 25 ÷ 5 = 75，不是 375。每隔 75 米就重合一次（动画第 4 步）。' },
+  { type: '填空', q: '原题中，改成每 25 米一棵后，需要<b>新挖</b>几个坑？', ans: ['24'], placeholder: '填数字', why: '新树 900 ÷ 25 + 1 = 37 棵，其中 13 棵可以用旧坑，新挖 37 − 13 = <b>24</b> 个。' },
+  { type: '选择', q: '<b>常见误区</b>：小红算原题：“原来 61 个坑，现在只要 37 个，所以填掉 61 − 37 = 24 个。”错在哪？', opts: ['原来的坑数算错了', '新树大多不在旧坑上，填不填要看位置是否重合', '没有错'], ans: 1, why: '新树的 37 个位置里只有 13 个和旧坑重合，另外 24 个要新挖。旧坑只留下 13 个，填掉 61 − 13 = 48 个。“少了几棵”≠“填了几个”。' },
+  { type: '填空', q: '一条 360 米的路，原来每 12 米栽一棵（两端都栽），现在改成每 18 米栽一棵。有几棵树<b>不用移动</b>？', ans: ['11'], placeholder: '填数字', why: '[12, 18] = 36，不动的树在 36 的倍数处：360 ÷ 36 + 1 = <b>11</b> 棵。' },
+  { type: '填空', q: '接上题，需要移走几棵？', ans: ['20'], placeholder: '填数字', why: '原来 360 ÷ 12 + 1 = 31 棵，不动 11 棵，移走 31 − 11 = <b>20</b> 棵。' },
+  { type: '填空', q: '<b>迁移（环形）</b>：一个周长 400 米的环形跑道，原来每 8 米插一面旗，现在改成每 10 米插一面。有几面旗不用动？', ans: ['10'], placeholder: '填数字', why: '[8, 10] = 40。环形没有“两端”，棵数 = 段数：400 ÷ 40 = <b>10</b> 面。' },
+  { type: '填空', q: '<b>迁移（两端都不画）</b>：一根 120 厘米的木条，从一端起每 4 厘米画一条红线，每 6 厘米画一条蓝线，两端都不画。红线和蓝线重合的有几处？', ans: ['9'], placeholder: '填数字', why: '[4, 6] = 12，重合在 12、24 … 108 厘米处。120 ÷ 12 = 10 段，两端都不画：10 − 1 = <b>9</b> 处。' }
+];
+</script>
+<script>
+/* ---------- 练习题（learn 通用组件） ----------
+   题目来自 window.LQ_ITEMS：{type, q, opts, ans: 选项下标, why} 或填空题 {type, q, ans: [可接受答案…], why}
+   定义 window.resetPage()（导航条「重置」按钮调用）：先调用页面自己的 window.pageReset()，再清空练习 */
+(() => {
+  const box = document.getElementById('lq');
+  const items = window.LQ_ITEMS || [];
+  const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let answered = 0, right = 0;
+
+  function update() {
+    const all = answered === items.length;
+    score.textContent = `已答 ${answered} / ${items.length} · 答对 ${right}` +
+      (all ? (right === items.length ? ' · 全对！' : ' · 看看解析，再重做一次') : '');
+  }
+
+  function render() {
+    answered = 0; right = 0; list.innerHTML = '';
+    items.forEach((it, i) => {
+      const el = document.createElement('div');
+      el.className = 'lq-item';
+      el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
+      const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
+      const judge = (ok, answer) => {
+        answered++; if (ok) right++;
+        el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
+        why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
+        update();
+      };
+      if (it.opts) {
+        a.classList.add('lq-opts');
+        it.opts.forEach((o, j) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'lq-opt'; b.innerHTML = o;
+          b.onclick = () => {
+            a.querySelectorAll('button').forEach(x => x.disabled = true);
+            a.children[it.ans].classList.add('lq-right');
+            if (j !== it.ans) b.classList.add('lq-wrong');
+            judge(j === it.ans, it.opts[it.ans]);
+          };
+          a.append(b);
+        });
+      } else {
+        a.classList.add('lq-fill');
+        a.innerHTML = `<input type="text" autocomplete="off" spellcheck="false" placeholder="${it.placeholder || '输入答案'}" aria-label="第 ${i + 1} 题答案"><button type="button" class="lq-opt">确定</button>`;
+        const inp = a.querySelector('input'), go = a.querySelector('button');
+        const submit = () => {
+          if (!inp.value.trim()) { inp.focus(); return; }
+          inp.disabled = go.disabled = true;
+          const ok = it.ans.some(x => norm(x) === norm(inp.value));
+          inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
+          judge(ok, it.ans[0]);
+        };
+        go.onclick = submit;
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      }
+      list.append(el);
+    });
+    update();
+  }
+
+  box.querySelector('.lq-redo').addEventListener('click', render);
+  // 导航条的「重置」按钮调用它：页面各模块 + 练习题一起恢复初始状态
+  window.resetPage = () => {
+    if (typeof window.pageReset === 'function') window.pageReset();
+    render();
+  };
+  render();
+})();
+</script>
+</body>
+</html>
