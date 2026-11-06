@@ -411,7 +411,7 @@ function chips(root, init, onPick) {
     h += `<path class="ar" d="M200 115 H250 V43 H327"/><path class="ar" d="M200 135 H250 V205 H297"/>`;
     h += L(418, 205, 443, 205);
     h += `<path class="ar" d="M432 43 H560 V112 H583"/><path class="ar" d="M552 205 H560 V138 H583"/>`;
-    h += `<text class="lb" x="256" y="32">大于 1</text><text class="lb" x="256" y="238">小于等于 1</text>`;
+    h += `<text class="lb" x="258" y="82">大于 1</text><text class="lb" x="258" y="175">小于等于 1</text>`;
     const used = new Set(S.slice(0, i + 1).map(s => s[1]));
     for (const k in POS) {
       const [x, y, w, hh] = POS[k];
