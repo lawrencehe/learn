@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>数轴上滚三角形</title>
+<meta name="description" content="试卷第 29 题：边长 2/3 的等边三角形在数轴上滚动，滚一圈前进多少？+2、−1、+3、−8、+3 圈后点 C 在哪、哪次离原点最远？左右交替滚 1、2、3……圈，Cₙ 怎么用 n 表示？用真实翻滚动画、数轴跳点和分组找规律讲清。">
+<style>
+/* ---------- 页面变量：中性色映射到站点变量，只为内容另加语义色 ---------- */
+:root{
+  --bg:var(--up-bg); --surface:var(--up-surface); --ink:var(--up-ink); --muted:var(--up-muted); --line:var(--up-line);
+  --accent:var(--up-accent); --ok:var(--up-ok); --bad:var(--up-bad);
+  --c1:#1c7ed6; --c2:#7048e8;
+  --tri:#a5d8ff; --cpt:#e8590c; --trail:#7048e8;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --c1:#74c0fc; --c2:#b197fc; --tri:#1e4a6e; --cpt:#ffa94d; --trail:#b197fc; }
+}
+:root[data-theme="dark"]{ --c1:#74c0fc; --c2:#b197fc; --tri:#1e4a6e; --cpt:#ffa94d; --trail:#b197fc; }
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 var(--up-font);padding:24px 16px 96px}
+main{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:48px}
+h1{font-size:clamp(1.7rem,4.5vw,2.4rem);line-height:1.25;margin:0 0 8px}
+h2{font-size:1.4rem;margin:0 0 8px}
+p{margin:0}
+.lead{color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--up-radius);box-shadow:var(--up-shadow);padding:16px}
+.analogy{border-left:4px solid var(--accent)}
+.btn{font:inherit;font-size:14px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--up-surface)}
+.btn:disabled{opacity:.45;cursor:default}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.stepno{font-family:var(--up-mono);color:var(--muted);font-size:.9rem;min-width:56px;text-align:center}
+
+/* ---------- 本组页面共用 ---------- */
+.stage{border-radius:10px;background:var(--up-surface-2);margin-top:12px;overflow:hidden}
+.stage svg{display:block;width:100%;height:auto}
+.caption{min-height:3.6em;margin-top:10px}
+.btn.on{border-color:var(--accent);background:var(--up-accent-soft);color:var(--accent);font-weight:700}
+.problem{border-left:4px solid var(--c1)}
+.problem .src{font-size:.85rem;color:var(--muted)}
+.warn{border-left:4px solid var(--bad)}
+.sum{border-left:4px solid var(--ok)}
+.mono,.k{font-family:var(--up-mono)}
+.fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;font-size:.82em;line-height:1.15;margin:0 2px;font-family:var(--up-mono)}
+.fr>i{font-style:normal;padding:0 2px}
+.fr>i:first-child{border-bottom:1.5px solid currentColor}
+.sec-lead{color:var(--muted);margin-bottom:12px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.recipe{counter-reset:r;list-style:none;padding:0;margin:8px 0 0;display:grid;gap:8px}
+.recipe li{counter-increment:r;padding-left:34px;position:relative}
+.recipe li::before{content:counter(r);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--up-surface);font:700 13px/24px var(--up-mono);text-align:center}
+.tbl{width:100%;border-collapse:collapse;font-size:.92rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+.tbl th{background:var(--up-surface-2)}
+.tblwrap{overflow-x:auto}
+.hl{background:var(--up-accent-soft);color:var(--accent);border-radius:4px;padding:0 3px;font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.readout{font-family:var(--up-mono);margin-top:10px;line-height:1.8}
+.ok-t{color:var(--ok);font-weight:700}.bad-t{color:var(--bad);font-weight:700}
+input[type=range]{width:min(100%,320px);accent-color:var(--accent)}
+label.sl{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px}
+svg text{font-family:var(--up-font);fill:var(--ink)}
+svg .mono{font-family:var(--up-mono)}
+.fade{transition:opacity .7s ease}
+@media (prefers-reduced-motion: reduce){.fade,svg *{transition:none!important}}
+.card p,.caption,.readout,.lq-q,.lq-why{overflow-wrap:anywhere}
+
+:root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:var(--ok);--lq-bad:var(--bad)}
+/* ---------- 练习题（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+.lq{display:grid;gap:12px;margin-bottom:56px}
+.lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+.lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
+.lq-sub{margin:0;color:var(--lq-muted);font-size:14px}
+.lq-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--lq-muted);font-variant-numeric:tabular-nums}
+.lq-list{display:grid;gap:10px}
+.lq-item{background:var(--lq-surface);border:1.5px solid var(--lq-line);border-radius:10px;padding:12px 16px;display:grid;gap:10px;min-width:0;color:var(--lq-ink);text-align:left}
+.lq-item.lq-is-ok{border-color:var(--lq-ok)}
+.lq-item.lq-is-bad{border-color:var(--lq-bad)}
+.lq-q{font-size:15px;font-weight:600;line-height:1.6}
+.lq-tag{display:inline-block;font-size:11px;font-weight:500;line-height:1.6;color:var(--lq-muted);border:1px solid var(--lq-line);border-radius:999px;padding:0 8px;margin-right:8px;vertical-align:1px}
+.lq-opts,.lq-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lq .lq-opt,.lq .lq-redo{font:inherit;font-size:14px;line-height:1.4;padding:6px 14px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);cursor:pointer;text-align:left;opacity:1}
+.lq .lq-opt:hover:not(:disabled),.lq .lq-redo:hover{border-color:var(--lq-accent)}
+.lq .lq-opt:disabled{cursor:default;opacity:1}
+.lq .lq-opt.lq-right{border-color:var(--lq-ok);color:var(--lq-ok);font-weight:700}
+.lq .lq-opt.lq-wrong{border-color:var(--lq-bad);color:var(--lq-bad);text-decoration:line-through}
+.lq-fill input{font:inherit;font-size:14px;padding:6px 10px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);width:min(100%,200px)}
+.lq-fill input.lq-right{border-color:var(--lq-ok)}
+.lq-fill input.lq-wrong{border-color:var(--lq-bad)}
+.lq-why{font-size:14px;line-height:1.65;color:var(--lq-muted)}
+.lq-why:empty{display:none}
+.lq-why .lq-ok{color:var(--lq-ok)}
+.lq-why .lq-bad{color:var(--lq-bad)}
+.nl line.axis{stroke:var(--ink);stroke-width:2}
+.nl .tick{stroke:var(--ink);stroke-width:1.5}
+.nl .tk{font:13px var(--up-mono);fill:var(--muted)}
+.nl .tri{fill:var(--tri);stroke:var(--ink);stroke-width:2;fill-opacity:.85}
+.nl .vl{font:700 15px var(--up-font)}
+.nl .cdot{fill:var(--cpt)}
+.nl .clab{font:700 14px var(--up-mono);fill:var(--cpt)}
+.nl .land{fill:var(--trail)}
+.nl .arc{fill:none;stroke:var(--trail);stroke-width:2}
+.nl .arc.l{stroke:var(--cpt)}
+.mv{transition:transform .9s ease}
+@media (prefers-reduced-motion: reduce){.mv{transition:none}}
+.tbl td.max{background:var(--up-accent-soft);color:var(--accent);font-weight:700}
+.tbl tr.dim td{color:var(--line)}
+.calc input{font:inherit;font-family:var(--up-mono);width:90px;padding:4px 8px;border-radius:6px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink)}
+.mis{display:grid;gap:12px}
+.mis .card{border-left:4px solid var(--bad)}
+.wrong-t{color:var(--bad);text-decoration:line-through;font-family:var(--up-mono)}
+.right-t{color:var(--ok);font-family:var(--up-mono);font-weight:700}
+</style>
+</head>
+<body>
+<!-- up-shell:begin（由 scripts/shell.mjs 自动生成，勿手改） -->
+<nav id="up-nav" aria-label="网站导航">
+<a class="up-home" href="/" title="Up 学习站首页"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="up-nav-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c6ef5"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#up-nav-g)"/><path d="M12 52V42a2 2 0 0 1 2-2h10V32a2 2 0 0 1 2-2h10v-8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v30z" fill="#fff"/><circle cx="43" cy="13" r="5.5" fill="#ffa94d"/></svg><span>Up 学习站</span></a>
+<span class="up-sep" aria-hidden="true">›</span><a class="up-cat" href="/math">数学</a>
+<span class="up-sep" aria-hidden="true">›</span><span class="up-title">数轴上滚三角形</span>
+<button id="up-reset" type="button" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+</nav>
+<style>
+:root{--up-bg:#f5f6f8;--up-surface:#ffffff;--up-surface-2:#eef0f4;--up-ink:#1d2127;--up-muted:#626b78;--up-line:#dfe2e8;--up-ok:#2b8a3e;--up-bad:#d6336c;--up-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);--up-font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif;--up-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;--up-radius:12px;--up-accent:#d9480f;--up-accent-soft:#fff1e8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#ff8a50;--up-accent-soft:#3a2218;color-scheme:dark}}
+:root[data-theme="dark"]{--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#ff8a50;--up-accent-soft:#3a2218;color-scheme:dark}
+html{padding-top:52px;scroll-padding-top:64px}
+#up-nav{position:fixed;top:0;left:0;right:0;z-index:2147483000;height:52px;box-sizing:border-box;display:flex;align-items:center;gap:8px;
+padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));border-top:3px solid var(--up-accent);
+border-bottom:1px solid var(--up-line);background:color-mix(in srgb,var(--up-surface) 88%,transparent);
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:500 14px/1.2 var(--up-font);color:var(--up-ink);text-align:left}
+#up-nav a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none}
+#up-nav a:hover{color:var(--up-accent)}
+#up-nav svg{width:24px;height:24px;flex:none;display:block}
+#up-nav .up-home span{font-weight:700}
+#up-nav .up-cat{color:var(--up-accent);font-weight:600}
+#up-nav .up-sep{color:var(--up-muted);flex:none}
+#up-nav .up-title{color:var(--up-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#up-reset{margin:0 0 0 auto;flex:none;font:600 14px/1 var(--up-font);padding:8px 14px;border-radius:999px;cursor:pointer;
+border:1.5px solid var(--up-accent);background:transparent;color:var(--up-accent);transition:background .2s,color .2s}
+#up-reset:hover,#up-reset:focus-visible{background:var(--up-accent);color:var(--up-surface)}
+#up-reset:focus-visible,#up-nav a:focus-visible{outline:2px solid var(--up-accent);outline-offset:2px}
+@media (max-width:560px){#up-nav .up-home span{display:none}}
+@media print{#up-nav{display:none}html{padding-top:0}}
+</style>
+<script>
+document.getElementById('up-reset').addEventListener('click', function () {
+  if (typeof window.resetPage === 'function') window.resetPage();
+  else console.warn('本页没有定义 window.resetPage()，重置按钮无效');
+  window.scrollTo({ top: 0, behavior: 'auto' });
+});
+</script>
+<!-- up-shell:end -->
+<main>
+
+<section>
+  <h1>数轴上滚三角形</h1>
+  <p class="lead">第 29 题的三问都靠一句话：<b>滚一圈，每个顶点都前进一个周长</b>。剩下的就是正负数加减和找规律。</p>
+</section>
+
+<section class="card problem">
+  <span class="src">原题 · 第 29 题</span><br>
+  边长为 <span class="fr"><i>2</i><i>3</i></span> 的等边三角形 ABC 放在数轴上，点 B 与原点 O 重合，点 C 与表示 <span class="fr"><i>2</i><i>3</i></span> 的点重合。<br>
+  (1) 向右滚动一圈（BC 再次落在数轴上），点 C 表示的数是 ___；<br>
+  (2) 依次滚动 5 次，记录（右正左负，单位：圈）：+2，−1，+3，−8，+3。① 第几次滚动后点 C 离原点最远？最远距离是多少？② 结束时点 C 表示的数是 ___；<br>
+  (3) 第 1 次向右滚 1 圈到 C₁，第 2 次向左滚 2 圈到 C₂，第 3 次向右滚 3 圈到 C₃，第 4 次向左滚 4 圈到 C₄……点 Cₙ 表示的数是 ___（用含 n 的式子表示）。
+</section>
+
+<section class="card analogy">
+  <b>生活比喻：自行车轮</b><br>
+  轮子滚一圈，车往前走的路程就是轮子的周长。三角形也是“轮子”：滚一圈，三条边依次贴着数轴走过，前进 3 × <span class="fr"><i>2</i><i>3</i></span> = <b>2</b> 个单位。
+</section>
+
+<section>
+  <h2>(1) 滚一圈，前进一个周长</h2>
+  <div class="card" id="roll">
+    <div class="stage"><svg class="nl" viewBox="0 0 680 230" data-svg role="img" aria-label="三角形在数轴上翻滚"></svg></div>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>(2) 五次滚动：C 跳到哪、哪次最远</h2>
+  <p class="sec-lead">每圈 = 2 个单位。C 的位置 = <span class="fr"><i>2</i><i>3</i></span> + 2 × 累计圈数。</p>
+  <div class="card" id="five">
+    <div class="stage"><svg class="nl" viewBox="0 0 680 130" data-svg role="img" aria-label="点 C 在数轴上的位置"></svg></div>
+    <div class="tblwrap" style="margin-top:10px"><table class="tbl" data-tbl></table></div>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>(3) 左右交替越滚越多：找 Cₙ 的规律</h2>
+  <div class="card" id="pat">
+    <div class="stage"><svg class="nl" viewBox="0 0 680 170" data-svg role="img" aria-label="C1 到 C4 的位置"></svg></div>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>自己试试：任意 n 求 Cₙ</h2>
+  <div class="card calc" id="calc">
+    <label class="sl">n = <input type="number" min="1" max="60" data-n> <button type="button" class="btn" data-act="reset">↺ 重置本模块</button></label>
+    <p class="readout" data-read></p>
+  </div>
+</section>
+
+<section>
+  <h2>常见误区</h2>
+  <div class="mis">
+    <div class="card"><h3>误区 1：滚一圈只走 1 个单位，或只走一条边长</h3>
+      <span class="wrong-t">+2 圈 → C 移动 2</span>　一圈是一个周长 2，2 圈要移动 <span class="right-t">2 × 2 = 4</span>。</div>
+    <div class="card"><h3>误区 2：“离原点最远”只看最后一次，或只看哪个数最大</h3>
+      离原点的距离是<b>绝对值</b>。要把每一次后的位置都算出来，比较 |位置|：−22/3 离原点 22/3，比 14/3 远，但比 26/3 近。</div>
+    <div class="card"><h3>误区 3：规律题写成“Cₙ₊₁”这类记号</h3>
+      题目要的是<b>用 n 算出的数</b>。奇数次、偶数次方向不同，要分两种情况写，再用 n = 1、2 代进去验算。</div>
+  </div>
+</section>
+
+<section class="card sum">
+  <b>一句话总结：</b>滚一圈 = 前进一个<b>周长</b>；位置 = 起点 + 周长 × 累计圈数（右正左负）；离原点多远看<b>绝对值</b>；交替问题<b>两次一组</b>找规律，分奇偶写答案。
+</section>
+
+<section class="lq" id="lq" aria-label="练习">
+  <div class="lq-head"><h2>练习</h2><span class="lq-score"></span></div>
+  <p class="lq-sub">每题作答后马上看到解析；点「重做练习」清空重来。分数写成 a/b（如 2/3），负数用 -（如 -4/3）。</p>
+  <div class="lq-list"></div>
+  <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+</section>
+
+</main>
+
+<script>
+const resets = [];                                   // 每个模块的 reset()
+window.pageReset = () => resets.forEach(f => f());   // 练习组件会把它包进 window.resetPage
+const F = (a, b) => `<span class="fr"><i>${a}</i><i>${b}</i></span>`;   // 竖排分数
+/* 通用分步模块：render(step) 负责画图并返回说明文字 */
+function stepper(id, n, render, ms = 1800) {
+  const root = document.getElementById(id);
+  const cap = root.querySelector('.caption'), no = root.querySelector('.stepno');
+  const btn = a => root.querySelector(`[data-act="${a}"]`);
+  let step = 0, timer = null;
+  const draw = () => {
+    cap.innerHTML = render(step) || '';
+    no.textContent = `${step + 1} / ${n}`;
+    btn('prev').disabled = step === 0; btn('next').disabled = step === n - 1;
+    btn('play').textContent = timer ? '⏸ 暂停' : '▶ 播放';
+  };
+  const stop = () => { clearInterval(timer); timer = null; };
+  const go = d => { step = Math.max(0, Math.min(n - 1, step + d)); draw(); };
+  btn('prev').onclick = () => { stop(); go(-1); };
+  btn('next').onclick = () => { stop(); go(1); };
+  btn('play').onclick = () => {
+    if (timer) { stop(); draw(); return; }
+    if (step === n - 1) step = 0;
+    timer = setInterval(() => { go(1); if (step === n - 1) { stop(); draw(); } }, ms);
+    draw();
+  };
+  const reset = () => { stop(); step = 0; draw(); };
+  btn('reset').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+const NS = 'http://www.w3.org/2000/svg';
+const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent && parent.append(e); return e; };
+const txt = (parent, x, y, s, cls, anchor = 'middle') => { const t = el('text', { x, y, 'text-anchor': anchor, class: cls }, parent); t.textContent = s; return t; };
+// 三分之几的显示：n/3 → 文本
+const th = n => { const g = n % 3 === 0; const s = n < 0 ? '−' : ''; return g ? `${n / 3}`.replace('-', '−') : `${s}${Math.abs(n)}/3`; };
+const thH = n => n % 3 === 0 ? `${n / 3}`.replace('-', '−') : (n < 0 ? '−' : '') + F(Math.abs(n), 3);
+function axis(svg, lo, hi, x0, sc, y, labels) {
+  el('line', { x1: x0 + (lo - .3) * sc, y1: y, x2: x0 + (hi + .3) * sc, y2: y, class: 'axis' }, svg);
+  for (let k = Math.ceil(lo); k <= hi; k++) {
+    el('line', { x1: x0 + k * sc, y1: y - 6, x2: x0 + k * sc, y2: y + 6, class: 'tick' }, svg);
+    if (!labels || labels(k)) txt(svg, x0 + k * sc, y + 24, `${k}`.replace('-', '−'), 'tk');
+  }
+}
+
+/* ---------- 模块 1：真实翻滚 ---------- */
+{
+  const svg = document.querySelector('#roll [data-svg]');
+  const sc = 180, x0 = 60, y0 = 170, s = 2 / 3, h = Math.sqrt(3) / 3;
+  const X = u => x0 + u * sc, Y = v => y0 - v * sc;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // 顶点状态（数学坐标，v 向上）
+  const states = [{ A: [1 / 3, h], B: [0, 0], C: [s, 0] }];
+  const rot = ([x, y], [cx, cy], a) => { const c = Math.cos(a), si = Math.sin(a); return [cx + (x - cx) * c - (y - cy) * si, cy + (x - cx) * si + (y - cy) * c]; };
+  const pivotOf = st => Object.keys(st).filter(k => Math.abs(st[k][1]) < 1e-9).sort((a, b) => st[b][0] - st[a][0])[0];
+  for (let i = 0; i < 3; i++) {
+    const st = states[i], p = st[pivotOf(st)], n = {};
+    for (const k in st) n[k] = rot(st[k], p, -2 * Math.PI / 3);
+    states.push(n);
+  }
+  const landed = [['B', 0], ['C', s]];
+  const LAND = [null, ['A', 4 / 3], ['B', 2], ['C', 8 / 3]];
+  let raf = 0;
+  function scene(st, upto) {
+    svg.innerHTML = '';
+    axis(svg, 0, 3, x0, sc, y0);
+    [[2 / 3, '2/3'], [4 / 3, '4/3'], [8 / 3, '8/3']].forEach(([u, l]) => { el('line', { x1: X(u), y1: y0 - 4, x2: X(u), y2: y0 + 4, class: 'tick' }, svg); txt(svg, X(u), y0 + 42, l, 'tk'); });
+    const marks = landed.concat(LAND.slice(1, upto + 1));
+    marks.forEach(([k, u]) => { el('circle', { cx: X(u), cy: y0, r: 5, class: k === 'C' ? 'cdot' : 'land' }, svg); });
+    el('polygon', { points: ['A', 'B', 'C'].map(k => `${X(st[k][0])},${Y(st[k][1])}`).join(' '), class: 'tri' }, svg);
+    let cx = 0, cy = 0; for (const k in st) { cx += st[k][0] / 3; cy += st[k][1] / 3; }
+    for (const k in st) {
+      const [u, v] = st[k], dx = u - cx, dy = v - cy, d = Math.hypot(dx, dy);
+      txt(svg, X(u + dx / d * .09), Y(v + dy / d * .09) + 5, k, 'vl' + (k === 'C' ? ' clab' : ''));
+    }
+  }
+  const TXT = [
+    `B 在 0，C 在 ${F(2,3)}。边长 ${F(2,3)}，周长 = 3 × ${F(2,3)} = 2。`,
+    `以 C 为支点向右翻（转 120°），A 落在 ${F(4,3)}。`,
+    `再以 A 为支点翻，B 落在 2。`,
+    `再以 B 为支点翻，C 落在 ${F(8,3)}，BC 又回到数轴上——滚完一圈。`,
+    `C 从 ${F(2,3)} 到 ${F(8,3)}，正好前进 2 = 周长。<b>(1) 答案：${F(8,3)}</b>。向右滚 1 圈，每个点都 +2；向左滚 1 圈，都 −2。`,
+  ];
+  stepper('roll', TXT.length, i => {
+    cancelAnimationFrame(raf);
+    const k = Math.min(i, 3);
+    if (k >= 1 && !reduce) {
+      const from = states[k - 1], p = from[pivotOf(from)], t0 = performance.now();
+      const tick = now => {
+        const f = Math.min(1, (now - t0) / 1100), st = {};
+        for (const q in from) st[q] = rot(from[q], p, -2 * Math.PI / 3 * f);
+        scene(st, f < 1 ? k - 1 : k);
+        if (f < 1) raf = requestAnimationFrame(tick);
+      };
+      if (i <= 3) raf = requestAnimationFrame(tick); else scene(states[3], 3);
+    } else scene(states[k], k);
+    return TXT[i];
+  }, 2600);
+}
+
+/* ---------- 模块 2：五次滚动 ---------- */
+{
+  const root = document.getElementById('five');
+  const svg = root.querySelector('[data-svg]'), tbl = root.querySelector('[data-tbl]');
+  const sc = 32, x0 = 340, y0 = 60;
+  const REC = [2, -1, 3, -8, 3];
+  const pos = [2];                                       // 以 1/3 为单位：2/3 → 2
+  REC.forEach(r => pos.push(pos[pos.length - 1] + 6 * r));  // 每圈 2 = 6/3
+  // pos: 2, 14, 8, 26, -22, -4
+  axis(svg, -9, 9, x0, sc, y0, k => k % 3 === 0);
+  const ghost = el('g', {}, svg);
+  const g = el('g', { class: 'mv' }, svg);
+  el('circle', { cx: 0, cy: y0, r: 7, class: 'cdot' }, g);
+  const lab = txt(g, 0, y0 - 14, '', 'clab');
+  const head = '<tr><th>第几次</th><th>圈数</th><th>移动</th><th>C 的位置</th><th>离原点</th></tr>';
+  const TXT = [
+    `开始：C 在 ${F(2,3)}。每滚 1 圈移动 2，右正左负。`,
+    `第 1 次 +2 圈：移动 +4，C 到 ${F(2,3)} + 4 = ${F(14,3)}。`,
+    `第 2 次 −1 圈：移动 −2，C 到 ${F(14,3)} − 2 = ${F(8,3)}。`,
+    `第 3 次 +3 圈：移动 +6，C 到 ${F(8,3)} + 6 = ${F(26,3)}。`,
+    `第 4 次 −8 圈：移动 −16，C 到 ${F(26,3)} − 16 = −${F(22,3)}，跑到原点左边了。`,
+    `第 5 次 +3 圈：移动 +6，C 到 −${F(22,3)} + 6 = −${F(4,3)}。<b>② 答案：−${F(4,3)}</b>`,
+    `比较“离原点”那一列（绝对值）：${F(26,3)} 最大。<b>① 第 3 次后最远，最远 ${F(26,3)}</b>。快捷算法：累计圈数 2、1、4、−4、−1，绝对值最大是第 3 次的 4 圈 → ${F(2,3)} + 8 = ${F(26,3)}。`,
+  ];
+  stepper('five', TXT.length, i => {
+    const k = Math.min(i, 5), p = pos[k];
+    g.style.transform = `translateX(${x0 + p / 3 * sc}px)`;
+    lab.textContent = th(p);
+    ghost.innerHTML = '';
+    for (let j = 0; j < k; j++) el('circle', { cx: x0 + pos[j] / 3 * sc, cy: y0, r: 4, class: 'land', opacity: .5 }, ghost);
+    let rows = `<tr><td>开始</td><td>—</td><td>—</td><td>${thH(2)}</td><td>${thH(2)}</td></tr>`;
+    for (let j = 1; j <= 5; j++) {
+      const show = j <= k, best = i === 6 && j === 3;
+      rows += `<tr class="${show ? '' : 'dim'}"><td>${j}</td><td>${show ? (REC[j - 1] > 0 ? '+' : '−') + Math.abs(REC[j - 1]) : '?'}</td><td>${show ? (REC[j - 1] > 0 ? '+' : '−') + Math.abs(2 * REC[j - 1]) : '?'}</td><td>${show ? thH(pos[j]) : '?'}</td><td class="${best ? 'max' : ''}">${show ? thH(Math.abs(pos[j])) : '?'}</td></tr>`;
+    }
+    tbl.innerHTML = head + rows;
+    return TXT[i];
+  }, 2400);
+}
+
+/* ---------- 模块 3：找规律 ---------- */
+{
+  const svg = document.querySelector('#pat [data-svg]');
+  const sc = 40, x0 = 340, y0 = 120;
+  const C = [2]; for (let n = 1; n <= 4; n++) C.push(C[n - 1] + (n % 2 ? 1 : -1) * 6 * n);   // 2, 8, -4, 14, -10（单位 1/3）
+  const TXT = [
+    `起点：C 在 ${F(2,3)}。`,
+    `第 1 次向右 1 圈：+2，C₁ = ${F(8,3)}。`,
+    `第 2 次向左 2 圈：−4，C₂ = −${F(4,3)}。`,
+    `第 3 次向右 3 圈：+6，C₃ = ${F(14,3)}。`,
+    `第 4 次向左 4 圈：−8，C₄ = −${F(10,3)}。越跳越远，左右来回。`,
+    `两次一组：(+2) + (−4) = −2，(+6) + (−8) = −2……每组都是 −2。<br><b>n 为偶数</b>：共 n/2 组，Cₙ = ${F(2,3)} − 2 × n/2 = <b>${F(2,3)} − n</b>。`,
+    `<b>n 为奇数</b>：先到 Cₙ₋₁ = ${F(2,3)} − (n − 1)，再向右滚 n 圈 +2n：Cₙ = ${F(2,3)} + n + 1 = <b>n + ${F(5,3)}</b>。`,
+    `验算：n = 1 → 1 + ${F(5,3)} = ${F(8,3)} ✓；n = 3 → ${F(14,3)} ✓；n = 2 → ${F(2,3)} − 2 = −${F(4,3)} ✓；n = 4 → −${F(10,3)} ✓。`,
+  ];
+  stepper('pat', TXT.length, i => {
+    svg.innerHTML = '';
+    axis(svg, -6, 7, x0, sc, y0);
+    const k = Math.min(i, 4);
+    for (let n = 1; n <= k; n++) {
+      const a = x0 + C[n - 1] / 3 * sc, b = x0 + C[n] / 3 * sc, hgt = 14 + n * 18;
+      el('path', { d: `M${a} ${y0}Q${(a + b) / 2} ${y0 - hgt * 2} ${b} ${y0}`, class: 'arc' + (n % 2 ? '' : ' l') }, svg);
+      txt(svg, b, y0 + 44, `C${'₁₂₃₄'[n - 1]}`, 'clab');
+    }
+    for (let n = 0; n <= k; n++) el('circle', { cx: x0 + C[n] / 3 * sc, cy: y0, r: n === k ? 7 : 4, class: n === k ? 'cdot' : 'land' }, svg);
+    return TXT[i];
+  }, 2600);
+}
+
+/* ---------- 模块 4：任意 n ---------- */
+{
+  const root = document.getElementById('calc');
+  const inp = root.querySelector('[data-n]'), read = root.querySelector('[data-read]');
+  const INIT = 5;
+  const draw = () => {
+    let n = Math.max(1, Math.min(60, Math.round(+inp.value) || 1)); inp.value = n;
+    let sum = 0; const parts = [];
+    for (let k = 1; k <= n; k++) { const m = (k % 2 ? 1 : -1) * 2 * k; sum += m; if (n <= 10) parts.push((m > 0 ? '+ ' : '− ') + Math.abs(m)); }
+    const v = 2 + 3 * sum;   // 单位 1/3
+    const formula = n % 2 ? `n 是奇数：Cₙ = n + ${F(5,3)} = ${n} + ${F(5,3)}` : `n 是偶数：Cₙ = ${F(2,3)} − n = ${F(2,3)} − ${n}`;
+    read.innerHTML = `${formula} = <b>${thH(v)}</b>` + (n <= 10 ? `<br>逐次相加验算：${F(2,3)} ${parts.join(' ')} = ${thH(v)}` : '');
+  };
+  inp.addEventListener('input', draw);
+  const reset = () => { inp.value = INIT; draw(); };
+  root.querySelector('[data-act="reset"]').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+window.LQ_ITEMS = [
+  { type: '填空', q: '边长 2/3 的等边三角形在数轴上滚动一圈，前进几个单位长度？', ans: ['2'], placeholder: '填数字',
+    why: '滚一圈，三条边依次贴着数轴走过，前进一个周长：3 × 2/3 = 2（模块 1 第 5 步）。' },
+  { type: '填空', q: '原题 (2)②：滚完 +2，−1，+3，−8，+3 圈后，点 C 表示的数是？', ans: ['-4/3', '-1又1/3', '-1.333'], placeholder: '如 -4/3',
+    why: '累计圈数 2 − 1 + 3 − 8 + 3 = −1，移动 −1 × 2 = −2：2/3 − 2 = −4/3。' },
+  { type: '判断', q: '“离原点最远”就是看哪一次滚完后 C 表示的数最大。', opts: ['对', '错'], ans: 1,
+    why: '离原点的距离是绝对值。如果某次 C 在 −10，它比在 +9 时更远。本题恰好最大的 26/3 也是绝对值最大，但必须用绝对值去比。' },
+  { type: '选择', q: '原题 (3) 中 C₁₀ 表示的数是？', opts: ['−28/3', '35/3', '−10', '32/3'], ans: 0,
+    why: '10 是偶数：Cₙ = 2/3 − n = 2/3 − 10 = −28/3。' },
+  { type: '填空', q: '原题 (3) 中 C₇ 表示的数是？', ans: ['26/3', '8又2/3'], placeholder: '如 26/3',
+    why: '7 是奇数：Cₙ = n + 5/3 = 7 + 5/3 = 26/3。验算：C₆ = 2/3 − 6 = −16/3，再向右 7 圈 +14：−16/3 + 14 = 26/3 ✓。' },
+  { type: '迁移', q: '边长为 1 的正方形 ABCD 放在数轴上，A 在原点，B 在 1。向右滚动一圈后，点 B 表示的数是？', ans: ['5'], placeholder: '填数字',
+    why: '正方形的周长是 4，滚一圈前进 4：1 + 4 = 5。三角形、正方形、圆都一样：滚一圈 = 前进一个周长。' },
+  { type: '迁移', q: '直径为 1 的圆，圆上一点 P 与原点重合，向左滚动一周后 P 落在哪个数？', opts: ['−1', '−π', 'π', '−2π'], ans: 1,
+    why: '圆的周长 = π × 直径 = π，向左滚一周就移动 −π，P 落在 −π。' },
+  { type: '挑战', q: '原题三角形一直向右滚，依次落在数轴上的点是 2/3(C)、4/3(A)、2(B)、8/3(C)……哪个顶点会落在 2026 上？', opts: ['A', 'B', 'C', '都不会'], ans: 1,
+    why: '落点每次 +2/3，顶点按 C、A、B 循环。2026 = 3039 × 2/3：落在 k × 2/3 上的点，k 除以 3 余 1 是 C、余 2 是 A、整除是 B。3039 能被 3 整除，所以是 B。' },
+];
+</script>
+<script>
+/* ---------- 练习题（learn 通用组件） ----------
+   题目来自 window.LQ_ITEMS：{type, q, opts, ans: 选项下标, why} 或填空题 {type, q, ans: [可接受答案…], why}
+   定义 window.resetPage()（导航条「重置」按钮调用）：先调用页面自己的 window.pageReset()，再清空练习 */
+(() => {
+  const box = document.getElementById('lq');
+  const items = window.LQ_ITEMS || [];
+  const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let answered = 0, right = 0;
+
+  function update() {
+    const all = answered === items.length;
+    score.textContent = `已答 ${answered} / ${items.length} · 答对 ${right}` +
+      (all ? (right === items.length ? ' · 全对！' : ' · 看看解析，再重做一次') : '');
+  }
+
+  function render() {
+    answered = 0; right = 0; list.innerHTML = '';
+    items.forEach((it, i) => {
+      const el = document.createElement('div');
+      el.className = 'lq-item';
+      el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
+      const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
+      const judge = (ok, answer) => {
+        answered++; if (ok) right++;
+        el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
+        why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
+        update();
+      };
+      if (it.opts) {
+        a.classList.add('lq-opts');
+        it.opts.forEach((o, j) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'lq-opt'; b.innerHTML = o;
+          b.onclick = () => {
+            a.querySelectorAll('button').forEach(x => x.disabled = true);
+            a.children[it.ans].classList.add('lq-right');
+            if (j !== it.ans) b.classList.add('lq-wrong');
+            judge(j === it.ans, it.opts[it.ans]);
+          };
+          a.append(b);
+        });
+      } else {
+        a.classList.add('lq-fill');
+        a.innerHTML = `<input type="text" autocomplete="off" spellcheck="false" placeholder="${it.placeholder || '输入答案'}" aria-label="第 ${i + 1} 题答案"><button type="button" class="lq-opt">确定</button>`;
+        const inp = a.querySelector('input'), go = a.querySelector('button');
+        const submit = () => {
+          if (!inp.value.trim()) { inp.focus(); return; }
+          inp.disabled = go.disabled = true;
+          const ok = it.ans.some(x => norm(x) === norm(inp.value));
+          inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
+          judge(ok, it.ans[0]);
+        };
+        go.onclick = submit;
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      }
+      list.append(el);
+    });
+    update();
+  }
+
+  box.querySelector('.lq-redo').addEventListener('click', render);
+  // 导航条的「重置」按钮调用它：页面各模块 + 练习题一起恢复初始状态
+  window.resetPage = () => {
+    if (typeof window.pageReset === 'function') window.pageReset();
+    render();
+  };
+  render();
+})();
+</script>
+</body>
+</html>

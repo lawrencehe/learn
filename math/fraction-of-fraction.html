@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>分数的分数</title>
-<meta name="description" content="集装箱 20 吨货，服装占 5/12，服装里童装占 3/8：其它服装比童装多几分之几、占总货物几分之几、有多少吨？用方格图动画讲清“谁的几分之几”，单位“1”一换，算法就换。">
+<meta name="description" content="试卷第 28 题：集装箱 20 吨货，服装占 5/12，服装里童装占 3/8。看算式 20×5/12、5/12×3/8 怎么提问题，其它服装比童装多几分之几、占总货物几分之几、有多少吨？用方格图动画讲清“谁的几分之几”：数量×分率得数量，分率×分率还是分率。">
 <style>
 :root{
   --bg:var(--up-bg); --surface:var(--up-surface); --ink:var(--up-ink); --muted:var(--up-muted); --line:var(--up-line);
@@ -157,13 +157,15 @@ document.getElementById('up-reset').addEventListener('click', function () {
 </section>
 
 <section class="card problem">
-  <b>原题</b><br>
-  一个集装箱有 <b>20 吨</b>货物，货物总量的 <span class="c"><span class="fr"><span>5</span><span>12</span></span></span> 是服装；在服装类货物中，童装占 <span class="k"><span class="fr"><span>3</span><span>8</span></span></span>。
+  <b>原题 · 第 28 题</b><br>
+  一个集装箱内装有 <b>20 吨</b>货物，货物总量的 <span class="c"><span class="fr"><span>5</span><span>12</span></span></span> 是服装；在服装类货物中，童装又占了 <span class="k"><span class="fr"><span>3</span><span>8</span></span></span>。
   <ol>
-    <li>其它服装比童装多几分之几？</li>
-    <li>其它服装占总货物的几分之几？</li>
-    <li>其它服装共多少吨？</li>
+    <li>根据以上信息和下面的算式，提出相应的数学问题：<br>
+      ① 20 × <span class="fr"><span>5</span><span>12</span></span>，问题：<b>服装有多少吨？</b><br>
+      ② <span class="fr"><span>5</span><span>12</span></span> × <span class="fr"><span>3</span><span>8</span></span>，问题：<b>童装占货物总量的几分之几？</b>（= <span class="fr"><span>5</span><span>32</span></span>）</li>
+    <li>这个集装箱内其它服装比童装多几分之几？　<b>答案：<span class="fr"><span>2</span><span>3</span></span></b></li>
   </ol>
+  <p class="muted" style="margin-top:6px;font-size:.95rem">下面先用方格图看清三层关系，再专门练“看算式提问题”；“占总货物几分之几”“有多少吨”是同类拓展。</p>
 </section>
 
 <section class="card analogy">
@@ -198,6 +200,23 @@ document.getElementById('up-reset').addEventListener('click', function () {
 </section>
 
 <section>
+  <h2>看算式，说问题（第 28 题第 1 问）</h2>
+  <p class="muted">点一个算式：先认出每个数是“谁”，再看结果是<b>吨数</b>还是<b>分率</b>，问题就说出来了。</p>
+  <div class="card" id="ask">
+    <div class="tabs" data-tabs></div>
+    <div class="gwrap"><div class="grid" data-grid></div></div>
+    <div class="formula" data-parts></div>
+    <p class="caption"></p>
+    <div class="ctrl"><button type="button" class="btn" data-act="reset">↺ 重置本模块</button></div>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <b>两条规则</b><br>
+    · <b>数量 × 分率 = 数量</b>：算式里有 20（吨），结果是吨，问“有多少吨”。<br>
+    · <b>分率 × 分率 = 分率</b>：没有 20，结果是“几分之几”，问“占<b>第一个分率的单位“1”</b>的几分之几”。5/12 的单位“1”是货物总量，所以问“童装占货物总量的几分之几”。
+  </div>
+</section>
+
+<section>
   <h2>三问，三个单位“1”</h2>
   <p class="muted">点一问，图上虚线框出的就是这一问的单位“1”（拿谁来比）。</p>
   <div class="card" id="qs">
@@ -216,6 +235,12 @@ document.getElementById('up-reset').addEventListener('click', function () {
 <section>
   <h2>常见误区</h2>
   <div class="mis">
+    <div class="card">
+      <h3>误区 0：给“分率 × 分率”配上“多少吨”</h3>
+      <span class="wrong">5/12 × 3/8 → 童装占全部服装的多少吨？</span><br>
+      两处错：① 算式里没有 20，算不出吨数；② “童装占服装”就是题目给的 3/8，用不着算。
+      5/12 × 3/8 是童装占<b>货物总量</b>的分率：<span class="right">童装占货物总量的几分之几？ 5/12 × 3/8 = 5/32</span>
+    </div>
     <div class="card">
       <h3>误区 1：把 3/8 当成“占总货物的 3/8”</h3>
       <span class="wrong">童装 = 20 × 3/8 = 7.5 吨</span><br>
@@ -344,6 +369,43 @@ const kind = (x, y, a, c) => x >= a ? 'rest' : (y < c ? 'kid' : 'oth');
   reset();
 }
 
+/* ---------- 模块：看算式说问题 ---------- */
+{
+  const root = document.getElementById('ask');
+  const cap = root.querySelector('.caption'), parts = root.querySelector('[data-parts]'), tabsEl = root.querySelector('[data-tabs]');
+  const G = makeGrid(root.querySelector('[data-grid]')); G.build(12, 8);
+  const fx = (x, y) => kind(x, y, 5, 3) + (x === 5 ? ' cs' : '') + (y === 3 && x < 5 ? ' rs' : '');
+  const only = test => (x, y) => fx(x, y) + (test(kind(x, y, 5, 3)) ? ' mark' : ' dim');
+  const E = [
+    { lab: '20 × 5/12', p: ['20 → 货物总吨数（<b>数量</b>）', F(5, 12) + ' → 服装占货物总量（分率）'], r: '数量 × 分率 = <b>数量（吨）</b>',
+      q: '服装有多少吨？', a: '20 × ' + F(5, 12) + ' = ' + Fm(25, 3) + ' 吨', paint: only(k => k !== 'rest') },
+    { lab: '5/12 × 3/8', p: [F(5, 12) + ' → 服装占<b>货物总量</b>', F(3, 8) + ' → 童装占服装'], r: '分率 × 分率 = <b>分率</b>（没有 20，算不出吨）；单位“1”跟第一个分率走：货物总量',
+      q: '童装占货物总量的几分之几？', a: F(5, 12) + ' × ' + F(3, 8) + ' = ' + F(15, 96) + ' = ' + F(5, 32) + '（童装 15 格 / 整箱 96 格）', paint: only(k => k === 'kid') },
+    { lab: '20 × 5/12 × 3/8', p: ['20 → 总吨数', F(5, 12) + ' → 服装占总量', F(3, 8) + ' → 童装占服装'], r: '数量 × 分率 × 分率 = <b>数量（吨）</b>',
+      q: '童装有多少吨？', a: '20 × ' + F(5, 12) + ' × ' + F(3, 8) + ' = ' + Fm(25, 8) + ' 吨', paint: only(k => k === 'kid') },
+    { lab: '1 − 3/8', p: ['1 → 全部服装', F(3, 8) + ' → 童装占服装'], r: '单位“1”是服装，结果是<b>分率</b>',
+      q: '其它服装占服装的几分之几？', a: '1 − ' + F(3, 8) + ' = ' + F(5, 8), paint: only(k => k === 'oth') },
+    { lab: '5/12 × (1 − 3/8)', p: [F(5, 12) + ' → 服装占总量', '(1 − ' + F(3, 8) + ') → 其它服装占服装'], r: '分率 × 分率 = <b>分率</b>，单位“1”：货物总量',
+      q: '其它服装占货物总量的几分之几？', a: F(5, 12) + ' × ' + F(5, 8) + ' = ' + F(25, 96), paint: only(k => k === 'oth') },
+    { lab: '(5/8 − 3/8) ÷ 3/8', p: [F(5, 8) + ' − ' + F(3, 8) + ' → 其它服装比童装多出的部分', '÷ ' + F(3, 8) + ' → 拿童装当单位“1”去比'], r: '差 ÷ 被比的量 = <b>多几分之几</b>',
+      q: '其它服装比童装多几分之几？（第 2 问）', a: '(' + F(5, 8) + ' − ' + F(3, 8) + ') ÷ ' + F(3, 8) + ' = ' + F(2, 3) + '（多 10 格，童装 15 格）', paint: only(k => k !== 'rest') },
+  ];
+  const tabs = E.map((e, i) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn'; b.textContent = e.lab; b.onclick = () => { S.q = i; draw(); }; tabsEl.append(b); return b; });
+  const INIT = { q: 0 };
+  let S = { ...INIT };
+  const draw = () => {
+    const e = E[S.q];
+    tabs.forEach((b, i) => b.classList.toggle('on', i === S.q));
+    G.paint(e.paint);
+    parts.innerHTML = '① 每个数是谁：' + e.p.join('；') + '<br>② 结果是什么：' + e.r + '<br>③ 问题：<b>' + e.q + '</b>';
+    cap.innerHTML = '算一算：' + e.a;
+  };
+  const reset = () => { S = { ...INIT }; draw(); };
+  root.querySelector('[data-act="reset"]').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
 /* ---------- 模块 2：三问三个单位“1” ---------- */
 {
   const root = document.getElementById('qs');
@@ -416,6 +478,12 @@ const kind = (x, y, a, c) => x >= a ? 'rest' : (y < c ? 'kid' : 'oth');
 
 /* ---------- 练习题 ---------- */
 window.LQ_ITEMS = [
+  { type: '选择', q: '第 28 题：算式 5/12 × 3/8 可以提出什么问题？', opts: ['童装占全部服装的多少吨？', '童装占货物总量的几分之几？', '服装有多少吨？', '童装比服装少几分之几？'], ans: 1,
+    why: '没有 20，结果不是吨；5/12 的单位“1”是货物总量，所以是“童装占货物总量的几分之几”，= 5/32。“童装占服装”就是 3/8 本身，不用算。' },
+  { type: '选择', q: '算式 20 × 5/12 × 3/8 求的是？', opts: ['童装占货物总量的几分之几', '童装有多少吨', '服装有多少吨', '其它服装有多少吨'], ans: 1,
+    why: '有 20（吨）打头，数量 × 分率 × 分率，结果还是吨：先求服装吨数，再求其中的童装吨数 = 25/8 吨。' },
+  { type: '填空', q: '第 28 题第 (2) 问：其它服装比童装多几分之几？', ans: ['2/3'], placeholder: '如 2/3',
+    why: '其它服装占服装 5/8，童装占 3/8。多的 2/8 要和<b>童装</b>比：2/8 ÷ 3/8 = 2/3。答 5/3 是把“其它服装是童装的几倍”（5/8 ÷ 3/8）当成了“多几分之几”，还要减去 1。' },
   { type: '选择', q: '“在服装类货物中，童装占 3/8”，这里的单位“1”是？', opts: ['集装箱里的全部货物', '服装类货物', '童装'], ans: 1,
     why: '“在服装类货物中”已经点明：3/8 是服装的 3/8。对应动画第 3 步——只在服装那 5 列里取 3 行。' },
   { type: '判断', q: '其它服装比童装多：5/8 − 3/8 = 1/4。', opts: ['对', '错'], ans: 1,

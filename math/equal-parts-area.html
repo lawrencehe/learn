@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>平均分与分数面积图</title>
+<meta name="description" content="试卷第 25 题：把正方形平均分成四份有哪些“不同的方法”？形状不同为什么也算平均分？怎样在图里用阴影表示 3/5 × 1/2？用可点击涂色的正方形和面积图动画讲清“平均分 = 每份面积相等”和“几分之几的几分之几”。">
+<style>
+/* ---------- 页面变量：中性色映射到站点变量，只为内容另加语义色 ---------- */
+:root{
+  --bg:var(--up-bg); --surface:var(--up-surface); --ink:var(--up-ink); --muted:var(--up-muted); --line:var(--up-line);
+  --accent:var(--up-accent); --ok:var(--up-ok); --bad:var(--up-bad);
+  --c1:#1c7ed6; --c2:#7048e8;
+  --p1:#a5d8ff; --p2:#1971c2; --cut:#e8590c;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --c1:#74c0fc; --c2:#b197fc; --p1:#1e4a6e; --p2:#74c0fc; --cut:#ffa94d; }
+}
+:root[data-theme="dark"]{ --c1:#74c0fc; --c2:#b197fc; --p1:#1e4a6e; --p2:#74c0fc; --cut:#ffa94d; }
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 var(--up-font);padding:24px 16px 96px}
+main{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:48px}
+h1{font-size:clamp(1.7rem,4.5vw,2.4rem);line-height:1.25;margin:0 0 8px}
+h2{font-size:1.4rem;margin:0 0 8px}
+p{margin:0}
+.lead{color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--up-radius);box-shadow:var(--up-shadow);padding:16px}
+.analogy{border-left:4px solid var(--accent)}
+.btn{font:inherit;font-size:14px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--up-surface)}
+.btn:disabled{opacity:.45;cursor:default}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.stepno{font-family:var(--up-mono);color:var(--muted);font-size:.9rem;min-width:56px;text-align:center}
+
+/* ---------- 本组页面共用 ---------- */
+.stage{border-radius:10px;background:var(--up-surface-2);margin-top:12px;overflow:hidden}
+.stage svg{display:block;width:100%;height:auto}
+.caption{min-height:3.6em;margin-top:10px}
+.btn.on{border-color:var(--accent);background:var(--up-accent-soft);color:var(--accent);font-weight:700}
+.problem{border-left:4px solid var(--c1)}
+.problem .src{font-size:.85rem;color:var(--muted)}
+.warn{border-left:4px solid var(--bad)}
+.sum{border-left:4px solid var(--ok)}
+.mono,.k{font-family:var(--up-mono)}
+.fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;font-size:.82em;line-height:1.15;margin:0 2px;font-family:var(--up-mono)}
+.fr>i{font-style:normal;padding:0 2px}
+.fr>i:first-child{border-bottom:1.5px solid currentColor}
+.sec-lead{color:var(--muted);margin-bottom:12px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.recipe{counter-reset:r;list-style:none;padding:0;margin:8px 0 0;display:grid;gap:8px}
+.recipe li{counter-increment:r;padding-left:34px;position:relative}
+.recipe li::before{content:counter(r);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--up-surface);font:700 13px/24px var(--up-mono);text-align:center}
+.tbl{width:100%;border-collapse:collapse;font-size:.92rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+.tbl th{background:var(--up-surface-2)}
+.tblwrap{overflow-x:auto}
+.hl{background:var(--up-accent-soft);color:var(--accent);border-radius:4px;padding:0 3px;font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.readout{font-family:var(--up-mono);margin-top:10px;line-height:1.8}
+.ok-t{color:var(--ok);font-weight:700}.bad-t{color:var(--bad);font-weight:700}
+input[type=range]{width:min(100%,320px);accent-color:var(--accent)}
+label.sl{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px}
+svg text{font-family:var(--up-font);fill:var(--ink)}
+svg .mono{font-family:var(--up-mono)}
+.fade{transition:opacity .7s ease}
+@media (prefers-reduced-motion: reduce){.fade,svg *{transition:none!important}}
+.card p,.caption,.readout,.lq-q,.lq-why{overflow-wrap:anywhere}
+
+:root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:var(--ok);--lq-bad:var(--bad)}
+/* ---------- 练习题（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+.lq{display:grid;gap:12px;margin-bottom:56px}
+.lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+.lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
+.lq-sub{margin:0;color:var(--lq-muted);font-size:14px}
+.lq-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--lq-muted);font-variant-numeric:tabular-nums}
+.lq-list{display:grid;gap:10px}
+.lq-item{background:var(--lq-surface);border:1.5px solid var(--lq-line);border-radius:10px;padding:12px 16px;display:grid;gap:10px;min-width:0;color:var(--lq-ink);text-align:left}
+.lq-item.lq-is-ok{border-color:var(--lq-ok)}
+.lq-item.lq-is-bad{border-color:var(--lq-bad)}
+.lq-q{font-size:15px;font-weight:600;line-height:1.6}
+.lq-tag{display:inline-block;font-size:11px;font-weight:500;line-height:1.6;color:var(--lq-muted);border:1px solid var(--lq-line);border-radius:999px;padding:0 8px;margin-right:8px;vertical-align:1px}
+.lq-opts,.lq-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lq .lq-opt,.lq .lq-redo{font:inherit;font-size:14px;line-height:1.4;padding:6px 14px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);cursor:pointer;text-align:left;opacity:1}
+.lq .lq-opt:hover:not(:disabled),.lq .lq-redo:hover{border-color:var(--lq-accent)}
+.lq .lq-opt:disabled{cursor:default;opacity:1}
+.lq .lq-opt.lq-right{border-color:var(--lq-ok);color:var(--lq-ok);font-weight:700}
+.lq .lq-opt.lq-wrong{border-color:var(--lq-bad);color:var(--lq-bad);text-decoration:line-through}
+.lq-fill input{font:inherit;font-size:14px;padding:6px 10px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);width:min(100%,200px)}
+.lq-fill input.lq-right{border-color:var(--lq-ok)}
+.lq-fill input.lq-wrong{border-color:var(--lq-bad)}
+.lq-why{font-size:14px;line-height:1.65;color:var(--lq-muted)}
+.lq-why:empty{display:none}
+.lq-why .lq-ok{color:var(--lq-ok)}
+.lq-why .lq-bad{color:var(--lq-bad)}
+.sq{max-width:300px;margin:0 auto}
+.sq .pc{fill:var(--surface);stroke:var(--ink);stroke-width:2;cursor:pointer;transition:fill .6s}
+.sq .pc.on{fill:var(--p1)}
+.sq .pc:hover{stroke:var(--accent)}
+.sq .lab{font:700 13px var(--up-mono);fill:var(--muted);pointer-events:none}
+.tabs{display:flex;flex-wrap:wrap;gap:8px}
+.note{margin-top:10px;padding:10px 12px;border-radius:8px;background:var(--up-surface-2);min-height:3em}
+.grid-svg rect.cell{fill:var(--surface);stroke:var(--ink);stroke-width:1.5;transition:fill .7s}
+.grid-svg rect.cell.a{fill:var(--p1)}
+.grid-svg rect.cell.ab{fill:var(--p2)}
+.proof .rect{fill:var(--p1);stroke:var(--ink);stroke-width:2}
+.proof .tri{fill:var(--p2);stroke:var(--ink);stroke-width:2;fill-opacity:.85}
+.proof .ghost{fill:none;stroke:var(--line);stroke-width:2;stroke-dasharray:6 5}
+.proof .cutl{stroke:var(--cut);stroke-width:3;stroke-dasharray:7 5}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:4px;border:1px solid var(--line)}
+.mis{display:grid;gap:12px}
+.mis .card{border-left:4px solid var(--bad)}
+</style>
+</head>
+<body>
+<!-- up-shell:begin（由 scripts/shell.mjs 自动生成，勿手改） -->
+<nav id="up-nav" aria-label="网站导航">
+<a class="up-home" href="/" title="Up 学习站首页"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="up-nav-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c6ef5"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#up-nav-g)"/><path d="M12 52V42a2 2 0 0 1 2-2h10V32a2 2 0 0 1 2-2h10v-8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v30z" fill="#fff"/><circle cx="43" cy="13" r="5.5" fill="#ffa94d"/></svg><span>Up 学习站</span></a>
+<span class="up-sep" aria-hidden="true">›</span><a class="up-cat" href="/math">数学</a>
+<span class="up-sep" aria-hidden="true">›</span><span class="up-title">平均分与分数面积图</span>
+<button id="up-reset" type="button" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+</nav>
+<style>
+:root{--up-bg:#f5f6f8;--up-surface:#ffffff;--up-surface-2:#eef0f4;--up-ink:#1d2127;--up-muted:#626b78;--up-line:#dfe2e8;--up-ok:#2b8a3e;--up-bad:#d6336c;--up-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);--up-font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif;--up-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;--up-radius:12px;--up-accent:#d9480f;--up-accent-soft:#fff1e8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#ff8a50;--up-accent-soft:#3a2218;color-scheme:dark}}
+:root[data-theme="dark"]{--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#ff8a50;--up-accent-soft:#3a2218;color-scheme:dark}
+html{padding-top:52px;scroll-padding-top:64px}
+#up-nav{position:fixed;top:0;left:0;right:0;z-index:2147483000;height:52px;box-sizing:border-box;display:flex;align-items:center;gap:8px;
+padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));border-top:3px solid var(--up-accent);
+border-bottom:1px solid var(--up-line);background:color-mix(in srgb,var(--up-surface) 88%,transparent);
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:500 14px/1.2 var(--up-font);color:var(--up-ink);text-align:left}
+#up-nav a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none}
+#up-nav a:hover{color:var(--up-accent)}
+#up-nav svg{width:24px;height:24px;flex:none;display:block}
+#up-nav .up-home span{font-weight:700}
+#up-nav .up-cat{color:var(--up-accent);font-weight:600}
+#up-nav .up-sep{color:var(--up-muted);flex:none}
+#up-nav .up-title{color:var(--up-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#up-reset{margin:0 0 0 auto;flex:none;font:600 14px/1 var(--up-font);padding:8px 14px;border-radius:999px;cursor:pointer;
+border:1.5px solid var(--up-accent);background:transparent;color:var(--up-accent);transition:background .2s,color .2s}
+#up-reset:hover,#up-reset:focus-visible{background:var(--up-accent);color:var(--up-surface)}
+#up-reset:focus-visible,#up-nav a:focus-visible{outline:2px solid var(--up-accent);outline-offset:2px}
+@media (max-width:560px){#up-nav .up-home span{display:none}}
+@media print{#up-nav{display:none}html{padding-top:0}}
+</style>
+<script>
+document.getElementById('up-reset').addEventListener('click', function () {
+  if (typeof window.resetPage === 'function') window.resetPage();
+  else console.warn('本页没有定义 window.resetPage()，重置按钮无效');
+  window.scrollTo({ top: 0, behavior: 'auto' });
+});
+</script>
+<!-- up-shell:end -->
+<main>
+
+<section>
+  <h1>平均分与分数面积图</h1>
+  <p class="lead">第 25 题考两件事：①“平均分”到底要求什么；② 3/5 × 1/2 在图上是哪一块。</p>
+</section>
+
+<section class="card problem">
+  <span class="src">原题 · 第 25 题</span><br>
+  有一张正方形纸片。<br>
+  (1) 用<b>四种不同的方法</b>把它<b>平均分</b>成四份，并在图中把表示 <span class="fr"><i>3</i><i>4</i></span> 的部分打上阴影。<br>
+  (2) 在图 5（5 行 × 2 列的长方形）中用阴影部分表示 <span class="fr"><i>3</i><i>5</i></span> × <span class="fr"><i>1</i><i>2</i></span>。
+</section>
+
+<section class="card analogy">
+  <b>生活比喻：分蛋糕</b><br>
+  4 个人分一块方蛋糕，只要<b>每人分到的一样多</b>就公平——你拿长条，我拿三角，形状不同没关系。<br>
+  “平均分”只看<b>大小（面积）相等</b>，不看形状。
+</section>
+
+<section>
+  <h2>(1) 平均分成四份：点一点，涂出 3/4</h2>
+  <p class="sec-lead">选一种分法，点小块给它涂色（再点取消）。正方形看成 4×4 = 16 个小方格，每份要正好 4 格。</p>
+  <div class="card" id="cut">
+    <div class="tabs" data-tabs></div>
+    <div class="stage sq"><svg viewBox="0 0 240 240" data-svg role="img" aria-label="正方形分法"></svg></div>
+    <div class="note" data-note></div>
+    <p class="readout" data-read></p>
+    <div class="ctrl"><button type="button" class="btn" data-act="reset">↺ 重置本模块</button></div>
+  </div>
+</section>
+
+<section>
+  <h2>形状不同，为什么一样大？</h2>
+  <p class="sec-lead">分法 ⑤ 里有长方形，也有三角形。把三角形剪一刀、转一转，就能拼成和长方形一样大的正方形。</p>
+  <div class="card" id="proof">
+    <div class="stage"><svg class="proof" viewBox="0 0 300 250" data-svg role="img" aria-label="三角形剪拼成正方形"></svg></div>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>(2) 3/5 × 1/2：先取 3/5，再取它的一半</h2>
+  <div class="card" id="area">
+    <div class="stage"><svg class="grid-svg" viewBox="0 0 320 300" data-svg role="img" aria-label="分数乘法面积图"></svg></div>
+    <div class="legend"><span><i style="background:var(--p1)"></i>3/5（第一次取）</span><span><i style="background:var(--p2)"></i>3/5 的 1/2（答案）</span></div>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>自己试试：任意 a/b × c/d</h2>
+  <p class="sec-lead">横着分 b 行取 a 行，再在这几行里竖着分 d 列取 c 列。深色就是乘积。</p>
+  <div class="card" id="try">
+    <label class="sl">a = <b data-v="a"></b><input type="range" data-k="a" min="1" max="8"></label>
+    <label class="sl">b = <b data-v="b"></b><input type="range" data-k="b" min="2" max="8"></label>
+    <label class="sl">c = <b data-v="c"></b><input type="range" data-k="c" min="1" max="8"></label>
+    <label class="sl">d = <b data-v="d"></b><input type="range" data-k="d" min="2" max="8"></label>
+    <div class="stage" style="max-width:420px"><svg class="grid-svg" viewBox="0 0 320 300" data-svg role="img" aria-label="自选分数乘法面积图"></svg></div>
+    <p class="readout" data-read></p>
+    <div class="ctrl"><button type="button" class="btn" data-act="reset">↺ 重置本模块</button></div>
+  </div>
+</section>
+
+<section>
+  <h2>常见误区</h2>
+  <div class="mis">
+    <div class="card"><h3>误区 1：“不同的方法”只是转了个方向</h3>横着切 4 条和竖着切 4 条，转 90° 就重合，阅卷时常常只算<b>一种</b>。四种方法要真正不一样（条形、田字、对角线、风车、拼合……）。</div>
+    <div class="card"><h3>误区 2：分成 4 块 ≠ 平均分</h3>线随便画也能分出 4 块，但每块必须<b>面积相等</b>。看看分法里的两个 ✗ 例子。</div>
+    <div class="card"><h3>误区 3：3/5 × 1/2 涂成“3/5 和 1/2 两块”</h3>× 1/2 是取<b>3/5 这部分</b>的一半，不是整个图形的一半。答案是两次都取到的重叠部分：10 格里的 3 格 = 3/10。</div>
+  </div>
+</section>
+
+<section class="card sum">
+  <b>一句话总结：</b>平均分只看<b>面积相等</b>；“a/b × c/d”就是<b>先取 a/b，再在取出的部分里取 c/d</b>，阴影 = a×c 格，总共 b×d 格。
+</section>
+
+<section class="lq" id="lq" aria-label="练习">
+  <div class="lq-head"><h2>练习</h2><span class="lq-score"></span></div>
+  <p class="lq-sub">每题作答后马上看到解析；点「重做练习」清空重来。分数写成 a/b（如 2/3），负数用 -（如 -4/3）。</p>
+  <div class="lq-list"></div>
+  <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+</section>
+
+</main>
+
+<script>
+const resets = [];                                   // 每个模块的 reset()
+window.pageReset = () => resets.forEach(f => f());   // 练习组件会把它包进 window.resetPage
+const F = (a, b) => `<span class="fr"><i>${a}</i><i>${b}</i></span>`;   // 竖排分数
+/* 通用分步模块：render(step) 负责画图并返回说明文字 */
+function stepper(id, n, render, ms = 1800) {
+  const root = document.getElementById(id);
+  const cap = root.querySelector('.caption'), no = root.querySelector('.stepno');
+  const btn = a => root.querySelector(`[data-act="${a}"]`);
+  let step = 0, timer = null;
+  const draw = () => {
+    cap.innerHTML = render(step) || '';
+    no.textContent = `${step + 1} / ${n}`;
+    btn('prev').disabled = step === 0; btn('next').disabled = step === n - 1;
+    btn('play').textContent = timer ? '⏸ 暂停' : '▶ 播放';
+  };
+  const stop = () => { clearInterval(timer); timer = null; };
+  const go = d => { step = Math.max(0, Math.min(n - 1, step + d)); draw(); };
+  btn('prev').onclick = () => { stop(); go(-1); };
+  btn('next').onclick = () => { stop(); go(1); };
+  btn('play').onclick = () => {
+    if (timer) { stop(); draw(); return; }
+    if (step === n - 1) step = 0;
+    timer = setInterval(() => { go(1); if (step === n - 1) { stop(); draw(); } }, ms);
+    draw();
+  };
+  const reset = () => { stop(); step = 0; draw(); };
+  btn('reset').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+const NS = 'http://www.w3.org/2000/svg';
+const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent && parent.append(e); return e; };
+const shoelace = p => { let s = 0; for (let i = 0; i < p.length; i += 2) { const j = (i + 2) % p.length; s += p[i] * p[j + 1] - p[j] * p[i + 1]; } return Math.abs(s) / 2; };
+const R = (x, y, w, h) => [x, y, x + w, y, x + w, y + h, x, y + h];
+
+/* ---------- 模块 1：分法 + 涂色 ---------- */
+{
+  const root = document.getElementById('cut');
+  const svg = root.querySelector('[data-svg]'), tabs = root.querySelector('[data-tabs]');
+  const note = root.querySelector('[data-note]'), read = root.querySelector('[data-read]');
+  const M = [
+    { n: '① 条形', pieces: [R(0,0,4,1), R(0,1,4,1), R(0,2,4,1), R(0,3,4,1)], t: '横着切 3 刀，分成 4 条同样宽的长条。注意：竖着切 4 条是<b>同一种</b>方法（转 90° 就一样）。' },
+    { n: '② 田字格', pieces: [R(0,0,2,2), R(2,0,2,2), R(0,2,2,2), R(2,2,2,2)], t: '横竖各切一刀，过正中间，得到 4 个小正方形。' },
+    { n: '③ 对角线', pieces: [[0,0,4,0,2,2], [4,0,4,4,2,2], [4,4,0,4,2,2], [0,4,0,0,2,2]], t: '画两条对角线，得到 4 个一样大的三角形。' },
+    { n: '④ 风车', pieces: [[0,0,3,0,2,2,0,1], [3,0,4,0,4,3,2,2], [4,3,4,4,1,4,2,2], [1,4,0,4,0,1,2,2]], t: '任意两条<b>过中心、互相垂直</b>的线都能把正方形分成 4 块完全一样的四边形（转 90° 互相重合）。' },
+    { n: '⑤ 长方形 + 三角形', pieces: [R(0,0,2,2), R(2,0,2,2), [0,2,4,2,4,4], [0,2,4,4,0,4]], t: '上半部分竖切成两个长方形，下半部分沿斜线切成两个三角形。形状不同，但每块都是 4 格（下面的动画会证明）。' },
+    { n: '⑥ 竖条 + 方块', pieces: [R(0,0,1,4), R(1,0,1,4), R(2,0,2,2), R(2,2,2,2)], t: '左半边切成两根竖条，右半边切成两个小正方形。每块都是 4 格。' },
+    { n: '✗ 不等宽', bad: true, pieces: [R(0,0,0.8,4), R(0.8,0,1.2,4), R(2,0,1.2,4), R(3.2,0,0.8,4)], t: '也是 4 条，但宽窄不一，<b>不是平均分</b>，涂 3 块也不是 3/4。' },
+    { n: '✗ 对角线 + 中线', bad: true, pieces: [[0,0,2,0,2,2], [0,0,2,2,2,4,0,4], [2,0,4,0,4,4,2,2], [2,2,4,4,2,4]], t: '一条对角线加一条竖中线，也能分出 4 块，可大小是 2、6、6、2 格，<b>不是平均分</b>。' },
+  ];
+  const btns = M.map((m, i) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn'; b.textContent = m.n; b.onclick = () => { S.m = i; S.on = [0, 0, 0, 0]; draw(); }; tabs.append(b); return b; });
+  const INIT = () => ({ m: 0, on: [0, 0, 0, 0] });
+  let S = INIT();
+  const fmt = v => Number.isInteger(v) ? v : v.toFixed(1);
+  function draw() {
+    const m = M[S.m]; svg.innerHTML = '';
+    btns.forEach((b, i) => b.classList.toggle('on', i === S.m));
+    m.pieces.forEach((p, i) => {
+      const pts = []; for (let k = 0; k < p.length; k += 2) pts.push(`${20 + p[k] * 50},${20 + p[k + 1] * 50}`);
+      const poly = el('polygon', { points: pts.join(' '), class: 'pc' + (S.on[i] ? ' on' : '') }, svg);
+      poly.onclick = () => { S.on[i] ^= 1; draw(); };
+      let cx = 0, cy = 0; for (let k = 0; k < p.length; k += 2) { cx += p[k]; cy += p[k + 1]; } cx /= p.length / 2; cy /= p.length / 2;
+      const t = el('text', { x: 20 + cx * 50, y: 25 + cy * 50, 'text-anchor': 'middle', class: 'lab' }, svg); t.textContent = fmt(shoelace(p)) + '格';
+    });
+    note.innerHTML = m.t;
+    const areas = m.pieces.map(shoelace), eq = areas.every(a => Math.abs(a - 4) < 1e-9), k = S.on.reduce((a, b) => a + b, 0);
+    const got = m.pieces.reduce((s, p, i) => s + (S.on[i] ? shoelace(p) : 0), 0);
+    read.innerHTML = `每块：${areas.map(fmt).join('、')} 格 → ${eq ? '<span class="ok-t">平均分 ✓</span>' : '<span class="bad-t">不是平均分 ✗</span>'}<br>` +
+      `已涂 ${k} 块，共 ${fmt(got)} / 16 格` + (eq && k === 3 ? ' = <span class="ok-t">3/4 ✓</span>' : (eq && k ? `（要表示 3/4 需涂 3 块）` : (!eq && k === 3 ? '（涂了 3 块，可面积不是 3/4）' : '')));
+  }
+  const reset = () => { S = INIT(); draw(); };
+  root.querySelector('[data-act="reset"]').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+/* ---------- 模块 2：三角形剪拼成正方形 ---------- */
+{
+  const root = document.getElementById('proof');
+  const svg = root.querySelector('[data-svg]');
+  const U = 50, ox = 50, oy = 20;   // 坐标：只画正方形下半部分 + 左上长方形
+  const P = (x, y) => `${ox + x * U},${oy + y * U}`;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let raf = 0;
+  const rot = (x, y, a, cx, cy) => { const c = Math.cos(a), s = Math.sin(a); return [cx + (x - cx) * c - (y - cy) * s, cy + (x - cx) * s + (y - cy) * c]; };
+  function scene(step, ang) {
+    svg.innerHTML = '';
+    el('polygon', { points: [P(0,0), P(4,0), P(4,4), P(0,4)].join(' '), class: 'ghost' }, svg);
+    el('polygon', { points: [P(0,0), P(2,0), P(2,2), P(0,2)].join(' '), class: 'rect' }, svg);
+    const tA = el('text', { x: ox + U, y: oy + U + 5, 'text-anchor': 'middle', class: 'mono' }, svg); tA.textContent = '4 格';
+    if (step < 1) el('polygon', { points: [P(0,2), P(4,2), P(4,4)].join(' '), class: 'tri' }, svg);
+    else {
+      el('polygon', { points: [P(2,2), P(4,2), P(4,4), P(2,3)].join(' '), class: 'tri' }, svg);
+      const small = [[0,2], [2,2], [2,3]].map(([x, y]) => rot(x, y, ang, 2, 3));
+      el('polygon', { points: small.map(([x, y]) => P(x, y)).join(' '), class: 'tri' }, svg);
+      if (step === 1) el('line', { x1: ox + 2 * U, y1: oy + 2 * U - 8, x2: ox + 2 * U, y2: oy + 3 * U + 8, class: 'cutl' }, svg);
+    }
+    if (step >= 3) { const t = el('text', { x: ox + 3 * U, y: oy + 3 * U + 5, 'text-anchor': 'middle', class: 'mono' }, svg); t.textContent = '4 格'; }
+  }
+  const TXT = [
+    '上面浅色是分法 ⑤ 的长方形（2×2 = 4 格），下面深色是三角形。看着不一样大？',
+    '沿竖中线剪一刀：三角形分成一个小三角形和一个梯形。',
+    '把小三角形绕切口下端转半圈（180°），正好补到右下角。',
+    '拼成了一个 2×2 的正方形，也是 4 格。形状不同，面积相等，所以是平均分。',
+  ];
+  stepper('proof', TXT.length, i => {
+    cancelAnimationFrame(raf);
+    if (i < 2) scene(i, 0);
+    else if (i === 2 && !reduce) {
+      const t0 = performance.now();
+      const tick = now => { const k = Math.min(1, (now - t0) / 1200); scene(2, Math.PI * k); if (k < 1) raf = requestAnimationFrame(tick); };
+      raf = requestAnimationFrame(tick);
+    } else scene(i, Math.PI);
+    return TXT[i];
+  }, 2600);
+}
+
+/* ---------- 面积图绘制（模块 3、4 共用） ---------- */
+function drawArea(svg, a, b, c, d, phase) {   // phase: 0 只有整体 1 分行取 a 行 2 再分列取 c 列 3 计数
+  svg.innerHTML = '';
+  const W = 240, Hh = 260, x0 = 40, y0 = 20, cw = W / (phase >= 2 ? d : 1), rh = Hh / (phase >= 1 ? b : 1);
+  const rows = phase >= 1 ? b : 1, cols = phase >= 2 ? d : 1;
+  for (let r = 0; r < rows; r++) for (let q = 0; q < cols; q++) {
+    let cls = 'cell';
+    if (phase >= 1 && r < a) cls += ' a';
+    if (phase >= 2 && r < a && q < c) cls += ' ab';
+    el('rect', { x: x0 + q * cw, y: y0 + r * rh, width: cw, height: rh, class: cls }, svg);
+    if (phase >= 3 && r < a && q < c) { const t = el('text', { x: x0 + (q + .5) * cw, y: y0 + (r + .5) * rh + 5, 'text-anchor': 'middle', class: 'mono' }, svg); t.textContent = '✓'; }
+  }
+}
+/* ---------- 模块 3：3/5 × 1/2 分步 ---------- */
+{
+  const svg = document.querySelector('#area [data-svg]');
+  const TXT = [
+    '整个长方形看作单位“1”。',
+    `横着平均分成 5 行，涂其中 3 行：这就是 ${F(3,5)}。`,
+    `“× ${F(1,2)}”是取<b>刚才这 3/5</b> 的一半：竖着分成 2 列，只在涂过的 3 行里再取 1 列（深色）。`,
+    `数一数：整个图被分成 5 × 2 = 10 格，深色 3 × 1 = 3 格。所以 ${F(3,5)} × ${F(1,2)} = ${F(3,10)}。`,
+    `易错：别把整列（1/2）也涂上，也别只涂 2 格。图 5 里正确的阴影就是这 <b>3 个小格</b>。`,
+  ];
+  stepper('area', TXT.length, i => { drawArea(svg, 3, 5, 1, 2, Math.min(i, 3)); return TXT[i]; }, 2400);
+}
+/* ---------- 模块 4：自己试试 ---------- */
+{
+  const root = document.getElementById('try');
+  const svg = root.querySelector('[data-svg]'), read = root.querySelector('[data-read]');
+  const ins = [...root.querySelectorAll('input[data-k]')];
+  const INIT = { a: 3, b: 5, c: 1, d: 2 };
+  let S = { ...INIT };
+  const g = (x, y) => { while (y) [x, y] = [y, x % y]; return x; };
+  const draw = () => {
+    S.a = Math.min(S.a, S.b - 1); S.c = Math.min(S.c, S.d - 1);
+    ins.forEach(i => { i.value = S[i.dataset.k]; root.querySelector(`[data-v="${i.dataset.k}"]`).textContent = S[i.dataset.k]; });
+    drawArea(svg, S.a, S.b, S.c, S.d, 2);
+    const n = S.a * S.c, m = S.b * S.d, k = g(n, m);
+    read.innerHTML = `${F(S.a, S.b)} × ${F(S.c, S.d)} = 深色 ${n} 格 / 共 ${m} 格 = ${F(n, m)}` + (k > 1 ? ` = ${F(n / k, m / k)}` : '');
+  };
+  ins.forEach(i => i.addEventListener('input', () => { S[i.dataset.k] = +i.value; draw(); }));
+  const reset = () => { S = { ...INIT }; draw(); };
+  root.querySelector('[data-act="reset"]').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+window.LQ_ITEMS = [
+  { type: '判断', q: '把正方形分成 4 块形状不同的部分，就一定不是平均分。', opts: ['对', '错'], ans: 1,
+    why: '平均分只要求每份面积相等。分法 ⑤、⑥ 里形状不同，但每块都是 4 格。' },
+  { type: '选择', q: '题目要求“四种不同的方法”。下面哪一组最稳妥？', opts: ['横 4 条、竖 4 条、田字格、对角线', '横 4 条、田字格、对角线、长方形 + 三角形', '横 4 条、竖 4 条、斜 4 条（风车转一点）、田字格'], ans: 1,
+    why: '横条和竖条转 90° 就重合，常被判为同一种方法。第二组四种分法彼此确实不同。' },
+  { type: '选择', q: '一条对角线加一条竖中线，把正方形分成 4 块。这是平均分吗？', opts: ['是', '不是'], ans: 1,
+    why: '4 块面积是 2、6、6、2 格（看分法“✗ 对角线 + 中线”），大小不等，不是平均分。' },
+  { type: '选择', q: '在 5 行 × 2 列的图 5 中表示 3/5 × 1/2，应涂几个小格？', opts: ['3 格', '5 格', '6 格', '8 格'], ans: 0,
+    why: '先取 3 行（3/5，共 6 格），再取这 6 格的一半，就是 3 格 = 3/10。涂 8 格是把 3/5 和 1/2 都涂上了（误区 3）。' },
+  { type: '填空', q: '用面积图表示 2/3 × 3/4：整个图分成多少个小格？', ans: ['12'], placeholder: '填数字',
+    why: '横分 3 行、竖分 4 列，3 × 4 = 12 格。阴影 2 × 3 = 6 格，6/12 = 1/2。可在“自己试试”里调 a=2, b=3, c=3, d=4 验证。' },
+  { type: '计算', q: '3/5 × 1/2 的结果是？', ans: ['3/10', '0.3'], placeholder: '如 3/10',
+    why: '阴影 3 格 / 总共 10 格 = 3/10，也就是 分子乘分子、分母乘分母。' },
+  { type: '迁移', q: '一块菜地的 3/4 种蔬菜，蔬菜地的 2/3 种白菜。白菜地占整块菜地的几分之几？', ans: ['1/2', '6/12', '0.5'], placeholder: '如 1/2',
+    why: '先取 3/4，再取它的 2/3：3/4 × 2/3 = 6/12 = 1/2。和图 5、和第 28 题“童装占货物总量的几分之几”是同一个道理。' },
+];
+</script>
+<script>
+/* ---------- 练习题（learn 通用组件） ----------
+   题目来自 window.LQ_ITEMS：{type, q, opts, ans: 选项下标, why} 或填空题 {type, q, ans: [可接受答案…], why}
+   定义 window.resetPage()（导航条「重置」按钮调用）：先调用页面自己的 window.pageReset()，再清空练习 */
+(() => {
+  const box = document.getElementById('lq');
+  const items = window.LQ_ITEMS || [];
+  const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let answered = 0, right = 0;
+
+  function update() {
+    const all = answered === items.length;
+    score.textContent = `已答 ${answered} / ${items.length} · 答对 ${right}` +
+      (all ? (right === items.length ? ' · 全对！' : ' · 看看解析，再重做一次') : '');
+  }
+
+  function render() {
+    answered = 0; right = 0; list.innerHTML = '';
+    items.forEach((it, i) => {
+      const el = document.createElement('div');
+      el.className = 'lq-item';
+      el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
+      const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
+      const judge = (ok, answer) => {
+        answered++; if (ok) right++;
+        el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
+        why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
+        update();
+      };
+      if (it.opts) {
+        a.classList.add('lq-opts');
+        it.opts.forEach((o, j) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'lq-opt'; b.innerHTML = o;
+          b.onclick = () => {
+            a.querySelectorAll('button').forEach(x => x.disabled = true);
+            a.children[it.ans].classList.add('lq-right');
+            if (j !== it.ans) b.classList.add('lq-wrong');
+            judge(j === it.ans, it.opts[it.ans]);
+          };
+          a.append(b);
+        });
+      } else {
+        a.classList.add('lq-fill');
+        a.innerHTML = `<input type="text" autocomplete="off" spellcheck="false" placeholder="${it.placeholder || '输入答案'}" aria-label="第 ${i + 1} 题答案"><button type="button" class="lq-opt">确定</button>`;
+        const inp = a.querySelector('input'), go = a.querySelector('button');
+        const submit = () => {
+          if (!inp.value.trim()) { inp.focus(); return; }
+          inp.disabled = go.disabled = true;
+          const ok = it.ans.some(x => norm(x) === norm(inp.value));
+          inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
+          judge(ok, it.ans[0]);
+        };
+        go.onclick = submit;
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      }
+      list.append(el);
+    });
+    update();
+  }
+
+  box.querySelector('.lq-redo').addEventListener('click', render);
+  // 导航条的「重置」按钮调用它：页面各模块 + 练习题一起恢复初始状态
+  window.resetPage = () => {
+    if (typeof window.pageReset === 'function') window.pageReset();
+    render();
+  };
+  render();
+})();
+</script>
+</body>
+</html>
