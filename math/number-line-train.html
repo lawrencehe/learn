@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>数轴上的火车与年龄</title>
+<meta name="description" content="试卷第 21 题：|a−5|+(b−23)²=0 求 a、b；玩具火车在数轴上左右挪求车长和 C、D；“我若是你这么大”的年龄问题。用火车动画讲清不变的长度左右各挪一次，切出三段相等的距离。">
+<style>
+/* ---------- 页面变量：中性色映射到站点变量，只为内容另加语义色 ---------- */
+:root{
+  --bg:var(--up-bg); --surface:var(--up-surface); --ink:var(--up-ink); --muted:var(--up-muted); --line:var(--up-line);
+  --accent:var(--up-accent); --ok:var(--up-ok); --bad:var(--up-bad);
+  --c1:#1c7ed6; --c2:#7048e8; --c3:#0c8599;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --c1:#74c0fc; --c2:#b197fc; --c3:#66d9e8; }
+}
+:root[data-theme="dark"]{ --c1:#74c0fc; --c2:#b197fc; --c3:#66d9e8; }
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 var(--up-font);padding:24px 16px 96px}
+main{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:48px}
+h1{font-size:clamp(1.7rem,4.5vw,2.4rem);line-height:1.25;margin:0 0 8px}
+h2{font-size:1.4rem;margin:0 0 8px}
+p{margin:0}
+.lead{color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--up-radius);box-shadow:var(--up-shadow);padding:16px}
+.analogy{border-left:4px solid var(--accent)}
+.btn{font:inherit;font-size:14px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--up-surface)}
+.btn:disabled{opacity:.45;cursor:default}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.stepno{font-family:var(--up-mono);color:var(--muted);font-size:.9rem;min-width:56px;text-align:center}
+
+/* ---------- 本组页面共用 ---------- */
+.stage{border-radius:10px;background:var(--up-surface-2);margin-top:12px;overflow:hidden}
+.stage svg{display:block;width:100%;height:auto}
+.caption{min-height:3.6em;margin-top:10px}
+.btn.on{border-color:var(--accent);background:var(--up-accent-soft);color:var(--accent);font-weight:700}
+.problem{border-left:4px solid var(--c1)}
+.problem .src{font-size:.85rem;color:var(--muted)}
+.warn{border-left:4px solid var(--bad)}
+.sum{border-left:4px solid var(--ok)}
+.mono,.k{font-family:var(--up-mono)}
+.fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;font-size:.82em;line-height:1.15;margin:0 2px;font-family:var(--up-mono)}
+.fr>i{font-style:normal;padding:0 2px}
+.fr>i:first-child{border-bottom:1.5px solid currentColor}
+.sec-lead{color:var(--muted);margin-bottom:12px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.recipe{counter-reset:r;list-style:none;padding:0;margin:8px 0 0;display:grid;gap:8px}
+.recipe li{counter-increment:r;padding-left:34px;position:relative}
+.recipe li::before{content:counter(r);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--up-surface);font:700 13px/24px var(--up-mono);text-align:center}
+.tbl{width:100%;border-collapse:collapse;font-size:.92rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+.tbl th{background:var(--up-surface-2)}
+.tblwrap{overflow-x:auto}
+.hl{background:var(--up-accent-soft);color:var(--accent);border-radius:4px;padding:0 3px;font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.readout{font-family:var(--up-mono);margin-top:10px;line-height:1.8}
+.ok-t{color:var(--ok);font-weight:700}.bad-t{color:var(--bad);font-weight:700}
+input[type=range]{width:min(100%,320px);accent-color:var(--accent)}
+label.sl{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px}
+svg text{font-family:var(--up-font);fill:var(--ink)}
+svg .mono{font-family:var(--up-mono)}
+.fade{transition:opacity .7s ease}
+@media (prefers-reduced-motion: reduce){.fade,svg *{transition:none!important}}
+.card p,.caption,.readout,.lq-q,.lq-why{overflow-wrap:anywhere}
+
+
+.big{font-size:1.15rem;font-family:var(--up-mono)}
+:root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:var(--ok);--lq-bad:var(--bad)}
+/* ---------- 练习题（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+.lq{display:grid;gap:12px;margin-bottom:56px}
+.lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+.lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
+.lq-sub{margin:0;color:var(--lq-muted);font-size:14px}
+.lq-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--lq-muted);font-variant-numeric:tabular-nums}
+.lq-list{display:grid;gap:10px}
+.lq-item{background:var(--lq-surface);border:1.5px solid var(--lq-line);border-radius:10px;padding:12px 16px;display:grid;gap:10px;min-width:0;color:var(--lq-ink);text-align:left}
+.lq-item.lq-is-ok{border-color:var(--lq-ok)}
+.lq-item.lq-is-bad{border-color:var(--lq-bad)}
+.lq-q{font-size:15px;font-weight:600;line-height:1.6}
+.lq-tag{display:inline-block;font-size:11px;font-weight:500;line-height:1.6;color:var(--lq-muted);border:1px solid var(--lq-line);border-radius:999px;padding:0 8px;margin-right:8px;vertical-align:1px}
+.lq-opts,.lq-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lq .lq-opt,.lq .lq-redo{font:inherit;font-size:14px;line-height:1.4;padding:6px 14px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);cursor:pointer;text-align:left;opacity:1}
+.lq .lq-opt:hover:not(:disabled),.lq .lq-redo:hover{border-color:var(--lq-accent)}
+.lq .lq-opt:disabled{cursor:default;opacity:1}
+.lq .lq-opt.lq-right{border-color:var(--lq-ok);color:var(--lq-ok);font-weight:700}
+.lq .lq-opt.lq-wrong{border-color:var(--lq-bad);color:var(--lq-bad);text-decoration:line-through}
+.lq-fill input{font:inherit;font-size:14px;padding:6px 10px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);width:min(100%,200px)}
+.lq-fill input.lq-right{border-color:var(--lq-ok)}
+.lq-fill input.lq-wrong{border-color:var(--lq-bad)}
+.lq-why{font-size:14px;line-height:1.65;color:var(--lq-muted)}
+.lq-why:empty{display:none}
+.lq-why .lq-ok{color:var(--lq-ok)}
+.lq-why .lq-bad{color:var(--lq-bad)}
+</style>
+
+</head>
+<body>
+<!-- up-shell:begin（由 scripts/shell.mjs 自动生成，勿手改） -->
+<nav id="up-nav" aria-label="网站导航">
+<a class="up-home" href="/" title="Up 学习站首页"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="up-nav-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c6ef5"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#up-nav-g)"/><path d="M12 52V42a2 2 0 0 1 2-2h10V32a2 2 0 0 1 2-2h10v-8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v30z" fill="#fff"/><circle cx="43" cy="13" r="5.5" fill="#ffa94d"/></svg><span>Up 学习站</span></a>
+<span class="up-sep" aria-hidden="true">›</span><a class="up-cat" href="/math">数学</a>
+<span class="up-sep" aria-hidden="true">›</span><span class="up-title">数轴上的火车与年龄</span>
+<button id="up-reset" type="button" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+</nav>
+<style>
+:root{--up-bg:#f5f6f8;--up-surface:#ffffff;--up-surface-2:#eef0f4;--up-ink:#1d2127;--up-muted:#626b78;--up-line:#dfe2e8;--up-ok:#2b8a3e;--up-bad:#d6336c;--up-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);--up-font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif;--up-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;--up-radius:12px;--up-accent:#d9480f;--up-accent-soft:#fff1e8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#ff8a50;--up-accent-soft:#3a2218;color-scheme:dark}}
+:root[data-theme="dark"]{--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#ff8a50;--up-accent-soft:#3a2218;color-scheme:dark}
+html{padding-top:52px;scroll-padding-top:64px}
+#up-nav{position:fixed;top:0;left:0;right:0;z-index:2147483000;height:52px;box-sizing:border-box;display:flex;align-items:center;gap:8px;
+padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));border-top:3px solid var(--up-accent);
+border-bottom:1px solid var(--up-line);background:color-mix(in srgb,var(--up-surface) 88%,transparent);
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:500 14px/1.2 var(--up-font);color:var(--up-ink);text-align:left}
+#up-nav a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none}
+#up-nav a:hover{color:var(--up-accent)}
+#up-nav svg{width:24px;height:24px;flex:none;display:block}
+#up-nav .up-home span{font-weight:700}
+#up-nav .up-cat{color:var(--up-accent);font-weight:600}
+#up-nav .up-sep{color:var(--up-muted);flex:none}
+#up-nav .up-title{color:var(--up-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#up-reset{margin:0 0 0 auto;flex:none;font:600 14px/1 var(--up-font);padding:8px 14px;border-radius:999px;cursor:pointer;
+border:1.5px solid var(--up-accent);background:transparent;color:var(--up-accent);transition:background .2s,color .2s}
+#up-reset:hover,#up-reset:focus-visible{background:var(--up-accent);color:var(--up-surface)}
+#up-reset:focus-visible,#up-nav a:focus-visible{outline:2px solid var(--up-accent);outline-offset:2px}
+@media (max-width:560px){#up-nav .up-home span{display:none}}
+@media print{#up-nav{display:none}html{padding-top:0}}
+</style>
+<script>
+document.getElementById('up-reset').addEventListener('click', function () {
+  if (typeof window.resetPage === 'function') window.resetPage();
+  else console.warn('本页没有定义 window.resetPage()，重置按钮无效');
+  window.scrollTo({ top: 0, behavior: 'auto' });
+});
+</script>
+<!-- up-shell:end -->
+<main>
+<section>
+  <h1>数轴上的火车与年龄</h1>
+  <p class="lead">试卷第 21 题。三个小问其实是一个套路：<b>一段长度不变的“火车”在数轴上左右挪</b>，挪出来的几个点<b>间隔相等</b>。年龄差也是这样一列不变的火车。<br><a href="exam2-review.html" style="color:var(--accent)">← 本卷错题总览</a></p>
+</section>
+
+<section class="card problem">
+  <p class="src">原题（第 21 题）</p>
+  <p>在数轴上点 A 表示数 a，点 B 表示数 b，|a − 5| + (b − 23)² = 0。</p>
+  <p>（1）a = ＿，b = ＿；</p>
+  <p>（2）一个玩具火车放在数轴上，车头在点 C，车尾在点 D。将火车沿数轴左右水平移动，当车头移动到点 A 时，车尾恰好与点 C 重合；当车尾移动到点 B 时，车头正好与点 D 重合。① 玩具火车长＿个单位长度；② C 点表示的数是＿，D 点表示的数是＿；</p>
+  <p>（3）妙妙问爷爷：“您今年多少岁了？”爷爷说：“我若是你现在这么大，你还要 42 年才出生；你若是我现在这么大，我已经 120 岁，是老寿星了！”请借助数轴算一算，爷爷和妙妙现在分别多少岁？</p>
+  <p style="margin-top:6px"><b>答案：</b>（1）a = 5，b = 23；（2）① 6　② C = 11，D = 17；（3）爷爷 66 岁，妙妙 12 岁。</p>
+</section>
+
+<section class="card">
+  <h2>第（1）问：两个“不会是负数”的数加起来等于 0</h2>
+  <p>|a − 5| 是绝对值，<b>一定 ≥ 0</b>；(b − 23)² 是平方，<b>也一定 ≥ 0</b>。</p>
+  <p style="margin-top:6px">两个不会是负数的数加起来是 0，只可能<b>两个都是 0</b>（就像两个人各掏出不是负数的钱，加起来 0 元，那每人都掏了 0 元）。</p>
+  <p class="big" style="margin-top:8px">a − 5 = 0 → a = 5　　b − 23 = 0 → b = 23</p>
+</section>
+
+<section class="card analogy">
+  <b>生活比喻：挪一根尺子量距离。</b><br>
+  手里一根尺子（火车），往左挪一次、往右挪一次，每次正好挪一个尺子长。从 A 到 B 一共被分成了<b>三段一样长</b>的距离：A→C、C→D、D→B。
+</section>
+
+<section>
+  <h2>第（2）问：开火车</h2>
+  <div class="card" id="demoA">
+    <div class="stage"><svg viewBox="0 0 480 185" id="svA" role="img" aria-label="数轴上的玩具火车"></svg></div>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>第（3）问：年龄差就是一列火车</h2>
+  <div class="card" id="demoB">
+    <div class="stage"><svg viewBox="0 0 480 185" id="svB" role="img" aria-label="年龄问题数轴"></svg></div>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>方法：画出四个等距点</h2>
+  <ol class="recipe">
+    <li><b>找出那段不变的长度</b>：火车长、年龄差。</li>
+    <li><b>按题意左挪一次、右挪一次</b>，在数轴上标出四个点：左端、两个中间点、右端。</li>
+    <li>四个点<b>间隔相等</b>：一段 = (右端 − 左端) ÷ 3。</li>
+    <li>从左端加一段、两段，得到中间两点。“还要 42 年才出生”记作 <b>−42</b>。</li>
+  </ol>
+</section>
+
+<section>
+  <h2>自己试试：换一组爷爷的话</h2>
+  <div class="card" id="try">
+    <label class="sl">“我若是你这么大，你还要 <input type="range" id="tP" min="3" max="60" step="1"> <b class="mono" id="tPN"></b> 年才出生”</label>
+    <label class="sl">“你若是我这么大，我就 <input type="range" id="tQ" min="60" max="150" step="1"> <b class="mono" id="tQN"></b> 岁了”</label>
+    <div class="stage"><svg viewBox="0 0 480 120" id="svT" role="img" aria-label="自定义年龄数轴"></svg></div>
+    <p class="readout" id="tOut"></p>
+    <div class="ctrl"><button type="button" class="btn" id="tReset">↺ 重置本模块</button></div>
+  </div>
+</section>
+
+<section class="card warn">
+  <h2>常见误区</h2>
+  <p>① <b>以为 A 到 B 只有两段</b>：火车挪了两次，但 A、C、D、B 之间是<b>三段</b>（C→D 本身就是车长）。18 ÷ 2 = 9 是错的，18 ÷ 3 = 6 才对。</p>
+  <p style="margin-top:8px">② <b>“还要 42 年才出生”写成 +42</b>：还没出生，在数轴 0 的左边，是 <b>−42</b>。所以全长是 120 − (−42) = 162，不是 120 − 42。</p>
+  <p style="margin-top:8px">③ <b>忘了年龄差不变</b>：不管过去还是将来，爷爷永远比妙妙大同样多岁——这就是那列长度不变的火车。</p>
+</section>
+
+<section class="card sum">
+  <b>一句话总结：</b>一段长度不变的东西（火车、年龄差）左挪一次、右挪一次，就在数轴上切出三段相等的距离：一段 = 总距离 ÷ 3。
+</section>
+
+<section class="lq" id="lq" aria-label="练习">
+  <div class="lq-head"><h2>练习</h2><span class="lq-score"></span></div>
+  <p class="lq-sub">学完上面的内容，来检验一下。每题作答后马上看到解析；点「重做练习」清空重来。</p>
+  <div class="lq-list"></div>
+  <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+</section>
+</main>
+<script>
+const resets = [];                                   // 每个模块的 reset()
+window.pageReset = () => resets.forEach(f => f());   // 练习组件会把它包进 window.resetPage
+const F = (a, b) => `<span class="fr"><i>${a}</i><i>${b}</i></span>`;   // 竖排分数
+const NS = 'http://www.w3.org/2000/svg';
+const E = (t, at = {}, txt) => { const e = document.createElementNS(NS, t); for (const k in at) e.setAttribute(k, at[k]); if (txt != null) e.textContent = txt; return e; };
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* 通用分步模块：render(step) 负责画图并返回说明文字 */
+function stepper(id, n, render, ms = 2200) {
+  const root = document.getElementById(id);
+  const cap = root.querySelector('.caption'), no = root.querySelector('.stepno');
+  const btn = a => root.querySelector(`[data-act="${a}"]`);
+  let step = 0, timer = null;
+  const draw = () => {
+    cap.innerHTML = render(step) || '';
+    no.textContent = `${step + 1} / ${n}`;
+    btn('prev').disabled = step === 0; btn('next').disabled = step === n - 1;
+    btn('play').textContent = timer ? '⏸ 暂停' : '▶ 播放';
+  };
+  const stop = () => { clearInterval(timer); timer = null; };
+  const go = d => { step = Math.max(0, Math.min(n - 1, step + d)); draw(); };
+  btn('prev').onclick = () => { stop(); go(-1); };
+  btn('next').onclick = () => { stop(); go(1); };
+  btn('play').onclick = () => {
+    if (timer) { stop(); draw(); return; }
+    if (step === n - 1) step = 0;
+    timer = setInterval(() => { go(1); if (step === n - 1) { stop(); draw(); } }, ms);
+    draw();
+  };
+  const reset = () => { stop(); step = 0; draw(); };
+  btn('reset').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+/* 数轴：lo..hi 映射到 x0..x1 */
+function axis(svg, lo, hi, step, labelStep, y = 110) {
+  const x0 = 30, x1 = 455, P = v => x0 + (v - lo) / (hi - lo) * (x1 - x0);
+  svg.append(E('line', { x1: x0 - 10, y1: y, x2: x1 + 15, y2: y, stroke: 'var(--ink)', 'stroke-width': 1.5 }));
+  svg.append(E('path', { d: `M${x1 + 15} ${y - 5} L${x1 + 23} ${y} L${x1 + 15} ${y + 5}Z`, fill: 'var(--ink)' }));
+  for (let v = lo; v <= hi; v += step) {
+    const big = v % labelStep === 0;
+    svg.append(E('line', { x1: P(v), y1: y - (big ? 6 : 3), x2: P(v), y2: y + (big ? 6 : 3), stroke: 'var(--ink)' }));
+    if (big) svg.append(E('text', { x: P(v), y: y + 22, 'text-anchor': 'middle', 'font-size': 11, class: 'mono', style: 'fill:var(--muted)' }, v));
+  }
+  return P;
+}
+const pt = (svg, P, v, name, col = 'var(--ink)', y = 110) => {
+  svg.append(E('circle', { cx: P(v), cy: y, r: 5, fill: col }));
+  svg.append(E('text', { x: P(v), y: y + 40, 'text-anchor': 'middle', 'font-size': 13, 'font-weight': 700, style: `fill:${col}` }, name));
+};
+/* 火车：从 a（车头）到 b（车尾），y 为车底 */
+function train(svg, P, a, b, op = 1, label = '', y = 100) {
+  const g = E('g', { opacity: op });
+  g.append(E('rect', { x: P(a), y: y - 26, width: P(b) - P(a), height: 22, rx: 6, fill: 'var(--c1)' }));
+  g.append(E('text', { x: P(a) + 4, y: y - 10, 'font-size': 11, style: 'fill:var(--up-surface)', 'font-weight': 700 }, '头'));
+  g.append(E('text', { x: P(b) - 4, y: y - 10, 'text-anchor': 'end', 'font-size': 11, style: 'fill:var(--up-surface)', 'font-weight': 700 }, '尾'));
+  if (label) g.append(E('text', { x: (P(a) + P(b)) / 2, y: y - 32, 'text-anchor': 'middle', 'font-size': 12, class: 'mono', style: 'fill:var(--c1)' }, label));
+  svg.append(g);
+}
+const brace = (svg, P, a, b, t, y = 162) => {
+  svg.append(E('path', { d: `M${P(a)} ${y - 6} V${y} H${P(b)} V${y - 6}`, fill: 'none', stroke: 'var(--accent)', 'stroke-width': 2 }));
+  svg.append(E('text', { x: (P(a) + P(b)) / 2, y: y + 15, 'text-anchor': 'middle', 'font-size': 12, 'font-weight': 700, style: 'fill:var(--accent)' }, t));
+};
+
+{
+  const svg = document.getElementById('svA');
+  const base = () => { svg.innerHTML = ''; const P = axis(svg, 0, 25, 1, 5, 100); pt(svg, P, 5, 'A', 'var(--c2)', 100); pt(svg, P, 23, 'B', 'var(--c2)', 100); return P; };
+  const STEPS = [
+    () => { base(); return '第 1 步：由第（1）问，A 在 5，B 在 23。'; },
+    () => { const P = base(); train(svg, P, 11, 17, 1, '车长 = ?'); return '第 2 步：火车停在 C、D 之间：<b>车头在 C，车尾在 D</b>。车长 = C 到 D 的距离，还不知道。'; },
+    () => { const P = base(); train(svg, P, 11, 17, .25); train(svg, P, 5, 11, 1, '车长'); brace(svg, P, 5, 11, 'A→C = 车长', 162); return '第 3 步：向左开，车头到 A 时，<b>车尾正好在 C</b>。车头在 A、车尾在 C，所以 <b>A 到 C = 车长</b>。'; },
+    () => { const P = base(); train(svg, P, 11, 17, .25); train(svg, P, 17, 23, 1, '车长'); brace(svg, P, 17, 23, 'D→B = 车长', 162); return '第 4 步：向右开，车尾到 B 时，<b>车头正好在 D</b>。车头在 D、车尾在 B，所以 <b>D 到 B = 车长</b>。'; },
+    () => { const P = base(); train(svg, P, 5, 11, .35); train(svg, P, 11, 17, 1); train(svg, P, 17, 23, .35); brace(svg, P, 5, 11, '车长', 162); brace(svg, P, 11, 17, '车长', 162); brace(svg, P, 17, 23, '车长', 162);
+      return '第 5 步：A→C、C→D、D→B 是<b>三个车长</b>，拼起来正好是 A→B：3 × 车长 = 23 − 5 = 18，<b>车长 = 6</b>。'; },
+    () => { const P = base(); train(svg, P, 11, 17, 1, '6'); pt(svg, P, 11, 'C=11', 'var(--accent)', 100); pt(svg, P, 17, 'D=17', 'var(--accent)', 100);
+      return '第 6 步：C = 5 + 6 = <b>11</b>，D = 11 + 6 = <b>17</b>（也可以 23 − 6 = 17 验算）。'; },
+  ];
+  stepper('demoA', STEPS.length, i => STEPS[i](), 2600);
+}
+
+{
+  const svg = document.getElementById('svB');
+  const base = () => { svg.innerHTML = ''; return axis(svg, -50, 130, 10, 50, 100); };
+  const ppl = (P, m, g, op = 1) => { pt(svg, P, m, '妙妙', 'var(--c2)', 100); pt(svg, P, g, '爷爷', 'var(--c3)', 100); };
+  const STEPS = [
+    () => { const P = base(); ppl(P, 12, 66); train(svg, P, 12, 66, 1, '年龄差 = ?'); return '第 1 步：妙妙 x 岁，爷爷 y 岁，把“年龄差”看成一列火车：车头在妙妙，车尾在爷爷。<b>年龄差永远不变</b>，火车长度不变。'; },
+    () => { const P = base(); train(svg, P, 12, 66, .25); train(svg, P, -42, 12, 1, '年龄差'); pt(svg, P, -42, '−42', 'var(--accent)', 100); pt(svg, P, 12, '妙妙', 'var(--c2)', 100);
+      return '第 2 步：“我若是你现在这么大”= 爷爷倒回去到 x 岁：火车左挪，<b>车尾到妙妙</b>。那时妙妙“还要 42 年才出生”，车头在 <b>−42</b>。'; },
+    () => { const P = base(); train(svg, P, 12, 66, .25); train(svg, P, 66, 120, 1, '年龄差'); pt(svg, P, 120, '120', 'var(--accent)', 100); pt(svg, P, 66, '爷爷', 'var(--c3)', 100);
+      return '第 3 步：“你若是我现在这么大”= 妙妙长到 y 岁：火车右挪，<b>车头到爷爷</b>。那时爷爷 <b>120</b> 岁，车尾在 120。'; },
+    () => { const P = base(); train(svg, P, -42, 12, .35); train(svg, P, 12, 66, 1); train(svg, P, 66, 120, .35); brace(svg, P, -42, 12, '54', 162); brace(svg, P, 12, 66, '54', 162); brace(svg, P, 66, 120, '54', 162); pt(svg, P, -42, '−42', 'var(--accent)', 100); pt(svg, P, 120, '120', 'var(--accent)', 100);
+      return '第 4 步：−42、妙妙、爷爷、120 四点<b>间隔相等</b>，是三个年龄差：120 − (−42) = 162，162 ÷ 3 = <b>54</b>。'; },
+    () => { const P = base(); train(svg, P, 12, 66, 1, '54'); pt(svg, P, 12, '妙妙 12', 'var(--c2)', 100); pt(svg, P, 66, '爷爷 66', 'var(--c3)', 100);
+      return '第 5 步：妙妙 = −42 + 54 = <b>12 岁</b>，爷爷 = 12 + 54 = <b>66 岁</b>。验算：爷爷回到 12 岁时，妙妙 12 − 54 = −42（还要 42 年出生）✓；妙妙到 66 岁时，爷爷 66 + 54 = 120 ✓。'; },
+  ];
+  stepper('demoB', STEPS.length, i => STEPS[i](), 2800);
+}
+
+{
+  const INIT = { p: 42, q: 120 };
+  const svg = document.getElementById('svT'), pi = document.getElementById('tP'), qi = document.getElementById('tQ'), out = document.getElementById('tOut');
+  const draw = () => {
+    const p = +pi.value, q = +qi.value; document.getElementById('tPN').textContent = p; document.getElementById('tQN').textContent = q;
+    const d = (q + p) / 3, m = -p + d, g = q - d, ok = Number.isInteger(d);
+    svg.innerHTML = ''; const P = axis(svg, -60, 150, 10, 50, 60);
+    [[-p, '−' + p, 'var(--accent)'], [m, '妙妙', 'var(--c2)'], [g, '爷爷', 'var(--c3)'], [q, String(q), 'var(--accent)']].forEach(([v, n, c]) => pt(svg, P, v, n, c, 60));
+    train(svg, P, m, g, 1, '', 50);
+    const f = v => +v.toFixed(2);
+    out.innerHTML = `年龄差 = (${q} − (−${p})) ÷ 3 = ${q + p} ÷ 3 = <b>${f(d)}</b><br>妙妙 = −${p} + ${f(d)} = <b>${f(m)}</b> 岁，爷爷 = ${f(m)} + ${f(d)} = <b>${f(g)}</b> 岁` +
+      (ok ? '' : '<br><span class="bad-t">年龄差不是整数——出题时两个数加起来要是 3 的倍数。</span>') + (m <= 0 ? '<br><span class="bad-t">妙妙还没出生，这组数据不合理。</span>' : '');
+  };
+  pi.oninput = qi.oninput = draw;
+  const reset = () => { pi.value = INIT.p; qi.value = INIT.q; draw(); };
+  document.getElementById('tReset').onclick = reset;
+  resets.push(reset); reset();
+}
+
+window.LQ_ITEMS = [
+  { type: '填空', q: '已知 |x + 3| + (y − 7)² = 0，那么 x + y = ？', ans: ['4'], placeholder: '填数字', why: '两个都 ≥ 0，和为 0 → 都为 0：x + 3 = 0，x = −3；y − 7 = 0，y = 7。x + y = 4。注意 x 是 −3，不是 3。' },
+  { type: '判断', q: '如果 |a| + |b| = 0，那么 a 和 b 都等于 0。', opts: ['对', '错'], ans: 0, why: '|a| ≥ 0，|b| ≥ 0，两个非负数相加为 0，只能都是 0。' },
+  { type: '选择', q: '原题第（2）问，玩具火车有多长？下面哪个算式对？', opts: ['(23 − 5) ÷ 2 = 9', '(23 − 5) ÷ 3 = 6', '23 − 5 = 18'], ans: 1, why: 'A→C、C→D、D→B 是三个车长（看第（2）问动画第 5 步），所以除以 3。除以 2 是漏掉了中间车身 C→D 这一段。' },
+  { type: '填空', q: '换一组数：A 表示 −4，B 表示 20，火车按原题方式移动（车头到 A 时车尾在 C，车尾到 B 时车头在 D）。火车长多少？', ans: ['8'], placeholder: '填数字', why: '20 − (−4) = 24，24 ÷ 3 = 8。' },
+  { type: '填空', q: '接上题，C 点表示的数是多少？', ans: ['4'], placeholder: '填数字', why: 'C = A + 车长 = −4 + 8 = 4（D = 12）。' },
+  { type: '填空', q: '哥哥对弟弟说：“我像你这么大时，你才 3 岁；你像我这么大时，我就 18 岁了。”哥哥今年几岁？', ans: ['13'], placeholder: '填数字', why: '数轴上 3、弟弟、哥哥、18 四点等距：(18 − 3) ÷ 3 = 5 是年龄差。弟弟 3 + 5 = 8 岁，哥哥 8 + 5 = 13 岁。' },
+  { type: '填空', q: '爸爸对小明说：“我像你这么大时，你还要 6 年才出生；你像我这么大时，我就 69 岁了。”爸爸今年几岁？', ans: ['44'], placeholder: '填数字', why: '四点：−6、小明、爸爸、69。69 − (−6) = 75，75 ÷ 3 = 25。小明 −6 + 25 = 19 岁，爸爸 19 + 25 = 44 岁。“还要 6 年才出生”是 −6，不是 6。' },
+];
+
+</script>
+<script>
+/* ---------- 练习题（learn 通用组件） ----------
+   题目来自 window.LQ_ITEMS：{type, q, opts, ans: 选项下标, why} 或填空题 {type, q, ans: [可接受答案…], why}
+   定义 window.resetPage()（导航条「重置」按钮调用）：先调用页面自己的 window.pageReset()，再清空练习 */
+(() => {
+  const box = document.getElementById('lq');
+  const items = window.LQ_ITEMS || [];
+  const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let answered = 0, right = 0;
+
+  function update() {
+    const all = answered === items.length;
+    score.textContent = `已答 ${answered} / ${items.length} · 答对 ${right}` +
+      (all ? (right === items.length ? ' · 全对！' : ' · 看看解析，再重做一次') : '');
+  }
+
+  function render() {
+    answered = 0; right = 0; list.innerHTML = '';
+    items.forEach((it, i) => {
+      const el = document.createElement('div');
+      el.className = 'lq-item';
+      el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
+      const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
+      const judge = (ok, answer) => {
+        answered++; if (ok) right++;
+        el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
+        why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
+        update();
+      };
+      if (it.opts) {
+        a.classList.add('lq-opts');
+        it.opts.forEach((o, j) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'lq-opt'; b.innerHTML = o;
+          b.onclick = () => {
+            a.querySelectorAll('button').forEach(x => x.disabled = true);
+            a.children[it.ans].classList.add('lq-right');
+            if (j !== it.ans) b.classList.add('lq-wrong');
+            judge(j === it.ans, it.opts[it.ans]);
+          };
+          a.append(b);
+        });
+      } else {
+        a.classList.add('lq-fill');
+        a.innerHTML = `<input type="text" autocomplete="off" spellcheck="false" placeholder="${it.placeholder || '输入答案'}" aria-label="第 ${i + 1} 题答案"><button type="button" class="lq-opt">确定</button>`;
+        const inp = a.querySelector('input'), go = a.querySelector('button');
+        const submit = () => {
+          if (!inp.value.trim()) { inp.focus(); return; }
+          inp.disabled = go.disabled = true;
+          const ok = it.ans.some(x => norm(x) === norm(inp.value));
+          inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
+          judge(ok, it.ans[0]);
+        };
+        go.onclick = submit;
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      }
+      list.append(el);
+    });
+    update();
+  }
+
+  box.querySelector('.lq-redo').addEventListener('click', render);
+  // 导航条的「重置」按钮调用它：页面各模块 + 练习题一起恢复初始状态
+  window.resetPage = () => {
+    if (typeof window.pageReset === 'function') window.pageReset();
+    render();
+  };
+  render();
+})();
+</script>
+</body>
+</html>

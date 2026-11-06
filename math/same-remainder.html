@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>余数相同，求除数</title>
+<meta name="description" content="试卷第 14 题：226、192、141 除以同一个数余数相同，这个数是几？用三根绳子和同一把尺子的动画讲清为什么“两两相减，求公因数”，再排除让余数为 0 的情况，附滑块换除数自己试。">
+<style>
+/* ---------- 页面变量：中性色映射到站点变量，只为内容另加语义色 ---------- */
+:root{
+  --bg:var(--up-bg); --surface:var(--up-surface); --ink:var(--up-ink); --muted:var(--up-muted); --line:var(--up-line);
+  --accent:var(--up-accent); --ok:var(--up-ok); --bad:var(--up-bad);
+  --c1:#1c7ed6; --c2:#7048e8;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --c1:#74c0fc; --c2:#b197fc; }
+}
+:root[data-theme="dark"]{ --c1:#74c0fc; --c2:#b197fc; }
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 var(--up-font);padding:24px 16px 96px}
+main{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:48px}
+h1{font-size:clamp(1.7rem,4.5vw,2.4rem);line-height:1.25;margin:0 0 8px}
+h2{font-size:1.4rem;margin:0 0 8px}
+p{margin:0}
+.lead{color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--up-radius);box-shadow:var(--up-shadow);padding:16px}
+.analogy{border-left:4px solid var(--accent)}
+.btn{font:inherit;font-size:14px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--up-surface)}
+.btn:disabled{opacity:.45;cursor:default}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.stepno{font-family:var(--up-mono);color:var(--muted);font-size:.9rem;min-width:56px;text-align:center}
+
+/* ---------- 本组页面共用 ---------- */
+.stage{border-radius:10px;background:var(--up-surface-2);margin-top:12px;overflow:hidden}
+.stage svg{display:block;width:100%;height:auto}
+.caption{min-height:3.6em;margin-top:10px}
+.btn.on{border-color:var(--accent);background:var(--up-accent-soft);color:var(--accent);font-weight:700}
+.problem{border-left:4px solid var(--c1)}
+.problem .src{font-size:.85rem;color:var(--muted)}
+.warn{border-left:4px solid var(--bad)}
+.sum{border-left:4px solid var(--ok)}
+.mono,.k{font-family:var(--up-mono)}
+.fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;font-size:.82em;line-height:1.15;margin:0 2px;font-family:var(--up-mono)}
+.fr>i{font-style:normal;padding:0 2px}
+.fr>i:first-child{border-bottom:1.5px solid currentColor}
+.sec-lead{color:var(--muted);margin-bottom:12px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.recipe{counter-reset:r;list-style:none;padding:0;margin:8px 0 0;display:grid;gap:8px}
+.recipe li{counter-increment:r;padding-left:34px;position:relative}
+.recipe li::before{content:counter(r);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--up-surface);font:700 13px/24px var(--up-mono);text-align:center}
+.tbl{width:100%;border-collapse:collapse;font-size:.92rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+.tbl th{background:var(--up-surface-2)}
+.tblwrap{overflow-x:auto}
+.hl{background:var(--up-accent-soft);color:var(--accent);border-radius:4px;padding:0 3px;font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.readout{font-family:var(--up-mono);margin-top:10px;line-height:1.8}
+.ok-t{color:var(--ok);font-weight:700}.bad-t{color:var(--bad);font-weight:700}
+input[type=range]{width:min(100%,320px);accent-color:var(--accent)}
+label.sl{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px}
+svg text{font-family:var(--up-font);fill:var(--ink)}
+svg .mono{font-family:var(--up-mono)}
+.fade{transition:opacity .7s ease}
+@media (prefers-reduced-motion: reduce){.fade,svg *{transition:none!important}}
+.card p,.caption,.readout,.lq-q,.lq-why{overflow-wrap:anywhere}
+
+
+.big{font-size:1.15rem;font-family:var(--up-mono)}
+:root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:var(--ok);--lq-bad:var(--bad)}
+/* ---------- 练习题（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+.lq{display:grid;gap:12px;margin-bottom:56px}
+.lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+.lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
+.lq-sub{margin:0;color:var(--lq-muted);font-size:14px}
+.lq-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--lq-muted);font-variant-numeric:tabular-nums}
+.lq-list{display:grid;gap:10px}
+.lq-item{background:var(--lq-surface);border:1.5px solid var(--lq-line);border-radius:10px;padding:12px 16px;display:grid;gap:10px;min-width:0;color:var(--lq-ink);text-align:left}
+.lq-item.lq-is-ok{border-color:var(--lq-ok)}
+.lq-item.lq-is-bad{border-color:var(--lq-bad)}
+.lq-q{font-size:15px;font-weight:600;line-height:1.6}
+.lq-tag{display:inline-block;font-size:11px;font-weight:500;line-height:1.6;color:var(--lq-muted);border:1px solid var(--lq-line);border-radius:999px;padding:0 8px;margin-right:8px;vertical-align:1px}
+.lq-opts,.lq-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lq .lq-opt,.lq .lq-redo{font:inherit;font-size:14px;line-height:1.4;padding:6px 14px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);cursor:pointer;text-align:left;opacity:1}
+.lq .lq-opt:hover:not(:disabled),.lq .lq-redo:hover{border-color:var(--lq-accent)}
+.lq .lq-opt:disabled{cursor:default;opacity:1}
+.lq .lq-opt.lq-right{border-color:var(--lq-ok);color:var(--lq-ok);font-weight:700}
+.lq .lq-opt.lq-wrong{border-color:var(--lq-bad);color:var(--lq-bad);text-decoration:line-through}
+.lq-fill input{font:inherit;font-size:14px;padding:6px 10px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);width:min(100%,200px)}
+.lq-fill input.lq-right{border-color:var(--lq-ok)}
+.lq-fill input.lq-wrong{border-color:var(--lq-bad)}
+.lq-why{font-size:14px;line-height:1.65;color:var(--lq-muted)}
+.lq-why:empty{display:none}
+.lq-why .lq-ok{color:var(--lq-ok)}
+.lq-why .lq-bad{color:var(--lq-bad)}
+</style>
+
+</head>
+<body>
+<!-- up-shell:begin（由 scripts/shell.mjs 自动生成，勿手改） -->
+<nav id="up-nav" aria-label="网站导航">
+<a class="up-home" href="/" title="Up 学习站首页"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="up-nav-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c6ef5"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#up-nav-g)"/><path d="M12 52V42a2 2 0 0 1 2-2h10V32a2 2 0 0 1 2-2h10v-8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v30z" fill="#fff"/><circle cx="43" cy="13" r="5.5" fill="#ffa94d"/></svg><span>Up 学习站</span></a>
+<span class="up-sep" aria-hidden="true">›</span><a class="up-cat" href="/math">数学</a>
+<span class="up-sep" aria-hidden="true">›</span><span class="up-title">余数相同，求除数</span>
+<button id="up-reset" type="button" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+</nav>
+<style>
+:root{--up-bg:#f5f6f8;--up-surface:#ffffff;--up-surface-2:#eef0f4;--up-ink:#1d2127;--up-muted:#626b78;--up-line:#dfe2e8;--up-ok:#2b8a3e;--up-bad:#d6336c;--up-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);--up-font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif;--up-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;--up-radius:12px;--up-accent:#d9480f;--up-accent-soft:#fff1e8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#ff8a50;--up-accent-soft:#3a2218;color-scheme:dark}}
+:root[data-theme="dark"]{--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#ff8a50;--up-accent-soft:#3a2218;color-scheme:dark}
+html{padding-top:52px;scroll-padding-top:64px}
+#up-nav{position:fixed;top:0;left:0;right:0;z-index:2147483000;height:52px;box-sizing:border-box;display:flex;align-items:center;gap:8px;
+padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));border-top:3px solid var(--up-accent);
+border-bottom:1px solid var(--up-line);background:color-mix(in srgb,var(--up-surface) 88%,transparent);
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:500 14px/1.2 var(--up-font);color:var(--up-ink);text-align:left}
+#up-nav a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none}
+#up-nav a:hover{color:var(--up-accent)}
+#up-nav svg{width:24px;height:24px;flex:none;display:block}
+#up-nav .up-home span{font-weight:700}
+#up-nav .up-cat{color:var(--up-accent);font-weight:600}
+#up-nav .up-sep{color:var(--up-muted);flex:none}
+#up-nav .up-title{color:var(--up-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#up-reset{margin:0 0 0 auto;flex:none;font:600 14px/1 var(--up-font);padding:8px 14px;border-radius:999px;cursor:pointer;
+border:1.5px solid var(--up-accent);background:transparent;color:var(--up-accent);transition:background .2s,color .2s}
+#up-reset:hover,#up-reset:focus-visible{background:var(--up-accent);color:var(--up-surface)}
+#up-reset:focus-visible,#up-nav a:focus-visible{outline:2px solid var(--up-accent);outline-offset:2px}
+@media (max-width:560px){#up-nav .up-home span{display:none}}
+@media print{#up-nav{display:none}html{padding-top:0}}
+</style>
+<script>
+document.getElementById('up-reset').addEventListener('click', function () {
+  if (typeof window.resetPage === 'function') window.resetPage();
+  else console.warn('本页没有定义 window.resetPage()，重置按钮无效');
+  window.scrollTo({ top: 0, behavior: 'auto' });
+});
+</script>
+<!-- up-shell:end -->
+<main>
+<section>
+  <h1>余数相同，求除数</h1>
+  <p class="lead">试卷第 14 题。三个数除以同一个数，余数一样——这个除数藏在三个数的<b>差</b>里。秘诀只有一句：<b>两两相减，求公因数</b>。<br><a href="exam2-review.html" style="color:var(--accent)">← 本卷错题总览</a></p>
+</section>
+
+<section class="card problem">
+  <p class="src">原题（第 14 题）</p>
+  <p>用 226、192、141 分别除以同一个正整数，得到的余数都相同，且余数不为 0，这个正整数是＿＿。</p>
+  <p style="margin-top:6px"><b>答案：17</b>（余数都是 5）</p>
+</section>
+
+<section class="card analogy">
+  <b>生活比喻：三根绳子，用同一把尺子量。</b><br>
+  三根绳子长 226、192、141 厘米，用同一把尺子一段一段量，最后都剩下<b>一样长的小尾巴</b>。<br>
+  把尾巴剪掉，剩下的都是“整把尺子”的倍数——那两根绳子<b>相差的部分</b>，也一定正好是整把尺子的倍数。
+</section>
+
+<section>
+  <h2>一步一步看：为什么要相减</h2>
+  <div class="card" id="demo">
+    <div class="stage"><svg viewBox="0 0 480 220" id="sv1" role="img" aria-label="三根绳子与余数"></svg></div>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>方法：三步走</h2>
+  <ol class="recipe">
+    <li><b>两两相减</b>：226 − 192 = 34，192 − 141 = 51，226 − 141 = 85。</li>
+    <li><b>求这几个差的最大公因数</b>：17 | 34　51　85 → 2　3　5，最大公因数 17。除数一定是 17 的因数：1 或 17。</li>
+    <li><b>按题目条件筛选并验算</b>：除以 1 余数是 0，不合题意；除以 17 余数都是 5 ✓。答案 17。</li>
+  </ol>
+  <p style="margin-top:10px;color:var(--muted)">如果题目问“这个数<b>最大</b>是多少”，答案就是差的最大公因数；如果问“有几个”，就数它的因数（再去掉让余数为 0 的）。</p>
+</section>
+
+<section>
+  <h2>自己试试：换一把尺子</h2>
+  <div class="card" id="try">
+    <div class="chips"><span>三个数：</span><span class="chips" id="setChips"></span></div>
+    <label class="sl">除数（尺子长）m = <input type="range" id="tM" min="1" max="40" step="1"> <b class="mono" id="tMN"></b></label>
+    <div class="stage"><svg viewBox="0 0 480 220" id="sv2" role="img" aria-label="自定义除数"></svg></div>
+    <p class="readout" id="tOut"></p>
+    <div class="ctrl"><button type="button" class="btn" id="tReset">↺ 重置本模块</button></div>
+  </div>
+  <p class="sec-lead" style="margin-top:8px">拖动滑块找一找：只有哪些 m 能让三个“小尾巴”（紫色）一样长？</p>
+</section>
+
+<section class="card warn">
+  <h2>常见误区</h2>
+  <p>① <b>直接求 226、192、141 本身的公因数</b>：它们的最大公因数是 1，没有用。余数相同时，要找的是<b>差</b>的公因数。</p>
+  <p style="margin-top:8px">② <b>忘了验算和筛选</b>：差的公因数里，1 会让余数为 0；题目说“余数不为 0”，要排除。</p>
+  <p style="margin-top:8px">③ <b>和“余数不同”的题搞混</b>：如“一个数除 49 余 4、除 70 余 7”，那是<b>先减掉余数</b>（45、63），再求公因数，而且除数要比余数大。</p>
+</section>
+
+<section class="card sum">
+  <b>一句话总结：</b>余数相同 → 两两相减，差都能被除数整除 → 除数是差的公因数（最大就是最大公因数），最后按条件筛选、验算余数。
+</section>
+
+<section class="lq" id="lq" aria-label="练习">
+  <div class="lq-head"><h2>练习</h2><span class="lq-score"></span></div>
+  <p class="lq-sub">学完上面的内容，来检验一下。每题作答后马上看到解析；点「重做练习」清空重来。</p>
+  <div class="lq-list"></div>
+  <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+</section>
+</main>
+<script>
+const resets = [];                                   // 每个模块的 reset()
+window.pageReset = () => resets.forEach(f => f());   // 练习组件会把它包进 window.resetPage
+const F = (a, b) => `<span class="fr"><i>${a}</i><i>${b}</i></span>`;   // 竖排分数
+const NS = 'http://www.w3.org/2000/svg';
+const E = (t, at = {}, txt) => { const e = document.createElementNS(NS, t); for (const k in at) e.setAttribute(k, at[k]); if (txt != null) e.textContent = txt; return e; };
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* 通用分步模块：render(step) 负责画图并返回说明文字 */
+function stepper(id, n, render, ms = 2200) {
+  const root = document.getElementById(id);
+  const cap = root.querySelector('.caption'), no = root.querySelector('.stepno');
+  const btn = a => root.querySelector(`[data-act="${a}"]`);
+  let step = 0, timer = null;
+  const draw = () => {
+    cap.innerHTML = render(step) || '';
+    no.textContent = `${step + 1} / ${n}`;
+    btn('prev').disabled = step === 0; btn('next').disabled = step === n - 1;
+    btn('play').textContent = timer ? '⏸ 暂停' : '▶ 播放';
+  };
+  const stop = () => { clearInterval(timer); timer = null; };
+  const go = d => { step = Math.max(0, Math.min(n - 1, step + d)); draw(); };
+  btn('prev').onclick = () => { stop(); go(-1); };
+  btn('next').onclick = () => { stop(); go(1); };
+  btn('play').onclick = () => {
+    if (timer) { stop(); draw(); return; }
+    if (step === n - 1) step = 0;
+    timer = setInterval(() => { go(1); if (step === n - 1) { stop(); draw(); } }, ms);
+    draw();
+  };
+  const reset = () => { stop(); step = 0; draw(); };
+  btn('reset').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+const NUMS0 = [226, 192, 141];
+/* 画三根绳子。mode: 'plain' | 'tail'（尾巴在左，未分段）| 'seg'（尾巴在左，分段）| 'div'（从左分段，尾巴在右）
+   hi: [[绳子下标, 从, 到, 文字]] 高亮区间 */
+function ropes(svg, nums, m, mode, hi = []) {
+  svg.innerHTML = '';
+  const X0 = 64, K = 370 / Math.max(...nums), Y = [30, 95, 160], H = 26;
+  nums.forEach((N, i) => {
+    const y = Y[i], r = m ? N % m : 0;
+    svg.append(E('text', { x: X0 - 8, y: y + 18, 'text-anchor': 'end', 'font-size': 15, class: 'mono', 'font-weight': 700 }, N));
+    if (mode === 'plain') { svg.append(E('rect', { x: X0, y, width: N * K, height: H, rx: 5, fill: 'var(--c1)', opacity: .55 })); return; }
+    if (mode === 'tail') {
+      svg.append(E('rect', { x: X0, y, width: r * K, height: H, rx: 3, fill: 'var(--c2)' }));
+      svg.append(E('rect', { x: X0 + r * K, y, width: (N - r) * K, height: H, rx: 3, fill: 'var(--c1)', opacity: .35 }));
+      svg.append(E('text', { x: X0 + (r + (N - r) / 2) * K, y: y + 18, 'text-anchor': 'middle', 'font-size': 13 }, 'm 的整数倍'));
+      svg.append(E('text', { x: X0 + r * K / 2, y: y - 4, 'text-anchor': 'middle', 'font-size': 11, style: 'fill:var(--c2)' }, '余'));
+      return;
+    }
+    const tailLeft = mode === 'seg', q = Math.floor(N / m);
+    let x = X0;
+    if (tailLeft && r) { svg.append(E('rect', { x, y, width: r * K, height: H, fill: 'var(--c2)' })); x += r * K; }
+    for (let s = 0; s < q; s++) { svg.append(E('rect', { x: x + s * m * K, y, width: m * K, height: H, fill: 'var(--c1)', opacity: s % 2 ? .35 : .65 })); }
+    x += q * m * K;
+    if (!tailLeft && r) { svg.append(E('rect', { x, y, width: r * K, height: H, fill: 'var(--c2)' })); }
+    svg.append(E('text', { x: X0 + N * K + 6, y: y + 18, 'font-size': 13, class: 'mono', style: 'fill:var(--c2)' }, r ? `余${r}` : '余0'));
+  });
+  hi.forEach(([i, a, b, t]) => {
+    const y = Y[i];
+    svg.append(E('rect', { x: X0 + a * K, y: y - 3, width: (b - a) * K, height: H + 6, fill: 'none', stroke: 'var(--accent)', 'stroke-width': 3, rx: 4 }));
+    svg.append(E('text', { x: X0 + (a + b) / 2 * K, y: y + H + 17, 'text-anchor': 'middle', 'font-size': 13, 'font-weight': 700, style: 'fill:var(--accent)' }, t));
+  });
+}
+
+{
+  const svg = document.getElementById('sv1');
+  const STEPS = [
+    () => { ropes(svg, NUMS0, 17, 'plain'); return '第 1 步：三根绳子长 226、192、141。用同一把尺子（除数 m）量，题目说剩下的小尾巴（余数）一样长。'; },
+    () => { ropes(svg, NUMS0, 17, 'tail'); return '第 2 步：把一样长的尾巴（紫色）都挪到最左边。剩下的浅色部分，每一根都正好是 m 的整数倍。'; },
+    () => { ropes(svg, NUMS0, 17, 'tail', [[0, 192, 226, '多出 34']]); return '第 3 步：226 比 192 多出的那截（橙框）= 34。两个“m 的整数倍”相减，还是 m 的整数倍 → <b>m 能整除 34</b>。'; },
+    () => { ropes(svg, NUMS0, 17, 'tail', [[1, 141, 192, '多出 51'], [0, 141, 226, '多出 85']]); return '第 4 步：同理 192 − 141 = 51，226 − 141 = 85，m 也能整除 51 和 85。'; },
+    () => { ropes(svg, NUMS0, 17, 'tail'); return '第 5 步：m 要同时整除 34、51、85 → 求最大公因数：<span class="mono">17 | 34 51 85 → 2 3 5</span>，最大公因数是 <b>17</b>。所以 m 只可能是 17 的因数：<b>1 或 17</b>。'; },
+    () => { ropes(svg, NUMS0, 17, 'seg', [[0, 192, 226, '正好 2 段'], [1, 141, 192, '正好 3 段']]); return '第 6 步：试 m = 17：226 = 17×13 + <b>5</b>，192 = 17×11 + <b>5</b>，141 = 17×8 + <b>5</b>，余数都是 5 ✓。多出的 34、51 正好是 2 段、3 段尺子。'; },
+    () => { ropes(svg, NUMS0, 1, 'plain'); return '第 7 步：m = 1 时什么数都能整除，余数都是 0——题目说“余数不为 0”，排除。答案：<b>17</b>。'; },
+  ];
+  stepper('demo', STEPS.length, i => STEPS[i](), 2600);
+}
+
+{
+  const SETS = [[226, 192, 141], [41, 69, 97], [90, 132, 160]];
+  const INIT = { set: 0, m: 10 };
+  let S = { ...INIT };
+  const svg = document.getElementById('sv2'), mi = document.getElementById('tM'), out = document.getElementById('tOut'), box = document.getElementById('setChips');
+  SETS.forEach((s, i) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn'; b.textContent = s.join('、'); b.onclick = () => { S.set = i; draw(); }; box.append(b); });
+  const draw = () => {
+    S.m = +mi.value; document.getElementById('tMN').textContent = S.m;
+    [...box.children].forEach((b, i) => b.classList.toggle('on', i === S.set));
+    const N = SETS[S.set], m = S.m;
+    ropes(svg, N, m, 'div');
+    const rs = N.map(n => n % m), same = rs.every(r => r === rs[0]);
+    out.innerHTML = N.map(n => `${n} ÷ ${m} = ${Math.floor(n / m)} … ${n % m}`).join('<br>') + '<br>' +
+      (same ? (rs[0] ? `<span class="ok-t">余数都是 ${rs[0]}，而且不为 0 ✓</span>` : '<span class="bad-t">余数都是 0（相同，但题目要求不为 0）</span>') : '<span class="bad-t">余数不一样 ✗</span>') +
+      `<br><span style="color:var(--muted)">提示：差是 ${N[0] - N[1]}、${N[1] - N[2]}、${N[0] - N[2]}</span>`;
+  };
+  mi.oninput = draw;
+  const reset = () => { S = { ...INIT }; mi.value = INIT.m; draw(); };
+  document.getElementById('tReset').onclick = reset;
+  resets.push(reset); reset();
+}
+
+window.LQ_ITEMS = [
+  { type: '填空', q: '原题中，226、192、141 除以 17，余数都是多少？', ans: ['5'], placeholder: '填数字', why: '17 × 13 = 221，226 − 221 = 5；17 × 11 = 187，192 − 187 = 5；17 × 8 = 136，141 − 136 = 5。' },
+  { type: '判断', q: '“三个数除以同一个数余数相同”，就求这三个数本身的最大公因数。', opts: ['对', '错'], ans: 1, why: '要求的是<b>差</b>的公因数。226、192、141 本身的最大公因数是 1，没有意义。（见动画第 3、4 步：相差的部分才是整段尺子。）' },
+  { type: '选择', q: '用同一个数去除 41、69、97，余数都相同。这个数最大是多少？', opts: ['7', '14', '28', '56'], ans: 2, why: '差：69 − 41 = 28，97 − 69 = 28，97 − 41 = 56。最大公因数是 28。验算：41、69、97 除以 28 都余 13 ✓。（“自己试试”里选第二组，把 m 拖到 28 看看。）' },
+  { type: '填空', q: '一个正整数除 31、59、101，余数相同且不为 0，这个数最大是多少？', ans: ['14'], placeholder: '填数字', why: '差：28、42、70，最大公因数 14。验算：31 = 14×2 + 3，59 = 14×4 + 3，101 = 14×7 + 3，余数都是 3 ✓。' },
+  { type: '填空', q: '三根铁丝长 90、132、160 厘米，用同一个长度（整厘米）去剪，剪成若干整段后，三根都剩下一样长的小段（不为 0）。每段最长多少厘米？', ans: ['14'], placeholder: '填数字', why: '换个场景还是同一题型：差 42、28、70，最大公因数 14。验算：90、132、160 除以 14 都余 6 ✓。' },
+  { type: '选择', q: '用同一个数去除 41、69、97，余数相同且不为 0。满足条件的除数一共有几个？', opts: ['1 个', '3 个', '5 个', '6 个'], ans: 2, why: '除数必须是 28 的因数：1、2、4、7、14、28，共 6 个。除以 1 余数是 0，排除；其余 5 个（余数分别是 1、1、6、13、13）都符合。“最大”取 28，“有几个”就要一个个列。' },
+  { type: '填空', q: '迁移（余数不同）：一个数除 49 余 4，除 70 余 7。这个数是多少？', ans: ['9'], placeholder: '填数字', why: '先去掉余数：49 − 4 = 45，70 − 7 = 63，它们都能被这个数整除，45 和 63 的公因数有 1、3、9。除数必须<b>大于余数</b> 7，所以是 9。验算：49 = 9×5 + 4 ✓，70 = 9×7 + 7 ✓。' },
+];
+
+</script>
+<script>
+/* ---------- 练习题（learn 通用组件） ----------
+   题目来自 window.LQ_ITEMS：{type, q, opts, ans: 选项下标, why} 或填空题 {type, q, ans: [可接受答案…], why}
+   定义 window.resetPage()（导航条「重置」按钮调用）：先调用页面自己的 window.pageReset()，再清空练习 */
+(() => {
+  const box = document.getElementById('lq');
+  const items = window.LQ_ITEMS || [];
+  const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let answered = 0, right = 0;
+
+  function update() {
+    const all = answered === items.length;
+    score.textContent = `已答 ${answered} / ${items.length} · 答对 ${right}` +
+      (all ? (right === items.length ? ' · 全对！' : ' · 看看解析，再重做一次') : '');
+  }
+
+  function render() {
+    answered = 0; right = 0; list.innerHTML = '';
+    items.forEach((it, i) => {
+      const el = document.createElement('div');
+      el.className = 'lq-item';
+      el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
+      const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
+      const judge = (ok, answer) => {
+        answered++; if (ok) right++;
+        el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
+        why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
+        update();
+      };
+      if (it.opts) {
+        a.classList.add('lq-opts');
+        it.opts.forEach((o, j) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'lq-opt'; b.innerHTML = o;
+          b.onclick = () => {
+            a.querySelectorAll('button').forEach(x => x.disabled = true);
+            a.children[it.ans].classList.add('lq-right');
+            if (j !== it.ans) b.classList.add('lq-wrong');
+            judge(j === it.ans, it.opts[it.ans]);
+          };
+          a.append(b);
+        });
+      } else {
+        a.classList.add('lq-fill');
+        a.innerHTML = `<input type="text" autocomplete="off" spellcheck="false" placeholder="${it.placeholder || '输入答案'}" aria-label="第 ${i + 1} 题答案"><button type="button" class="lq-opt">确定</button>`;
+        const inp = a.querySelector('input'), go = a.querySelector('button');
+        const submit = () => {
+          if (!inp.value.trim()) { inp.focus(); return; }
+          inp.disabled = go.disabled = true;
+          const ok = it.ans.some(x => norm(x) === norm(inp.value));
+          inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
+          judge(ok, it.ans[0]);
+        };
+        go.onclick = submit;
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      }
+      list.append(el);
+    });
+    update();
+  }
+
+  box.querySelector('.lq-redo').addEventListener('click', render);
+  // 导航条的「重置」按钮调用它：页面各模块 + 练习题一起恢复初始状态
+  window.resetPage = () => {
+    if (typeof window.pageReset === 'function') window.pageReset();
+    render();
+  };
+  render();
+})();
+</script>
+</body>
+</html>
