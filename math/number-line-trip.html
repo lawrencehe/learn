@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>数轴行程：位置与路程</title>
+<meta name="description" content="试卷第 22 题：检修车 +10、−2、+3……用小车在数轴上来回跑的动画讲清“最后在哪”（直接相加）和“一共跑了多远、耗多少油”（绝对值相加），以及 |m| + |n| = 30 时哪个点能当原点。">
+<style>
+/* ---------- 页面变量：中性色映射到站点变量，只为内容另加语义色 ---------- */
+:root{
+  --bg:var(--up-bg); --surface:var(--up-surface); --ink:var(--up-ink); --muted:var(--up-muted); --line:var(--up-line);
+  --accent:var(--up-accent); --ok:var(--up-ok); --bad:var(--up-bad);
+  --c1:#1c7ed6; --c2:#7048e8; --east:#2b8a3e; --west:#c2255c;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --c1:#74c0fc; --c2:#b197fc; --east:#69db7c; --west:#f783ac; }
+}
+:root[data-theme="dark"]{ --c1:#74c0fc; --c2:#b197fc; --east:#69db7c; --west:#f783ac; }
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 var(--up-font);padding:24px 16px 96px}
+main{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:48px}
+h1{font-size:clamp(1.7rem,4.5vw,2.4rem);line-height:1.25;margin:0 0 8px}
+h2{font-size:1.4rem;margin:0 0 8px}
+p{margin:0}
+.lead{color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--up-radius);box-shadow:var(--up-shadow);padding:16px}
+.analogy{border-left:4px solid var(--accent)}
+.btn{font:inherit;font-size:14px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--up-surface)}
+.btn:disabled{opacity:.45;cursor:default}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.stepno{font-family:var(--up-mono);color:var(--muted);font-size:.9rem;min-width:56px;text-align:center}
+
+/* ---------- 本组页面共用 ---------- */
+.stage{border-radius:10px;background:var(--up-surface-2);margin-top:12px;overflow:hidden}
+.stage svg{display:block;width:100%;height:auto}
+.caption{min-height:3.6em;margin-top:10px}
+.btn.on{border-color:var(--accent);background:var(--up-accent-soft);color:var(--accent);font-weight:700}
+.problem{border-left:4px solid var(--c1)}
+.problem .src{font-size:.85rem;color:var(--muted)}
+.warn{border-left:4px solid var(--bad)}
+.sum{border-left:4px solid var(--ok)}
+.mono,.k{font-family:var(--up-mono)}
+.fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;font-size:.82em;line-height:1.15;margin:0 2px;font-family:var(--up-mono)}
+.fr>i{font-style:normal;padding:0 2px}
+.fr>i:first-child{border-bottom:1.5px solid currentColor}
+.sec-lead{color:var(--muted);margin-bottom:12px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.recipe{counter-reset:r;list-style:none;padding:0;margin:8px 0 0;display:grid;gap:8px}
+.recipe li{counter-increment:r;padding-left:34px;position:relative}
+.recipe li::before{content:counter(r);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--up-surface);font:700 13px/24px var(--up-mono);text-align:center}
+.tbl{width:100%;border-collapse:collapse;font-size:.92rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+.tbl th{background:var(--up-surface-2)}
+.tblwrap{overflow-x:auto}
+.hl{background:var(--up-accent-soft);color:var(--accent);border-radius:4px;padding:0 3px;font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.readout{font-family:var(--up-mono);margin-top:10px;line-height:1.8}
+.ok-t{color:var(--ok);font-weight:700}.bad-t{color:var(--bad);font-weight:700}
+input[type=range]{width:min(100%,320px);accent-color:var(--accent)}
+label.sl{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px}
+svg text{font-family:var(--up-font);fill:var(--ink)}
+svg .mono{font-family:var(--up-mono)}
+.fade{transition:opacity .7s ease}
+@media (prefers-reduced-motion: reduce){.fade,svg *{transition:none!important}}
+.card p,.caption,.readout,.lq-q,.lq-why{overflow-wrap:anywhere}
+
+.meters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:10px}
+.meter{background:var(--up-surface-2);border-radius:8px;padding:8px 10px}
+.meter b{display:block;font:700 1.2rem var(--up-mono)}
+.meter span{font-size:.85rem;color:var(--muted)}
+:root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:var(--ok);--lq-bad:var(--bad)}
+/* ---------- 练习题（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+.lq{display:grid;gap:12px;margin-bottom:56px}
+.lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+.lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
+.lq-sub{margin:0;color:var(--lq-muted);font-size:14px}
+.lq-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--lq-muted);font-variant-numeric:tabular-nums}
+.lq-list{display:grid;gap:10px}
+.lq-item{background:var(--lq-surface);border:1.5px solid var(--lq-line);border-radius:10px;padding:12px 16px;display:grid;gap:10px;min-width:0;color:var(--lq-ink);text-align:left}
+.lq-item.lq-is-ok{border-color:var(--lq-ok)}
+.lq-item.lq-is-bad{border-color:var(--lq-bad)}
+.lq-q{font-size:15px;font-weight:600;line-height:1.6}
+.lq-tag{display:inline-block;font-size:11px;font-weight:500;line-height:1.6;color:var(--lq-muted);border:1px solid var(--lq-line);border-radius:999px;padding:0 8px;margin-right:8px;vertical-align:1px}
+.lq-opts,.lq-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lq .lq-opt,.lq .lq-redo{font:inherit;font-size:14px;line-height:1.4;padding:6px 14px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);cursor:pointer;text-align:left;opacity:1}
+.lq .lq-opt:hover:not(:disabled),.lq .lq-redo:hover{border-color:var(--lq-accent)}
+.lq .lq-opt:disabled{cursor:default;opacity:1}
+.lq .lq-opt.lq-right{border-color:var(--lq-ok);color:var(--lq-ok);font-weight:700}
+.lq .lq-opt.lq-wrong{border-color:var(--lq-bad);color:var(--lq-bad);text-decoration:line-through}
+.lq-fill input{font:inherit;font-size:14px;padding:6px 10px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);width:min(100%,200px)}
+.lq-fill input.lq-right{border-color:var(--lq-ok)}
+.lq-fill input.lq-wrong{border-color:var(--lq-bad)}
+.lq-why{font-size:14px;line-height:1.65;color:var(--lq-muted)}
+.lq-why:empty{display:none}
+.lq-why .lq-ok{color:var(--lq-ok)}
+.lq-why .lq-bad{color:var(--lq-bad)}
+</style>
+</head>
+<body>
+<!-- up-shell:begin（由 scripts/shell.mjs 自动生成，勿手改） -->
+<nav id="up-nav" aria-label="网站导航">
+<a class="up-home" href="/" title="Up 学习站首页"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="up-nav-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c6ef5"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#up-nav-g)"/><path d="M12 52V42a2 2 0 0 1 2-2h10V32a2 2 0 0 1 2-2h10v-8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v30z" fill="#fff"/><circle cx="43" cy="13" r="5.5" fill="#ffa94d"/></svg><span>Up 学习站</span></a>
+<span class="up-sep" aria-hidden="true">›</span><a class="up-cat" href="/math">数学</a>
+<span class="up-sep" aria-hidden="true">›</span><span class="up-title">数轴行程：位置与路程</span>
+<button id="up-reset" type="button" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+</nav>
+<style>
+:root{--up-bg:#f5f6f8;--up-surface:#ffffff;--up-surface-2:#eef0f4;--up-ink:#1d2127;--up-muted:#626b78;--up-line:#dfe2e8;--up-ok:#2b8a3e;--up-bad:#d6336c;--up-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);--up-font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif;--up-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;--up-radius:12px;--up-accent:#d9480f;--up-accent-soft:#fff1e8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#ff8a50;--up-accent-soft:#3a2218;color-scheme:dark}}
+:root[data-theme="dark"]{--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#ff8a50;--up-accent-soft:#3a2218;color-scheme:dark}
+html{padding-top:52px;scroll-padding-top:64px}
+#up-nav{position:fixed;top:0;left:0;right:0;z-index:2147483000;height:52px;box-sizing:border-box;display:flex;align-items:center;gap:8px;
+padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));border-top:3px solid var(--up-accent);
+border-bottom:1px solid var(--up-line);background:color-mix(in srgb,var(--up-surface) 88%,transparent);
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:500 14px/1.2 var(--up-font);color:var(--up-ink);text-align:left}
+#up-nav a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none}
+#up-nav a:hover{color:var(--up-accent)}
+#up-nav svg{width:24px;height:24px;flex:none;display:block}
+#up-nav .up-home span{font-weight:700}
+#up-nav .up-cat{color:var(--up-accent);font-weight:600}
+#up-nav .up-sep{color:var(--up-muted);flex:none}
+#up-nav .up-title{color:var(--up-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#up-reset{margin:0 0 0 auto;flex:none;font:600 14px/1 var(--up-font);padding:8px 14px;border-radius:999px;cursor:pointer;
+border:1.5px solid var(--up-accent);background:transparent;color:var(--up-accent);transition:background .2s,color .2s}
+#up-reset:hover,#up-reset:focus-visible{background:var(--up-accent);color:var(--up-surface)}
+#up-reset:focus-visible,#up-nav a:focus-visible{outline:2px solid var(--up-accent);outline-offset:2px}
+@media (max-width:560px){#up-nav .up-home span{display:none}}
+@media print{#up-nav{display:none}html{padding-top:0}}
+</style>
+<script>
+document.getElementById('up-reset').addEventListener('click', function () {
+  if (typeof window.resetPage === 'function') window.resetPage();
+  else console.warn('本页没有定义 window.resetPage()，重置按钮无效');
+  window.scrollTo({ top: 0, behavior: 'auto' });
+});
+</script>
+<!-- up-shell:end -->
+<main>
+
+<section>
+  <h1>数轴行程：位置与路程</h1>
+  <p class="lead">试卷第 22 题。核心只有一句：<b>“在哪儿”看带符号的和，“跑了多远”看绝对值的和。</b>绝对值 |x| 就是点 x 到原点的距离（不管方向）。<br><a href="five-mistakes-review.html" style="color:var(--accent)">← 五道错题题型归纳（总览）</a></p>
+</section>
+
+<section class="card problem">
+  <p class="src">原题（第 22 题）</p>
+  <p>向东为正、向西为负，出发地为原点。A、B、C、D 是数轴上四个整数点，AB = BC = CD = 10（千米）。点 M 在 A 与 B 之间，点 N 在 C 与 D 之间，分别对应数 m、n，且 |m| + |n| = 30。</p>
+  <p style="margin-top:6px">(1) A、B、C、D 中，可能是原点（出发地）的是？　<b>答：A 或 D。</b><br>
+  (2) 行走记录（千米）：+10, −2, +3, −1, +9, −3, −2, +11, +3, −4, +6。收工时离出发地多远？在东还是西？　<b>答：东边 30 千米。</b><br>
+  (3) 以 A 为出发点，油箱 40 升，B 是加油站，每千米耗油 0.5 升，收工后立即赶往 B 加油，能在油耗尽前赶到吗？　<b>答：能（共用 37 升，还剩 3 升）。</b></p>
+</section>
+
+<section class="card analogy">
+  <b>生活比喻：手环计步 vs 地图定位。</b><br>
+  你在操场上来回跑：<b>手环</b>记你一共跑了多少米，往回跑也照样加——这是<b>路程</b>，耗油跟着它走。<b>地图</b>只告诉你现在离起点多远、在哪边，来回会抵消——这是<b>位置</b>。
+</section>
+
+<section>
+  <h2>一步一步跟着检修车跑（第 2、3 问）</h2>
+  <p class="sec-lead">以 A 为出发点（原点 0），B 在 10，C 在 20，D 在 30。</p>
+  <div class="card" id="demo">
+    <div class="stage"><svg viewBox="0 0 460 250" id="trip" role="img" aria-label="检修车在数轴上的行程"></svg></div>
+    <div class="meters">
+      <div class="meter"><span>位置（地图）</span><b id="mPos"></b></div>
+      <div class="meter"><span>总路程（手环）</span><b id="mDist"></b></div>
+      <div class="meter"><span>剩余油量</span><b id="mFuel"></b></div>
+    </div>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>第 1 问：哪个点能当原点？自己试试</h2>
+  <p class="sec-lead">选一个点当原点，再拖动 M、N（M 只能在 A、B 之间，N 只能在 C、D 之间），看 |m| + |n| 能不能等于 30。</p>
+  <div class="card" id="org">
+    <div class="chips" id="oChips"></div>
+    <div class="stage"><svg viewBox="0 0 460 120" id="orgSvg" role="img" aria-label="选择原点"></svg></div>
+    <label class="sl">M 离 A <input type="range" id="uM" min="0.5" max="9.5" step="0.5"> <b class="mono" id="uMN"></b></label>
+    <label class="sl">N 离 C <input type="range" id="vN" min="0.5" max="9.5" step="0.5"> <b class="mono" id="vNN"></b></label>
+    <p class="readout" id="oOut"></p>
+    <div class="ctrl"><button type="button" class="btn" id="oReset">↺ 重置本模块</button></div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>第 1 问的道理</h2>
+  <p>|m| + |n| = M 到原点的距离 + N 到原点的距离。</p>
+  <div class="tblwrap" style="margin-top:8px"><table class="tbl">
+    <tr><th>原点</th><th>|m| + |n| 的范围</th><th>能等于 30？</th></tr>
+    <tr><td>A</td><td>|m| 在 0~10，|n| 在 20~30 → 和在 20~40 之间</td><td class="ok-t">能（如 m = 5，n = 25）</td></tr>
+    <tr><td>B</td><td>|m| 在 0~10，|n| 在 10~20 → 和<b>小于</b> 30</td><td class="bad-t">不能</td></tr>
+    <tr><td>C</td><td>|m| 在 10~20，|n| 在 0~10 → 和<b>小于</b> 30</td><td class="bad-t">不能</td></tr>
+    <tr><td>D</td><td>|m| 在 20~30，|n| 在 0~10 → 和在 20~40 之间</td><td class="ok-t">能（如 m = −25，n = −5）</td></tr>
+  </table></div>
+  <p style="margin-top:8px;color:var(--muted)">原点在 B 或 C（中间）时，M、N 离原点都“很近”，加起来凑不够 30；原点在两头才够。</p>
+</section>
+
+<section class="card warn">
+  <h2>常见误区</h2>
+  <p>① <b>算位置时把负数也当正数加</b>：位置 = 10 − 2 + 3 − 1 + … = 30，要带着符号加。</p>
+  <p style="margin-top:8px">② <b>算耗油时用位置 30</b>：油是跑一步耗一步的，要用路程 = 10 + 2 + 3 + 1 + … = 54。</p>
+  <p style="margin-top:8px">③ <b>忘了“赶往 B”这一段</b>：收工在 30，B 在 10，还要跑 |30 − 10| = 20 千米。总共 54 + 20 = 74 千米，耗油 37 升。</p>
+  <p style="margin-top:8px">④ <b>第 1 问只找一个</b>：A、D 都可以，要逐个点检验。</p>
+</section>
+
+<section class="card sum">
+  <b>一句话总结：</b>位置 = 带符号相加（来回抵消）；路程/耗油 = 绝对值相加（来回都算）；两点距离 = 大数 − 小数；|x| 就是 x 到原点的距离。
+</section>
+
+<section class="lq" id="lq" aria-label="练习">
+  <div class="lq-head"><h2>练习</h2><span class="lq-score"></span></div>
+  <p class="lq-sub">学完上面的内容，来检验一下。每题作答后马上看到解析；点「重做练习」清空重来。</p>
+  <div class="lq-list"></div>
+  <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+</section>
+
+</main>
+
+<script>
+const resets = [];                                   // 每个模块的 reset()
+window.pageReset = () => resets.forEach(f => f());   // 练习组件会把它包进 window.resetPage
+const F = (a, b) => `<span class="fr"><i>${a}</i><i>${b}</i></span>`;   // 竖排分数
+/* 通用分步模块：render(step) 负责画图并返回说明文字 */
+function stepper(id, n, render, ms = 1800) {
+  const root = document.getElementById(id);
+  const cap = root.querySelector('.caption'), no = root.querySelector('.stepno');
+  const btn = a => root.querySelector(`[data-act="${a}"]`);
+  let step = 0, timer = null;
+  const draw = () => {
+    cap.innerHTML = render(step) || '';
+    no.textContent = `${step + 1} / ${n}`;
+    btn('prev').disabled = step === 0; btn('next').disabled = step === n - 1;
+    btn('play').textContent = timer ? '⏸ 暂停' : '▶ 播放';
+  };
+  const stop = () => { clearInterval(timer); timer = null; };
+  const go = d => { step = Math.max(0, Math.min(n - 1, step + d)); draw(); };
+  btn('prev').onclick = () => { stop(); go(-1); };
+  btn('next').onclick = () => { stop(); go(1); };
+  btn('play').onclick = () => {
+    if (timer) { stop(); draw(); return; }
+    if (step === n - 1) step = 0;
+    timer = setInterval(() => { go(1); if (step === n - 1) { stop(); draw(); } }, ms);
+    draw();
+  };
+  const reset = () => { stop(); step = 0; draw(); };
+  btn('reset').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+const NS = 'http://www.w3.org/2000/svg';
+const el = (t, at, txt) => { const e = document.createElementNS(NS, t); for (const k in at) e.setAttribute(k, at[k]); if (txt != null) e.textContent = txt; return e; };
+const sgn = x => (x > 0 ? '+' : '−') + Math.abs(x);
+/* ---------- 行程分步 ---------- */
+{
+  const svg = document.getElementById('trip');
+  const R = [10, -2, 3, -1, 9, -3, -2, 11, 3, -4, 6];
+  const X = v => 40 + (v + 5) * 10;           // 数轴 −5 ~ 37
+  const pos = [0]; R.forEach(r => pos.push(pos[pos.length - 1] + r));
+  const N = R.length;                          // 0..N 行程步，N+1 赶往 B，N+2 结论
+  const draw = step => {
+    svg.innerHTML = '';
+    const ly = 225;
+    svg.append(el('line', { x1: 30, y1: ly, x2: 450, y2: ly, stroke: 'var(--ink)', 'stroke-width': 1.5 }));
+    for (let v = -5; v <= 36; v++) if (v % 5 === 0) {
+      svg.append(el('line', { x1: X(v), y1: ly - 5, x2: X(v), y2: ly + 5, stroke: 'var(--ink)' }));
+      svg.append(el('text', { x: X(v), y: ly + 20, 'font-size': 11, 'text-anchor': 'middle', class: 'mono' }, v));
+    }
+    [['A', 0], ['B', 10], ['C', 20], ['D', 30]].forEach(([n, v]) => svg.append(el('text', { x: X(v), y: ly - 10, 'font-size': 13, 'font-weight': 700, 'text-anchor': 'middle' }, n)));
+    svg.append(el('text', { x: 30, y: 16, 'font-size': 12 }, '← 西'));
+    svg.append(el('text', { x: 450, y: 16, 'font-size': 12, 'text-anchor': 'end' }, '东 →'));
+    const moves = Math.min(step, N);
+    for (let i = 0; i < moves; i++) {
+      const y = 26 + i * 14, a = X(pos[i]), b = X(pos[i + 1]), col = R[i] > 0 ? 'var(--east)' : 'var(--west)';
+      svg.append(el('line', { x1: a, y1: y, x2: b, y2: y, stroke: col, 'stroke-width': 3, opacity: i === moves - 1 && step <= N ? 1 : .55 }));
+      svg.append(el('polygon', { points: R[i] > 0 ? `${b},${y} ${b - 6},${y - 4} ${b - 6},${y + 4}` : `${b},${y} ${b + 6},${y - 4} ${b + 6},${y + 4}`, fill: col }));
+      svg.append(el('text', { x: Math.max(a, b) + 10, y: y + 4, 'font-size': 10, class: 'mono' }, sgn(R[i])));
+    }
+    let p = pos[moves], dist = R.slice(0, moves).reduce((s, r) => s + Math.abs(r), 0);
+    if (step >= N + 1) {
+      const y = 26 + N * 14;
+      svg.append(el('line', { x1: X(30), y1: y, x2: X(10), y2: y, stroke: 'var(--c2)', 'stroke-width': 3, 'stroke-dasharray': '6 4' }));
+      svg.append(el('polygon', { points: `${X(10)},${y} ${X(10) + 6},${y - 4} ${X(10) + 6},${y + 4}`, fill: 'var(--c2)' }));
+      svg.append(el('text', { x: X(30) + 8, y: y + 4, 'font-size': 10, class: 'mono' }, '去 B 加油 20'));
+      p = 10; dist += 20;
+    }
+    svg.append(el('circle', { cx: X(p), cy: ly, r: 8, fill: 'var(--c1)' }));
+    document.getElementById('mPos').textContent = p === 0 ? '0（出发地）' : `${p > 0 ? '东' : '西'} ${Math.abs(p)} 千米`;
+    document.getElementById('mDist').textContent = `${dist} 千米`;
+    document.getElementById('mFuel').textContent = `${40 - dist * 0.5} 升`;
+    if (step === 0) return '起点：车在 A（原点 0），油箱 40 升。绿色箭头向东（+），粉色箭头向西（−）。';
+    if (step <= N) {
+      const r = R[step - 1];
+      return `第 ${step} 次 ${sgn(r)}：向${r > 0 ? '东' : '西'}走 ${Math.abs(r)} 千米。位置 ${pos[step - 1]} ${r > 0 ? '+' : '−'} ${Math.abs(r)} = <b>${pos[step]}</b>；路程不管方向，再加 ${Math.abs(r)}，累计 <b>${dist}</b> 千米。` +
+        (step === N ? `<br>收工！位置 = 10 − 2 + 3 − 1 + 9 − 3 − 2 + 11 + 3 − 4 + 6 = <b>30</b> → 在出发地<b>东边 30 千米</b>（第 2 问答案）。` : '');
+    }
+    if (step === N + 1) return '收工后赶往 B 加油：从 30 到 10，距离 = 30 − 10 = <b>20</b> 千米。总路程 = 54 + 20 = <b>74</b> 千米。';
+    return '耗油 = 74 × 0.5 = 37 升 ≤ 40 升，到 B 时还剩 3 升 → <b>能安全赶到</b>（第 3 问答案）。';
+  };
+  stepper('demo', N + 3, draw, 1500);
+}
+
+/* ---------- 第 1 问：选原点 ---------- */
+{
+  const svg = document.getElementById('orgSvg'), out = document.getElementById('oOut'), box = document.getElementById('oChips');
+  const iu = document.getElementById('uM'), iv = document.getElementById('vN');
+  const PTS = [['A', 0], ['B', 10], ['C', 20], ['D', 30]];
+  const RANGE = { A: [20, 40, true], B: [10, 30, false], C: [10, 30, false], D: [20, 40, true] };
+  const INIT = { o: 'A', u: 5, v: 5 };
+  let S = { ...INIT };
+  PTS.forEach(([n]) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn'; b.textContent = `原点 = ${n}`; b.dataset.o = n; b.onclick = () => { S.o = n; draw(); }; box.append(b); });
+  const X = v => 50 + v * 12;
+  const draw = () => {
+    S.u = +iu.value; S.v = +iv.value;
+    document.getElementById('uMN').textContent = S.u; document.getElementById('vNN').textContent = S.v;
+    box.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.o === S.o));
+    const O = PTS.find(p => p[0] === S.o)[1], m = S.u - O, n = 20 + S.v - O, sum = Math.abs(m) + Math.abs(n);
+    svg.innerHTML = '';
+    svg.append(el('line', { x1: 20, y1: 70, x2: 440, y2: 70, stroke: 'var(--ink)', 'stroke-width': 1.5 }));
+    PTS.forEach(([nm, v]) => {
+      svg.append(el('line', { x1: X(v), y1: 64, x2: X(v), y2: 76, stroke: 'var(--ink)' }));
+      svg.append(el('text', { x: X(v), y: 96, 'font-size': 14, 'font-weight': 700, 'text-anchor': 'middle' }, nm));
+      svg.append(el('text', { x: X(v), y: 112, 'font-size': 11, 'text-anchor': 'middle', class: 'mono' }, v - O));
+    });
+    svg.append(el('circle', { cx: X(O), cy: 70, r: 9, fill: 'none', stroke: 'var(--accent)', 'stroke-width': 3 }));
+    svg.append(el('line', { x1: X(O), y1: 40, x2: X(S.u), y2: 40, stroke: 'var(--c1)', 'stroke-width': 4 }));
+    svg.append(el('line', { x1: X(O), y1: 26, x2: X(20 + S.v), y2: 26, stroke: 'var(--c2)', 'stroke-width': 4 }));
+    svg.append(el('circle', { cx: X(S.u), cy: 70, r: 6, fill: 'var(--c1)' }));
+    svg.append(el('text', { x: X(S.u), y: 58, 'font-size': 13, 'text-anchor': 'middle', style: 'fill:var(--c1)' }, 'M'));
+    svg.append(el('circle', { cx: X(20 + S.v), cy: 70, r: 6, fill: 'var(--c2)' }));
+    svg.append(el('text', { x: X(20 + S.v), y: 58, 'font-size': 13, 'text-anchor': 'middle', style: 'fill:var(--c2)' }, 'N'));
+    const [lo, hi, can] = RANGE[S.o];
+    out.innerHTML = `m = ${m}，n = ${n}，|m| + |n| = ${Math.abs(m)} + ${Math.abs(n)} = <b>${sum}</b> ${sum === 30 ? '<span class="ok-t">= 30 ✓</span>' : ''}<br>` +
+      `原点为 ${S.o} 时，|m| + |n| 总在 ${lo} 和 ${hi} 之间（取不到两端）→ ` +
+      (can ? `<span class="ok-t">能等于 30，${S.o} 可以是原点</span>` : `<span class="bad-t">永远小于 30，${S.o} 不可能是原点</span>`);
+  };
+  iu.oninput = iv.oninput = draw;
+  const reset = () => { S = { ...INIT }; iu.value = INIT.u; iv.value = INIT.v; draw(); };
+  document.getElementById('oReset').onclick = reset;
+  resets.push(reset); reset();
+}
+
+window.LQ_ITEMS = [
+  { type: '选择', q: '出租车从车站出发，向东为正，行驶记录：+5，−3，+8，−6，−4（千米）。最后停在哪？', opts: ['车站东边 26 千米', '回到车站', '车站西边 2 千米', '车站东边 2 千米'], ans: 1, why: '位置带符号相加：5 − 3 + 8 − 6 − 4 = 0，回到出发地。26 是路程，不是位置。' },
+  { type: '填空', q: '接上题：出租车一共行驶了多少千米？', ans: ['26'], placeholder: '填数字', why: '路程用绝对值相加：5 + 3 + 8 + 6 + 4 = 26。' },
+  { type: '填空', q: '接上题：每千米耗油 0.2 升，一共耗油多少升？', ans: ['5.2'], placeholder: '填数字', why: '耗油跟着路程走：26 × 0.2 = 5.2 升。位置是 0，可油可没少用。' },
+  { type: '判断', q: '检修车收工时在出发地东边 30 千米，所以它这一天一共行驶了 30 千米。', opts: ['对', '错'], ans: 1, why: '误区！30 是位置（来回抵消后的结果），实际跑了 54 千米（绝对值相加）。看动画里“位置”和“总路程”两个表一直不一样。' },
+  { type: '填空', q: '巡逻车从 A 出发，记录：+8，−12，+5，−3（千米），然后立即返回 A。每千米耗油 0.3 升，一共要耗油多少升？', ans: ['9'], placeholder: '填数字', why: '最后位置 8 − 12 + 5 − 3 = −2（A 西边 2 千米），返回 A 还要 2 千米。总路程 8 + 12 + 5 + 3 + 2 = 30，耗油 30 × 0.3 = 9 升。' },
+  { type: '选择', q: '迁移：P、Q、R 是数轴上三个点，PQ = QR = 6。点 X 在 P、Q 之间，点 Y 在 Q、R 之间，对应数 x、y，且 |x| + |y| = 12。原点可能是哪个点？', opts: ['P', 'Q', 'P 或 R', 'Q 或 R'], ans: 2, why: '原点 Q：|x|、|y| 都小于 6，和小于 12 ✗。原点 P：|x| 在 0~6，|y| 在 6~12，和在 6~18，能等于 12 ✓。原点 R 同理 ✓。和第 22(1) 题一样：原点在中间时凑不够，在两头才行。' },
+  { type: '填空', q: '第 22(1) 题中，若原点是 D，且 m = −24，那么 n = ？', ans: ['-6', '−6'], placeholder: '如 -3', why: '|−24| + |n| = 30 → |n| = 6。原点是 D 时，N 在 C、D 之间，即 −10 < n < 0，所以 n = −6（不是 6）。' },
+];
+</script>
+<script>
+/* ---------- 练习题（learn 通用组件） ----------
+   题目来自 window.LQ_ITEMS：{type, q, opts, ans: 选项下标, why} 或填空题 {type, q, ans: [可接受答案…], why}
+   定义 window.resetPage()（导航条「重置」按钮调用）：先调用页面自己的 window.pageReset()，再清空练习 */
+(() => {
+  const box = document.getElementById('lq');
+  const items = window.LQ_ITEMS || [];
+  const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let answered = 0, right = 0;
+
+  function update() {
+    const all = answered === items.length;
+    score.textContent = `已答 ${answered} / ${items.length} · 答对 ${right}` +
+      (all ? (right === items.length ? ' · 全对！' : ' · 看看解析，再重做一次') : '');
+  }
+
+  function render() {
+    answered = 0; right = 0; list.innerHTML = '';
+    items.forEach((it, i) => {
+      const el = document.createElement('div');
+      el.className = 'lq-item';
+      el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
+      const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
+      const judge = (ok, answer) => {
+        answered++; if (ok) right++;
+        el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
+        why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
+        update();
+      };
+      if (it.opts) {
+        a.classList.add('lq-opts');
+        it.opts.forEach((o, j) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'lq-opt'; b.innerHTML = o;
+          b.onclick = () => {
+            a.querySelectorAll('button').forEach(x => x.disabled = true);
+            a.children[it.ans].classList.add('lq-right');
+            if (j !== it.ans) b.classList.add('lq-wrong');
+            judge(j === it.ans, it.opts[it.ans]);
+          };
+          a.append(b);
+        });
+      } else {
+        a.classList.add('lq-fill');
+        a.innerHTML = `<input type="text" autocomplete="off" spellcheck="false" placeholder="${it.placeholder || '输入答案'}" aria-label="第 ${i + 1} 题答案"><button type="button" class="lq-opt">确定</button>`;
+        const inp = a.querySelector('input'), go = a.querySelector('button');
+        const submit = () => {
+          if (!inp.value.trim()) { inp.focus(); return; }
+          inp.disabled = go.disabled = true;
+          const ok = it.ans.some(x => norm(x) === norm(inp.value));
+          inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
+          judge(ok, it.ans[0]);
+        };
+        go.onclick = submit;
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      }
+      list.append(el);
+    });
+    update();
+  }
+
+  box.querySelector('.lq-redo').addEventListener('click', render);
+  // 导航条的「重置」按钮调用它：页面各模块 + 练习题一起恢复初始状态
+  window.resetPage = () => {
+    if (typeof window.pageReset === 'function') window.pageReset();
+    render();
+  };
+  render();
+})();
+</script>
+</body>
+</html>

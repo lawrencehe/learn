@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>五道错题题型归纳</title>
+<meta name="description" content="试卷第 6、15、17、21、22 题归成五种题型：重叠容斥、等距植树、质因数反推、净速度、数轴行程。每类给出“一眼认出它的信号”“核心方法”“容易踩的坑”，并链接到专门讲解和练习的页面。">
+<style>
+/* ---------- 页面变量：中性色映射到站点变量，只为内容另加语义色 ---------- */
+:root{
+  --bg:var(--up-bg); --surface:var(--up-surface); --ink:var(--up-ink); --muted:var(--up-muted); --line:var(--up-line);
+  --accent:var(--up-accent); --ok:var(--up-ok); --bad:var(--up-bad);
+  --c1:#1c7ed6; --c2:#7048e8;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --c1:#74c0fc; --c2:#b197fc; }
+}
+:root[data-theme="dark"]{ --c1:#74c0fc; --c2:#b197fc; }
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 var(--up-font);padding:24px 16px 96px}
+main{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:48px}
+h1{font-size:clamp(1.7rem,4.5vw,2.4rem);line-height:1.25;margin:0 0 8px}
+h2{font-size:1.4rem;margin:0 0 8px}
+p{margin:0}
+.lead{color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--up-radius);box-shadow:var(--up-shadow);padding:16px}
+.analogy{border-left:4px solid var(--accent)}
+.btn{font:inherit;font-size:14px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--up-surface)}
+.btn:disabled{opacity:.45;cursor:default}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.stepno{font-family:var(--up-mono);color:var(--muted);font-size:.9rem;min-width:56px;text-align:center}
+
+/* ---------- 本组页面共用 ---------- */
+.stage{border-radius:10px;background:var(--up-surface-2);margin-top:12px;overflow:hidden}
+.stage svg{display:block;width:100%;height:auto}
+.caption{min-height:3.6em;margin-top:10px}
+.btn.on{border-color:var(--accent);background:var(--up-accent-soft);color:var(--accent);font-weight:700}
+.problem{border-left:4px solid var(--c1)}
+.problem .src{font-size:.85rem;color:var(--muted)}
+.warn{border-left:4px solid var(--bad)}
+.sum{border-left:4px solid var(--ok)}
+.mono,.k{font-family:var(--up-mono)}
+.fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;font-size:.82em;line-height:1.15;margin:0 2px;font-family:var(--up-mono)}
+.fr>i{font-style:normal;padding:0 2px}
+.fr>i:first-child{border-bottom:1.5px solid currentColor}
+.sec-lead{color:var(--muted);margin-bottom:12px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.recipe{counter-reset:r;list-style:none;padding:0;margin:8px 0 0;display:grid;gap:8px}
+.recipe li{counter-increment:r;padding-left:34px;position:relative}
+.recipe li::before{content:counter(r);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--up-surface);font:700 13px/24px var(--up-mono);text-align:center}
+.tbl{width:100%;border-collapse:collapse;font-size:.92rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+.tbl th{background:var(--up-surface-2)}
+.tblwrap{overflow-x:auto}
+.hl{background:var(--up-accent-soft);color:var(--accent);border-radius:4px;padding:0 3px;font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.readout{font-family:var(--up-mono);margin-top:10px;line-height:1.8}
+.ok-t{color:var(--ok);font-weight:700}.bad-t{color:var(--bad);font-weight:700}
+input[type=range]{width:min(100%,320px);accent-color:var(--accent)}
+label.sl{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px}
+svg text{font-family:var(--up-font);fill:var(--ink)}
+svg .mono{font-family:var(--up-mono)}
+.fade{transition:opacity .7s ease}
+@media (prefers-reduced-motion: reduce){.fade,svg *{transition:none!important}}
+.card p,.caption,.readout,.lq-q,.lq-why{overflow-wrap:anywhere}
+
+.qtext{background:var(--up-surface-2);border-radius:10px;padding:12px 14px;margin-top:12px;line-height:1.9;min-height:6.5em}
+.qtext .hl{transition:background .6s}
+.goto{display:inline-block;margin-top:6px;font-weight:700;color:var(--accent)}
+.tcard h3{margin:0 0 4px;font-size:1.05rem}
+.tcard p{font-size:.95rem}
+.tcard .no{font:700 .85rem var(--up-mono);color:var(--muted)}
+:root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:var(--ok);--lq-bad:var(--bad)}
+/* ---------- 练习题（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+.lq{display:grid;gap:12px;margin-bottom:56px}
+.lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+.lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
+.lq-sub{margin:0;color:var(--lq-muted);font-size:14px}
+.lq-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--lq-muted);font-variant-numeric:tabular-nums}
+.lq-list{display:grid;gap:10px}
+.lq-item{background:var(--lq-surface);border:1.5px solid var(--lq-line);border-radius:10px;padding:12px 16px;display:grid;gap:10px;min-width:0;color:var(--lq-ink);text-align:left}
+.lq-item.lq-is-ok{border-color:var(--lq-ok)}
+.lq-item.lq-is-bad{border-color:var(--lq-bad)}
+.lq-q{font-size:15px;font-weight:600;line-height:1.6}
+.lq-tag{display:inline-block;font-size:11px;font-weight:500;line-height:1.6;color:var(--lq-muted);border:1px solid var(--lq-line);border-radius:999px;padding:0 8px;margin-right:8px;vertical-align:1px}
+.lq-opts,.lq-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lq .lq-opt,.lq .lq-redo{font:inherit;font-size:14px;line-height:1.4;padding:6px 14px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);cursor:pointer;text-align:left;opacity:1}
+.lq .lq-opt:hover:not(:disabled),.lq .lq-redo:hover{border-color:var(--lq-accent)}
+.lq .lq-opt:disabled{cursor:default;opacity:1}
+.lq .lq-opt.lq-right{border-color:var(--lq-ok);color:var(--lq-ok);font-weight:700}
+.lq .lq-opt.lq-wrong{border-color:var(--lq-bad);color:var(--lq-bad);text-decoration:line-through}
+.lq-fill input{font:inherit;font-size:14px;padding:6px 10px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);width:min(100%,200px)}
+.lq-fill input.lq-right{border-color:var(--lq-ok)}
+.lq-fill input.lq-wrong{border-color:var(--lq-bad)}
+.lq-why{font-size:14px;line-height:1.65;color:var(--lq-muted)}
+.lq-why:empty{display:none}
+.lq-why .lq-ok{color:var(--lq-ok)}
+.lq-why .lq-bad{color:var(--lq-bad)}
+</style>
+</head>
+<body>
+<!-- up-shell:begin（由 scripts/shell.mjs 自动生成，勿手改） -->
+<nav id="up-nav" aria-label="网站导航">
+<a class="up-home" href="/" title="Up 学习站首页"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="up-nav-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c6ef5"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#up-nav-g)"/><path d="M12 52V42a2 2 0 0 1 2-2h10V32a2 2 0 0 1 2-2h10v-8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v30z" fill="#fff"/><circle cx="43" cy="13" r="5.5" fill="#ffa94d"/></svg><span>Up 学习站</span></a>
+<span class="up-sep" aria-hidden="true">›</span><a class="up-cat" href="/math">数学</a>
+<span class="up-sep" aria-hidden="true">›</span><span class="up-title">五道错题题型归纳</span>
+<button id="up-reset" type="button" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+</nav>
+<style>
+:root{--up-bg:#f5f6f8;--up-surface:#ffffff;--up-surface-2:#eef0f4;--up-ink:#1d2127;--up-muted:#626b78;--up-line:#dfe2e8;--up-ok:#2b8a3e;--up-bad:#d6336c;--up-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);--up-font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif;--up-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;--up-radius:12px;--up-accent:#d9480f;--up-accent-soft:#fff1e8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#ff8a50;--up-accent-soft:#3a2218;color-scheme:dark}}
+:root[data-theme="dark"]{--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#ff8a50;--up-accent-soft:#3a2218;color-scheme:dark}
+html{padding-top:52px;scroll-padding-top:64px}
+#up-nav{position:fixed;top:0;left:0;right:0;z-index:2147483000;height:52px;box-sizing:border-box;display:flex;align-items:center;gap:8px;
+padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));border-top:3px solid var(--up-accent);
+border-bottom:1px solid var(--up-line);background:color-mix(in srgb,var(--up-surface) 88%,transparent);
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:500 14px/1.2 var(--up-font);color:var(--up-ink);text-align:left}
+#up-nav a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none}
+#up-nav a:hover{color:var(--up-accent)}
+#up-nav svg{width:24px;height:24px;flex:none;display:block}
+#up-nav .up-home span{font-weight:700}
+#up-nav .up-cat{color:var(--up-accent);font-weight:600}
+#up-nav .up-sep{color:var(--up-muted);flex:none}
+#up-nav .up-title{color:var(--up-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#up-reset{margin:0 0 0 auto;flex:none;font:600 14px/1 var(--up-font);padding:8px 14px;border-radius:999px;cursor:pointer;
+border:1.5px solid var(--up-accent);background:transparent;color:var(--up-accent);transition:background .2s,color .2s}
+#up-reset:hover,#up-reset:focus-visible{background:var(--up-accent);color:var(--up-surface)}
+#up-reset:focus-visible,#up-nav a:focus-visible{outline:2px solid var(--up-accent);outline-offset:2px}
+@media (max-width:560px){#up-nav .up-home span{display:none}}
+@media print{#up-nav{display:none}html{padding-top:0}}
+</style>
+<script>
+document.getElementById('up-reset').addEventListener('click', function () {
+  if (typeof window.resetPage === 'function') window.resetPage();
+  else console.warn('本页没有定义 window.resetPage()，重置按钮无效');
+  window.scrollTo({ top: 0, behavior: 'auto' });
+});
+</script>
+<!-- up-shell:end -->
+<main>
+
+<section>
+  <h1>五道错题题型归纳</h1>
+  <p class="lead">第 6、15、17、21、22 题看起来各不相同，其实各属一个固定题型。先学会<b>认出题型</b>，再套<b>对应的方法</b>。每类都有一页专门讲解和练习，点链接进入。</p>
+</section>
+
+<section>
+  <h2>一步一步：从关键词认出题型</h2>
+  <p class="sec-lead">读题时先圈出橙色的“信号词”，题型就出来了。</p>
+  <div class="card" id="demo">
+    <div class="qtext" id="qt"></div>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>五种题型速查</h2>
+  <div class="grid2" style="margin-top:8px">
+    <div class="card tcard"><span class="no">第 6 题</span><h3>① 重叠面积（容斥 + 分率）</h3>
+      <p><b>信号：</b>“……的几分之几被覆盖”“重叠部分”</p>
+      <p><b>方法：</b>盖住的 = 甲 + 乙 − 重叠；相等的量设成同一个 X，再链式换算。</p>
+      <p><b>坑：</b>不同单位“1”的分率直接相加；最后 S ÷ C 除反。</p>
+      <a class="goto" href="overlap-area.html">去学：重叠面积与容斥 →</a></div>
+    <div class="card tcard"><span class="no">第 15 题</span><h3>② 等距植树（路灯）+ 最大公因数</h3>
+      <p><b>信号：</b>“等距离”“A、B、C 处各装一盏”“最少”</p>
+      <p><b>方法：</b>间距 = 两段长度的最大公因数；不封闭：灯 = 段数 + 1，拐角只算一次。</p>
+      <p><b>坑：</b>忘 +1、拐角数两次；“最少”误用小间距。</p>
+      <a class="goto" href="gcd-lcm-apply.html">去学：公因数公倍数应用题 →</a></div>
+    <div class="card tcard"><span class="no">第 17 题</span><h3>③ 由公因数/公倍数反推质数</h3>
+      <p><b>信号：</b>“甲 = 2×3×7×A”“A、B 为质数”“最大公因数是…，最小公倍数小于…”</p>
+      <p><b>方法：</b>先让两数都含最大公因数的全部质因数（定 A），再用 最小公倍数 = 甲×乙÷最大公因数 逐个检验 B。</p>
+      <p><b>坑：</b>B = 2 会把最大公因数变大；只写一个答案。</p>
+      <a class="goto" href="gcd-lcm-apply.html">去学：公因数公倍数应用题 →</a></div>
+    <div class="card tcard"><span class="no">第 21 题</span><h3>④ 行程：分数速度 + 净速度</h3>
+      <p><b>信号：</b>“<span class="fr"><i>5</i><i>14</i></span> 天爬 7<span class="fr"><i>1</i><i>2</i></span> 尺”“一边……一边……”“能否”</p>
+      <p><b>方法：</b>速度 = 路程 ÷ 时间；一个让距离变短、一个变长 → 净速度 = 差；时间 = 距离 ÷ 净速度。</p>
+      <p><b>坑：</b>除反成 <span class="fr"><i>1</i><i>21</i></span>；忽略尾巴生长。</p>
+      <a class="goto" href="net-speed-snake.html">去学：白蛇进洞：净速度 →</a></div>
+    <div class="card tcard"><span class="no">第 22 题</span><h3>⑤ 数轴 + 正负数行程</h3>
+      <p><b>信号：</b>“向东为正”“距出发地多远”“耗油”“|m| + |n|”</p>
+      <p><b>方法：</b>位置 = 带符号相加；路程、耗油 = 绝对值相加；|x| = 到原点的距离。</p>
+      <p><b>坑：</b>用位置算油；漏掉“赶往 B”那一段；原点只找一个。</p>
+      <a class="goto" href="number-line-trip.html">去学：数轴行程：位置与路程 →</a></div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>五题答案对照</h2>
+  <div class="tblwrap"><table class="tbl">
+    <tr><th>题号</th><th>正确答案</th><th>关键一步</th></tr>
+    <tr><td>6</td><td>A（<span class="fr"><i>6</i><i>25</i></span>）</td><td><span class="fr"><i>2</i><i>3</i></span>A = 2X − <span class="fr"><i>1</i><i>6</i></span>A → X = <span class="fr"><i>5</i><i>12</i></span>A → C = <span class="fr"><i>25</i><i>36</i></span>A</td></tr>
+    <tr><td>15</td><td>8 盏</td><td>最大公因数 50；200÷50 + 150÷50 + 1 = 8</td></tr>
+    <tr><td>17</td><td>B = 3 或 5</td><td>A = 5；最小公倍数 = 210×B < 1200，且 B ≠ 2</td></tr>
+    <tr><td>21</td><td>能，8 天</td><td>21 − 11 = 10 尺/天；80 ÷ 10 = 8</td></tr>
+    <tr><td>22</td><td>(1) A 或 D　(2) 东 30 千米　(3) 能</td><td>位置和 30；路程 54 + 20 = 74，耗油 37 ≤ 40</td></tr>
+  </table></div>
+</section>
+
+<section class="card sum">
+  <b>一句话总结：</b>做应用题先找“信号词”定题型，再套方法；每类题最容易错的地方都是“单位‘1’/方向/重复计数”没想清楚。
+</section>
+
+<section class="lq" id="lq" aria-label="练习">
+  <div class="lq-head"><h2>练习</h2><span class="lq-score"></span></div>
+  <p class="lq-sub">学完上面的内容，来检验一下。每题作答后马上看到解析；点「重做练习」清空重来。</p>
+  <div class="lq-list"></div>
+  <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+</section>
+
+</main>
+
+<script>
+const resets = [];                                   // 每个模块的 reset()
+window.pageReset = () => resets.forEach(f => f());   // 练习组件会把它包进 window.resetPage
+const F = (a, b) => `<span class="fr"><i>${a}</i><i>${b}</i></span>`;   // 竖排分数
+/* 通用分步模块：render(step) 负责画图并返回说明文字 */
+function stepper(id, n, render, ms = 1800) {
+  const root = document.getElementById(id);
+  const cap = root.querySelector('.caption'), no = root.querySelector('.stepno');
+  const btn = a => root.querySelector(`[data-act="${a}"]`);
+  let step = 0, timer = null;
+  const draw = () => {
+    cap.innerHTML = render(step) || '';
+    no.textContent = `${step + 1} / ${n}`;
+    btn('prev').disabled = step === 0; btn('next').disabled = step === n - 1;
+    btn('play').textContent = timer ? '⏸ 暂停' : '▶ 播放';
+  };
+  const stop = () => { clearInterval(timer); timer = null; };
+  const go = d => { step = Math.max(0, Math.min(n - 1, step + d)); draw(); };
+  btn('prev').onclick = () => { stop(); go(-1); };
+  btn('next').onclick = () => { stop(); go(1); };
+  btn('play').onclick = () => {
+    if (timer) { stop(); draw(); return; }
+    if (step === n - 1) step = 0;
+    timer = setInterval(() => { go(1); if (step === n - 1) { stop(); draw(); } }, ms);
+    draw();
+  };
+  const reset = () => { stop(); step = 0; draw(); };
+  btn('reset').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+/* ---------- 关键词扫描分步 ---------- */
+{
+  const qt = document.getElementById('qt');
+  const H = s => `<span class="hl">${s}</span>`;
+  const Q = [
+    { t: n => `6. 圆的面积的 ${n ? H(F(3,5) + ' 被阴影覆盖') : F(3,5) + ' 被阴影覆盖'}，三角形面积的 ${F(4,7)} 被阴影覆盖……圆与三角形${n ? H('重叠部分') : '重叠部分'}的面积 S……`, c: `题型 ① <b>重叠面积</b>：“被覆盖”“重叠” → 想到 盖住的 = 甲 + 乙 − 重叠。` },
+    { t: n => `15. 街道 ABC 在 B 处拐弯，在一侧${n ? H('等距离') : '等距离'}安装路灯，要求在 ${n ? H('A、B、C 处各安装一盏') : 'A、B、C 处各安装一盏'}，那么${n ? H('最少') : '最少'}安装几盏？`, c: `题型 ② <b>等距植树 + 最大公因数</b>：“等距”“各装一盏”“最少” → 间距取最大公因数，灯 = 段数 + 1。` },
+    { t: n => `17. 甲数 = ${n ? H('2×3×7×A') : '2×3×7×A'}，乙数 = 3×5×7×B，${n ? H('A、B 均为质数') : 'A、B 均为质数'}，${n ? H('最大公因数是 105，最小公倍数小于 1200') : '最大公因数是 105，最小公倍数小于 1200'}……`, c: `题型 ③ <b>质因数反推</b>：先凑齐最大公因数定 A，再用最小公倍数逐个检验 B。` },
+    { t: n => `21. 白蛇以 ${n ? H(F(5,14) + ' 天爬 7' + F(1,2) + ' 尺') : F(5,14) + ' 天爬 7' + F(1,2) + ' 尺'}的速度进洞，${n ? H('尾巴') : '尾巴'}以 ${F(1,4)} 天长出 ${F(11,4)} 尺的速度${n ? H('生长') : '生长'}……${n ? H('能否') : '能否'}……`, c: `题型 ④ <b>分数速度 + 净速度</b>：先化成“每天几尺”（尺 ÷ 天），一进一长 → 净速度 = 21 − 11。` },
+    { t: n => `22. ${n ? H('向东走为正，向西走为负') : '向东走为正，向西走为负'}……+10，−2，+3……收工时，${n ? H('距出发地多远') : '距出发地多远'}？……每千米${n ? H('耗油') : '耗油'} 0.5 升……`, c: `题型 ⑤ <b>数轴行程</b>：“距出发地”看带符号的和；“耗油”看绝对值的和。` },
+  ];
+  stepper('demo', Q.length * 2, i => {
+    const q = Q[i >> 1], on = i % 2 === 1;
+    qt.innerHTML = q.t(on);
+    return on ? q.c : `第 ${(i >> 1) + 1} 题：先读一遍，你能找出“信号词”吗？点「下一步」揭晓。`;
+  }, 2000);
+}
+
+window.LQ_ITEMS = [
+  { type: '选择', q: '“两根绳子长 48 米和 36 米，要剪成同样长的小段且都没有剩余，每段最长几米？”属于哪种题型？', opts: ['重叠容斥', '最大公因数', '净速度', '数轴行程'], ans: 1, why: '“同样长”“都没有剩余”“最长” → 同时整除两个长度、取最大 → 最大公因数，和第 15 题路灯间距一样。' },
+  { type: '填空', q: '接上题，每段最长几米？', ans: ['12'], placeholder: '填数字', why: '48 = 12×4，36 = 12×3，最大公因数 12。' },
+  { type: '选择', q: '“参加数学组的 20 人，参加语文组的 15 人，两个组都参加的 6 人，参加兴趣组的一共几人？”用哪个方法？', opts: ['20 + 15', '20 + 15 − 6', '20 + 15 + 6', '20 − 6'], ans: 1, why: '重叠容斥：都参加的 6 人被数了两次，减掉一次，20 + 15 − 6 = 29 人。' },
+  { type: '选择', q: '“电梯从 1 楼出发，上升记为正：+5，−3，+6，−4（层）。电梯一共运行了多少层？”应该怎么算？', opts: ['5 − 3 + 6 − 4', '5 + 3 + 6 + 4', '5 + 6', '(5 + 6) − (3 + 4)'], ans: 1, why: '“一共运行”是路程，绝对值相加 = 18 层。“现在在几楼”才是带符号相加。' },
+  { type: '判断', q: '“最少装几盏灯”应该用两段长度的最小公倍数做间距。', opts: ['对', '错'], ans: 1, why: '间距必须能整除两段长度，所以是公因数；要灯最少，间距要最大 → 最大公因数。最小公倍数比两段路都长，根本装不下。' },
+  { type: '选择', q: `“蚂蚁 ${F(1,6)} 分钟爬 2 米，传送带 ${F(1,4)} 分钟把它往回送 1 米，蚂蚁逆着传送带爬 16 米要几分钟？”第一步应该做什么？`, opts: [`算 ${F(1,6)} ÷ 2`, '分别算出每分钟的速度：2 ÷ 1/6 和 1 ÷ 1/4', '算 16 ÷ 2', '算 2 − 1'], ans: 1, why: `先统一成“每分钟几米”：12 米/分、4 米/分；净速度 8 米/分；16 ÷ 8 = 2 分钟。直接算 2 − 1 不行，因为两个“1 份时间”不一样长。` },
+];
+</script>
+<script>
+/* ---------- 练习题（learn 通用组件） ----------
+   题目来自 window.LQ_ITEMS：{type, q, opts, ans: 选项下标, why} 或填空题 {type, q, ans: [可接受答案…], why}
+   定义 window.resetPage()（导航条「重置」按钮调用）：先调用页面自己的 window.pageReset()，再清空练习 */
+(() => {
+  const box = document.getElementById('lq');
+  const items = window.LQ_ITEMS || [];
+  const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let answered = 0, right = 0;
+
+  function update() {
+    const all = answered === items.length;
+    score.textContent = `已答 ${answered} / ${items.length} · 答对 ${right}` +
+      (all ? (right === items.length ? ' · 全对！' : ' · 看看解析，再重做一次') : '');
+  }
+
+  function render() {
+    answered = 0; right = 0; list.innerHTML = '';
+    items.forEach((it, i) => {
+      const el = document.createElement('div');
+      el.className = 'lq-item';
+      el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
+      const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
+      const judge = (ok, answer) => {
+        answered++; if (ok) right++;
+        el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
+        why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
+        update();
+      };
+      if (it.opts) {
+        a.classList.add('lq-opts');
+        it.opts.forEach((o, j) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'lq-opt'; b.innerHTML = o;
+          b.onclick = () => {
+            a.querySelectorAll('button').forEach(x => x.disabled = true);
+            a.children[it.ans].classList.add('lq-right');
+            if (j !== it.ans) b.classList.add('lq-wrong');
+            judge(j === it.ans, it.opts[it.ans]);
+          };
+          a.append(b);
+        });
+      } else {
+        a.classList.add('lq-fill');
+        a.innerHTML = `<input type="text" autocomplete="off" spellcheck="false" placeholder="${it.placeholder || '输入答案'}" aria-label="第 ${i + 1} 题答案"><button type="button" class="lq-opt">确定</button>`;
+        const inp = a.querySelector('input'), go = a.querySelector('button');
+        const submit = () => {
+          if (!inp.value.trim()) { inp.focus(); return; }
+          inp.disabled = go.disabled = true;
+          const ok = it.ans.some(x => norm(x) === norm(inp.value));
+          inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
+          judge(ok, it.ans[0]);
+        };
+        go.onclick = submit;
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      }
+      list.append(el);
+    });
+    update();
+  }
+
+  box.querySelector('.lq-redo').addEventListener('click', render);
+  // 导航条的「重置」按钮调用它：页面各模块 + 练习题一起恢复初始状态
+  window.resetPage = () => {
+    if (typeof window.pageReset === 'function') window.pageReset();
+    render();
+  };
+  render();
+})();
+</script>
+</body>
+</html>
