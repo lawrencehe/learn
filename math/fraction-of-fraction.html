@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>分数的分数</title>
-<meta name="description" content="试卷5 第 28 题：集装箱 20 吨货，服装占 5/12，服装里童装占 3/8。看算式 20×5/12、5/12×3/8 怎么提问题，其它服装比童装多几分之几、占总货物几分之几、有多少吨？用方格图动画讲清“谁的几分之几”：数量×分率得数量，分率×分率还是分率。">
+<meta name="description" content="试卷5 第 28 题：集装箱 20 吨货，服装占 5/12，服装里童装占 3/8。看算式 20×5/12、5/12×3/8 怎么提问题，其它服装比童装多几分之几、占总货物几分之几、有多少吨？用方格图动画讲清“谁的几分之几”：数量×分率得数量，分率×分率还是分率。 附进阶 20 题：剩下的几分之几、倒推单位“1”、连续涨降价、不变量。">
 <style>
 :root{
   --bg:var(--up-bg); --surface:var(--up-surface); --ink:var(--up-ink); --muted:var(--up-muted); --line:var(--up-line);
@@ -78,6 +78,8 @@ p{margin:0}
 .try-in input{font:inherit;font-family:var(--up-mono);width:64px;padding:4px 6px;border-radius:6px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink)}
 .out{display:grid;gap:6px;margin-top:12px}
 .out div{padding:8px 12px;border-radius:8px;background:var(--up-surface-2);font-size:15px;overflow-x:auto}
+.tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.tools .card{border-top:3px solid var(--accent);font-size:15px}
 .summary{border-left:4px solid var(--ok);font-size:1.05rem}
 @media (prefers-reduced-motion: reduce){.cell{transition:none}}
 
@@ -287,6 +289,24 @@ document.getElementById('up-reset').addEventListener('click', function () {
   <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
 </section>
 
+<section>
+  <h2>进阶前的工具箱</h2>
+  <p class="muted">下面 20 道题，几乎都能用这四招拆开。做题卡住时回来看看。</p>
+  <div class="tools">
+    <div class="card"><b>① 先找单位“1”</b><br>“A 的几分之几”“比 A 多/少”——A 就是单位“1”。“剩下的”“余下的”也是一个新的单位“1”。</div>
+    <div class="card"><b>② 跨层就连乘</b><br>“总量的 5/12 里的 3/8”，统一成总量的几分之几：5/12 × 3/8。</div>
+    <div class="card"><b>③ 量 ÷ 对应分率 = 单位“1”</b><br>知道某部分有多少（量），也知道它占整体几分之几（分率），整体 = 量 ÷ 分率。</div>
+    <div class="card"><b>④ 找不变的量</b><br>人转来转去、货装进装出，总有一样没变。抓住它当桥梁，前后两个分数就连起来了。</div>
+  </div>
+</section>
+
+<section class="lq" id="lq2" aria-label="进阶练习">
+  <div class="lq-head"><h2>进阶 20 题</h2><span class="lq-score"></span></div>
+  <p class="lq-sub">分三档：<b>基础</b>（1–5，连乘与“剩下的”）→ <b>进阶</b>（6–12，倒推单位“1”、多/少几分之几）→ <b>挑战</b>（13–20，连续变化、不变量）。填空可写分数、带分数或小数，如 25/8、3又1/8、3.125 都算对。</p>
+  <div class="lq-list"></div>
+  <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+</section>
+
 </main>
 
 <script>
@@ -491,23 +511,84 @@ window.LQ_ITEMS = [
     why: '1/4 是“多出的部分占服装的几分之几”。问的是比<b>童装</b>多几分之几，要用多的 ÷ 童装：1/4 ÷ 3/8 = 2/3。格子上看：多 10 格，童装 15 格，10/15 = 2/3。' },
   { type: '选择', q: '其它服装占总货物的几分之几？', opts: ['5/8', '25/96', '1/4', '7/12'], ans: 1,
     why: '其它服装占服装 5/8，服装占总货物 5/12，跨两层要连乘：5/12 × 5/8 = 25/96。选 5/8 是忘了换单位“1”（误区 3）。' },
-  { type: '填空', q: '童装有多少吨？（写分数或小数）', ans: ['25/8', '3.125', '3又1/8', '3又8分之1', '3+1/8'], placeholder: '如 25/8',
+  { type: '填空', q: '童装有多少吨？（写分数或小数）', ans: ['25/8', '3.125', '3又1/8'], num: 25/8, placeholder: '如 25/8',
     why: '20 × 5/12 × 3/8 = 25/8 = 3.125 吨。如果算成 20 × 3/8 = 7.5 吨，就是把 3/8 当成了总货物的（误区 1）。' },
   { type: '选择', q: '反过来问：童装比其它服装<b>少</b>几分之几？', opts: ['2/3', '2/5', '1/4', '3/5'], ans: 1,
     why: '“比其它服装”——单位“1”变成其它服装（25 格）。少 10 格，10 ÷ 25 = 2/5。差距一样，比的对象换了，分母就换了，所以不是 2/3。' },
-  { type: '计算', q: '其它服装比童装多多少<b>吨</b>？（写分数）', ans: ['25/12', '2又1/12', '2又12分之1', '2+1/12', '50/24'], placeholder: '如 25/12',
+  { type: '计算', q: '其它服装比童装多多少<b>吨</b>？（写分数）', ans: ['25/12', '2又1/12'], num: 25/12, placeholder: '如 25/12',
     why: '其它服装 125/24 吨，童装 25/8 = 75/24 吨，相差 50/24 = 25/12 吨。也可用 10 格 × 每格 5/24 吨 = 50/24 = 25/12 吨。注意问“多少吨”是数量，问“多几分之几”才是分率 2/3。' },
-  { type: '迁移', q: '果园有 240 棵树，其中果树占 3/4；果树中苹果树占 2/9。苹果树有多少棵？', ans: ['40'], placeholder: '填数字',
+  { type: '迁移', q: '果园有 240 棵树，其中果树占 3/4；果树中苹果树占 2/9。苹果树有多少棵？', ans: ['40'], num: 40, placeholder: '填数字',
     why: '同一个结构：2/9 是果树的 2/9。240 × 3/4 × 2/9 = 180 × 2/9 = 40 棵。' },
+];
+
+/* ---------- 进阶 20 题（数值题用 num 判分，ans[0] 为展示答案） ---------- */
+window.LQ_ITEMS2 = [
+  /* 基础 */
+  { type: '基础·选择', q: '一桶油 18 千克，第一次用去 1/3，第二次用去<b>剩下的</b> 1/4。第二次用去多少千克？', opts: ['4.5 千克', '3 千克', '6 千克', '1.5 千克'], ans: 1,
+    why: '第二次的单位“1”是“剩下的”：18 × (1 − 1/3) = 12 千克，12 × 1/4 = 3 千克。选 4.5 是用 18 × 1/4，把“剩下的 1/4”当成了“全部的 1/4”。' },
+  { type: '基础·填空', q: '接上题，两次用完后还剩多少千克油？', ans: ['9'], num: 9, placeholder: '填数字',
+    why: '连乘“剩下的部分”：18 × (1 − 1/3) × (1 − 1/4) = 18 × 2/3 × 3/4 = 9 千克。也可 18 − 6 − 3 = 9。' },
+  { type: '基础·判断', q: '“第二次用去剩下的 1/4”和“第二次用去全部的 1/4”，用去的一样多。', opts: ['对', '错'], ans: 1,
+    why: '单位“1”不同：剩下的 1/4 是 12 × 1/4 = 3 千克，全部的 1/4 是 18 × 1/4 = 4.5 千克。分数一样，单位“1”不一样，量就不一样。' },
+  { type: '基础·填空', q: '某校 600 人，男生占 7/12，男生中戴眼镜的占 2/7。戴眼镜的男生占全校的几分之几？', ans: ['1/6'], num: 1/6, placeholder: '如 1/6',
+    why: '跨两层，连乘：7/12 × 2/7 = 14/84 = 1/6。（顺便算出有 600 × 1/6 = 100 人。）这和集装箱题第②问是同一个结构。' },
+  { type: '基础·填空', q: '接上题，<b>不戴</b>眼镜的男生比戴眼镜的男生多几分之几？', ans: ['3/2', '1又1/2', '1.5'], num: 1.5, placeholder: '如 3/2',
+    why: '都在“男生”这一层比：不戴眼镜占 5/7，戴眼镜占 2/7。比戴眼镜的多，单位“1”是戴眼镜的：(5/7 − 2/7) ÷ 2/7 = 3/2。“多几分之几”可以超过 1：多出的部分比被比的量还大。' },
+  /* 进阶 */
+  { type: '进阶·填空', q: '集装箱里服装占总货物的 5/12，服装中童装占 3/8。已知童装有 5 吨，集装箱里共有多少吨货物？', ans: ['32'], num: 32, placeholder: '填数字',
+    why: '先求童装占总货物的分率：5/12 × 3/8 = 5/32。量 ÷ 对应分率：5 ÷ 5/32 = 32 吨。验算：32 × 5/12 × 3/8 = 5 ✓。' },
+  { type: '进阶·填空', q: '分率同上（服装占 5/12，童装占服装的 3/8），已知其它服装比童装多 4 吨。集装箱共有多少吨？', ans: ['38.4', '192/5', '38又2/5'], num: 38.4, placeholder: '填数字',
+    why: '4 吨对应的是“其它服装 − 童装”，占总货物 5/12 × (5/8 − 3/8) = 5/12 × 1/4 = 5/48。4 ÷ 5/48 = 192/5 = 38.4 吨。验算：服装 16 吨，童装 6 吨，其它 10 吨，多 4 吨 ✓。' },
+  { type: '进阶·选择', q: '甲比乙多 1/4，那么乙比甲少几分之几？', opts: ['1/4', '1/5', '1/3', '3/4'], ans: 1,
+    why: '设乙为 4 份，甲就是 5 份，相差 1 份。“乙比甲少”，单位“1”换成甲（5 份）：1 ÷ 5 = 1/5。差距一样，比的对象变了，分母就变了。' },
+  { type: '进阶·填空', q: '故事书比科技书多 2/3，科技书有 60 本。科技书比故事书少几分之几？', ans: ['2/5'], num: 2/5, placeholder: '如 2/5',
+    why: '故事书 = 60 × (1 + 2/3) = 100 本，少 40 本。单位“1”是故事书：40 ÷ 100 = 2/5。快速法：多 2/3 → 3 份对 5 份，差 2 份 ÷ 5 份 = 2/5。' },
+  { type: '进阶·填空', q: '一根绳子，第一次剪去全长的 1/4，第二次剪去<b>余下的</b> 1/3，还剩 12 米。绳子原长多少米？', ans: ['24'], num: 24, placeholder: '填数字',
+    why: '剩下的占全长：(1 − 1/4) × (1 − 1/3) = 3/4 × 2/3 = 1/2。12 ÷ 1/2 = 24 米。验算：剪去 6 米剩 18 米，再剪去 6 米剩 12 米 ✓。' },
+  { type: '进阶·填空', q: '修一条路，甲队修了全长的 2/5，乙队修了余下的 1/2，还剩 600 米没修。这条路全长多少米？', ans: ['2000'], num: 2000, placeholder: '填数字',
+    why: '没修的占全长：(1 − 2/5) × (1 − 1/2) = 3/5 × 1/2 = 3/10。600 ÷ 3/10 = 2000 米。' },
+  { type: '进阶·填空', q: '接上题，甲队比乙队多修了几分之几？', ans: ['1/3'], num: 1/3, placeholder: '如 1/3',
+    why: '统一成全长的几分之几：甲 2/5 = 4/10，乙 3/5 × 1/2 = 3/10。比乙多，单位“1”是乙：(4/10 − 3/10) ÷ 3/10 = 1/3。（甲 800 米，乙 600 米，200 ÷ 600 = 1/3。）注意乙的“1/2”是余下的 1/2，不能直接拿 2/5 和 1/2 比。' },
+  /* 挑战 */
+  { type: '挑战·判断', q: '一件商品先涨价 1/10，再降价 1/10，价格回到原价。', opts: ['对', '错'], ans: 1,
+    why: '两次的单位“1”不同：涨价以原价为“1”，降价以涨价后的价格为“1”。原价 × 11/10 × 9/10 = 原价 × 99/100，比原价便宜了 1/100。' },
+  { type: '挑战·填空', q: '一件衣服原价 200 元，先涨价 1/5，再降价 1/5。现价多少元？', ans: ['192'], num: 192, placeholder: '填数字',
+    why: '200 × (1 + 1/5) = 240 元；再降价，单位“1”是 240：240 × (1 − 1/5) = 192 元。和上一题同理：涨降同样的分数，最后会变便宜。' },
+  { type: '挑战·选择', q: '一个班男生人数是女生的 4/5。男生占全班人数的几分之几？', opts: ['4/5', '4/9', '1/5', '5/9'], ans: 1,
+    why: '4/5 的单位“1”是女生。设女生 5 份，男生 4 份，全班 9 份，男生占全班 4/9。选 4/5 是没换单位“1”。' },
+  { type: '挑战·填空', q: '某班女生占全班的 3/5。后来转来 5 名男生（女生人数不变），女生就占全班的 1/2。原来全班有多少人？', ans: ['25'], num: 25, placeholder: '填数字',
+    why: '全班人数变了，女生人数没变——用不变的量当桥梁。原来女生 : 男生 = 3 : 2，现在 = 1 : 1。设女生 3 份：原来男生 2 份，现在男生 3 份，转来的 5 人就是 1 份。原来全班 5 份 = 25 人（女 15，男 10）。' },
+  { type: '挑战·填空', q: '果园里苹果树占 3/8，梨树占<b>剩下的</b> 2/5，其余是 150 棵桃树。果园共有多少棵果树？', ans: ['400'], num: 400, placeholder: '填数字',
+    why: '桃树占全园：(1 − 3/8) × (1 − 2/5) = 5/8 × 3/5 = 3/8。150 ÷ 3/8 = 400 棵。（苹果 150、梨 100、桃 150。）' },
+  { type: '挑战·选择', q: '接上题，梨树比苹果树少几分之几？', opts: ['1/8', '1/3', '1/2', '2/3'], ans: 1,
+    why: '梨树占全园 5/8 × 2/5 = 1/4，苹果树占 3/8。比苹果树少，单位“1”是苹果树：(3/8 − 1/4) ÷ 3/8 = 1/8 ÷ 3/8 = 1/3。选 1/8 是只算了差，没除以单位“1”。' },
+  { type: '挑战·填空', q: '一批货，第一天运走全部的 1/3 还多 4 吨，第二天运走余下的 1/2，最后还剩 18 吨。这批货共有多少吨？', ans: ['60'], num: 60, placeholder: '填数字',
+    why: '倒着推。第二天运走余下的 1/2，还剩 18 吨，所以第一天运完后剩 18 ÷ (1 − 1/2) = 36 吨。这 36 吨 + 多运的 4 吨 = 40 吨，对应全部的 1 − 1/3 = 2/3，所以全部是 40 ÷ 2/3 = 60 吨。验算：第一天 20 + 4 = 24，剩 36；第二天运 18，剩 18 ✓。' },
+  { type: '挑战·填空', q: '回到原题：20 吨货，服装占 5/12，童装占服装的 3/8。现在<b>只</b>再装进一批童装，使童装正好占服装的一半。要装进多少吨童装？', ans: ['25/12', '2又1/12'], num: 25/12, placeholder: '如 25/12',
+    why: '装进童装后，服装总量变了，“其它服装”没变，它是不变量：20 × 5/12 × 5/8 = 125/24 吨。童装要占服装的一半，就要和其它服装一样多，也是 125/24 吨。原有童装 25/8 = 75/24 吨，要装进 125/24 − 75/24 = 50/24 = 25/12 吨。正好是原题里两者相差的那 10 格！' },
 ];
 </script>
 <script>
 /* ---------- 练习题（learn 通用组件） ----------
    题目来自 window.LQ_ITEMS：{type, q, opts, ans: 选项下标, why} 或填空题 {type, q, ans: [可接受答案…], why}
    定义 window.resetPage()（导航条「重置」按钮调用）：先调用页面自己的 window.pageReset()，再清空练习 */
-(() => {
-  const box = document.getElementById('lq');
-  const items = window.LQ_ITEMS || [];
+const LQ_NUM = s => {   // 把 25/8、3又1/8、3+1/8、3又8分之1、3.125 等写法转成数；不认识返回 NaN
+  s = String(s).trim().replace(/\s+/g, '').replace(/／/g, '/').replace(/[−–—]/g, '-')
+    .replace(/(吨|千克|米|元|本|棵|人|名|倍)$/, '').replace(/(\d+)分之(\d+)/g, '$2/$1').replace(/又/g, '+');
+  if (!/^[-\d./+]+$/.test(s)) return NaN;
+  let v = 0;
+  for (const t of s.split('+')) {
+    if (!t) return NaN;
+    const m = t.split('/');
+    if (m.length > 2) return NaN;
+    const n = Number(m[0]), d = m.length === 2 ? Number(m[1]) : 1;
+    if (!isFinite(n) || !isFinite(d) || d === 0) return NaN;
+    v += n / d;
+  }
+  return v;
+};
+const LQ_RENDERS = [];
+function initLQ(box, items) {
   const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
   const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
   let answered = 0, right = 0;
@@ -551,7 +632,7 @@ window.LQ_ITEMS = [
         const submit = () => {
           if (!inp.value.trim()) { inp.focus(); return; }
           inp.disabled = go.disabled = true;
-          const ok = it.ans.some(x => norm(x) === norm(inp.value));
+          const ok = it.num !== undefined ? Math.abs(LQ_NUM(inp.value) - it.num) < 1e-9 : it.ans.some(x => norm(x) === norm(inp.value));
           inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
           judge(ok, it.ans[0]);
         };
@@ -564,13 +645,16 @@ window.LQ_ITEMS = [
   }
 
   box.querySelector('.lq-redo').addEventListener('click', render);
-  // 导航条的「重置」按钮调用它：页面各模块 + 练习题一起恢复初始状态
-  window.resetPage = () => {
-    if (typeof window.pageReset === 'function') window.pageReset();
-    render();
-  };
+  LQ_RENDERS.push(render);
   render();
-})();
+}
+initLQ(document.getElementById('lq'), window.LQ_ITEMS || []);
+initLQ(document.getElementById('lq2'), window.LQ_ITEMS2 || []);
+// 导航条的「重置」按钮调用它：页面各模块 + 两组练习题一起恢复初始状态
+window.resetPage = () => {
+  if (typeof window.pageReset === 'function') window.pageReset();
+  LQ_RENDERS.forEach(r => r());
+};
 </script>
 
 </body>
