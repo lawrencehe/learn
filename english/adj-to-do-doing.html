@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>be + adj. + to do / doing</title>
+<meta name="description" content="形容词后面默认接 to do（It is important to do / I'm happy to do / easy to read）；一旦后面有介词——看得见的 good at、used to，或看不见的 busy (in)、worth——就接 doing；再对比 afraid / sorry / sure 两种用法的意思差别。">
+<style>
+:root{
+  --bg:var(--up-bg); --surface:var(--up-surface); --surface2:var(--up-surface-2); --ink:var(--up-ink); --muted:var(--up-muted); --line:var(--up-line);
+  --accent:var(--up-accent); --ok:var(--up-ok); --bad:var(--up-bad);
+  --to:#1c7ed6;   --to-soft:#e3f0fc;     /* to do */
+  --ing:#d9480f;  --ing-soft:#fde8dc;    /* doing */
+  --prep:#7048e8; --prep-soft:#ece6fd;   /* 介词（门卫） */
+  --adj:#c2255c;                          /* 形容词 */
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --to:#74c0fc; --to-soft:#16314a; --ing:#ffa94d; --ing-soft:#3d2a14; --prep:#b197fc; --prep-soft:#2a2245; --adj:#f783ac; }
+}
+:root[data-theme="dark"]{ --to:#74c0fc; --to-soft:#16314a; --ing:#ffa94d; --ing-soft:#3d2a14; --prep:#b197fc; --prep-soft:#2a2245; --adj:#f783ac; }
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 var(--up-font);padding:24px 16px 96px}
+main{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:48px}
+h1{font-size:clamp(1.7rem,4.5vw,2.4rem);line-height:1.25;margin:0 0 8px}
+h2{font-size:1.4rem;margin:0 0 8px}
+h3{font-size:1.05rem;margin:0 0 6px}
+p{margin:0}
+.lead{color:var(--muted)}
+.muted{color:var(--muted);font-size:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--up-radius);box-shadow:var(--up-shadow);padding:16px}
+.analogy{border-left:4px solid var(--accent)}
+.btn{font:inherit;font-size:14px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--up-surface)}
+.btn.on{border-color:var(--accent);background:var(--up-accent-soft);color:var(--ink);font-weight:600}
+.btn:disabled{opacity:.45;cursor:default}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.stepno{font-family:var(--up-mono);color:var(--muted);font-size:.9rem;min-width:56px;text-align:center}
+.caption{min-height:3.4em;margin-top:10px}
+.en{font-family:var(--up-mono)}
+.t-to{color:var(--to);font-weight:700}
+.t-ing{color:var(--ing);font-weight:700}
+.t-prep{color:var(--prep);font-weight:700}
+.t-adj{color:var(--adj);font-weight:700}
+
+/* 两栏对比 */
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cmp .card{border-top:4px solid var(--to)}
+.cmp .card.b{border-top-color:var(--ing)}
+.cmp ul{margin:6px 0 0;padding-left:1.2em}
+@media (max-width:620px){.cmp{grid-template-columns:1fr}}
+
+/* 句子舞台 */
+.stage{border-radius:10px;background:var(--surface2);padding:16px 12px;margin-top:12px;overflow:hidden;display:grid;gap:12px;min-height:120px;align-content:center}
+.sent{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px;font-family:var(--up-mono);font-size:clamp(14px,3.4vw,19px)}
+.sent .zh{flex-basis:100%;text-align:center;font-family:var(--up-font);font-size:13px;color:var(--muted)}
+.chip{padding:3px 10px;border-radius:8px;background:var(--surface);border:1.5px solid var(--line);white-space:nowrap}
+.chip.a{border-color:var(--adj);color:var(--adj);font-weight:700}
+.chip.t{background:var(--to-soft);border-color:var(--to);color:var(--to);font-weight:700}
+.chip.g{background:var(--ing-soft);border-color:var(--ing);color:var(--ing);font-weight:700}
+.chip.p{background:var(--prep-soft);border-color:var(--prep);color:var(--prep);font-weight:700}
+.chip.x{border:1.5px dashed var(--prep);color:var(--prep);opacity:.55;background:transparent}
+.chip.s{border-color:var(--bad);color:var(--bad);text-decoration:line-through}
+.chip.new{animation:pop .7s ease}
+@keyframes pop{from{transform:translateY(-10px) scale(.6);opacity:0}to{transform:none;opacity:1}}
+
+/* 分拣器 */
+.words{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.words .btn{font-family:var(--up-mono)}
+.words .btn.done-to{border-color:var(--to);color:var(--to)}
+.words .btn.done-ing{border-color:var(--ing);color:var(--ing)}
+.words .btn.done-both{border-color:var(--prep);color:var(--prep)}
+.out{margin-top:12px;border-radius:10px;background:var(--surface2);padding:14px;min-height:96px}
+.out .s{font-family:var(--up-mono);font-size:clamp(14px,3.4vw,18px)}
+.out .tag{display:inline-block;font-size:12px;border-radius:999px;padding:0 10px;margin:6px 6px 0 0;border:1.5px solid}
+.tag.to{color:var(--to);border-color:var(--to);background:var(--to-soft)}
+.tag.ing{color:var(--ing);border-color:var(--ing);background:var(--ing-soft)}
+.tag.both{color:var(--prep);border-color:var(--prep);background:var(--prep-soft)}
+.bins{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.bin{border:1.5px dashed var(--line);border-radius:10px;padding:8px 10px;min-height:72px;font-size:13px}
+.bin b{display:block;font-size:13px;margin-bottom:4px}
+.bin.to b{color:var(--to)} .bin.ing b{color:var(--ing)} .bin.both b{color:var(--prep)}
+.bin .w{display:inline-block;font-family:var(--up-mono);margin:2px 6px 2px 0;animation:pop .6s ease}
+@media (max-width:620px){.bins{grid-template-columns:1fr}}
+
+/* 同词对比 */
+.pair{display:grid;gap:10px;margin-top:12px}
+.pair .row{background:var(--surface2);border-radius:10px;padding:10px 14px;border-left:4px solid var(--line);animation:pop .6s ease}
+.pair .row.to{border-left-color:var(--to)} .pair .row.ing{border-left-color:var(--ing)} .pair .row.oth{border-left-color:var(--muted)}
+.pair .row .s{font-family:var(--up-mono);font-size:clamp(14px,3.4vw,18px)}
+.pair .row small{display:block;font-size:13px;color:var(--muted)}
+.key{margin-top:10px}
+
+/* 决策图 */
+.flow{display:grid;gap:8px;margin-top:12px;font-size:15px}
+.flow .q{background:var(--surface2);border-radius:10px;padding:10px 14px;text-align:center;font-weight:600}
+.flow .br{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.flow .br div{border-radius:10px;padding:10px 12px;border:1.5px solid}
+.flow .br .l{border-color:var(--to);background:var(--to-soft)}
+.flow .br .r{border-color:var(--ing);background:var(--ing-soft)}
+@media (max-width:620px){.flow .br{grid-template-columns:1fr}}
+
+ul.tight{margin:6px 0 0;padding-left:1.2em}
+ul.tight li{margin:4px 0}
+.sum{border-left:4px solid var(--accent);font-size:1.05rem}
+@media (prefers-reduced-motion: reduce){
+  .chip.new,.bin .w,.pair .row{animation:none}
+}
+:root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:var(--ok);--lq-bad:var(--bad)}
+/* ---------- 练习题（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+.lq{display:grid;gap:12px;margin-bottom:56px}
+.lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+.lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
+.lq-sub{margin:0;color:var(--lq-muted);font-size:14px}
+.lq-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--lq-muted);font-variant-numeric:tabular-nums}
+.lq-list{display:grid;gap:10px}
+.lq-item{background:var(--lq-surface);border:1.5px solid var(--lq-line);border-radius:10px;padding:12px 16px;display:grid;gap:10px;min-width:0;color:var(--lq-ink);text-align:left}
+.lq-item.lq-is-ok{border-color:var(--lq-ok)}
+.lq-item.lq-is-bad{border-color:var(--lq-bad)}
+.lq-q{font-size:15px;font-weight:600;line-height:1.6}
+.lq-tag{display:inline-block;font-size:11px;font-weight:500;line-height:1.6;color:var(--lq-muted);border:1px solid var(--lq-line);border-radius:999px;padding:0 8px;margin-right:8px;vertical-align:1px}
+.lq-opts,.lq-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lq .lq-opt,.lq .lq-redo{font:inherit;font-size:14px;line-height:1.4;padding:6px 14px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);cursor:pointer;text-align:left;opacity:1}
+.lq .lq-opt:hover:not(:disabled),.lq .lq-redo:hover{border-color:var(--lq-accent)}
+.lq .lq-opt:disabled{cursor:default;opacity:1}
+.lq .lq-opt.lq-right{border-color:var(--lq-ok);color:var(--lq-ok);font-weight:700}
+.lq .lq-opt.lq-wrong{border-color:var(--lq-bad);color:var(--lq-bad);text-decoration:line-through}
+.lq-fill input{font:inherit;font-size:14px;padding:6px 10px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);width:min(100%,200px)}
+.lq-fill input.lq-right{border-color:var(--lq-ok)}
+.lq-fill input.lq-wrong{border-color:var(--lq-bad)}
+.lq-why{font-size:14px;line-height:1.65;color:var(--lq-muted)}
+.lq-why:empty{display:none}
+.lq-why .lq-ok{color:var(--lq-ok)}
+.lq-why .lq-bad{color:var(--lq-bad)}
+</style>
+</head>
+<body>
+<!-- up-shell:begin（由 scripts/shell.mjs 自动生成，勿手改） -->
+<nav id="up-nav" aria-label="网站导航">
+<a class="up-home" href="/" title="Up 学习站首页"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="up-nav-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c6ef5"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#up-nav-g)"/><path d="M12 52V42a2 2 0 0 1 2-2h10V32a2 2 0 0 1 2-2h10v-8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v30z" fill="#fff"/><circle cx="43" cy="13" r="5.5" fill="#ffa94d"/></svg><span>Up 学习站</span></a>
+<span class="up-sep" aria-hidden="true">›</span><a class="up-cat" href="/english">英语</a>
+<span class="up-sep" aria-hidden="true">›</span><span class="up-title">be + adj. + to do / doing</span>
+<button id="up-reset" type="button" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+</nav>
+<style>
+:root{--up-bg:#f5f6f8;--up-surface:#ffffff;--up-surface-2:#eef0f4;--up-ink:#1d2127;--up-muted:#626b78;--up-line:#dfe2e8;--up-ok:#2b8a3e;--up-bad:#d6336c;--up-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);--up-font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif;--up-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;--up-radius:12px;--up-accent:#2f9e44;--up-accent-soft:#ebfbee}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#69db7c;--up-accent-soft:#1b3222;color-scheme:dark}}
+:root[data-theme="dark"]{--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#69db7c;--up-accent-soft:#1b3222;color-scheme:dark}
+html{padding-top:52px;scroll-padding-top:64px}
+#up-nav{position:fixed;top:0;left:0;right:0;z-index:2147483000;height:52px;box-sizing:border-box;display:flex;align-items:center;gap:8px;
+padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));border-top:3px solid var(--up-accent);
+border-bottom:1px solid var(--up-line);background:color-mix(in srgb,var(--up-surface) 88%,transparent);
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:500 14px/1.2 var(--up-font);color:var(--up-ink);text-align:left}
+#up-nav a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none}
+#up-nav a:hover{color:var(--up-accent)}
+#up-nav svg{width:24px;height:24px;flex:none;display:block}
+#up-nav .up-home span{font-weight:700}
+#up-nav .up-cat{color:var(--up-accent);font-weight:600}
+#up-nav .up-sep{color:var(--up-muted);flex:none}
+#up-nav .up-title{color:var(--up-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#up-reset{margin:0 0 0 auto;flex:none;font:600 14px/1 var(--up-font);padding:8px 14px;border-radius:999px;cursor:pointer;
+border:1.5px solid var(--up-accent);background:transparent;color:var(--up-accent);transition:background .2s,color .2s}
+#up-reset:hover,#up-reset:focus-visible{background:var(--up-accent);color:var(--up-surface)}
+#up-reset:focus-visible,#up-nav a:focus-visible{outline:2px solid var(--up-accent);outline-offset:2px}
+@media (max-width:560px){#up-nav .up-home span{display:none}}
+@media print{#up-nav{display:none}html{padding-top:0}}
+</style>
+<script>
+document.getElementById('up-reset').addEventListener('click', function () {
+  if (typeof window.resetPage === 'function') window.resetPage();
+  else console.warn('本页没有定义 window.resetPage()，重置按钮无效');
+  window.scrollTo({ top: 0, behavior: 'auto' });
+});
+</script>
+<!-- up-shell:end -->
+<main>
+
+<section>
+  <h1>be + adj. + to do / doing</h1>
+  <p class="lead">你的理解对：形容词后面<b>默认</b>接 <span class="en t-to">to do</span>（<span class="en">It is important to do sth</span>）。而 <span class="en">be busy doing</span> 这类「例外」其实有一条统一的规律——<b>形容词后面藏着一个介词</b>。看懂这一点，例外就不用死记了。</p>
+</section>
+
+<section class="cmp">
+  <div class="card">
+    <h3 class="t-to">默认：adj. + to do</h3>
+    <p class="en">important / necessary / easy / hard / possible / kind / happy / glad / sorry / ready / able / eager / willing …</p>
+    <ul class="muted"><li class="en">It is important <b>to sleep</b> early.</li><li class="en">I'm glad <b>to see</b> you.</li></ul>
+  </div>
+  <div class="card b">
+    <h3 class="t-ing">例外：adj. + (介词) + doing</h3>
+    <p class="en">busy / worth<br>good at / interested in / fond of / tired of / afraid of / used to …</p>
+    <ul class="muted"><li class="en">She is busy <b>doing</b> homework.</li><li class="en">The film is worth <b>seeing</b>.</li></ul>
+  </div>
+</section>
+
+<section class="card analogy">
+  <b>生活比喻：介词是一个「只收名词的门卫」。</b><br>
+  形容词后面如果<b>直接</b>跟动词，就用 <span class="t-to">to</span> 牵着它：<span class="en">happy to see</span>。<br>
+  可一旦中间站了个介词（<span class="t-prep">at / in / of / to …</span>），门卫只放<b>名词</b>进门——动词必须穿上 <span class="t-ing">-ing</span> 这件「名词外套」（动名词）才能进去：<span class="en">good <span class="t-prep">at</span> <span class="t-ing">swimming</span></span>。<br>
+  <span class="en">busy</span> 和 <span class="en">worth</span> 的门卫是<b>隐形的</b>：看不见，但它在。
+</section>
+
+<!-- 模块 1：to do 的三种句型 -->
+<section>
+  <h2>一步一步看①：adj. + to do 的三种句型</h2>
+  <div class="card" id="m1">
+    <div class="stage"></div>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<!-- 模块 2：例外 = 介词 -->
+<section>
+  <h2>一步一步看②：例外的秘密——门卫（介词）</h2>
+  <div class="card" id="m2">
+    <div class="stage"></div>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<!-- 决策图 -->
+<section>
+  <h2>判断方法：只问一个问题</h2>
+  <div class="flow">
+    <div class="q">形容词后面有没有介词？（包括隐形的 busy (in)、worth）</div>
+    <div class="br">
+      <div class="l"><b class="t-to">没有 → to do</b><br><span class="en">important to do · happy to do · ready to do · easy to read</span></div>
+      <div class="r"><b class="t-ing">有 → doing</b><br><span class="en">good at doing · used to doing · busy doing · worth doing</span></div>
+    </div>
+  </div>
+  <p class="muted" style="margin-top:10px">⚠ 小心 <span class="en">to</span> 的两种身份：<span class="en">happy <span class="t-to">to</span> help</span> 里的 to 是不定式符号；<span class="en">used <span class="t-prep">to</span> / be devoted <span class="t-prep">to</span> / be close <span class="t-prep">to</span></span> 里的 to 是<b>介词</b>，后面要 doing。检验法：to 后面能换成名词吗？<span class="en">used to <u>the noise</u></span> ✓ → 是介词。</p>
+</section>
+
+<!-- 模块 3：分拣器 -->
+<section>
+  <h2>自己试试：把形容词扔进分拣机</h2>
+  <div class="card" id="sorter">
+    <p>点一个形容词，看它后面接 to do 还是 doing，并自动落进对应的筐里。</p>
+    <div class="words"></div>
+    <div class="out"><p class="muted">← 先点一个形容词</p></div>
+    <div class="bins">
+      <div class="bin to"><b>+ to do</b><div data-bin="to"></div></div>
+      <div class="bin ing"><b>+ (介词) doing</b><div data-bin="ing"></div></div>
+      <div class="bin both"><b>两种都有（意思不同）</b><div data-bin="both"></div></div>
+    </div>
+    <div class="ctrl"><span class="muted" data-k="cnt"></span><button type="button" class="btn" data-act="reset">↺ 重置本模块</button></div>
+  </div>
+</section>
+
+<!-- 模块 4：同词两用 -->
+<section>
+  <h2>同一个词，两种用法：意思不一样</h2>
+  <div class="card" id="pair">
+    <p>有几个形容词既能 <span class="t-to">+ to do</span>，也能 <span class="t-prep">+ 介词</span> <span class="t-ing">+ doing</span>，考试最爱考它们的区别。</p>
+    <div class="ctrl" data-k="tabs"></div>
+    <div class="pair"></div>
+    <p class="key"></p>
+    <div class="ctrl"><button type="button" class="btn" data-act="reset">↺ 重置本模块</button></div>
+  </div>
+</section>
+
+<section>
+  <h2>常见误区</h2>
+  <div class="card">
+    <ul class="tight">
+      <li><b>✗ <span class="en">He is busy to do his homework.</span></b> → ✓ <span class="en">busy <span class="t-ing">doing</span></span>。busy 后面有隐形的 in。busy 后面接名词时用 <span class="en">busy <span class="t-prep">with</span> sth</span>。</li>
+      <li><b>✗ <span class="en">The museum is worth to visit / worth being visited.</span></b> → ✓ <span class="en">worth <span class="t-ing">visiting</span></span>。主动形式就表达被动意思（「值得被参观」）。</li>
+      <li><b>✗ <span class="en">I'm used to get up early.</span></b>（想说「习惯早起」）→ ✓ <span class="en">used <span class="t-prep">to</span> <span class="t-ing">getting</span> up</span>。这里的 to 是介词。</li>
+      <li><b>✗ <span class="en">This question is easy to answer it.</span></b> → ✓ 去掉 <span class="en">it</span>。主语 this question 就是 answer 的对象，后面不再重复。</li>
+      <li><b>✗ <span class="en">It's kind for you to help me.</span></b> → ✓ <span class="en">kind <b>of</b> you</span>。夸/批评「人的品质」（kind, nice, clever, careless, rude）用 of；其他（important, easy, necessary）用 for。</li>
+    </ul>
+  </div>
+</section>
+
+<section class="card sum">
+  <b>一句话总结：</b>形容词后面<b>直接</b>跟动词 → <span class="en t-to">to do</span>；形容词后面<b>有介词</b>（看得见的 at / in / of / used to，或看不见的 busy、worth）→ <span class="en t-ing">doing</span>。
+</section>
+
+<section class="lq" id="lq" aria-label="练习">
+  <div class="lq-head"><h2>练习</h2><span class="lq-score"></span></div>
+  <p class="lq-sub">学完上面的内容，来检验一下。每题作答后马上看到解析；点「重做练习」清空重来。</p>
+  <div class="lq-list"></div>
+  <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+</section>
+
+</main>
+
+<script>
+const resets = [];
+window.pageReset = () => resets.forEach(f => f());
+
+/* 句子渲染："a:important" → 带语义色的小块；前缀 * 表示本步新出现（弹入动画）；"zh:…" 是中文释义 */
+const chips = line => '<div class="sent">' + line.split('|').map(tok => {
+  let isNew = tok.startsWith('*'); if (isNew) tok = tok.slice(1);
+  const i = tok.indexOf(':'), c = tok.slice(0, i), t = tok.slice(i + 1);
+  if (c === 'zh') return `<span class="zh">${t}</span>`;
+  return `<span class="chip ${c === 'w' ? '' : c}${isNew ? ' new' : ''}">${t}</span>`;
+}).join('') + '</div>';
+
+/* 通用分步模块：上一步 / 下一步 / 播放 / 局部重置 */
+function stepper(id, STEPS) {
+  const root = document.getElementById(id);
+  const stage = root.querySelector('.stage'), cap = root.querySelector('.caption'), no = root.querySelector('.stepno');
+  const btn = act => root.querySelector(`[data-act="${act}"]`);
+  const INIT = { step: 0, playing: false };
+  let S = { ...INIT }, timer = null;
+  const draw = () => {
+    const s = STEPS[S.step];
+    stage.innerHTML = s.lines.map(chips).join('');
+    cap.innerHTML = s.text; no.textContent = `${S.step + 1} / ${STEPS.length}`;
+    btn('prev').disabled = S.step === 0; btn('next').disabled = S.step === STEPS.length - 1;
+    btn('play').textContent = S.playing ? '⏸ 暂停' : '▶ 播放';
+  };
+  const stop = () => { clearInterval(timer); timer = null; S.playing = false; };
+  const go = d => { S.step = Math.max(0, Math.min(STEPS.length - 1, S.step + d)); draw(); };
+  btn('prev').onclick = () => { stop(); go(-1); };
+  btn('next').onclick = () => { stop(); go(1); };
+  btn('play').onclick = () => {
+    if (S.playing) { stop(); draw(); return; }
+    if (S.step === STEPS.length - 1) S.step = 0;
+    S.playing = true; draw();
+    timer = setInterval(() => { go(1); if (S.step === STEPS.length - 1) { stop(); draw(); } }, 3200);
+  };
+  const reset = () => { stop(); S = { ...INIT }; draw(); };
+  btn('reset').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+/* ---------- 模块 1 ---------- */
+stepper('m1', [
+  { lines: ['t:To learn English|w:is|a:important|w:.|zh:学英语很重要'],
+    text: '第 1 步：先看原始句子。主语 <span class="en">to learn English</span> 又长又重，压在句首，读起来「头重脚轻」。' },
+  { lines: ['*w:It|w:is|a:important|*t:to learn English|w:.|zh:学英语很重要'],
+    text: '第 2 步：请 <span class="en">It</span> 来占位（形式主语），真正的主语 <span class="t-to">to learn English</span> 挪到句尾。这就是 <b>句型 A：It is + adj. + to do</b>。' },
+  { lines: ['w:It|w:is|a:important|*p:for us|t:to learn English|w:.', 'w:It|w:is|a:kind|*p:of you|t:to help me|w:.|zh:你帮我真是太好了'],
+    text: '第 3 步：想说「谁」做，加 <span class="en">for sb</span>；但形容词夸/评价的是<b>这个人的品质</b>（kind、nice、clever、careless）时用 <span class="en">of sb</span>。检验：You are kind ✓ → 用 of。' },
+  { lines: ['w:I\'m|a:glad|*t:to see you|w:.|zh:见到你很高兴', 'w:We are|a:ready|*t:to start|w:.|zh:我们准备好出发了'],
+    text: '第 4 步：<b>句型 B：sb + be + adj. + to do</b>。主语是人：情绪（glad、happy、sorry、surprised）后面的 to do 说明「为什么有这种情绪」；ready、able、eager、willing 说明「对要做的事的状态」。' },
+  { lines: ['w:This question|w:is|a:easy|*t:to answer|w:.|zh:这个问题很好回答', 'w:This question|w:is|a:easy|t:to answer|*s:it|w:.'],
+    text: '第 5 步：<b>句型 C：sth + be + adj. + to do</b>。主语 this question 正是 answer 的对象，所以句尾<b>不能再加 it</b>（红色划掉的是常见错误）。' },
+  { lines: ['a:adj.|*t:to do'],
+    text: '第 6 步：三种句型的共同点——<b>形容词后面直接跟动词，中间没有介词</b>，所以用 <span class="t-to">to do</span>。记住这个「直接」，下一个模块就靠它。' },
+]);
+
+/* ---------- 模块 2 ---------- */
+stepper('m2', [
+  { lines: ['w:She|w:is|a:good|*p:at|*s:swim|w:.'],
+    text: '第 1 步：<span class="en">good</span> 后面先站了一个介词 <span class="t-prep">at</span>——门卫只收名词，原形动词 <span class="en">swim</span> 被拦下 ✗。' },
+  { lines: ['w:She|w:is|a:good|p:at|*g:swimming|w:.|zh:她擅长游泳'],
+    text: '第 2 步：给动词穿上 <span class="t-ing">-ing</span> 外套，变成动名词（有名词身份），顺利进门 ✓。<b>介词后面的动词一律用 doing。</b>' },
+  { lines: ['w:I\'m|a:interested|*p:in|*g:learning Chinese|w:.', 'w:He is|a:tired|*p:of|*g:waiting|w:.', 'w:I\'m|a:used|*p:to|*g:getting up early|w:.|zh:我习惯早起'],
+    text: '第 3 步：同样的道理：<span class="en">interested in / fond of / tired of / proud of / afraid of / used to</span> + doing。注意 <span class="en">used to</span> 里的 to 是<b>介词</b>，不是不定式！' },
+  { lines: ['w:Mom|w:is|a:busy|*x:(in)|*g:cooking|w:.|zh:妈妈正忙着做饭', 'w:Mom|w:is|a:busy|*p:with|*w:the housework|w:.|zh:busy with + 名词'],
+    text: '第 4 步：<b>busy 的门卫是隐形的</b>。老式英语说 <span class="en">busy in doing</span>，后来 in 习惯省掉了，但 doing 留了下来。后面接名词时用 <span class="en">busy with sth</span>。' },
+  { lines: ['w:The film|w:is|a:worth|*g:seeing|w:.|zh:这部电影值得一看', 'w:The film|w:is|a:worth|*s:to see|*s:being seen'],
+    text: '第 5 步：<b>worth 本身就像个介词</b>，后面接名词（<span class="en">worth 10 dollars</span>）或 doing。而且用<b>主动形式表被动意思</b>：电影「被看」，却说 <span class="en">worth seeing</span>。' },
+  { lines: ['a:adj.|t:to do|zh:中间没东西 → to do', 'a:adj.|p:介词|g:doing|zh:中间有门卫 → doing', 'a:busy / worth|x:(隐形)|g:doing|zh:门卫隐形 → 照样 doing'],
+    text: '第 6 步：总结：<b>看形容词和动词中间有没有介词</b>。所谓「例外」，其实都是介词在起作用。' },
+]);
+
+/* ---------- 模块 3：分拣器 ---------- */
+{
+  const root = document.getElementById('sorter');
+  const words = root.querySelector('.words'), out = root.querySelector('.out'), cnt = root.querySelector('[data-k="cnt"]');
+  const TAG = { to: '<span class="tag to">+ to do</span>', ing: '<span class="tag ing">+ (介词) doing</span>', both: '<span class="tag both">两种都有</span>' };
+  const W = [
+    { w: 'important', k: 'to', s: 'It is important <b class="t-to">to sleep</b> early.', n: '句型 A：It is + adj. + to do。' },
+    { w: 'easy', k: 'to', s: 'This book is easy <b class="t-to">to read</b>.', n: '句型 C：句尾不加 it。' },
+    { w: 'kind', k: 'to', s: 'It\'s kind of you <b class="t-to">to help</b> me.', n: '评价人的品质用 of sb。' },
+    { w: 'happy', k: 'to', s: 'I\'m happy <b class="t-to">to meet</b> you.', n: 'to do 说明高兴的原因。' },
+    { w: 'ready', k: 'to', s: 'We are ready <b class="t-to">to go</b>.', n: '对将要做的事的状态。（ready for + 名词）' },
+    { w: 'able', k: 'to', s: 'She is able <b class="t-to">to swim</b>.', n: 'be able to do = can。' },
+    { w: 'busy', k: 'ing', s: 'He is busy <b class="t-ing">doing</b> his homework.', n: '隐形介词 (in)。接名词用 busy with。' },
+    { w: 'worth', k: 'ing', s: 'The book is worth <b class="t-ing">reading</b>.', n: 'worth 像介词；主动形式表被动。' },
+    { w: 'good at', k: 'ing', s: 'Tom is good <span class="t-prep">at</span> <b class="t-ing">drawing</b>.', n: '介词 at 后面用 doing。' },
+    { w: 'fond of', k: 'ing', s: 'Kids are fond <span class="t-prep">of</span> <b class="t-ing">playing</b> games.', n: '介词 of 后面用 doing。' },
+    { w: 'used to', k: 'ing', s: 'I\'m used <span class="t-prep">to</span> <b class="t-ing">living</b> here.', n: 'to 是介词：be used to doing = 习惯于。' },
+    { w: 'afraid', k: 'both', s: 'I\'m afraid <b class="t-to">to jump</b>. / I\'m afraid <span class="t-prep">of</span> <b class="t-ing">falling</b>.', n: '不敢做 / 担心某事发生。见下一个模块。' },
+    { w: 'sorry', k: 'both', s: 'Sorry <b class="t-to">to hear</b> that. / Sorry <span class="t-prep">for</span> <b class="t-ing">being</b> late.', n: '对眼前/将要的事 / 为做过的事道歉。' },
+    { w: 'sure', k: 'both', s: 'He is sure <b class="t-to">to win</b>. / He is sure <span class="t-prep">of</span> <b class="t-ing">winning</b>.', n: '说话人断定 / 主语自己有把握。' },
+  ];
+  const INIT = () => ({ done: new Set(), cur: null });
+  let S = INIT();
+  const btns = W.map((it, i) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'btn'; b.textContent = it.w;
+    b.onclick = () => { S.cur = i; if (!S.done.has(i)) { S.done.add(i); addToBin(it); } draw(); };
+    words.append(b); return b;
+  });
+  const addToBin = it => {
+    const sp = document.createElement('span'); sp.className = 'w'; sp.textContent = it.w;
+    root.querySelector(`[data-bin="${it.k}"]`).append(sp);
+  };
+  const draw = () => {
+    btns.forEach((b, i) => { b.className = 'btn' + (S.done.has(i) ? ' done-' + W[i].k : '') + (S.cur === i ? ' on' : ''); });
+    if (S.cur === null) out.innerHTML = '<p class="muted">← 先点一个形容词</p>';
+    else { const it = W[S.cur]; out.innerHTML = `<div class="s">${it.s}</div>${TAG[it.k]}<p class="muted" style="margin-top:6px">${it.n}</p>`; }
+    cnt.textContent = `已分拣 ${S.done.size} / ${W.length}`;
+  };
+  const reset = () => { S = INIT(); root.querySelectorAll('[data-bin]').forEach(d => d.innerHTML = ''); draw(); };
+  root.querySelector('[data-act="reset"]').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+/* ---------- 模块 4：同词两用 ---------- */
+{
+  const root = document.getElementById('pair');
+  const tabs = root.querySelector('[data-k="tabs"]'), box = root.querySelector('.pair'), key = root.querySelector('.key');
+  const P = {
+    afraid: { rows: [
+      ['to', 'I\'m afraid <b class="t-to">to jump</b> into the river.', '我<b>不敢</b>跳进河里。（因为怕，所以不去做）'],
+      ['ing', 'I\'m afraid <span class="t-prep">of</span> <b class="t-ing">falling</b> into the river.', '我<b>担心会</b>掉进河里。（怕某事发生在自己身上）'] ],
+      key: 'afraid to do = 不敢做（主动的动作）；afraid of doing = 害怕会发生……' },
+    sorry: { rows: [
+      ['to', 'I\'m sorry <b class="t-to">to hear</b> that.', '听到这个消息我很难过。（对<b>眼前 / 将要</b>的事）'],
+      ['ing', 'I\'m sorry <span class="t-prep">for</span> <b class="t-ing">being</b> late.', '对不起，我迟到了。（为<b>已经做过</b>的事道歉）'] ],
+      key: '为过去的事道歉也可以说 I\'m sorry to have kept you waiting（完成式不定式）。' },
+    sure: { rows: [
+      ['to', 'He is sure <b class="t-to">to win</b>.', '他<b>肯定</b>会赢。（<b>说话人</b>的判断）'],
+      ['ing', 'He is sure <span class="t-prep">of</span> <b class="t-ing">winning</b>.', '他<b>自己确信</b>能赢。（<b>主语</b>的信心，结果未必）'] ],
+      key: '同理 be certain to do / be certain of doing。祈使句 Be sure to come! = 一定要来！' },
+    used: { rows: [
+      ['ing', 'He is used <span class="t-prep">to</span> <b class="t-ing">living</b> here.', '他<b>习惯</b>住在这里。（to 是介词 → doing）'],
+      ['to', 'Wood is used <b class="t-to">to make</b> paper.', '木头<b>被用来</b>造纸。（被动 use；to do 表目的）'],
+      ['oth', 'He <b>used to live</b> here.', '他<b>过去常</b>住在这里。（现在不住了；没有 be）'] ],
+      key: '三兄弟靠「有没有 be」和「to 是不是介词」区分。' },
+  };
+  const NAMES = { afraid: 'afraid', sorry: 'sorry', sure: 'sure', used: 'used to' };
+  const INIT = 'afraid';
+  let cur = INIT;
+  const bs = Object.keys(P).map(k => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'btn en'; b.textContent = NAMES[k];
+    b.onclick = () => { cur = k; draw(); };
+    tabs.append(b); return [k, b];
+  });
+  const draw = () => {
+    bs.forEach(([k, b]) => b.classList.toggle('on', k === cur));
+    box.innerHTML = P[cur].rows.map(([c, s, zh]) => `<div class="row ${c}"><div class="s">${s}</div><small>${zh}</small></div>`).join('');
+    key.innerHTML = '🔑 ' + P[cur].key;
+  };
+  const reset = () => { cur = INIT; draw(); };
+  root.querySelector('[data-act="reset"]').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+/* ---------- 练习题 ---------- */
+window.LQ_ITEMS = [
+  { type: '填空', q: 'It is necessary ______ (learn) a foreign language.', ans: ['to learn'], placeholder: '填两个词', why: 'necessary 后面直接跟动词，没有介词 → to do。句型 A：It is + adj. + to do（模块①第 2 步）。' },
+  { type: '选择', q: 'Mom is busy ______ dinner in the kitchen.', opts: ['to cook', 'cooking', 'cook'], ans: 1, why: 'busy 后面藏着隐形介词 (in)，所以用 doing（模块②第 4 步）。接名词时用 busy with dinner。' },
+  { type: '判断', q: '「The Great Wall is worth to visit.」这句话正确。', opts: ['正确', '错误'], ans: 1, why: 'worth 像介词，后面接 doing：worth visiting。也不说 worth being visited——主动形式本身就表被动。' },
+  { type: '选择', q: 'He has lived in Beijing for years, so he is used to ______ the cold winter.', opts: ['face', 'facing', 'faced'], ans: 1, why: '「习惯于」be used to 里的 to 是介词，可以换成名词（used to the cold），所以接 doing。' },
+  { type: '选择', q: 'It\'s very kind ______ you to help me with my English.', opts: ['for', 'of', 'to'], ans: 1, why: 'kind 评价的是「你这个人」的品质（You are kind ✓），用 of sb。important、easy 这类评价事情的才用 for sb。' },
+  { type: '选择', q: '【常见误区】哪一句是对的？', opts: ['The question is easy to answer it.', 'The question is easy to answer.', 'The question is easy answering.'], ans: 1, why: '句型 C：主语 the question 就是 answer 的对象，句尾不能再加 it；easy 后面没有介词，用 to do（模块①第 5 步）。' },
+  { type: '填空', q: 'Lily is good at ______ (draw) pictures.', ans: ['drawing'], placeholder: '填一个词', why: '介词 at 是「门卫」，只收名词，动词要变成 doing（模块②第 1–2 步）。' },
+  { type: '选择', q: '【情景】你站在高高的跳台上，不敢往下跳，你说：I\'m afraid ______.', opts: ['to jump', 'of jump', 'jumping'], ans: 0, why: '「不敢做某个动作」用 afraid to do。afraid of 后面要 doing（of jump 少了 -ing），而且 afraid of doing 侧重「担心某事会发生」。' },
+  { type: '选择', q: '【情景】你让朋友等了半小时，见面时道歉：I\'m sorry ______ you waiting so long.', opts: ['to keep', 'for keeping', 'keep'], ans: 1, why: '为<b>已经做过</b>的事道歉：sorry for doing（也可说 sorry to have kept）。sorry to keep 是「抱歉（现在/马上）要让你等」。' },
+  { type: '选择', q: '【迁移】教练看好小明，对记者说：「他肯定会赢。」', opts: ['He is sure of winning.', 'He is sure to win.', 'He is sure winning.'], ans: 1, why: '「肯定会……」是<b>说话人（教练）</b>的判断 → be sure to do。sure of winning 是小明<b>自己</b>有把握，结果不一定。sure 后面也不能直接跟 doing。' },
+];
+</script>
+<script>
+/* ---------- 练习题（learn 通用组件） ----------
+   题目来自 window.LQ_ITEMS：{type, q, opts, ans: 选项下标, why} 或填空题 {type, q, ans: [可接受答案…], why}
+   定义 window.resetPage()（导航条「重置」按钮调用）：先调用页面自己的 window.pageReset()，再清空练习 */
+(() => {
+  const box = document.getElementById('lq');
+  const items = window.LQ_ITEMS || [];
+  const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let answered = 0, right = 0;
+
+  function update() {
+    const all = answered === items.length;
+    score.textContent = `已答 ${answered} / ${items.length} · 答对 ${right}` +
+      (all ? (right === items.length ? ' · 全对！' : ' · 看看解析，再重做一次') : '');
+  }
+
+  function render() {
+    answered = 0; right = 0; list.innerHTML = '';
+    items.forEach((it, i) => {
+      const el = document.createElement('div');
+      el.className = 'lq-item';
+      el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
+      const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
+      const judge = (ok, answer) => {
+        answered++; if (ok) right++;
+        el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
+        why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
+        update();
+      };
+      if (it.opts) {
+        a.classList.add('lq-opts');
+        it.opts.forEach((o, j) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'lq-opt'; b.innerHTML = o;
+          b.onclick = () => {
+            a.querySelectorAll('button').forEach(x => x.disabled = true);
+            a.children[it.ans].classList.add('lq-right');
+            if (j !== it.ans) b.classList.add('lq-wrong');
+            judge(j === it.ans, it.opts[it.ans]);
+          };
+          a.append(b);
+        });
+      } else {
+        a.classList.add('lq-fill');
+        a.innerHTML = `<input type="text" autocomplete="off" spellcheck="false" placeholder="${it.placeholder || '输入答案'}" aria-label="第 ${i + 1} 题答案"><button type="button" class="lq-opt">确定</button>`;
+        const inp = a.querySelector('input'), go = a.querySelector('button');
+        const submit = () => {
+          if (!inp.value.trim()) { inp.focus(); return; }
+          inp.disabled = go.disabled = true;
+          const ok = it.ans.some(x => norm(x) === norm(inp.value));
+          inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
+          judge(ok, it.ans[0]);
+        };
+        go.onclick = submit;
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      }
+      list.append(el);
+    });
+    update();
+  }
+
+  box.querySelector('.lq-redo').addEventListener('click', render);
+  // 导航条的「重置」按钮调用它：页面各模块 + 练习题一起恢复初始状态
+  window.resetPage = () => {
+    if (typeof window.pageReset === 'function') window.pageReset();
+    render();
+  };
+  render();
+})();
+</script>
+</body>
+</html>
