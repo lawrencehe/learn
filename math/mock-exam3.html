@@ -1,0 +1,662 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>练习模拟卷三</title>
+<meta name="description" content="按试卷1–6的出题规律出的第三套练习模拟卷：同一题型换问法（从大到小排列、求最小、错在第②步），并补上循环小数第几位、提速求路程、错位相减、数轴跳跃找规律等题型。共31题，满分100分，可在线判分，也可下载Word试卷和答案打印。">
+<style>
+:root{
+  --bg:var(--up-bg); --surface:var(--up-surface); --surface2:var(--up-surface-2); --ink:var(--up-ink); --muted:var(--up-muted); --line:var(--up-line);
+  --accent:var(--up-accent); --accent-soft:var(--up-accent-soft); --ok:var(--up-ok); --bad:var(--up-bad);
+  --pen:#e03131;          /* 老师的红笔：扣分标记 */
+  --hatch1:#1c7ed6; --hatch2:#e8590c;   /* 面积图两种阴影 */
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --pen:#ff8787; --hatch1:#74c0fc; --hatch2:#ffa94d; }
+}
+:root[data-theme="dark"]{ --pen:#ff8787; --hatch1:#74c0fc; --hatch2:#ffa94d; }
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.75 var(--up-font);padding:24px 16px 120px}
+main{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:32px}
+h1{font-size:clamp(1.5rem,4.5vw,2.1rem);line-height:1.3;margin:0 0 6px;text-align:center}
+h2{font-size:1.2rem;margin:0 0 10px}
+p{margin:0}
+a{color:var(--accent)}
+.lead{color:var(--muted);text-align:center}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--up-radius);box-shadow:var(--up-shadow);padding:16px}
+
+/* ---------- 风格画像 ---------- */
+details.card > summary{cursor:pointer;font-weight:700;font-size:1.05rem;list-style:none}
+details.card > summary::-webkit-details-marker{display:none}
+details.card > summary::before{content:"▸ ";color:var(--accent)}
+details.card[open] > summary::before{content:"▾ "}
+.style-grid{display:grid;gap:12px;margin-top:12px}
+.style-grid h3{font-size:1rem;margin:0 0 4px}
+.style-grid ul{margin:0;padding-left:1.2em}
+.style-grid li{margin:2px 0}
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{border:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top}
+th{background:var(--surface2);white-space:nowrap}
+td.no{font-family:var(--up-mono);white-space:nowrap}
+
+/* ---------- 试卷 ---------- */
+.paper{background:var(--surface);border:1px solid var(--line);border-radius:var(--up-radius);box-shadow:var(--up-shadow);padding:24px 20px 28px}
+.paper-head{text-align:center;border-bottom:2px solid var(--ink);padding-bottom:12px;margin-bottom:8px}
+.paper-head .sub{color:var(--muted);font-size:14px}
+.who{display:flex;justify-content:center;flex-wrap:wrap;gap:6px 24px;margin-top:10px;font-size:15px}
+.who span b{display:inline-block;min-width:72px;border-bottom:1px solid var(--ink);font-weight:400;font-family:var(--up-mono);color:var(--pen);text-align:center}
+.modebar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;margin:14px 0 4px;font-size:14px;color:var(--muted)}
+.seg{display:inline-flex;border:1.5px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{font:inherit;font-size:14px;padding:4px 12px;border:0;background:transparent;color:var(--ink);cursor:pointer}
+.seg button.on{background:var(--accent);color:var(--up-surface)}
+.sec-title{font-weight:700;font-size:1.08rem;margin:26px 0 6px}
+.sec-title small{font-weight:400;color:var(--muted);font-size:13px;margin-left:6px}
+.q{position:relative;padding:10px 0 10px 0;border-top:1px dashed var(--line);overflow-wrap:anywhere}
+.q:first-of-type{border-top:0}
+.q-stem{padding-right:56px}
+.q-no{font-weight:700;font-family:var(--up-mono);margin-right:4px}
+.q-pts{color:var(--muted);font-size:12px;margin-left:4px}
+.sub-q{display:block;margin:8px 0 0 1.2em}
+.mark{position:absolute;right:0;top:4px;font-family:"Comic Sans MS","Segoe Print","Bradley Hand",var(--up-font);font-size:26px;font-weight:700;color:var(--pen);transform:rotate(-8deg);line-height:1}
+.mark.full{color:var(--ok)}
+
+/* 分数 */
+.fr{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.15;margin:0 2px;font-size:.92em}
+.fr > span:first-child{border-bottom:1.2px solid currentColor;padding:0 2px}
+.fr > span:last-child{padding:0 2px}
+.mx{display:inline-flex;align-items:center;white-space:nowrap}
+.m{font-family:var(--up-mono)}
+.expr{display:inline-block;padding:2px 0}
+
+/* 填空 */
+input.bl{font:inherit;font-family:var(--up-mono);font-size:15px;width:110px;max-width:100%;padding:0 6px;border:0;border-bottom:1.5px solid var(--ink);background:transparent;color:var(--ink);text-align:center;border-radius:0}
+input.bl.w{width:170px}
+input.bl.ww{width:230px}
+input.bl:focus{outline:none;border-bottom-color:var(--accent);background:var(--accent-soft)}
+input.bl.ok,select.bl.ok{border-bottom-color:var(--ok);color:var(--ok)}
+input.bl.no,select.bl.no{border-bottom-color:var(--bad);color:var(--bad);text-decoration:line-through}
+select.bl{font:inherit;font-size:15px;border:0;border-bottom:1.5px solid var(--ink);background:transparent;color:var(--ink);padding:0 4px}
+.paren{font-family:var(--up-mono);white-space:nowrap}
+.paren b{display:inline-block;min-width:1.4em;text-align:center;color:var(--accent)}
+
+/* 选择 */
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:6px 10px;margin-top:6px}
+.opt{font:inherit;font-size:15px;text-align:left;padding:5px 10px;border:1.5px solid var(--line);border-radius:8px;background:transparent;color:var(--ink);cursor:pointer;display:flex;gap:6px;align-items:center;min-width:0}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt.sel{border-color:var(--accent);background:var(--accent-soft)}
+.opt.right{border-color:var(--ok);color:var(--ok);font-weight:700}
+.opt.wrong{border-color:var(--bad);color:var(--bad);text-decoration:line-through}
+.opt:disabled{cursor:default}
+.opt .lt{font-weight:700;font-family:var(--up-mono);flex:none}
+.opt svg{max-width:100%;height:auto}
+
+/* 排序 */
+.order{margin-top:6px;display:grid;gap:6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:15px;padding:2px 10px;border:1.5px solid var(--line);border-radius:999px;background:transparent;color:var(--ink);cursor:pointer}
+.chip:disabled{opacity:.35;cursor:default}
+.seq{min-height:34px;border-bottom:1.5px solid var(--ink);padding:2px 4px;display:flex;flex-wrap:wrap;gap:4px;align-items:center;font-size:15px}
+.seq.ok{border-bottom-color:var(--ok)}
+.seq.no{border-bottom-color:var(--bad)}
+.seq .lt{color:var(--muted)}
+.btn{font:inherit;font-size:14px;padding:5px 14px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--up-surface)}
+.btn.small{font-size:13px;padding:2px 10px}
+.btn:disabled{opacity:.45;cursor:default}
+.check{margin-top:6px}
+.paper:not(.practice) .check{display:none}
+
+/* 图 */
+figure{margin:8px 0;text-align:center}
+figure svg{max-width:100%;height:auto;color:var(--ink)}
+figcaption{font-size:13px;color:var(--muted)}
+.steps{font-family:var(--up-mono);font-size:15px;background:var(--surface2);border-radius:8px;padding:8px 12px;margin:6px 0;display:inline-block}
+.steps div{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-height:2.1em}
+.steps i{font-style:normal;color:var(--muted);width:1.6em}
+.tbl-num td,.tbl-num th{text-align:center;font-family:var(--up-mono)}
+
+/* 解析 */
+.fb{display:none;margin-top:8px;font-size:14px;line-height:1.8;color:var(--muted);background:var(--surface2);border-radius:8px;padding:8px 12px}
+.q.done .fb{display:block}
+.fb .ans{color:var(--ok);font-weight:700}
+.fb .lost{color:var(--bad);font-weight:700}
+.fb a{white-space:nowrap}
+
+/* 底部交卷条（顶部 52px 归导航条，底部可以放 fixed） */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -4px 16px rgb(0 0 0 / .06);padding:10px 16px}
+.bar-in{max-width:900px;margin:0 auto;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between}
+.bar .stat{font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar .stat b{color:var(--ink);font-family:var(--up-mono)}
+.bar .score b{color:var(--pen);font-size:1.25rem}
+.result{display:none;text-align:center;margin-top:20px;padding-top:14px;border-top:2px solid var(--ink)}
+.result.show{display:block}
+.result .big{font-size:2.4rem;font-family:var(--up-mono);color:var(--pen);font-weight:700}
+.result .secs{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;font-size:14px;color:var(--muted);margin-top:4px}
+
+@media (max-width:560px){
+  .paper{padding:18px 14px 22px}
+  .q-stem{padding-right:44px}
+  .mark{font-size:22px}
+}
+@media print{
+  #up-nav,.bar,.modebar,.check,details.card,.intro-note{display:none!important}
+  body{padding:0;background:#fff;color:#000}
+  .paper{border:0;box-shadow:none;padding:0}
+  .opt{border:0;padding:2px 0}
+}
+</style>
+</head>
+<body>
+<!-- up-shell:begin（由 scripts/shell.mjs 自动生成，勿手改） -->
+<nav id="up-nav" aria-label="网站导航">
+<a class="up-home" href="/" title="Up 学习站首页"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="up-nav-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c6ef5"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#up-nav-g)"/><path d="M12 52V42a2 2 0 0 1 2-2h10V32a2 2 0 0 1 2-2h10v-8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v30z" fill="#fff"/><circle cx="43" cy="13" r="5.5" fill="#ffa94d"/></svg><span>Up 学习站</span></a>
+<span class="up-sep" aria-hidden="true">›</span><a class="up-cat" href="/math">数学</a>
+<span class="up-sep" aria-hidden="true">›</span><span class="up-title">练习模拟卷三</span>
+<button id="up-reset" type="button" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+</nav>
+<style>
+:root{--up-bg:#f5f6f8;--up-surface:#ffffff;--up-surface-2:#eef0f4;--up-ink:#1d2127;--up-muted:#626b78;--up-line:#dfe2e8;--up-ok:#2b8a3e;--up-bad:#d6336c;--up-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);--up-font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif;--up-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;--up-radius:12px;--up-accent:#d9480f;--up-accent-soft:#fff1e8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#ff8a50;--up-accent-soft:#3a2218;color-scheme:dark}}
+:root[data-theme="dark"]{--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#ff8a50;--up-accent-soft:#3a2218;color-scheme:dark}
+html{padding-top:52px;scroll-padding-top:64px}
+#up-nav{position:fixed;top:0;left:0;right:0;z-index:2147483000;height:52px;box-sizing:border-box;display:flex;align-items:center;gap:8px;
+padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));border-top:3px solid var(--up-accent);
+border-bottom:1px solid var(--up-line);background:color-mix(in srgb,var(--up-surface) 88%,transparent);
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:500 14px/1.2 var(--up-font);color:var(--up-ink);text-align:left}
+#up-nav a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none}
+#up-nav a:hover{color:var(--up-accent)}
+#up-nav svg{width:24px;height:24px;flex:none;display:block}
+#up-nav .up-home span{font-weight:700}
+#up-nav .up-cat{color:var(--up-accent);font-weight:600}
+#up-nav .up-sep{color:var(--up-muted);flex:none}
+#up-nav .up-title{color:var(--up-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#up-reset{margin:0 0 0 auto;flex:none;font:600 14px/1 var(--up-font);padding:8px 14px;border-radius:999px;cursor:pointer;
+border:1.5px solid var(--up-accent);background:transparent;color:var(--up-accent);transition:background .2s,color .2s}
+#up-reset:hover,#up-reset:focus-visible{background:var(--up-accent);color:var(--up-surface)}
+#up-reset:focus-visible,#up-nav a:focus-visible{outline:2px solid var(--up-accent);outline-offset:2px}
+@media (max-width:560px){#up-nav .up-home span{display:none}}
+@media print{#up-nav{display:none}html{padding-top:0}}
+</style>
+<script>
+document.getElementById('up-reset').addEventListener('click', function () {
+  if (typeof window.resetPage === 'function') window.resetPage();
+  else console.warn('本页没有定义 window.resetPage()，重置按钮无效');
+  window.scrollTo({ top: 0, behavior: 'auto' });
+});
+</script>
+<!-- up-shell:end -->
+<main>
+
+<section>
+  <h1>练习模拟卷（三）</h1>
+  <p class="lead">第三套：结构、分值、难度和前两套一样，题型继续按试卷 1–6 的规律轮换，换了题目情境，也加了几道之前做错过的题型的变式。数字全部是新的。上一套：<a href="mock-exam2.html">预测数学卷二</a>。</p>
+</section>
+
+<details class="card" id="style">
+  <summary>这套卷怎么出的（每题对应哪张卷的哪类题）</summary>
+  <div class="style-grid">
+    <div>
+      <h3>① 和前两套比，换了什么</h3>
+      <ul>
+        <li><b>同一题型换个问法</b>：排大小改成“从大到小”，2、3、5 整除改成求“最小”，找错题错在第 ② 步而不是第 ① 步，选择题答案不再集中在 B、C。</li>
+        <li><b>补上原卷里出现过、前两套还没考的题型</b>：循环小数第几位（试卷3 第 9 题）、提速几分之几求时间和路程（试卷3 第 20 题，当时做错的题）、两个单位“1”互换（比…高 / 比…矮）、错位相减阅读题、数轴上跳跃找规律（试卷5 第 29 题的思路）。</li>
+      </ul>
+    </div>
+    <div>
+      <h3>② 题型对照</h3>
+      <div class="tbl-wrap"><table>
+        <tr><th>本卷</th><th>题型</th><th>原卷出处</th></tr>
+        <tr><td class="no">1、2、3</td><td>分解素因数 / 带分数的倒数 / 单位换算成几分之几</td><td>卷 1–6</td></tr>
+        <tr><td class="no">4</td><td>相反数 + 倒数 + 绝对值，整体代入</td><td>卷 1、2、5、6</td></tr>
+        <tr><td class="no">5</td><td>绝对值方程（两个答案）</td><td>卷 2 第 7</td></tr>
+        <tr><td class="no">6</td><td>已知约分结果和分子分母的差，求原分数</td><td>卷 2、5</td></tr>
+        <tr><td class="no">7</td><td>带多重符号的数<b>从大到小</b>排列</td><td>卷 2 第 10、卷 5 第 10</td></tr>
+        <tr><td class="no">8</td><td>已知最大公因数和最小公倍数，求两数</td><td>卷 1、2、3、5</td></tr>
+        <tr><td class="no">9</td><td>能同时被 2、3、5 整除的<b>最小</b>三位数</td><td>卷 1、2、3</td></tr>
+        <tr><td class="no">10</td><td>新定义运算 ⊗（从里往外算）</td><td>卷 3、4、5、6</td></tr>
+        <tr><td class="no">11</td><td>比…高几分之几 → 比…矮几分之几</td><td>卷 3 第 11、卷 1 第 16</td></tr>
+        <tr><td class="no">12</td><td>剪去几分之几、再剪几米，倒推原长</td><td>卷 2、3、6</td></tr>
+        <tr><td class="no">13</td><td>最简真分数的个数</td><td>卷 2 第 18、卷 3 第 10</td></tr>
+        <tr><td class="no">14</td><td>循环小数第 2026 位</td><td>卷 3 第 9</td></tr>
+        <tr><td class="no">15、17</td><td>概念判断、乘方的符号</td><td>每张卷、卷 6 第 4</td></tr>
+        <tr><td class="no">16</td><td>能化成有限小数的个数（先约分）</td><td>卷 1、4、5、6</td></tr>
+        <tr><td class="no">18</td><td>从数轴位置判断式子的符号</td><td>卷 1 第 3、卷 1 第 20</td></tr>
+        <tr><td class="no">19</td><td>工作效率比较（几天完成）</td><td>卷 2 第 20</td></tr>
+        <tr><td class="no">20</td><td>分数面积图</td><td>卷 2、3、4、5</td></tr>
+        <tr><td class="no">21</td><td>运算程序找周期</td><td>卷 3 第 4</td></tr>
+        <tr><td class="no">22</td><td>混合计算、乘法分配律、乘方</td><td>每张卷 + 计算卷</td></tr>
+        <tr><td class="no">23</td><td>找错步骤（这次错在第 ② 步）</td><td>卷 5 第 22</td></tr>
+        <tr><td class="no">24、25</td><td>解方程 / 三个数的最大公因数和最小公倍数</td><td>卷 1、卷 3 第 16</td></tr>
+        <tr><td class="no">26</td><td>数轴读数、到某点距离为定值</td><td>卷 4 第 10、卷 5 第 24、卷 6 第 11</td></tr>
+        <tr><td class="no">27</td><td>正负数记录表（和计划数比较）</td><td>卷 2 第 28</td></tr>
+        <tr><td class="no">28</td><td>挖坑种树改间距</td><td>卷 1 第 22</td></tr>
+        <tr><td class="no">29</td><td>提速几分之几，求时间和路程</td><td>卷 3 第 20</td></tr>
+        <tr><td class="no">30</td><td>阅读理解：错位相减求和</td><td>卷 1 第 23、卷 4 第 23、卷 6 第 25 的阅读题形式</td></tr>
+        <tr><td class="no">31</td><td>数轴上来回跳，找位置规律</td><td>卷 5 第 29</td></tr>
+      </table></div>
+    </div>
+  </div>
+</details></details>
+
+<p class="intro-note" style="color:var(--muted);font-size:14px">用法：默认是<b>考试模式</b>，全部做完点底部「交卷」统一判分，像老师批卷一样标出扣分；想边做边对答案，切到<b>练习模式</b>，每题下面有「核对本题」。填空可以写分数、小数、带分数（如 −3/2、−1.5、−1又1/2），多个答案用逗号或“或”隔开。建议先在草稿纸上写过程。想在纸上做：下载 <a href="/print/mock-exam3.docx">Word 试卷（A4 共 4 页）</a> 和 <a href="/print/mock-exam3-answers.docx">参考答案</a>。</p>
+
+<section class="paper" id="paper">
+  <div class="paper-head">
+    <div class="sub">六年级 数学 · 数的整除 / 分数 / 有理数</div>
+    <h2 style="font-size:1.35rem;margin:4px 0 0">练习模拟卷（三）</h2>
+    <div class="sub">满分 100 分 · 建议用时 90 分钟</div>
+    <div class="who"><span>姓名 <b>&nbsp;</b></span><span>班级 <b>&nbsp;</b></span><span>得分 <b id="head-score">&nbsp;</b></span></div>
+  </div>
+  <div class="modebar">
+    <span>模式</span>
+    <div class="seg" role="group" aria-label="作答模式">
+      <button type="button" data-mode="exam" class="on">考试模式</button>
+      <button type="button" data-mode="practice">练习模式</button>
+    </div>
+  </div>
+  <div id="qs"></div>
+  <div class="result" id="result">
+    <div>本卷得分</div>
+    <div class="big" id="res-score"></div>
+    <div class="secs" id="res-secs"></div>
+    <p style="margin-top:8px;color:var(--muted);font-size:14px">往上翻，红笔标了扣分的题，展开的解析里有“为什么”和对应的讲解页。</p>
+  </div>
+</section>
+
+</main>
+
+<div class="bar">
+  <div class="bar-in">
+    <span class="stat">已作答 <b id="bar-done">0</b> / <b id="bar-total">31</b> 题</span>
+    <span class="stat score" id="bar-score-wrap">得分 <b id="bar-score">—</b></span>
+    <span style="display:flex;gap:8px">
+      <button type="button" class="btn" id="btn-redo">↻ 重做</button>
+      <button type="button" class="btn primary" id="btn-submit">交卷</button>
+    </span>
+  </div>
+</div>
+
+<script>
+/* ===== 排版小工具：分数、带分数、负号 ===== */
+const f = (a, b) => `<span class="fr"><span>${a}</span><span>${b}</span></span>`;
+const mx = (w, a, b) => `<span class="mx">${w}${f(a, b)}</span>`;
+const M = s => `<span class="m">${s}</span>`;
+const see = (href, t) => `<a href="${href}">→ 复习：${t}</a>`;
+
+/* ===== 判分工具 ===== */
+const NUM = s => {   // −3/2、−1又1/2、−1.5、2分之3、(−3/2) → 数；不认识返回 NaN
+  s = String(s).trim().replace(/\s+/g, '').replace(/／/g, '/').replace(/[−–—－]/g, '-')
+    .replace(/^\((.*)\)$/, '$1').replace(/(\d+)分之(\d+)/g, '$2/$1').replace(/又/g, '+');
+  let sign = 1;
+  if (s.startsWith('+')) s = s.slice(1);
+  if (s.startsWith('-')) { sign = -1; s = s.slice(1); }
+  if (!/^[\d./+]+$/.test(s)) return NaN;
+  let v = 0;
+  for (const t of s.split('+')) {
+    if (!t) return NaN;
+    const m = t.split('/');
+    if (m.length > 2) return NaN;
+    const n = Number(m[0]), d = m.length === 2 ? Number(m[1]) : 1;
+    if (!isFinite(n) || !isFinite(d) || d === 0) return NaN;
+    v += n / d;
+  }
+  return sign * v;
+};
+const near = (a, b) => Math.abs(a - b) < 1e-9;
+const splitMany = s => String(s).replace(/[−–—－]/g, '-').split(/[,，、;；]|或|和|\s+/).map(x => x.trim()).filter(Boolean);
+const JUDGE = {
+  num:    (v, b) => near(NUM(v), b.v),
+  set:    (v, b) => { const xs = splitMany(v).map(NUM); return xs.length === b.v.length && !xs.some(isNaN) && b.v.every(t => xs.some(x => near(x, t))) && xs.every(x => b.v.some(t => near(x, t))); },
+  ints:   (v, b) => { const xs = (String(v).match(/\d+/g) || []).map(Number); const u = [...new Set(xs)].sort((p, q) => p - q); return u.join() === [...b.v].sort((p, q) => p - q).join() && xs.length === b.v.length; },
+  exact:  (v, b) => String(v).replace(/\s+/g, '').replace(/／/g, '/') === b.v,
+  factor: (v, b) => {
+    let s = String(v).replace(/\s+/g, '').replace(/^\d+=/, '').replace(/²/g, '^2').replace(/³/g, '^3').replace(/⁴/g, '^4');
+    const out = [];
+    for (const t of s.split(/[×xX*·.]/)) {
+      const m = t.match(/^(\d+)(?:\^(\d+))?$/); if (!m) return false;
+      for (let i = 0; i < Number(m[2] || 1); i++) out.push(Number(m[1]));
+    }
+    return out.sort((p, q) => p - q).join() === b.v.join();
+  },
+  select: (v, b) => v === b.v,
+  letters: (v, b) => String(v).toUpperCase().replace(/＜/g, '<').replace(/[^A-Z<]/g, '') === b.v,
+};
+
+/* ===== 图 ===== */
+const nl = (marks, w = 170) => {   // 选择题里的小数轴：marks = [[x, 标签], …]
+  return `<svg viewBox="0 0 ${w} 40" width="${w}" height="40" aria-hidden="true"><line x1="6" y1="16" x2="${w - 8}" y2="16" stroke="currentColor" stroke-width="1.5"/><path d="M${w - 8} 12 L${w - 2} 16 L${w - 8} 20" fill="currentColor"/>${marks.map(([x, t]) => `<line x1="${x}" y1="11" x2="${x}" y2="21" stroke="currentColor" stroke-width="1.5"/><text x="${x}" y="36" font-size="13" text-anchor="middle" fill="currentColor" font-style="${t === '0' ? 'normal' : 'italic'}">${t}</text>`).join('')}</svg>`;
+};
+const FIG_AREA = `<svg viewBox="0 0 260 160" width="260" height="160" role="img" aria-label="长方形先竖着平均分成5份取3份画斜线，再横着平均分成3份取2份画反斜线">
+<defs>
+<pattern id="h1" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="8" style="stroke:var(--hatch1)" stroke-width="2"/></pattern>
+<pattern id="h2" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)"><line x1="0" y1="0" x2="0" y2="8" style="stroke:var(--hatch2)" stroke-width="2"/></pattern>
+</defs>
+<rect x="5" y="5" width="150" height="150" fill="url(#h1)"/>
+<rect x="5" y="5" width="250" height="100" fill="url(#h2)"/>
+<g stroke="currentColor" stroke-width="1.2"><line x1="55" y1="5" x2="55" y2="155"/><line x1="105" y1="5" x2="105" y2="155"/><line x1="155" y1="5" x2="155" y2="155"/><line x1="205" y1="5" x2="205" y2="155"/>
+<line x1="5" y1="55" x2="255" y2="55"/><line x1="5" y1="105" x2="255" y2="105"/></g>
+<rect x="5" y="5" width="250" height="150" fill="none" stroke="currentColor" stroke-width="2"/></svg>`;
+const box = (x, y, w, h, t, sz = 13) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" style="fill:var(--up-surface)" stroke="currentColor" stroke-width="1.5"/><text x="${x + w / 2}" y="${y + h / 2 + 5}" font-size="${sz}" text-anchor="middle" fill="currentColor">${t}</text>`;
+const arrow = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="currentColor" stroke-width="1.4" marker-end="url(#ah)"/>`;
+const AH = `<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" fill="currentColor"/></marker></defs>`;
+const FIG_LOOP = `<svg viewBox="0 0 400 150" width="400" height="150" role="img" aria-label="输入x，x为偶数时计算x除以2，x为奇数时计算x加7，输出结果再返回作为下一次输入">${AH}
+${box(6, 40, 64, 30, '输入 x')}
+${arrow(70, 55, 100, 55)}
+<line x1="100" y1="28" x2="100" y2="88" stroke="currentColor" stroke-width="1.4"/>
+${arrow(100, 28, 160, 28)}${arrow(100, 88, 160, 88)}
+<text x="104" y="22" font-size="12" fill="currentColor">x 为偶数</text><text x="104" y="106" font-size="12" fill="currentColor">x 为奇数</text>
+${box(160, 13, 80, 30, 'x ÷ 2')}${box(160, 73, 80, 30, 'x + 7')}
+<line x1="240" y1="28" x2="270" y2="28" stroke="currentColor" stroke-width="1.4"/><line x1="240" y1="88" x2="270" y2="88" stroke="currentColor" stroke-width="1.4"/><line x1="270" y1="28" x2="270" y2="88" stroke="currentColor" stroke-width="1.4"/>
+${arrow(270, 55, 310, 55)}${box(310, 40, 64, 30, '输出')}
+<polyline points="342,70 342,135 38,135" fill="none" stroke="currentColor" stroke-width="1.4"/>${arrow(38, 135, 38, 72)}
+<text x="190" y="130" font-size="12" text-anchor="middle" fill="currentColor">输出的结果作为下一次的 x</text></svg>`;
+const numLine = (n, d, zero, pts, label, nums) => {   // n 个刻度，间距 d，0 在第 zero 个；pts = [[刻度位置, 字母]]；nums = [[刻度, 数字]]
+  const x0 = 20, w = x0 * 2 + (n - 1) * d;
+  let s = `<svg viewBox="0 0 ${w + 10} 56" width="${w + 10}" height="56" role="img" aria-label="${label}"><line x1="8" y1="24" x2="${w}" y2="24" stroke="currentColor" stroke-width="1.5"/><path d="M${w} 19 L${w + 8} 24 L${w} 29" fill="currentColor"/>`;
+  for (let i = 0; i < n; i++) s += `<line x1="${x0 + i * d}" y1="18" x2="${x0 + i * d}" y2="30" stroke="currentColor" stroke-width="1.3"/>`;
+  for (const [i, t] of (nums || [[zero, '0']])) s += `<text x="${x0 + i * d}" y="48" font-size="14" text-anchor="middle" fill="currentColor">${t}</text>`;
+  for (const [i, t] of pts) s += `<circle cx="${x0 + i * d}" cy="24" r="4" fill="currentColor"/><text x="${x0 + i * d}" y="12" font-size="14" font-style="italic" text-anchor="middle" fill="currentColor">${t}</text>`;
+  return s + '</svg>';
+};
+const FIG_AB = numLine(5, 70, 2, [[1.45, 'a'], [3.6, 'b']], '数轴：a在−1和0之间靠近0，b在1和2之间', [[0, '−2'], [1, '−1'], [2, '0'], [3, '1'], [4, '2']]);
+const FIG_NL26 = numLine(12, 30, 6, [[8, 'A'], [1, 'B']], '数轴：相邻刻度距离相等，0在第7个刻度，A在第9个刻度，B在第2个刻度');
+const FIG_FLEA = numLine(9, 36, 4, [[2, 'P₀']], '数轴：P0在表示−2的点', [[0, '−4'], [1, '−3'], [2, '−2'], [3, '−1'], [4, '0'], [5, '1'], [6, '2'], [7, '3'], [8, '4']]);
+
+/* ===== 题目 =====
+   sec：所属大题；stem：题干，{0}{1}… 是填空位置；blanks：每空的判分方式、标准答案、分值
+   opts/ans：选择题；why：解析 */
+const SECTIONS = [
+  { id: '一', title: '填空题', note: '（每题 2 分，共 28 分）' },
+  { id: '二', title: '选择题', note: '（每题 2 分，共 14 分）' },
+  { id: '三', title: '简答题', note: '（共 32 分）' },
+  { id: '四', title: '解答题', note: '（共 26 分）' },
+];
+const Q = [
+  /* ---------------- 一、填空题 ---------------- */
+  { sec: '一', stem: `分解素因数：126 = {0}`, blanks: [{ k: 'factor', v: [2, 3, 3, 7], show: '2×3×3×7', pts: 2, cls: 'w', ph: '如 2×3×…' }],
+    why: `126 = 2 × 63 = 2 × 3 × 21 = 2 × 3 × 3 × 7。21 还能分，别停在 2 × 3 × 21。` },
+  { sec: '一', stem: `−${mx(1, 3, 4)} 的倒数是 {0}。`, blanks: [{ k: 'num', v: -4 / 7, show: '−4/7', pts: 2 }],
+    why: `先化成假分数：−${mx(1, 3, 4)} = −${f(7, 4)}，倒数是 −${f(4, 7)}。常见错误：只颠倒分数部分写成 −1${f(4, 3)}，或者把负号丢了。` },
+  { sec: '一', stem: `1800 米是 2.4 千米的 {0}。（用最简分数表示）`, blanks: [{ k: 'exact', v: '3/4', show: '3/4', pts: 2, ph: '最简分数' }],
+    why: `单位先统一：2.4 千米 = 2400 米。1800 ÷ 2400 = ${f(18, 24)} = ${f(3, 4)}。直接拿 1800 ÷ 2.4 就错了（试卷1 第 12 题“400 秒是 1 小时的几分之几”同款）。` },
+  { sec: '一', stem: `已知 <i>a</i>、<i>b</i> 互为相反数，<i>c</i>、<i>d</i> 互为倒数，|<i>m</i>| = ${f(1, 2)}，则 ${f('<i>a</i> + <i>b</i>', 2026)} + 4<i>cd</i> − 4<i>m</i>² = {0}。`, blanks: [{ k: 'num', v: 3, show: '3', pts: 2 }],
+    why: `a + b = 0，所以第一项是 0；cd = 1；m² = ${f(1, 4)}（m = ±${f(1, 2)} 平方都一样）。原式 = 0 + 4 − 1 = 3。` },
+  { sec: '一', stem: `已知 |<i>x</i> − ${f(2, 3)}| = ${mx(1, 1, 6)}，则 <i>x</i> = {0}。`, blanks: [{ k: 'set', v: [11 / 6, -1 / 2], show: '11/6 或 −1/2', pts: 2, cls: 'w', ph: '有几个写几个' }],
+    why: `x − ${f(2, 3)} = ${f(7, 6)} → x = ${f(11, 6)}；x − ${f(2, 3)} = −${f(7, 6)} → x = −${f(1, 2)}。两个都要写（试卷2 第 7 题）。 ${see('absolute-value.html', '绝对值与相反数')}` },
+  { sec: '一', stem: `一个分数的分母比分子大 24，约分后是 ${f(5, 9)}，原来的分数是 {0}。`, blanks: [{ k: 'exact', v: '30/54', show: '30/54', pts: 2, ph: '如 a/b' }],
+    why: `约分后分母比分子大 9 − 5 = 4，原来大 24，说明约掉了 24 ÷ 4 = 6。原分数 = ${f('5×6', '9×6')} = ${f(30, 54)}。答 5/9 不对，问的是原来的分数。 ${see('numerator-change.html', '分子变化求原分数')}` },
+  { sec: '一', stem: `用“&gt;”将下列各数<b>从大到小</b>排列：−(−0.6)，−|−${f(2, 3)}|，|−${f(5, 8)}|，−(+${f(3, 5)})，0。<br>（依次点下面的数）`, order: ['−(−0.6)', '−|−2/3|', '|−5/8|', '−(+3/5)', '0'], orderAns: [2, 0, 4, 3, 1], desc: true, pts: 2,
+    showAns: '|−5/8| &gt; −(−0.6) &gt; 0 &gt; −(+3/5) &gt; −|−2/3|',
+    why: `先化简：−(−0.6) = 0.6，−|−${f(2, 3)}| ≈ −0.67，|−${f(5, 8)}| = 0.625，−(+${f(3, 5)}) = −0.6。正数里 0.625 &gt; 0.6；负数里绝对值小的反而大：−0.6 &gt; −0.67。注意这次是<b>从大到小</b>，用“&gt;”连接（试卷2 第 10 题就是从大到小）。` },
+  { sec: '一', stem: `如果两个正整数的最大公因数是 12，最小公倍数是 180，那么这两个数是 {0}。`, blanks: [{ k: 'ints', v: [12, 180, 36, 60], show: '12 和 180，或 36 和 60', pts: 2, cls: 'ww', ph: '每组都写出来' }],
+    why: `设两数为 12a、12b（a、b 互素），12ab = 180，ab = 15 = 1×15 = 3×5。所以是 12 和 180，或 36 和 60。 ${see('gcd-lcm-apply.html', '公因数公倍数应用题')}` },
+  { sec: '一', stem: `从 0、2、5、7、9 中选出三个数字，组成一个能同时被 2、3、5 整除的三位数，其中<b>最小</b>的是 {0}。`, blanks: [{ k: 'num', v: 270, show: '270', pts: 2 }],
+    why: `个位必须是 0；另两个数字之和要是 3 的倍数：2 + 7 = 9 ✓，5 + 7 = 12 ✓。能组成 270、720、570、750，最小 270。这次问的是“最小”，看清题目。 ${see('digit-divisible.html', '被每个数字整除的最大数')}` },
+  { sec: '一', stem: `规定一种新运算：<i>a</i> ⊗ <i>b</i> = <i>a</i> × <i>b</i> − (<i>a</i> + <i>b</i>)。那么 (−2) ⊗ (3 ⊗ ${f(1, 2)}) = {0}。`, blanks: [{ k: 'num', v: 8, show: '8', pts: 2 }],
+    why: `先算括号：3 ⊗ ${f(1, 2)} = ${f(3, 2)} − ${f(7, 2)} = −2。再算 (−2) ⊗ (−2) = 4 − (−4) = 8。代入负数时要加括号，减去 (a + b) 时整体变号（试卷4 第 14 题、试卷5 第 14 题）。` },
+  { sec: '一', stem: `小红比小明高 ${f(1, 9)}，那么小明比小红矮 {0}。（填几分之几）`, blanks: [{ k: 'num', v: 1 / 10, show: '1/10', pts: 2 }],
+    why: `设小明 9 份，小红 10 份。“小明比小红矮”，单位“1”换成了<b>小红</b>：(10 − 9) ÷ 10 = ${f(1, 10)}。直接填 ${f(1, 9)} 是没换单位“1”。 ${see('fraction-more-less.html', '多几分之几与少几分之几')}` },
+  { sec: '一', stem: `一根绳子，第一次剪去全长的 ${f(1, 3)}，第二次剪去 ${f(1, 3)} 米，还剩 ${mx(5, 1, 3)} 米，这根绳子原来长 {0} 米。`, blanks: [{ k: 'num', v: 17 / 2, show: '17/2（8又1/2）', pts: 2 }],
+    why: `倒推：先把第二次剪去的加回来，${mx(5, 1, 3)} + ${f(1, 3)} = ${mx(5, 2, 3)} 米，这是全长的 1 − ${f(1, 3)} = ${f(2, 3)}。全长 = ${f(17, 3)} ÷ ${f(2, 3)} = ${f(17, 2)} 米。 ${see('fraction-unit-one.html', '比…少几分之几')}` },
+  { sec: '一', stem: `如果 ${f('<i>a</i>', 9)} 是最简真分数，那么正整数 <i>a</i> 可以取的值共有 {0} 个。`, blanks: [{ k: 'num', v: 6, show: '6', pts: 2 }],
+    why: `真分数：a &lt; 9，a 取 1~8；最简：a 和 9 互素，去掉 3 和 6。剩 1、2、4、5、7、8，共 6 个（试卷3 第 10 题“分母是 10 的最简真分数”同款）。` },
+  { sec: '一', stem: `把 ${f(5, 7)} 化成循环小数后，小数点右边第 2026 位上的数字是 {0}。`, blanks: [{ k: 'num', v: 2, show: '2', pts: 2 }],
+    why: `${f(5, 7)} = 0.714285714285……，循环节“714285”有 6 位。2026 ÷ 6 = 337 余 4，第 4 位是 2（试卷3 第 9 题同款）。 ${see('cycle-program.html', '运算程序找周期')}` },
+
+  /* ---------------- 二、选择题 ---------------- */
+  { sec: '二', stem: `下列说法正确的是`, opts: ['0 是最小的有理数', '最小的正整数是 1', '有理数分为正有理数和负有理数', '两个素数的和一定是偶数'], ans: 1,
+    why: `A 错：负数比 0 小，没有最小的有理数。B 对。C 错：漏了 0。D 错：2 + 3 = 5 是奇数（2 是唯一的偶素数）（试卷5 第 1、15 题）。` },
+  { sec: '二', stem: `在 ${f(6, 24)}，${f(5, 30)}，${f(14, 35)}，${f(9, 45)}，${f(4, 18)} 中，能化成有限小数的有`, opts: ['2 个', '3 个', '4 个', '5 个'], ans: 1,
+    why: `先约分：${f(6, 24)} = ${f(1, 4)} ✓，${f(5, 30)} = ${f(1, 6)} ✗，${f(14, 35)} = ${f(2, 5)} ✓，${f(9, 45)} = ${f(1, 5)} ✓，${f(4, 18)} = ${f(2, 9)} ✗。共 3 个。` },
+  { sec: '二', stem: `下列各式中，计算结果是负数的是`, opts: ['(−2)⁴', '−(−2)³', '−|−2|²', '(−1)<sup>2026</sup>'], ans: 2,
+    why: `A：16。B：(−2)³ = −8，再取相反数得 8。C：|−2|² = 4，前面负号 → −4 ✓。D：偶数次方得 1。 ${see('rational-ops-drill.html', '有理数运算易错训练')}` },
+  { sec: '二', stem: `有理数 <i>a</i>、<i>b</i> 在数轴上的位置如图所示，下列结论正确的是<figure>${FIG_AB}</figure>`, opts: ['<i>a</i> + <i>b</i> &lt; 0', '<i>a</i> − <i>b</i> &gt; 0', '<i>ab</i> &gt; 0', '−<i>a</i> &lt; <i>b</i>'], ans: 3,
+    why: `a 是负数、离 0 近；b 是正数、离 0 远，所以 |a| &lt; |b|。A：a + b 的符号跟绝对值大的 b，是正数，错。B：小数减大数，负数，错。C：一负一正，积为负，错。D：−a 是一个比 1 小的正数，b 比 1 大，−a &lt; b ✓（试卷1 第 3 题、第 20 题）。 ${see('abs-simplify.html', '数轴化简绝对值')}` },
+  { sec: '二', stem: `一项工程，甲单独做 12 天完成，乙单独做 15 天完成。甲每天比乙多完成这项工程的`, opts: [`${f(1, 3)}`, `${f(1, 60)}`, `${f(1, 4)}`, '3'], ans: 1,
+    why: `甲每天完成 ${f(1, 12)}，乙每天完成 ${f(1, 15)}，多 ${f(1, 12)} − ${f(1, 15)} = ${f(5, 60)} − ${f(4, 60)} = ${f(1, 60)}。选 ${f(1, 4)} 是“甲的效率比乙多几分之几”，回答的是另一个问题；选 3 是天数差（试卷2 第 20 题思路）。` },
+  { sec: '二', stem: `如图，把一张长方形纸先竖着平均分成 5 份，取其中 3 份画上斜线 <span style="color:var(--hatch1)">╱╱</span>；再横着把整张纸平均分成 3 份，取其中 2 份画上斜线 <span style="color:var(--hatch2)">╲╲</span>。双阴影部分占整张纸的几分之几，可以列式为<figure>${FIG_AREA}</figure>`,
+    opts: [`${f(2, 5)} × ${f(1, 3)}`, `${f(3, 5)} × ${f(1, 3)}`, `${f(3, 5)} + ${f(2, 3)}`, `${f(3, 5)} × ${f(2, 3)}`], ans: 3,
+    why: `双阴影是“${f(3, 5)} 那部分”里的 ${f(2, 3)}：${f(3, 5)} × ${f(2, 3)} = ${f(2, 5)}。数格子：15 格里双阴影 3 × 2 = 6 格 = ${f(2, 5)} ✓。 ${see('equal-parts-area.html', '平均分与分数面积图')}` },
+  { sec: '二', stem: `如图所示的运算程序中，若开始输入的 <i>x</i> 的值为 3，第一次输出的结果是 10，返回进行第二次运算则输出的是 5，……，那么第 2026 次输出的结果是<figure>${FIG_LOOP}</figure>`,
+    opts: ['3', '5', '10', '12'], ans: 2,
+    why: `依次输出：10、5、12、6、3、10、5……从第 1 次起每 5 个一循环。2026 ÷ 5 = 405 余 1，和第 1 次一样，是 10。 ${see('cycle-program.html', '运算程序找周期')}` },
+
+  /* ---------------- 三、简答题 ---------------- */
+  { sec: '三', stem: `计算（每小题 4 分）：`, sub: [
+      `(1) −0.75 + ${mx(2, 1, 3)} − (−${mx(1, 1, 4)}) − ${mx(4, 2, 3)} = {0}`,
+      `(2) (${f(5, 6)} − ${f(3, 8)} + ${f(7, 12)}) × (−48) = {1}`,
+      `(3) 1.25 × ${mx(2, 3, 5)} − ${f(5, 4)} × (−1.4) − ${mx(1, 1, 4)} × 3 = {2}`,
+      `(4) −2⁴ ÷ (−${f(4, 3)})² − (−1)<sup>2027</sup> × |−3 + ${f(1, 2)}| = {3}`],
+    blanks: [{ k: 'num', v: -11 / 6, show: '−11/6（−1又5/6）', pts: 4 }, { k: 'num', v: -50, show: '−50', pts: 4 }, { k: 'num', v: 5 / 4, show: '5/4（1又1/4）', pts: 4 }, { k: 'num', v: -13 / 2, show: '−13/2（−6又1/2）', pts: 4 }],
+    why: `(1) 小数凑小数：−0.75 + 1.25 = 0.5；分数凑分数：${mx(2, 1, 3)} − ${mx(4, 2, 3)} = −${mx(2, 1, 3)}；0.5 − ${mx(2, 1, 3)} = −${mx(1, 5, 6)}。<br>
+(2) 分配律：${f(5, 6)}×(−48) = −40，−${f(3, 8)}×(−48) = 18，${f(7, 12)}×(−48) = −28，合计 −50。<br>
+(3) 1.25 = ${f(5, 4)} = ${mx(1, 1, 4)}，提出 ${f(5, 4)}：${f(5, 4)} × (${f(13, 5)} + ${f(7, 5)} − 3) = ${f(5, 4)} × 1 = ${f(5, 4)}。减去负数要变加。<br>
+(4) −2⁴ = −16，(−${f(4, 3)})² = ${f(16, 9)}，−16 ÷ ${f(16, 9)} = −9；(−1)<sup>2027</sup> = −1，|−${f(5, 2)}| = ${f(5, 2)}，−(−1) × ${f(5, 2)} = +${f(5, 2)}；−9 + ${f(5, 2)} = −${f(13, 2)}。 ${see('rational-ops-drill.html', '有理数运算易错训练')}` },
+  { sec: '三', stem: `下面是小明计算 −2² + 12 ÷ (−2)³ × 4 的过程：
+<div class="steps"><div><i></i>解：原式 = −2² + 12 ÷ (−2)³ × 4</div><div><i>①</i>= −4 + 12 ÷ (−8) × 4</div><div><i>②</i>= −4 + 12 ÷ (−32)</div><div><i>③</i>= −4 − ${f(3, 8)} = −${f(35, 8)}</div></div>
+<br>他从第 {0} 步开始出错（填序号数字，正确就填 0），正确结果是 {1}。`,
+    blanks: [{ k: 'num', v: 2, show: '2（第②步）', pts: 2, ph: '序号' }, { k: 'num', v: -10, show: '−10', pts: 2 }],
+    why: `第 ① 步是对的：−2² = −4，(−2)³ = −8。第 ② 步错：先算了 (−8) × 4，乘除同级应该从左往右。正确：12 ÷ (−8) = −${f(3, 2)}，× 4 = −6，−4 + (−6) = −10。这次错在第 ②步，不要一看到找错题就填 ①。` },
+  { sec: '三', stem: `解方程：2<i>x</i> − ${mx(1, 1, 2)} = ${f(3, 4)} × ${mx(2, 2, 3)}　　<i>x</i> = {0}`, blanks: [{ k: 'num', v: 7 / 4, show: '7/4（1又3/4）', pts: 4 }],
+    why: `右边：${f(3, 4)} × ${f(8, 3)} = 2。2x = 2 + ${mx(1, 1, 2)} = ${f(7, 2)}，x = ${f(7, 4)}。移项时减号变加号。` },
+  { sec: '三', stem: `求 60、90、150 的最大公因数和最小公倍数。<br>最大公因数是 {0}，最小公倍数是 {1}。`, blanks: [{ k: 'num', v: 30, show: '30', pts: 2 }, { k: 'num', v: 900, show: '900', pts: 2 }],
+    why: `60 = 2² × 3 × 5，90 = 2 × 3² × 5，150 = 2 × 3 × 5²。最大公因数取共有的、次数最低的：2 × 3 × 5 = 30。最小公倍数取每个素因数次数最高的：2² × 3² × 5² = 900。 ${see('gcd-lcm-apply.html', '公因数公倍数应用题')}` },
+  { sec: '三', stem: `(1) 如图，数轴上相邻两个刻度之间的距离相等，已知点 <i>A</i> 表示的数是 ${f(1, 3)}，那么点 <i>B</i> 表示的数是 {0}。<figure>${FIG_NL26}</figure>(2) 在数轴上，到表示 −1 的点的距离为 ${mx(2, 3, 4)} 个单位长度的点所表示的数是 {1}。`,
+    blanks: [{ k: 'num', v: -5 / 6, show: '−5/6', pts: 2 }, { k: 'set', v: [7 / 4, -15 / 4], show: '7/4 或 −15/4', pts: 2, cls: 'w', ph: '有几个写几个' }],
+    why: `(1) A 在 0 右边 2 格，表示 ${f(1, 3)}，每格 ${f(1, 6)}。B 在 0 左边 5 格：−${f(5, 6)}。<br>(2) 向右：−1 + ${mx(2, 3, 4)} = ${mx(1, 3, 4)}；向左：−1 − ${mx(2, 3, 4)} = −${mx(3, 3, 4)}。两个都要写。 ${see('number-line-trip.html', '数轴行程：位置与路程')}` },
+
+  /* ---------------- 四、解答题 ---------------- */
+  { sec: '四', stem: `某面包店计划每天卖出 200 个面包，实际每天卖出的数量与计划相比（超过记为正，不足记为负，单位：个）如下：
+<div class="tbl-wrap" style="margin:8px 0"><table class="tbl-num"><tr><th>星期一</th><th>星期二</th><th>星期三</th><th>星期四</th><th>星期五</th><th>星期六</th><th>星期日</th></tr><tr><td>+12</td><td>−8</td><td>+15</td><td>−20</td><td>+6</td><td>+25</td><td>−10</td></tr></table></div>
+(1) 卖得最多的一天比卖得最少的一天多卖 {0} 个；<br>(2) 这一周一共卖出 {1} 个面包；<br>(3) 如果每个面包赚 1.5 元，这一周共赚 {2} 元。`,
+    blanks: [{ k: 'num', v: 45, show: '45', pts: 2 }, { k: 'num', v: 1420, show: '1420', pts: 1 }, { k: 'num', v: 2130, show: '2130', pts: 2 }],
+    why: `(1) 最多 +25，最少 −20，相差 25 − (−20) = 45 个（不是 25 − 20 = 5）。<br>(2) 先算超出的总数：12 − 8 + 15 − 20 + 6 + 25 − 10 = +20；实际 200 × 7 + 20 = 1420 个。只算 20 就错了，表里记的是和计划的差。<br>(3) 1420 × 1.5 = 2130 元（试卷2 第 28 题销售表同款）。` },
+  { sec: '四', stem: `在一条长 864 米的公路一侧，原来从一端开始每隔 18 米挖一个树坑（两端都挖），挖好后，改为每隔 24 米种一棵树（两端都种）。<br>(1) 有 {0} 个坑可以直接用；<br>(2) 有 {1} 个坑要填掉；<br>(3) 还需要新挖 {2} 个坑。`,
+    blanks: [{ k: 'num', v: 13, show: '13', pts: 2 }, { k: 'num', v: 36, show: '36', pts: 2 }, { k: 'num', v: 24, show: '24', pts: 1 }],
+    why: `能直接用的坑，位置既是 18 的倍数又是 24 的倍数，每隔 [18, 24] = 72 米一个：864 ÷ 72 + 1 = 13 个。<br>原来 864 ÷ 18 + 1 = 49 个坑，填掉 49 − 13 = 36 个；现在 864 ÷ 24 + 1 = 37 棵，新挖 37 − 13 = 24 个（试卷1 第 22 题同款）。 ${see('tree-replant.html', '植树改栽问题')}` },
+  { sec: '四', stem: `一辆汽车从甲地开往乙地，按原计划的速度行驶需要 5 小时。<br>(1) 如果从出发起就把速度提高 ${f(1, 4)}，那么只需要 {0} 小时；<br>(2) 实际情况是：汽车先按原速度行驶了 120 千米，然后把速度提高 ${f(1, 4)}，结果比原计划早到 36 分钟。原计划的速度是每小时 {1} 千米，甲、乙两地相距 {2} 千米。`,
+    blanks: [{ k: 'num', v: 4, show: '4', pts: 2 }, { k: 'num', v: 60, show: '60', pts: 2 }, { k: 'num', v: 300, show: '300', pts: 2 }],
+    why: `(1) 速度变成原来的 ${f(5, 4)}，路程不变，时间变成原来的 ${f(4, 5)}：5 × ${f(4, 5)} = 4 小时（不是 5 × (1 − ${f(1, 4)})）。<br>(2) 提速那一段，时间也变成原计划的 ${f(4, 5)}，省下 ${f(1, 5)}。省下 36 分钟 = ${f(3, 5)} 小时，所以这一段原计划要 ${f(3, 5)} ÷ ${f(1, 5)} = 3 小时。前 120 千米用了 5 − 3 = 2 小时，原速 120 ÷ 2 = 60 千米/时，全程 60 × 5 = 300 千米（试卷3 第 20 题“提速 ${f(1, 7)}”同款）。 ${see('speed-up-ratio.html', '提速几分之几：时间比')}` },
+  { sec: '四', stem: `阅读理解：计算 S = ${f(1, 2)} + ${f(1, 4)} + ${f(1, 8)} + ${f(1, 16)} + ${f(1, 32)} + ${f(1, 64)}。
+<div class="steps" style="display:block"><div>两边都乘 2：2S = 1 + ${f(1, 2)} + ${f(1, 4)} + ${f(1, 8)} + ${f(1, 16)} + ${f(1, 32)}；</div><div>用 2S 减去 S，中间相同的项全部抵消：2S − S = 1 − ${f(1, 64)}，所以 S = {0}。</div></div>
+这种方法叫“错位相减”。用同样的方法计算：<br>(2) ${f(1, 3)} + ${f(1, 9)} + ${f(1, 27)} + ${f(1, 81)} = {1}；<br>(3) 2 + 2² + 2³ + … + 2<sup>10</sup> = {2}。`,
+    blanks: [{ k: 'num', v: 63 / 64, show: '63/64', pts: 1 }, { k: 'num', v: 40 / 81, show: '40/81', pts: 2 }, { k: 'num', v: 2046, show: '2046', pts: 2 }],
+    why: `(1) S = 1 − ${f(1, 64)} = ${f(63, 64)}。<br>(2) 公比是 ${f(1, 3)}，两边乘 3：3S = 1 + ${f(1, 3)} + ${f(1, 9)} + ${f(1, 27)}，3S − S = 1 − ${f(1, 81)} = ${f(80, 81)}，注意左边是 <b>2S</b>，所以 S = ${f(40, 81)}（常见错误：忘了除以 2，写成 80/81）。<br>(3) 两边乘 2：2S = 2² + … + 2<sup>11</sup>，2S − S = 2<sup>11</sup> − 2 = 2048 − 2 = 2046。阅读题的关键是看懂例子里“乘几、减谁”，再照着做（试卷1 第 23 题、数学卷6 第 25 题的形式）。` },
+  { sec: '四', stem: `一只电子跳蚤从数轴上表示 −2 的点 <i>P</i>₀ 出发：第 1 次向右跳 1 个单位长度到 <i>P</i>₁，第 2 次向左跳 2 个单位长度到 <i>P</i>₂，第 3 次向右跳 3 个单位长度到 <i>P</i>₃，第 4 次向左跳 4 个单位长度到 <i>P</i>₄，……按这样的规律跳下去。<figure>${FIG_FLEA}</figure>(1) 点 <i>P</i>₄ 表示的数是 {0}；<br>(2) 点 <i>P</i>₂₀₂₆ 表示的数是 {1}；<br>(3) 电子跳蚤跳完第 {2} 次后，第一次落在表示 20 的点上。`,
+    blanks: [{ k: 'num', v: -4, show: '−4', pts: 1 }, { k: 'num', v: -1015, show: '−1015', pts: 2 }, { k: 'num', v: 43, show: '43', pts: 2 }],
+    why: `每跳两次（右 n、左 n + 1）净向左 1 个单位。<br>(1) −2 + 1 − 2 + 3 − 4 = −4。<br>(2) 2026 次 = 1013 组，每组 −1：−2 − 1013 = −1015。<br>(3) 跳完偶数次都在 −2 左边，不可能到 20，所以落在 20 一定是奇数次。跳完第 2k + 1 次的位置是 −2 − k + (2k + 1) = k − 1。k − 1 = 20，k = 21，是第 2×21 + 1 = 43 次。验证：P₄₂ = −2 − 21 = −23，再向右跳 43：−23 + 43 = 20 ✓（试卷5 第 29 题“滚动后找规律”的思路）。 ${see('rolling-triangle.html', '数轴上滚三角形')}` },
+];
+
+/* ===== 渲染与判分 ===== */
+(() => {
+  const qsBox = document.getElementById('qs'), paper = document.getElementById('paper');
+  const total = Q.length, FULL = 100;
+  document.getElementById('bar-total').textContent = total;
+  const ptsOf = q => q.blanks ? q.blanks.reduce((s, b) => s + b.pts, 0) : (q.pts || 2);
+  let S;   // 全部作答状态集中在这里，initial() 给出初始值
+
+  const initial = () => ({ mode: 'exam', submitted: false, items: Q.map(() => ({ graded: false, score: 0, choice: -1, order: [] })) });
+
+  function render() {
+    S = initial();
+    qsBox.innerHTML = '';
+    paper.classList.remove('practice');
+    paper.querySelectorAll('.seg button').forEach(b => b.classList.toggle('on', b.dataset.mode === 'exam'));
+    let no = 0;
+    for (const sec of SECTIONS) {
+      const h = document.createElement('div');
+      h.className = 'sec-title';
+      h.innerHTML = `${sec.id}、${sec.title}<small>${sec.note}</small>`;
+      qsBox.append(h);
+      Q.forEach((q, qi) => { if (q.sec === sec.id) qsBox.append(renderQ(q, qi, ++no)); });
+    }
+    document.getElementById('result').classList.remove('show');
+    document.getElementById('head-score').innerHTML = '&nbsp;';
+    document.getElementById('btn-submit').disabled = false;
+    update();
+  }
+
+  function renderQ(q, qi, no) {
+    const el = document.createElement('div');
+    el.className = 'q'; el.id = 'q' + no;
+    const ptsTxt = q.sec === '一' || q.sec === '二' ? '' : `<span class="q-pts">（${ptsOf(q)} 分）</span>`;
+    let stem = q.sub ? q.stem + q.sub.map(s => `<div class="sub-q">${s}</div>`).join('') : q.stem;
+    if (q.blanks) stem = stem.replace(/\{(\d+)\}/g, (_, i) => {
+      const b = q.blanks[i];
+      if (b.k === 'select') return `<select class="bl" data-i="${i}" aria-label="第 ${no} 题第 ${+i + 1} 空"><option value="">选</option>${b.opts.map(o => `<option>${o}</option>`).join('')}</select>`;
+      return `<input class="bl ${b.cls || ''}" data-i="${i}" type="text" autocomplete="off" spellcheck="false" placeholder="${b.ph || ''}" aria-label="第 ${no} 题第 ${+i + 1} 空">`;
+    });
+    if (q.opts) stem += ` <span class="paren">（<b></b>）</span>`;
+    el.innerHTML = `<div class="q-stem"><span class="q-no">${no}.</span>${stem}${ptsTxt}</div>`;
+
+    if (q.opts) {
+      const o = document.createElement('div'); o.className = 'opts';
+      q.opts.forEach((t, j) => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'opt';
+        b.innerHTML = `<span class="lt">${'ABCD'[j]}.</span><span>${t}</span>`;
+        b.onclick = () => {
+          S.items[qi].choice = j;
+          o.querySelectorAll('.opt').forEach((x, k) => x.classList.toggle('sel', k === j));
+          el.querySelector('.paren b').textContent = 'ABCD'[j];
+          update();
+        };
+        o.append(b);
+      });
+      el.append(o);
+    }
+    if (q.order) {
+      const w = document.createElement('div'); w.className = 'order';
+      w.innerHTML = `<div class="seq" aria-live="polite"><span class="lt">（${q.desc ? '从大到小' : '从小到大'}）</span></div><div class="chips"></div><div><button type="button" class="btn small">清空重排</button></div>`;
+      const seq = w.querySelector('.seq'), chips = w.querySelector('.chips');
+      const draw = () => {
+        const ord = S.items[qi].order;
+        seq.innerHTML = ord.length ? ord.map(k => q.order[k]).join(q.desc ? ' &gt; ' : ' &lt; ') : `<span class="lt">（${q.desc ? '从大到小' : '从小到大'}，依次点下面的数）</span>`;
+        chips.querySelectorAll('.chip').forEach((c, k) => c.disabled = ord.includes(k) || S.items[qi].graded);
+      };
+      q.order.forEach((t, k) => {
+        const c = document.createElement('button'); c.type = 'button'; c.className = 'chip'; c.textContent = t;
+        c.onclick = () => { S.items[qi].order.push(k); draw(); update(); };
+        chips.append(c);
+      });
+      w.querySelector('.btn').onclick = () => { if (!S.items[qi].graded) { S.items[qi].order = []; draw(); update(); } };
+      w._draw = draw;
+      el.append(w);
+      draw();
+    }
+    el.querySelectorAll('.bl').forEach(x => x.addEventListener('input', update));
+    el.querySelectorAll('select.bl').forEach(x => x.addEventListener('change', update));
+
+    const chk = document.createElement('div'); chk.className = 'check';
+    chk.innerHTML = `<button type="button" class="btn small">核对本题</button>`;
+    chk.querySelector('button').onclick = () => { grade(qi, el); update(); };
+    el.append(chk);
+    const fb = document.createElement('div'); fb.className = 'fb'; el.append(fb);
+    return el;
+  }
+
+  function answered(qi) {
+    const q = Q[qi], el = qsBox.querySelectorAll('.q')[qi];   // Q 已按大题顺序排好，与页面顺序一致
+    if (q.opts) return S.items[qi].choice >= 0;
+    if (q.order) return S.items[qi].order.length === q.order.length;
+    return [...el.querySelectorAll('.bl')].some(x => x.value.trim());
+  }
+
+  function grade(qi, el) {
+    const q = Q[qi], st = S.items[qi];
+    if (st.graded) return;
+    st.graded = true;
+    let got = 0, full = ptsOf(q), lines = [];
+    if (q.opts) {
+      const ok = st.choice === q.ans;
+      got = ok ? full : 0;
+      el.querySelectorAll('.opt').forEach((b, k) => {
+        b.disabled = true;
+        if (k === q.ans) b.classList.add('right');
+        else if (k === st.choice) b.classList.add('wrong');
+      });
+      lines.push(`正确答案：<span class="ans">${'ABCD'[q.ans]}</span>`);
+    } else if (q.order) {
+      const ok = st.order.join() === q.orderAns.join();
+      got = ok ? full : 0;
+      const seq = el.querySelector('.seq'); seq.classList.add(ok ? 'ok' : 'no');
+      el.querySelector('.order')._draw();
+      el.querySelector('.order .btn').disabled = true;
+      lines.push(`正确答案：<span class="ans">${q.showAns}</span>`);
+    } else {
+      const inputs = [...el.querySelectorAll('.bl')];
+      q.blanks.forEach((b, i) => {
+        const inp = inputs.find(x => x.dataset.i == i);
+        const v = inp.value.trim();
+        const ok = v !== '' && JUDGE[b.k](v, b);
+        if (ok) got += b.pts;
+        inp.disabled = true;
+        inp.classList.add(ok ? 'ok' : 'no');
+      });
+      const shows = q.blanks.map(b => b.show);
+      lines.push(`正确答案：<span class="ans">${shows.join('；')}</span>`);
+    }
+    st.score = got;
+    const mark = document.createElement('span');
+    mark.className = 'mark' + (got === full ? ' full' : '');
+    mark.textContent = got === full ? '✓' : `−${full - got}`;
+    el.querySelector('.q-stem').append(mark);
+    el.querySelector('.check').style.display = 'none';
+    el.classList.add('done');
+    el.querySelector('.fb').innerHTML = lines.join('') + (got < full ? ` <span class="lost">（本题 ${got} / ${full} 分）</span>` : '') + '<br>' + q.why;
+  }
+
+  function submit() {
+    const els = qsBox.querySelectorAll('.q');
+    Q.forEach((q, qi) => grade(qi, els[qi]));
+    S.submitted = true;
+    const sum = S.items.reduce((s, x) => s + x.score, 0);
+    document.getElementById('res-score').textContent = `${sum} / ${FULL}`;
+    document.getElementById('head-score').textContent = sum;
+    document.getElementById('res-secs').innerHTML = SECTIONS.map(sec => {
+      let g = 0, t = 0;
+      Q.forEach((q, qi) => { if (q.sec === sec.id) { g += S.items[qi].score; t += ptsOf(q); } });
+      return `<span>${sec.id}、${sec.title} ${g} / ${t}</span>`;
+    }).join('');
+    document.getElementById('result').classList.add('show');
+    document.getElementById('btn-submit').disabled = true;
+    update();
+    document.getElementById('result').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
+  }
+
+  function update() {
+    let done = 0, gotSum = 0, gradedFull = 0;
+    Q.forEach((q, qi) => {
+      if (answered(qi)) done++;
+      if (S.items[qi].graded) { gotSum += S.items[qi].score; gradedFull += ptsOf(q); }
+    });
+    document.getElementById('bar-done').textContent = done;
+    document.getElementById('bar-score').textContent = gradedFull ? `${gotSum} / ${gradedFull}` : '—';
+  }
+
+  paper.querySelectorAll('.seg button').forEach(b => b.onclick = () => {
+    S.mode = b.dataset.mode;
+    paper.classList.toggle('practice', S.mode === 'practice');
+    paper.querySelectorAll('.seg button').forEach(x => x.classList.toggle('on', x === b));
+  });
+  document.getElementById('btn-submit').onclick = () => {
+    const left = Q.filter((q, qi) => !answered(qi) && !S.items[qi].graded).length;
+    if (left && !confirm(`还有 ${left} 道题没作答，确定交卷吗？`)) return;
+    submit();
+  };
+  document.getElementById('btn-redo').onclick = () => { render(); paper.scrollIntoView({ block: 'start' }); };
+
+  window.resetPage = () => {
+    render();
+    document.getElementById('style').open = false;
+  };
+  render();
+})();
+</script>
+</body>
+</html>
