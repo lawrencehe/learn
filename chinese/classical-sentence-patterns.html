@@ -1,0 +1,663 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>文言五大句式</title>
+<meta name="description" content="判断句、被动句、省略句、倒装句、固定句式怎么认、怎么译、怎么记：一句总口诀「加是、加被、补、调、套」，配句子变形动画、句式侦探和背诵模式。">
+<style>
+:root{
+  --bg:var(--up-bg); --surface:var(--up-surface); --surface2:var(--up-surface-2); --ink:var(--up-ink); --muted:var(--up-muted); --line:var(--up-line);
+  --accent:var(--up-accent); --ok:var(--up-ok); --bad:var(--up-bad);
+  /* 五类句式的语义色 */
+  --t1:#1c7ed6; --t2:#7048e8; --t3:#0c8599; --t4:#e8590c; --t5:#8d6e1f;
+  /* 句子变形：标志词 / 补出的字 */
+  --mark-bg:#fff3bf; --mark-ink:#7a5b00; --add-bg:#d3f9d8; --add-ink:#1f6b35;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --t1:#74c0fc; --t2:#b197fc; --t3:#66d9e8; --t4:#ffa94d; --t5:#e0c06a;
+    --mark-bg:#4a3d10; --mark-ink:#ffe066; --add-bg:#173a22; --add-ink:#8ce99a; }
+}
+:root[data-theme="dark"]{ --t1:#74c0fc; --t2:#b197fc; --t3:#66d9e8; --t4:#ffa94d; --t5:#e0c06a;
+  --mark-bg:#4a3d10; --mark-ink:#ffe066; --add-bg:#173a22; --add-ink:#8ce99a; }
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 var(--up-font);padding:24px 16px 96px}
+main{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:48px}
+h1{font-size:clamp(1.7rem,4.5vw,2.4rem);line-height:1.25;margin:0 0 8px}
+h2{font-size:1.4rem;margin:0 0 8px}
+h3{font-size:1.1rem;margin:0}
+p{margin:0}
+.lead{color:var(--muted)}
+.muted{color:var(--muted);font-size:.92rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--up-radius);box-shadow:var(--up-shadow);padding:16px}
+.analogy{border-left:4px solid var(--accent);display:grid;gap:8px}
+.btn{font:inherit;font-size:14px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--up-surface)}
+.btn.primary:hover:not(:disabled){color:var(--up-surface);opacity:.9}
+.btn:disabled{opacity:.45;cursor:default}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.stepno{font-family:var(--up-mono);color:var(--muted);font-size:.9rem;min-width:56px;text-align:center}
+.caption{min-height:3.4em;margin-top:10px}
+
+/* 总口诀 */
+.formula{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:12px}
+.fx{border-radius:12px;border:2px solid var(--c);padding:10px 4px;text-align:center;background:var(--surface);opacity:.25;transform:translateY(8px);transition:opacity .6s,transform .6s}
+.fx.on{opacity:1;transform:none}
+.fx .big{font-size:2rem;font-weight:700;color:var(--c);line-height:1.2}
+.fx .nm{font-size:.85rem;color:var(--muted)}
+.fx .act{margin-top:4px;font-weight:700;font-size:1.05rem}
+.fx .act,.fx .nm{white-space:nowrap}
+@media (max-width:520px){.formula{gap:4px}.fx{padding:8px 0}.fx .big{font-size:1.5rem}.fx .act{font-size:.8rem}.fx .nm{font-size:.68rem}.ty .bigc{font-size:1.3rem}}
+
+/* 句子变形 */
+.tabs{display:flex;flex-wrap:wrap;gap:6px}
+.tab{font:inherit;font-size:13px;padding:4px 10px;border-radius:999px;border:1.5px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.tab .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c);margin-right:5px;vertical-align:1px}
+.tab.on{border-color:var(--accent);background:var(--up-accent-soft);font-weight:700}
+.stage{border-radius:10px;background:var(--surface2);margin-top:12px;padding:28px 12px;min-height:120px;display:flex;align-items:center;justify-content:center}
+.sent{display:flex;flex-wrap:wrap;justify-content:center;gap:2px;font-size:clamp(1.05rem,4.8vw,2rem);font-weight:600;letter-spacing:.04em}
+.tk{display:inline-block;padding:2px 6px;border-radius:8px;border:2px solid transparent;transition:background .6s,color .6s,border-color .6s}
+.tk.mark{background:var(--mark-bg);color:var(--mark-ink);border-color:var(--mark-ink)}
+.tk.add{background:var(--add-bg);color:var(--add-ink);border-style:dashed;border-color:var(--add-ink)}
+.tk.mod{color:var(--muted);font-weight:500;padding:2px 0}
+.tk.fresh{animation:pop .7s ease}
+@keyframes pop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:.85rem;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:4px}
+.src{font-size:.85rem;color:var(--muted);margin-top:8px}
+
+/* 五类详解卡 */
+.types{display:grid;gap:12px}
+details.ty{border-left:5px solid var(--c)}
+details.ty>summary{cursor:pointer;list-style:none;display:flex;gap:10px;align-items:center}
+.ty .mid{flex:1;min-width:0;display:grid;gap:2px}
+details.ty>summary::-webkit-details-marker{display:none}
+.ty .bigc{font-size:1.6rem;font-weight:800;color:var(--c);width:1.6em;text-align:center}
+.ty .verse{font-weight:600}
+.ty .chev{margin-left:auto;color:var(--muted);transition:transform .3s}
+details.ty[open] .chev{transform:rotate(90deg)}
+.ty .body{margin-top:12px;display:grid;gap:10px}
+.ty table{border-collapse:collapse;width:100%;font-size:.93rem}
+.ty td,.ty th{border-top:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+.ty th{color:var(--muted);font-weight:500;font-size:.85rem}
+.ty td:first-child{white-space:nowrap;font-weight:600}
+.trap{background:var(--up-accent-soft);border-radius:8px;padding:8px 12px;font-size:.93rem}
+.how{font-size:.93rem}
+.how b{color:var(--c)}
+.k{border-radius:5px;padding:0 2px;transition:filter .3s,background .3s}
+.recite .k{filter:blur(6px);background:var(--surface2);cursor:pointer;user-select:none}
+.recite .k.seen{filter:none;background:var(--mark-bg);color:var(--mark-ink);cursor:default}
+.recite-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+
+/* 句式侦探 */
+.quiz-sent{font-size:clamp(1.2rem,4.5vw,1.6rem);font-weight:600;text-align:center;padding:20px 8px;background:var(--surface2);border-radius:10px;margin-top:12px}
+.quiz-sent .hl{background:var(--mark-bg);color:var(--mark-ink);border-radius:5px;padding:0 3px}
+.pick{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:12px}
+.pick button{font:inherit;font-size:14px;padding:8px 2px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.pick button:hover:not(:disabled){border-color:var(--accent)}
+.pick button:disabled{cursor:default}
+.pick button.right{border-color:var(--ok);color:var(--ok);font-weight:700}
+.pick button.wrong{border-color:var(--bad);color:var(--bad);text-decoration:line-through}
+.fb{min-height:3em;margin-top:10px;font-size:.95rem}
+.fb .ok{color:var(--ok)} .fb .bad{color:var(--bad)}
+@media (max-width:520px){.pick{grid-template-columns:repeat(3,1fr)}}
+
+.myth{display:grid;gap:10px}
+.myth .card b{color:var(--accent)}
+.sum{font-size:1.15rem;font-weight:700;text-align:center;border:2px solid var(--accent)}
+
+@media (prefers-reduced-motion: reduce){.fx,.tk,.k,.ty .chev{transition:none}.tk.fresh{animation:none}}
+
+:root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:var(--ok);--lq-bad:var(--bad)}
+/* ---------- 练习题（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+.lq{display:grid;gap:12px;margin-bottom:56px}
+.lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+.lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
+.lq-sub{margin:0;color:var(--lq-muted);font-size:14px}
+.lq-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--lq-muted);font-variant-numeric:tabular-nums}
+.lq-list{display:grid;gap:10px}
+.lq-item{background:var(--lq-surface);border:1.5px solid var(--lq-line);border-radius:10px;padding:12px 16px;display:grid;gap:10px;min-width:0;color:var(--lq-ink);text-align:left}
+.lq-item.lq-is-ok{border-color:var(--lq-ok)}
+.lq-item.lq-is-bad{border-color:var(--lq-bad)}
+.lq-q{font-size:15px;font-weight:600;line-height:1.6}
+.lq-tag{display:inline-block;font-size:11px;font-weight:500;line-height:1.6;color:var(--lq-muted);border:1px solid var(--lq-line);border-radius:999px;padding:0 8px;margin-right:8px;vertical-align:1px}
+.lq-opts,.lq-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lq .lq-opt,.lq .lq-redo{font:inherit;font-size:14px;line-height:1.4;padding:6px 14px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);cursor:pointer;text-align:left;opacity:1}
+.lq .lq-opt:hover:not(:disabled),.lq .lq-redo:hover{border-color:var(--lq-accent)}
+.lq .lq-opt:disabled{cursor:default;opacity:1}
+.lq .lq-opt.lq-right{border-color:var(--lq-ok);color:var(--lq-ok);font-weight:700}
+.lq .lq-opt.lq-wrong{border-color:var(--lq-bad);color:var(--lq-bad);text-decoration:line-through}
+.lq-fill input{font:inherit;font-size:14px;padding:6px 10px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);width:min(100%,200px)}
+.lq-fill input.lq-right{border-color:var(--lq-ok)}
+.lq-fill input.lq-wrong{border-color:var(--lq-bad)}
+.lq-why{font-size:14px;line-height:1.65;color:var(--lq-muted)}
+.lq-why:empty{display:none}
+.lq-why .lq-ok{color:var(--lq-ok)}
+.lq-why .lq-bad{color:var(--lq-bad)}
+</style>
+</head>
+<body>
+<!-- up-shell:begin（由 scripts/shell.mjs 自动生成，勿手改） -->
+<nav id="up-nav" aria-label="网站导航">
+<a class="up-home" href="/" title="Up 学习站首页"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="up-nav-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c6ef5"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#up-nav-g)"/><path d="M12 52V42a2 2 0 0 1 2-2h10V32a2 2 0 0 1 2-2h10v-8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v30z" fill="#fff"/><circle cx="43" cy="13" r="5.5" fill="#ffa94d"/></svg><span>Up 学习站</span></a>
+<span class="up-sep" aria-hidden="true">›</span><a class="up-cat" href="/chinese">语文</a>
+<span class="up-sep" aria-hidden="true">›</span><span class="up-title">文言五大句式</span>
+<button id="up-reset" type="button" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+</nav>
+<style>
+:root{--up-bg:#f5f6f8;--up-surface:#ffffff;--up-surface-2:#eef0f4;--up-ink:#1d2127;--up-muted:#626b78;--up-line:#dfe2e8;--up-ok:#2b8a3e;--up-bad:#d6336c;--up-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);--up-font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif;--up-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;--up-radius:12px;--up-accent:#a33a2e;--up-accent-soft:#f8ece8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#f0a08f;--up-accent-soft:#3a2220;color-scheme:dark}}
+:root[data-theme="dark"]{--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#f0a08f;--up-accent-soft:#3a2220;color-scheme:dark}
+html{padding-top:52px;scroll-padding-top:64px}
+#up-nav{position:fixed;top:0;left:0;right:0;z-index:2147483000;height:52px;box-sizing:border-box;display:flex;align-items:center;gap:8px;
+padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));border-top:3px solid var(--up-accent);
+border-bottom:1px solid var(--up-line);background:color-mix(in srgb,var(--up-surface) 88%,transparent);
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:500 14px/1.2 var(--up-font);color:var(--up-ink);text-align:left}
+#up-nav a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none}
+#up-nav a:hover{color:var(--up-accent)}
+#up-nav svg{width:24px;height:24px;flex:none;display:block}
+#up-nav .up-home span{font-weight:700}
+#up-nav .up-cat{color:var(--up-accent);font-weight:600}
+#up-nav .up-sep{color:var(--up-muted);flex:none}
+#up-nav .up-title{color:var(--up-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#up-reset{margin:0 0 0 auto;flex:none;font:600 14px/1 var(--up-font);padding:8px 14px;border-radius:999px;cursor:pointer;
+border:1.5px solid var(--up-accent);background:transparent;color:var(--up-accent);transition:background .2s,color .2s}
+#up-reset:hover,#up-reset:focus-visible{background:var(--up-accent);color:var(--up-surface)}
+#up-reset:focus-visible,#up-nav a:focus-visible{outline:2px solid var(--up-accent);outline-offset:2px}
+@media (max-width:560px){#up-nav .up-home span{display:none}}
+@media print{#up-nav{display:none}html{padding-top:0}}
+</style>
+<script>
+document.getElementById('up-reset').addEventListener('click', function () {
+  if (typeof window.resetPage === 'function') window.resetPage();
+  else console.warn('本页没有定义 window.resetPage()，重置按钮无效');
+  window.scrollTo({ top: 0, behavior: 'auto' });
+});
+</script>
+<!-- up-shell:end -->
+<main>
+
+<section>
+  <h1>文言五大句式：一句口诀记住</h1>
+  <p class="lead">判断、被动、省略、倒装、固定句式，条目多、例句杂，很难背。换个角度：别背「定义」，记住翻译时<b>各要做什么动作</b>。</p>
+</section>
+
+<section class="card analogy">
+  <b>生活比喻：把古人的「快递包裹」拆开整理</b>
+  <p>古人寄来的句子，和现代汉语比，总有几处「不对劲」：少了「是」、少了「被」、缺了东西、东西放错了位置，或者用的是一套固定的老包装。</p>
+  <p>五种句式，就是拆包时的<b>五个整理动作</b>。认出是哪一种，就知道该怎么动手。</p>
+</section>
+
+<!-- 模块 1：总口诀 -->
+<section>
+  <h2>① 总口诀：判被省倒固，加是加被补调套</h2>
+  <p class="muted">前半句是五种句式的名字，后半句是翻译时对应的五个动作，一一对应。</p>
+  <div class="card" id="m1">
+    <div class="formula">
+      <div class="fx" style="--c:var(--t1)"><div class="big">判</div><div class="nm">判断句</div><div class="act">加「是」</div></div>
+      <div class="fx" style="--c:var(--t2)"><div class="big">被</div><div class="nm">被动句</div><div class="act">加「被」</div></div>
+      <div class="fx" style="--c:var(--t3)"><div class="big">省</div><div class="nm">省略句</div><div class="act">补</div></div>
+      <div class="fx" style="--c:var(--t4)"><div class="big">倒</div><div class="nm">倒装句</div><div class="act">调</div></div>
+      <div class="fx" style="--c:var(--t5)"><div class="big">固</div><div class="nm">固定句式</div><div class="act">套</div></div>
+    </div>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<!-- 模块 2：句子变形 -->
+<section>
+  <h2>② 看句子怎么「变」成现代汉语</h2>
+  <p class="muted">选一个例句，一步一步看：先找<b>标志</b>，再做<b>动作</b>，最后得到译文。</p>
+  <div class="card" id="m2">
+    <div class="tabs"></div>
+    <div class="stage"><div class="sent"></div></div>
+    <div class="legend"><span><i style="background:var(--mark-bg);border:2px solid var(--mark-ink)"></i>标志词</span><span><i style="background:var(--add-bg);border:2px dashed var(--add-ink)"></i>补出 / 换上的字</span></div>
+    <p class="caption"></p>
+    <p class="src"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<!-- 模块 3：五类详解 + 背诵模式 -->
+<section>
+  <h2>③ 五类分口诀（点开看细节）</h2>
+  <div class="card recite-bar" id="m3bar" style="margin-bottom:12px">
+    <span class="muted">背诵模式：口诀里的关键字会被遮住，先自己说出来，再点一下揭开核对。</span>
+    <span><button type="button" class="btn" id="reciteBtn">开启背诵模式</button> <button type="button" class="btn" id="m3reset">↺ 重置本模块</button></span>
+  </div>
+  <div class="types" id="m3">
+
+    <details class="card ty" style="--c:var(--t1)">
+      <summary><span class="bigc">判</span><span class="mid"><h3>判断句 → 加「是」</h3><span class="verse">口诀：<span class="k">者也</span>一对，<span class="k">乃则即皆</span>，<span class="k">为是</span>与<span class="k">非</span>，没标志靠<span class="k">语意</span></span></span><span class="chev">▶</span></summary>
+      <div class="body">
+        <p class="how">说「A 是 B」（或「A 不是 B」）的句子。数一数：<b>1 对 + 4 个副词 + 2 个动词 + 1 个否定 + 光杆</b>，一共 5 种。</p>
+        <table>
+          <tr><th>标志</th><th>例句</th></tr>
+          <tr><td>者……也</td><td>陈胜者，阳城人也。（只用「也」：夫战，勇气也；句尾「者也」：莲，花之君子者也）</td></tr>
+          <tr><td>乃 则 即 皆</td><td>当立者<b>乃</b>公子扶苏。／此<b>则</b>岳阳楼之大观也。／夫六国与秦<b>皆</b>诸侯。</td></tr>
+          <tr><td>为 是</td><td>如今人方<b>为</b>刀俎，我<b>为</b>鱼肉。／同行十二年，不知木兰<b>是</b>女郎。</td></tr>
+          <tr><td>非（否定）</td><td>城<b>非</b>不高也，池<b>非</b>不深也。→ 不是</td></tr>
+          <tr><td>无标志</td><td>刘备天下枭雄。（靠语意：刘备是天下的英雄）</td></tr>
+        </table>
+        <p class="trap">⚠ 陷阱：谓语前的「是」多半是<b>代词「这」</b>，不是判断词。如「所在皆是也」＝到处都是这样。</p>
+      </div>
+    </details>
+
+    <details class="card ty" style="--c:var(--t2)">
+      <summary><span class="bigc">被</span><span class="mid"><h3>被动句 → 加「被」</h3><span class="verse">口诀：<span class="k">于</span>、<span class="k">为</span>、<span class="k">见</span>、<span class="k">被</span>四个字，再加<span class="k">意念</span>没标志</span></span><span class="chev">▶</span></summary>
+      <div class="body">
+        <p class="how">主语是<b>挨打的一方</b>。四个标志字可以单用，也可以配成组合：<b>受……于、为……所、见……于</b>。「于」「为」后面跟的是<b>动手的人</b>，翻译时提到动词前。</p>
+        <table>
+          <tr><th>标志</th><th>例句</th></tr>
+          <tr><td>于／受……于</td><td>不能容<b>于</b>远近。／<b>受</b>制<b>于</b>人。</td></tr>
+          <tr><td>为／为……所</td><td>身死国灭，<b>为</b>天下笑。／恐<b>为</b>操<b>所</b>先。</td></tr>
+          <tr><td>见／见……于</td><td>吾长<b>见</b>笑<b>于</b>大方之家。</td></tr>
+          <tr><td>被</td><td>予犹记周公之<b>被</b>逮。</td></tr>
+          <tr><td>无标志（意念被动）</td><td>荆州之民附操者，逼兵势耳。（＝被兵势所逼）</td></tr>
+        </table>
+        <p class="trap">⚠ 陷阱：动词前的「见」有时表示「对我」，是客气话，不表被动。如「冀君实或见恕也」＝希望您或许能原谅我（今天的「见谅」）。</p>
+      </div>
+    </details>
+
+    <details class="card ty" style="--c:var(--t3)">
+      <summary><span class="bigc">省</span><span class="mid"><h3>省略句 → 补</h3><span class="verse">口诀：<span class="k">主谓宾介</span>加<span class="k">修饰中心</span>；宾语多补<span class="k">之</span>，介词多补<span class="k">于、以</span></span></span><span class="chev">▶</span></summary>
+      <div class="body">
+        <p class="how">句子成分被省掉了，翻译时<b>省啥补啥</b>，补的字放在括号里。</p>
+        <table>
+          <tr><th>省了什么</th><th>例句（括号里是补出的）</th></tr>
+          <tr><td>主语</td><td>永州之野产异蛇，（蛇）黑质而白章。（承前省；还有承后省、自述省、对话省）</td></tr>
+          <tr><td>谓语</td><td>一鼓作气，再（鼓）而衰，三（鼓）而竭。</td></tr>
+          <tr><td>宾语</td><td>拜（之）为上卿。／竖子不足与（之）谋。／投（之）以骨。</td></tr>
+          <tr><td>介词</td><td>赐之（以）彘肩。／将军战（于）河北。</td></tr>
+          <tr><td>修饰语／中心词</td><td>（吾）妾之美我者。／杀一无罪（人）。</td></tr>
+        </table>
+        <p class="trap">⚠ 介词「以、为、与」后面的宾语「之」最常被省，看到「与谋」「以为」这类，想想后面是不是缺了「之」。</p>
+      </div>
+    </details>
+
+    <details class="card ty" style="--c:var(--t4)">
+      <summary><span class="bigc">倒</span><span class="mid"><h3>倒装句 → 调</h3><span class="verse">口诀：<span class="k">宾语</span>往前跑，<span class="k">定、状、主</span>往后跑</span></span><span class="chev">▶</span></summary>
+      <div class="body">
+        <p class="how">四种倒装里<b>只有宾语是「前置」</b>，另外三个都是「后置」。翻译时把它们<b>调回</b>现代汉语的位置。</p>
+        <p><b>宾语前置四条路：</b><span class="k">否定</span>句代词、<span class="k">疑问</span>代词、<span class="k">介词</span>宾语、<span class="k">之、是</span>提宾</p>
+        <table>
+          <tr><th>类型</th><th>例句 → 正常语序</th></tr>
+          <tr><td>否定句＋代词宾语</td><td>莫我肯顾 → 莫肯顾我／忌不自信 → 不自信己／未之有也 → 未有之也</td></tr>
+          <tr><td>疑问代词作宾语</td><td>大王来何操 → 操何／沛公安在 → 在安／彼且奚适也 → 适奚</td></tr>
+          <tr><td>介词宾语</td><td>吾谁与归 → 与谁归／何以自托于赵 → 以何／是以 → 以是（因此）</td></tr>
+          <tr><td>之、是 提宾</td><td>宋何罪之有 → 有何罪／惟命是听 → 惟听命</td></tr>
+          <tr><td>定语后置</td><td>三式：中＋定＋者（楚人有涉江者）；中＋之＋定（蚓无爪牙之利）；中＋（之）＋数量（马之千里者／白璧一双）</td></tr>
+          <tr><td>状语后置</td><td>「于／以」介宾短语放在动词后：青取之于蓝 → 于蓝取之／覆之以掌 → 以掌覆之</td></tr>
+          <tr><td>主谓倒装</td><td>为了强调谓语：甚矣，汝之不惠 → 汝之不惠甚矣／快哉此风</td></tr>
+        </table>
+        <p class="trap">⚠ 否定句宾语前置要同时满足两条：<b>有否定词</b>（不、未、毋、莫）＋<b>宾语是代词</b>（我、之、己……）。</p>
+      </div>
+    </details>
+
+    <details class="card ty" style="--c:var(--t5)">
+      <summary><span class="bigc">固</span><span class="mid"><h3>固定句式 → 套</h3><span class="verse">口诀：按译法分五组——<span class="k">比较</span>、<span class="k">揣测</span>、<span class="k">反问</span>、<span class="k">处置</span>、<span class="k">其他</span></span></span><span class="chev">▶</span></summary>
+      <div class="body">
+        <p class="how">像一套现成的「模具」，<b>整体套上</b>现代汉语的固定说法即可，不要逐字硬译。</p>
+        <table>
+          <tr><th>组别</th><th>句式 → 套译</th></tr>
+          <tr><td>比较</td><td>孰与、何如 → 跟……比，谁更……（吾孰与城北徐公美）／与其……孰若、与其……宁 → 与其……不如（与其坐而待亡，孰若起而拯之）</td></tr>
+          <tr><td>揣测</td><td>得无……乎（耶）→ 该不会……吧（得无教我猎虫所耶）／无乃……与 → 恐怕……吧（无乃尔是过与）</td></tr>
+          <tr><td>反问</td><td>何（以）……为、奚以……为 → 为什么要……呢（何以伐为）／不亦……乎 → 不是……吗（不亦乐乎）／岂……哉、独……哉 → 难道……吗</td></tr>
+          <tr><td>处置</td><td>如……何、奈……何、若……何 → 把……怎么办（如太行、王屋何）／以……为 → 把……当作（以荆卿为计）</td></tr>
+          <tr><td>其他</td><td>无以 → 没有用来……的办法（无以至千里）／……之谓也 → 说的就是……／唯……是 → 只……（惟利是图）</td></tr>
+        </table>
+        <p class="trap">⚠ 「何以……为」里的「为」是句末语气词（呢），不是「为了」。</p>
+      </div>
+    </details>
+
+  </div>
+</section>
+
+<!-- 模块 4：句式侦探 -->
+<section>
+  <h2>④ 自己试试：句式侦探</h2>
+  <p class="muted">读句子，判断它属于哪一种句式。答完会高亮破案线索。句子都来自讲义。</p>
+  <div class="card" id="m4">
+    <div class="ctrl" style="margin-top:0;justify-content:space-between"><span class="stepno" id="m4no"></span><span class="muted" id="m4score"></span></div>
+    <div class="quiz-sent"></div>
+    <div class="pick"></div>
+    <p class="fb"></p>
+    <div class="ctrl">
+      <button type="button" class="btn primary" data-act="next">下一句 ▶</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>⑤ 常见误区</h2>
+  <div class="myth">
+    <div class="card"><b>误区 1：看到「是」就当判断句。</b><br>谓语前的「是」多是代词「这」：「所在皆是也」「是以」。木兰诗里的「木兰是女郎」才是判断词。</div>
+    <div class="card"><b>误区 2：看到「见」「为」就当被动。</b><br>「见恕」「见谅」中的「见」＝对我；「以……为」＝把……当作；「何以……为」的「为」是语气词。看后面跟的是不是<b>动手的人</b>。</div>
+    <div class="card"><b>误区 3：倒装全是「往前放」。</b><br>只有宾语前置是往前，定语、状语、主语都是<b>后置</b>。「青取之于蓝」是状语后置，不是宾语前置。</div>
+  </div>
+</section>
+
+<section class="card sum">一句话：判被省倒固，加是加被补调套——认出句式，就知道翻译时该做哪个动作。</section>
+
+<section class="lq" id="lq" aria-label="练习">
+  <div class="lq-head"><h2>练习</h2><span class="lq-score"></span></div>
+  <p class="lq-sub">学完上面的内容，来检验一下。每题作答后马上看到解析；点「重做练习」清空重来。</p>
+  <div class="lq-list"></div>
+  <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+</section>
+
+</main>
+
+<script>
+const resets = [];
+window.pageReset = () => resets.forEach(f => f());
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* 通用分步控制器 */
+function stepper(root, count, draw, interval = 1300) {
+  const btn = act => root.querySelector(`[data-act="${act}"]`);
+  const no = root.querySelector('.stepno');
+  let S = { step: 0, playing: false }, timer = null;
+  const render = () => {
+    draw(S.step);
+    no.textContent = `${S.step + 1} / ${count()}`;
+    btn('prev').disabled = S.step === 0; btn('next').disabled = S.step === count() - 1;
+    btn('play').textContent = S.playing ? '⏸ 暂停' : '▶ 播放';
+  };
+  const stop = () => { clearInterval(timer); timer = null; S.playing = false; };
+  const go = d => { S.step = Math.max(0, Math.min(count() - 1, S.step + d)); render(); };
+  btn('prev').onclick = () => { stop(); go(-1); };
+  btn('next').onclick = () => { stop(); go(1); };
+  btn('play').onclick = () => {
+    if (S.playing) { stop(); render(); return; }
+    if (S.step === count() - 1) S.step = 0;
+    S.playing = true; render();
+    timer = setInterval(() => { go(1); if (S.step === count() - 1) { stop(); render(); } }, interval);
+  };
+  return { reset: () => { stop(); S = { step: 0, playing: false }; render(); }, render, stop, setStep: n => { stop(); S.step = n; render(); } };
+}
+
+/* ---------- 模块 1：总口诀逐个亮起 ---------- */
+{
+  const root = document.getElementById('m1');
+  const fx = [...root.querySelectorAll('.fx')], cap = root.querySelector('.caption');
+  const CAPS = [
+    '五种句式，就是五个翻译动作。先看第一个……',
+    '判断句 → 加「是」：古人说「A 者，B 也」，我们说「A 是 B」。',
+    '被动句 → 加「被」：古人用「于、为、见」，我们一律说「被」。',
+    '省略句 → 补：古人省掉的主语、宾语、介词，翻译时补回来。',
+    '倒装句 → 调：词序和今天不一样，调回现代汉语的顺序。',
+    '固定句式 → 套：「孰与」「得无……乎」这类整块套用固定译法。',
+    '连起来念：判被省倒固，加是加被补调套。',
+  ];
+  const ctl = stepper(root, () => CAPS.length, s => {
+    fx.forEach((el, i) => el.classList.toggle('on', s === 6 || i < s));
+    cap.textContent = CAPS[s];
+  });
+  root.querySelector('[data-act="reset"]').onclick = ctl.reset;
+  resets.push(ctl.reset); ctl.reset();
+}
+
+/* ---------- 模块 2：句子变形（FLIP 动画） ---------- */
+{
+  // 每个词块 [id, 文字, 样式]；同一 id 在不同步骤间会平滑移动
+  const T = (...a) => a.map(x => typeof x === 'string' ? x.split('|') : x);
+  const EX = [
+    { name: '判断句', c: 't1', src: '司马迁《陈涉世家》', steps: [
+      { t: T('a|陈胜', 'b|者', 'p|，', 'c|阳城人', 'd|也', 'e|。'), cap: '原句：陈胜者，阳城人也。' },
+      { t: T('a|陈胜', 'b|者|mark', 'p|，', 'c|阳城人', 'd|也|mark', 'e|。'), cap: '找标志：「……者，……也」，这是最典型的判断句。' },
+      { t: T('a|陈胜', 'x|是|add', 'c|阳城人', 'e|。'), cap: '动作「加是」：去掉「者」「也」，中间换上「是」。' },
+      { t: T('a|陈胜', 'x|是', 'c|阳城人', 'e|。'), cap: '译文：陈胜是阳城人。' } ] },
+    { name: '被动句', c: 't2', src: '《庄子·秋水》', steps: [
+      { t: T('a|吾', 'b|长', 'c|见', 'd|笑', 'e|于', 'f|大方之家', 'g|。'), cap: '原句：吾长见笑于大方之家。' },
+      { t: T('a|吾', 'b|长', 'c|见|mark', 'd|笑', 'e|于|mark', 'f|大方之家', 'g|。'), cap: '找标志：「见……于……」，「于」后面的「大方之家」是动手的人（笑话我的人）。' },
+      { t: T('a|吾', 'b|长', 'e|被|add', 'f|大方之家', 'd|笑', 'g|。'), cap: '动作「加被」：把「于大方之家」挪到动词「笑」前面，「见……于」换成「被」。' },
+      { t: T('a|我', 'b|长久地', 'e|被', 'f|懂大道理的人', 'd|笑话', 'g|。'), cap: '译文：我将长久地被懂得大道理的人笑话。' } ] },
+    { name: '省略句', c: 't3', src: '司马迁《鸿门宴》', steps: [
+      { t: T('a|竖子', 'b|不足', 'c|与', 'd|谋', 'e|。'), cap: '原句：竖子不足与谋。' },
+      { t: T('a|竖子', 'b|不足', 'c|与|mark', 'd|谋', 'e|。'), cap: '找标志：介词「与」后面直接跟动词，「和谁」谋划？宾语没了。' },
+      { t: T('a|竖子', 'b|不足', 'c|与', 'x|（之）|add', 'd|谋', 'e|。'), cap: '动作「补」：补出「之」，指项羽。' },
+      { t: T('a|这小子', 'b|不值得', 'c|和', 'x|（他）', 'd|共谋大事', 'e|。'), cap: '译文：这小子不值得和（他）共谋大事。' } ] },
+    { name: '宾语前置', c: 't4', src: '司马迁《鸿门宴》', steps: [
+      { t: T('a|沛公', 'b|安', 'c|在', 'd|？'), cap: '原句：沛公安在？' },
+      { t: T('a|沛公', 'b|安|mark', 'c|在', 'd|？'), cap: '找标志：疑问代词「安」（哪里）作宾语，跑到了动词「在」前面。' },
+      { t: T('a|沛公', 'c|在', 'b|安|mark', 'd|？'), cap: '动作「调」：把宾语「安」挪回动词后面。' },
+      { t: T('a|沛公', 'c|在', 'b|哪里', 'd|？'), cap: '译文：沛公在哪里？' } ] },
+    { name: '定语后置', c: 't4', src: '韩愈《马说》', steps: [
+      { t: T('a|马', 'b|之', 'c|千里', 'd|者'), cap: '原句：马之千里者。' },
+      { t: T('a|马', 'b|之|mark', 'c|千里', 'd|者|mark'), cap: '找标志：「中心词＋之＋定语＋者」，修饰语「千里」跑到了「马」后面。' },
+      { t: T('c|千里', 'b|之', 'a|马'), cap: '动作「调」：把定语「千里」挪到「马」前面，「者」去掉。' },
+      { t: T('c|日行千里', 'b|的', 'a|马'), cap: '译文：（能）日行千里的马。' } ] },
+    { name: '状语后置', c: 't4', src: '荀子《劝学》', steps: [
+      { t: T('a|青', 'p|，', 'b|取', 'c|之', 'd|于蓝'), cap: '原句：青，取之于蓝。' },
+      { t: T('a|青', 'p|，', 'b|取', 'c|之', 'd|于蓝|mark'), cap: '找标志：介宾短语「于蓝」（从蓼蓝）放在了动词「取」后面。' },
+      { t: T('a|青', 'p|，', 'd|于蓝|mark', 'b|取', 'c|之'), cap: '动作「调」：把「于蓝」挪到动词前面做状语。' },
+      { t: T('a|靛青', 'p|，', 'd|从蓼蓝中', 'b|提取', 'c|出来'), cap: '译文：靛青是从蓼蓝中提取出来的。' } ] },
+    { name: '主谓倒装', c: 't4', src: '《列子·愚公移山》', steps: [
+      { t: T('a|甚矣', 'p|，', 'b|汝之不惠', 'c|！'), cap: '原句：甚矣，汝之不惠！' },
+      { t: T('a|甚矣|mark', 'p|，', 'b|汝之不惠', 'c|！'), cap: '找标志：谓语「甚矣」（太过分了）放到了主语前面，为了强调。' },
+      { t: T('b|汝之不惠', 'a|甚矣', 'c|！'), cap: '动作「调」：主语放回前面。' },
+      { t: T('b|你太不聪明', 'a|了', 'c|！'), cap: '译文：你太不聪明了！' } ] },
+    { name: '固定句式', c: 't5', src: '《论语·季氏将伐颛臾》', steps: [
+      { t: T('a|何以', 'b|伐', 'c|为', 'd|？'), cap: '原句：（是社稷之臣也，）何以伐为？' },
+      { t: T('a|何以|mark', 'b|伐', 'c|为|mark', 'd|？'), cap: '找标志：「何以……为」是固定句式，「为」是句末语气词。' },
+      { t: T('a|为什么要|add', 'b|伐', 'c|呢|add', 'd|？'), cap: '动作「套」：整体套用「为什么要……呢」。' },
+      { t: T('a|为什么要', 'b|攻打它', 'c|呢', 'd|？'), cap: '译文：为什么要攻打它呢？' } ] },
+  ];
+  const root = document.getElementById('m2');
+  const tabs = root.querySelector('.tabs'), sent = root.querySelector('.sent');
+  const cap = root.querySelector('.caption'), src = root.querySelector('.src');
+  const INIT = { ex: 0 };
+  let S = { ...INIT };
+  EX.forEach((e, i) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'tab'; b.style.setProperty('--c', `var(--${e.c})`);
+    b.innerHTML = `<span class="dot"></span>${e.name}`;
+    b.onclick = () => { S.ex = i; sent.innerHTML = ''; paintTabs(); ctl.setStep(0); };
+    tabs.append(b);
+  });
+  const paintTabs = () => [...tabs.children].forEach((b, i) => b.classList.toggle('on', i === S.ex));
+  function drawSentence(st) {
+    const old = new Map([...sent.children].map(el => [el.dataset.id, el.getBoundingClientRect()]));
+    sent.innerHTML = '';
+    st.t.forEach(([id, txt, cls]) => {
+      const s = document.createElement('span');
+      s.className = 'tk' + (cls ? ' ' + cls : '') + (old.has(id) ? '' : ' fresh');
+      if (/^[，。？！]$/.test(txt)) s.classList.add('mod');
+      s.dataset.id = id; s.textContent = txt; sent.append(s);
+    });
+    if (reduced) return;
+    [...sent.children].forEach(el => {
+      const r0 = old.get(el.dataset.id); if (!r0) return;
+      const r1 = el.getBoundingClientRect();
+      const dx = r0.left - r1.left, dy = r0.top - r1.top;
+      if (!dx && !dy) return;
+      el.style.transition = 'none'; el.style.transform = `translate(${dx}px,${dy}px)`;
+      el.getBoundingClientRect();
+      el.style.transition = 'transform .8s ease, background .6s, color .6s, border-color .6s';
+      el.style.transform = '';
+    });
+  }
+  const ctl = stepper(root, () => EX[S.ex].steps.length, s => {
+    const e = EX[S.ex], st = e.steps[s];
+    drawSentence(st); cap.textContent = st.cap; src.textContent = `出处：${e.src}`;
+  }, 1600);
+  const reset = () => { S = { ...INIT }; sent.innerHTML = ''; paintTabs(); ctl.reset(); };
+  root.querySelector('[data-act="reset"]').onclick = reset;
+  resets.push(reset); reset();
+}
+
+/* ---------- 模块 3：五类详解 + 背诵模式 ---------- */
+{
+  const box = document.getElementById('m3'), btn = document.getElementById('reciteBtn');
+  const INIT = { recite: false };
+  let S = { ...INIT };
+  const paint = () => { box.classList.toggle('recite', S.recite); btn.textContent = S.recite ? '关闭背诵模式' : '开启背诵模式'; };
+  btn.onclick = () => { S.recite = !S.recite; box.querySelectorAll('.k.seen').forEach(k => k.classList.remove('seen')); paint(); };
+  box.addEventListener('click', e => {
+    const k = e.target.closest('.k');
+    if (!k || !S.recite) return;
+    e.preventDefault(); k.classList.add('seen');   // 在 summary 里点关键字只揭开，不展开卡片
+  });
+  const reset = () => {
+    S = { ...INIT };
+    box.querySelectorAll('.k.seen').forEach(k => k.classList.remove('seen'));
+    box.querySelectorAll('details').forEach(d => d.open = false);
+    paint();
+  };
+  document.getElementById('m3reset').onclick = reset;
+  resets.push(reset); reset();
+}
+
+/* ---------- 模块 4：句式侦探 ---------- */
+{
+  const TYPES = ['判断句', '被动句', '省略句', '倒装句', '固定句式'];
+  // s 中用 [ ] 标出线索；a 为 TYPES 下标
+  const BANK = [
+    { s: '莲，花之君子[者也]。', a: 0, why: '句尾「者也」连用，加强肯定：莲是花中的君子。' },
+    { s: '当立者[乃]公子扶苏。', a: 0, why: '副词「乃」表判断：应当即位的是公子扶苏。' },
+    { s: '而身死国灭，[为]天下笑。', a: 1, why: '「为」后面是动手的人「天下」：被天下人耻笑。' },
+    { s: '则今之高爵显位……不能容[于]远近。', a: 1, why: '「于」引出施动者：不能被远近的人容纳。' },
+    { s: '一鼓作气，再[（鼓）]而衰，三[（鼓）]而竭。', a: 2, why: '「再」「三」后面省了谓语「鼓」，要补出：第二次击鼓……' },
+    { s: '赐之[（以）]彘肩。', a: 2, why: '省略介词「以」：拿一只猪腿赏赐他。' },
+    { s: '忌[不自信]。', a: 3, why: '否定句＋代词宾语「自」前置：不相信自己。' },
+    { s: '彼且[奚适]也？', a: 3, why: '疑问代词「奚」作宾语前置：它将要到哪里去？' },
+    { s: '蚓无爪牙[之利]，筋骨[之强]。', a: 3, why: '定语后置（中心词＋之＋定语）：锋利的爪牙、强健的筋骨。' },
+    { s: '[快哉]此风！', a: 3, why: '主谓倒装，强调「快哉」：这风多么畅快啊！' },
+    { s: '公之视廉将军[孰与]秦王？', a: 4, why: '比较句式「孰与」：你们看廉将军跟秦王比，谁更厉害？' },
+    { s: '[得无]教我猎虫所[耶]？', a: 4, why: '揣测句式「得无……耶」：该不会是教我捕虫的地方吧？' },
+    { s: '故不积跬步，[无以]致千里。', a: 4, why: '「无以」：没有用来到达千里之外的办法。' },
+    { s: '刘备天下枭雄。', a: 0, why: '没有任何标志词，靠语意判断：刘备是天下的英雄。' },
+  ];
+  const root = document.getElementById('m4');
+  const sentEl = root.querySelector('.quiz-sent'), pick = root.querySelector('.pick'), fb = root.querySelector('.fb');
+  const no = document.getElementById('m4no'), sc = document.getElementById('m4score');
+  const nextBtn = root.querySelector('[data-act="next"]');
+  const INIT = { i: 0, picked: null, right: 0, done: 0 };
+  let S = { ...INIT };
+  const plain = s => s.replace(/[\[\]]/g, '');
+  const hl = s => s.replace(/\[([^\]]+)\]/g, '<span class="hl">$1</span>');
+  function draw() {
+    const q = BANK[S.i], answered = S.picked !== null;
+    no.textContent = `第 ${S.i + 1} / ${BANK.length} 句`;
+    sc.textContent = `答对 ${S.right} / ${S.done}`;
+    sentEl.innerHTML = answered ? hl(q.s) : plain(q.s);
+    pick.innerHTML = '';
+    TYPES.forEach((t, j) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.textContent = t; b.disabled = answered;
+      if (answered && j === q.a) b.classList.add('right');
+      if (answered && j === S.picked && j !== q.a) b.classList.add('wrong');
+      b.onclick = () => { S.picked = j; S.done++; if (j === q.a) S.right++; draw(); };
+      pick.append(b);
+    });
+    fb.innerHTML = !answered ? '' : (S.picked === q.a ? '<b class="ok">✓ 破案！</b>' : `<b class="bad">✗ 是${TYPES[q.a]}。</b>`) + q.why;
+    nextBtn.disabled = S.i === BANK.length - 1 || !answered;
+  }
+  nextBtn.onclick = () => { S.i++; S.picked = null; draw(); };
+  const reset = () => { S = { ...INIT }; draw(); };
+  root.querySelector('[data-act="reset"]').onclick = reset;
+  resets.push(reset); reset();
+}
+
+/* ---------- 练习题 ---------- */
+window.LQ_ITEMS = [
+  { type: '选择', q: '「师者，所以传道受业解惑也」属于哪种句式？', opts: ['判断句', '被动句', '省略句', '倒装句'], ans: 0, why: '「……者，……也」是最典型的判断句：老师，是用来传授道理、教授学业、解答疑惑的人。翻译动作：加「是」。' },
+  { type: '选择', q: '「吴广素爱人，士卒多为用者」中，表示被动的标志是？', opts: ['素', '为', '用', '者'], ans: 1, why: '「为用」＝被（吴广）任用，「为」是被动标志。口诀：于、为、见、被。' },
+  { type: '判断', q: '「冀君实或见恕也」中的「见」表示被动。', opts: ['对', '错'], ans: 1, why: '常见误区。这里的「见」放在动词前表示「对我」，是客气说法：希望您或许能原谅我，相当于今天的「见谅」。' },
+  { type: '判断', q: '「石之铿然有声者，所在皆是也」中的「是」是判断词。', opts: ['对', '错'], ans: 1, why: '常见误区。这里的「是」是代词「这样」：到处都是这样。谓语前的「是」多半是代词。' },
+  { type: '选择', q: '下面哪一句<b>不是</b>宾语前置？', opts: ['宋何罪之有', '忌不自信', '微斯人，吾谁与归', '青，取之于蓝'], ans: 3, why: '「青，取之于蓝」是状语后置（于蓝取之）。A 是「之」提宾，B 是否定句代词宾语前置，C 是介词宾语前置（与谁归）。口诀：宾语往前跑，定、状、主往后跑。' },
+  { type: '填空', q: '把「大王来何操？」调成正常语序：大王来＿＿＿？（填两个字）', ans: ['操何'], placeholder: '两个字', why: '疑问代词「何」作宾语前置，调回动词后：大王来时带了什么？' },
+  { type: '填空', q: '「以相如功大，拜（　）为上卿」，括号里省略了哪个字？', ans: ['之'], placeholder: '一个字', why: '省略了宾语「之」（指蔺相如）：拜（他）为上卿。口诀：宾语多补「之」。' },
+  { type: '选择', q: '「蚓无爪牙之利，筋骨之强」是哪种句式？', opts: ['判断句', '定语后置', '状语后置', '主谓倒装'], ans: 1, why: '「中心词＋之＋定语」：爪牙之利＝锋利的爪牙，属于定语后置。' },
+  { type: '选择', q: '迁移：《论语》有「君子质而已矣，何以文为？」这句话应该怎么翻译？', opts: ['用什么来作文章呢？', '为什么要文采呢？', '凭什么成为文人？', '何必把文当作为呢？'], ans: 1, why: '「何以……为」是固定句式，套译为「为什么要……呢」，句末「为」是语气词：君子只要有好的本质就行了，为什么要文采呢？' },
+  { type: '选择', q: '迁移：《论语》中「不为酒困」（不被酒所困扰）用的是哪种被动标志？', opts: ['于', '为', '见', '无标志'], ans: 1, why: '「为」后面跟施动者「酒」：不被酒困扰。和「为天下笑」同一种结构。' },
+];
+</script>
+<script>
+/* ---------- 练习题（learn 通用组件） ---------- */
+(() => {
+  const box = document.getElementById('lq');
+  const items = window.LQ_ITEMS || [];
+  const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let answered = 0, right = 0;
+
+  function update() {
+    const all = answered === items.length;
+    score.textContent = `已答 ${answered} / ${items.length} · 答对 ${right}` +
+      (all ? (right === items.length ? ' · 全对！' : ' · 看看解析，再重做一次') : '');
+  }
+
+  function render() {
+    answered = 0; right = 0; list.innerHTML = '';
+    items.forEach((it, i) => {
+      const el = document.createElement('div');
+      el.className = 'lq-item';
+      el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
+      const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
+      const judge = (ok, answer) => {
+        answered++; if (ok) right++;
+        el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
+        why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
+        update();
+      };
+      if (it.opts) {
+        a.classList.add('lq-opts');
+        it.opts.forEach((o, j) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'lq-opt'; b.innerHTML = o;
+          b.onclick = () => {
+            a.querySelectorAll('button').forEach(x => x.disabled = true);
+            a.children[it.ans].classList.add('lq-right');
+            if (j !== it.ans) b.classList.add('lq-wrong');
+            judge(j === it.ans, it.opts[it.ans]);
+          };
+          a.append(b);
+        });
+      } else {
+        a.classList.add('lq-fill');
+        a.innerHTML = `<input type="text" autocomplete="off" spellcheck="false" placeholder="${it.placeholder || '输入答案'}" aria-label="第 ${i + 1} 题答案"><button type="button" class="lq-opt">确定</button>`;
+        const inp = a.querySelector('input'), go = a.querySelector('button');
+        const submit = () => {
+          if (!inp.value.trim()) { inp.focus(); return; }
+          inp.disabled = go.disabled = true;
+          const ok = it.ans.some(x => norm(x) === norm(inp.value));
+          inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
+          judge(ok, it.ans[0]);
+        };
+        go.onclick = submit;
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      }
+      list.append(el);
+    });
+    update();
+  }
+
+  box.querySelector('.lq-redo').addEventListener('click', render);
+  window.resetPage = () => {
+    if (typeof window.pageReset === 'function') window.pageReset();
+    render();
+  };
+  render();
+})();
+</script>
+</body>
+</html>
