@@ -1,0 +1,677 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>文言实词怎么记</title>
+<meta name="description" content="150 个文言实词不靠死背：5 把钥匙「找本义、顺引申、辨古今、认通假、连熟句」，配引申链动画（兵 去 穷 绝）、15 个古今异义词翻转卡、通假字换字动画、成语迁移小游戏、趣记故事和 12 道练习。">
+<style>
+:root{
+  --bg:var(--up-bg); --surface:var(--up-surface); --surface2:var(--up-surface-2); --ink:var(--up-ink); --muted:var(--up-muted); --line:var(--up-line);
+  --accent:var(--up-accent); --ok:var(--up-ok); --bad:var(--up-bad);
+  /* 五把钥匙的语义色 */
+  --k1:#1c7ed6; --k2:#0c8599; --k3:#7048e8; --k4:#e8590c; --k5:#8d6e1f;
+  /* 古义 / 今义 */
+  --old-bg:#fff3bf; --old-ink:#7a5b00; --new-bg:#e7f5ff; --new-ink:#1864ab;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --k1:#74c0fc; --k2:#66d9e8; --k3:#b197fc; --k4:#ffa94d; --k5:#e0c06a;
+    --old-bg:#4a3d10; --old-ink:#ffe066; --new-bg:#15324a; --new-ink:#a5d8ff; }
+}
+:root[data-theme="dark"]{ --k1:#74c0fc; --k2:#66d9e8; --k3:#b197fc; --k4:#ffa94d; --k5:#e0c06a;
+  --old-bg:#4a3d10; --old-ink:#ffe066; --new-bg:#15324a; --new-ink:#a5d8ff; }
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 var(--up-font);padding:24px 16px 96px}
+main{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:48px}
+h1{font-size:clamp(1.7rem,4.5vw,2.4rem);line-height:1.25;margin:0 0 8px}
+h2{font-size:1.4rem;margin:0 0 8px}
+h2 .key{display:inline-block;font-size:.85rem;font-weight:700;color:var(--up-surface);background:var(--c);border-radius:999px;padding:0 10px;margin-right:8px;vertical-align:3px}
+p{margin:0}
+.lead{color:var(--muted)}
+.muted{color:var(--muted);font-size:.92rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--up-radius);box-shadow:var(--up-shadow);padding:16px}
+.analogy{border-left:4px solid var(--accent);display:grid;gap:8px}
+.btn{font:inherit;font-size:14px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--up-surface)}
+.btn.primary:hover:not(:disabled){color:var(--up-surface);opacity:.9}
+.btn:disabled{opacity:.45;cursor:default}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.stepno{font-family:var(--up-mono);color:var(--muted);font-size:.9rem;min-width:56px;text-align:center}
+.caption{min-height:3.4em;margin-top:10px}
+.dot{font-style:normal;font-weight:700;-webkit-text-emphasis:filled dot;text-emphasis:filled dot;-webkit-text-emphasis-position:under;text-emphasis-position:under right}
+.src{font-size:.85rem;color:var(--muted)}
+.tabs{display:flex;flex-wrap:wrap;gap:6px}
+.tab{font:inherit;font-size:15px;padding:4px 14px;border-radius:999px;border:1.5px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.tab.on{border-color:var(--accent);background:var(--up-accent-soft);font-weight:700}
+
+/* 树的比喻 */
+.treeimg{display:flex;justify-content:center}
+.treeimg svg{width:min(100%,420px);height:auto}
+
+/* 五把钥匙 */
+.keys{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.keys a{display:block;text-decoration:none;color:var(--ink);border:2px solid var(--c);border-radius:12px;padding:10px 6px;text-align:center;background:var(--surface)}
+.keys a:hover{background:var(--up-accent-soft)}
+.keys .n{font-size:.78rem;color:var(--muted)}
+.keys .t{font-size:1.15rem;font-weight:800;color:var(--c)}
+.keys .d{font-size:.8rem;color:var(--muted);line-height:1.45}
+@media (max-width:620px){.keys{grid-template-columns:repeat(2,1fr)}.keys a:last-child{grid-column:1/-1}}
+
+/* 引申链 */
+.chain{display:grid;gap:0;margin-top:12px}
+.glyph{display:flex;gap:14px;align-items:center;background:var(--surface2);border-radius:10px;padding:12px 14px}
+.glyph .big{font-size:3rem;font-weight:800;color:var(--c);line-height:1;min-width:1.1em;text-align:center}
+.link{display:grid;justify-items:center;opacity:0;transform:translateY(-6px);transition:opacity .7s,transform .7s;max-height:0;overflow:hidden}
+.link.on{opacity:1;transform:none;max-height:260px}
+.arrow{font-size:.85rem;color:var(--c);padding:6px 10px;text-align:center}
+.arrow::before{content:'↓';display:block;font-size:1.3rem;line-height:1}
+.mean{width:100%;border:2px solid var(--line);border-radius:10px;padding:8px 12px;background:var(--surface);transition:border-color .6s,background .6s}
+.mean.now{border-color:var(--c);background:var(--up-accent-soft)}
+.mean b{color:var(--c);font-size:1.05rem}
+.mean .eg{display:block;font-size:.95rem}
+.mean .idiom{display:block;font-size:.85rem;color:var(--muted)}
+
+/* 古今翻转卡 */
+.flips{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:12px}
+.flip{font:inherit;color:var(--ink);text-align:left;cursor:pointer;border:0;padding:0;background:transparent;perspective:900px}
+.flip{display:block;height:100%}
+.flip .in{display:grid;height:100%;transition:transform .7s;transform-style:preserve-3d}
+.flip.on .in{transform:rotateY(180deg)}
+.flip .f,.flip .b{grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--surface);display:grid;gap:4px;align-content:start}
+.flip .b{transform:rotateY(180deg)}
+.flip .w{font-size:1.35rem;font-weight:800;letter-spacing:.08em}
+.flip .s{font-size:.9rem}
+.flip .hint{font-size:.75rem;color:var(--muted)}
+.tag{display:inline-block;font-size:.75rem;border-radius:6px;padding:0 6px;margin-right:4px;font-weight:700}
+.tag.old{background:var(--old-bg);color:var(--old-ink)}
+.tag.new{background:var(--new-bg);color:var(--new-ink)}
+.flip .b div{font-size:.9rem;line-height:1.55}
+@media (prefers-reduced-motion: reduce){.flip .in{transition:none}}
+
+/* 通假字 */
+.stage{border-radius:10px;background:var(--surface2);margin-top:12px;padding:30px 12px 18px;display:grid;gap:10px;justify-items:center;min-height:150px}
+.sent{display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-end;font-size:clamp(1.2rem,5vw,2rem);font-weight:600;letter-spacing:.06em}
+.slot{position:relative;display:inline-grid;justify-items:center;margin:0 2px}
+.slot .py{font-family:var(--up-mono);font-size:.5em;font-weight:500;color:var(--c);height:1.4em;transition:opacity .6s}
+.slot .ch{display:grid;place-items:center;border:2px solid var(--c);border-radius:8px;padding:0 6px}
+.slot .ch span{grid-area:1/1;transition:opacity .7s,transform .7s}
+.slot .old{opacity:1}
+.slot .new{opacity:0;transform:translateY(-24px)}
+.swap .slot .old{opacity:0;transform:translateY(24px)}
+.swap .slot .new{opacity:1;transform:none;color:var(--c)}
+.tjnote{font-size:.95rem;min-height:1.6em;text-align:center}
+
+/* 成语迁移 */
+.idioms{display:grid;gap:10px;margin-top:12px}
+.idm{display:grid;gap:8px;border:1.5px solid var(--line);border-radius:10px;padding:10px 14px;background:var(--surface)}
+.idm.ok{border-color:var(--ok)} .idm.bad{border-color:var(--bad)}
+.idm .q{font-weight:600}
+.idm .q .big{font-size:1.2rem;letter-spacing:.1em}
+.idm .opts{display:flex;flex-wrap:wrap;gap:6px}
+.idm .opts button{font:inherit;font-size:14px;padding:4px 12px;border-radius:8px;border:1.5px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.idm .opts button:hover:not(:disabled){border-color:var(--accent)}
+.idm .opts button:disabled{cursor:default}
+.idm .opts button.right{border-color:var(--ok);color:var(--ok);font-weight:700}
+.idm .opts button.wrong{border-color:var(--bad);color:var(--bad);text-decoration:line-through}
+.idm .why{font-size:.92rem;color:var(--muted)}
+.idm .why:empty{display:none}
+
+/* 趣记故事 */
+.story{font-size:1.08rem;line-height:2.2;margin-top:12px;background:var(--surface2);border-radius:10px;padding:14px 16px}
+.story button.w{font:inherit;font-weight:800;color:var(--accent);background:var(--up-accent-soft);border:0;border-radius:6px;padding:0 4px;cursor:pointer}
+.story .gloss{display:none;font-size:.85rem;color:var(--old-ink);background:var(--old-bg);border-radius:6px;padding:0 4px;margin:0 2px}
+.story .open .gloss{display:inline}
+.story .open button.w{cursor:default}
+
+.steps5{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:10px}
+.steps5 div{background:var(--surface2);border-radius:8px;padding:8px 10px;font-size:.9rem}
+.steps5 b{display:block;color:var(--accent)}
+@media (max-width:620px){.steps5{grid-template-columns:1fr}}
+.myth{display:grid;gap:10px}
+.myth .card b{color:var(--accent)}
+.sum{font-size:1.1rem;font-weight:700;text-align:center;border:2px solid var(--accent)}
+
+@media (prefers-reduced-motion: reduce){.link,.mean,.slot .ch span,.slot .py{transition:none}}
+
+:root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:var(--ok);--lq-bad:var(--bad)}
+/* ---------- 练习题（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+.lq{display:grid;gap:12px;margin-bottom:56px}
+.lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+.lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
+.lq-sub{margin:0;color:var(--lq-muted);font-size:14px}
+.lq-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--lq-muted);font-variant-numeric:tabular-nums}
+.lq-list{display:grid;gap:10px}
+.lq-item{background:var(--lq-surface);border:1.5px solid var(--lq-line);border-radius:10px;padding:12px 16px;display:grid;gap:10px;min-width:0;color:var(--lq-ink);text-align:left}
+.lq-item.lq-is-ok{border-color:var(--lq-ok)}
+.lq-item.lq-is-bad{border-color:var(--lq-bad)}
+.lq-q{font-size:15px;font-weight:600;line-height:1.8}
+.lq-tag{display:inline-block;font-size:11px;font-weight:500;line-height:1.6;color:var(--lq-muted);border:1px solid var(--lq-line);border-radius:999px;padding:0 8px;margin-right:8px;vertical-align:1px}
+.lq-opts,.lq-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lq .lq-opt,.lq .lq-redo{font:inherit;font-size:14px;line-height:1.6;padding:6px 14px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);cursor:pointer;text-align:left;opacity:1}
+.lq .lq-opt:hover:not(:disabled),.lq .lq-redo:hover{border-color:var(--lq-accent)}
+.lq .lq-opt:disabled{cursor:default;opacity:1}
+.lq .lq-opt.lq-right{border-color:var(--lq-ok);color:var(--lq-ok);font-weight:700}
+.lq .lq-opt.lq-wrong{border-color:var(--lq-bad);color:var(--lq-bad);text-decoration:line-through}
+.lq-fill input{font:inherit;font-size:14px;padding:6px 10px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);width:min(100%,200px)}
+.lq-fill input.lq-right{border-color:var(--lq-ok)}
+.lq-fill input.lq-wrong{border-color:var(--lq-bad)}
+.lq-why{font-size:14px;line-height:1.65;color:var(--lq-muted)}
+.lq-why:empty{display:none}
+.lq-why .lq-ok{color:var(--lq-ok)}
+.lq-why .lq-bad{color:var(--lq-bad)}
+</style>
+</head>
+<body>
+<!-- up-shell:begin（由 scripts/shell.mjs 自动生成，勿手改） -->
+<nav id="up-nav" aria-label="网站导航">
+<a class="up-home" href="/" title="Up 学习站首页"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="up-nav-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c6ef5"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#up-nav-g)"/><path d="M12 52V42a2 2 0 0 1 2-2h10V32a2 2 0 0 1 2-2h10v-8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v30z" fill="#fff"/><circle cx="43" cy="13" r="5.5" fill="#ffa94d"/></svg><span>Up 学习站</span></a>
+<span class="up-sep" aria-hidden="true">›</span><a class="up-cat" href="/chinese">语文</a>
+<span class="up-sep" aria-hidden="true">›</span><span class="up-title">文言实词怎么记</span>
+<button id="up-reset" type="button" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+</nav>
+<style>
+:root{--up-bg:#f5f6f8;--up-surface:#ffffff;--up-surface-2:#eef0f4;--up-ink:#1d2127;--up-muted:#626b78;--up-line:#dfe2e8;--up-ok:#2b8a3e;--up-bad:#d6336c;--up-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);--up-font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif;--up-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;--up-radius:12px;--up-accent:#a33a2e;--up-accent-soft:#f8ece8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#f0a08f;--up-accent-soft:#3a2220;color-scheme:dark}}
+:root[data-theme="dark"]{--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#f0a08f;--up-accent-soft:#3a2220;color-scheme:dark}
+html{padding-top:52px;scroll-padding-top:64px}
+#up-nav{position:fixed;top:0;left:0;right:0;z-index:2147483000;height:52px;box-sizing:border-box;display:flex;align-items:center;gap:8px;
+padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));border-top:3px solid var(--up-accent);
+border-bottom:1px solid var(--up-line);background:color-mix(in srgb,var(--up-surface) 88%,transparent);
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:500 14px/1.2 var(--up-font);color:var(--up-ink);text-align:left}
+#up-nav a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none}
+#up-nav a:hover{color:var(--up-accent)}
+#up-nav svg{width:24px;height:24px;flex:none;display:block}
+#up-nav .up-home span{font-weight:700}
+#up-nav .up-cat{color:var(--up-accent);font-weight:600}
+#up-nav .up-sep{color:var(--up-muted);flex:none}
+#up-nav .up-title{color:var(--up-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#up-reset{margin:0 0 0 auto;flex:none;font:600 14px/1 var(--up-font);padding:8px 14px;border-radius:999px;cursor:pointer;
+border:1.5px solid var(--up-accent);background:transparent;color:var(--up-accent);transition:background .2s,color .2s}
+#up-reset:hover,#up-reset:focus-visible{background:var(--up-accent);color:var(--up-surface)}
+#up-reset:focus-visible,#up-nav a:focus-visible{outline:2px solid var(--up-accent);outline-offset:2px}
+@media (max-width:560px){#up-nav .up-home span{display:none}}
+@media print{#up-nav{display:none}html{padding-top:0}}
+</style>
+<script>
+document.getElementById('up-reset').addEventListener('click', function () {
+  if (typeof window.resetPage === 'function') window.resetPage();
+  else console.warn('本页没有定义 window.resetPage()，重置按钮无效');
+  window.scrollTo({ top: 0, behavior: 'auto' });
+});
+</script>
+<!-- up-shell:end -->
+<main>
+
+<section>
+  <h1>文言实词怎么记</h1>
+  <p class="lead">上海中考要掌握 150 个文言实词，很多词有三四个意思。一个个死背，背了就忘。这一页给你 <b>5 把钥匙</b>，把"背意思"变成"推意思"。</p>
+</section>
+
+<section class="card analogy">
+  <b>生活比喻：一个字的意思像一棵树</b>
+  <div class="treeimg">
+    <svg viewBox="0 0 420 220" role="img" aria-label="一棵树：树根是本义，枝杈是引申义">
+      <path d="M210 182 V70 M210 140 L90 62 M210 110 L330 62" stroke="var(--k5)" stroke-width="7" fill="none" stroke-linecap="round"/>
+      <g font-size="15" font-family="var(--up-font)" text-anchor="middle">
+        <rect x="34" y="30" width="112" height="28" rx="14" fill="var(--new-bg)"/><text x="90" y="49" fill="var(--new-ink)">枝杈：引申义</text>
+        <rect x="154" y="34" width="112" height="28" rx="14" fill="var(--new-bg)"/><text x="210" y="53" fill="var(--new-ink)">枝杈：引申义</text>
+        <rect x="274" y="30" width="112" height="28" rx="14" fill="var(--new-bg)"/><text x="330" y="49" fill="var(--new-ink)">枝杈：引申义</text>
+        <rect x="150" y="182" width="120" height="30" rx="15" fill="var(--old-bg)"/><text x="210" y="202" fill="var(--old-ink)" font-weight="700">树根：本义</text>
+      </g>
+    </svg>
+  </div>
+  <p>"绝"有断、消失、隔绝、极……好几个意思，看起来毫不相干。其实它们都从一个<b>树根</b>（本义：把丝弄断）长出来。</p>
+  <p>记住树根，再顺着枝杈往上爬，就能<b>推</b>出各个意思，不用一个个死背。</p>
+</section>
+
+<section>
+  <h2>五把钥匙</h2>
+  <p class="muted">点一把钥匙，跳到对应的练习模块。</p>
+  <div class="keys" style="margin-top:10px">
+    <a href="#key1" style="--c:var(--k1)"><div class="n">钥匙 1</div><div class="t">找本义</div><div class="d">看字形，找到树根</div></a>
+    <a href="#key1" style="--c:var(--k2)"><div class="n">钥匙 2</div><div class="t">顺引申</div><div class="d">从树根长出枝杈</div></a>
+    <a href="#key3" style="--c:var(--k3)"><div class="n">钥匙 3</div><div class="t">辨古今</div><div class="d">别拿今义套古义</div></a>
+    <a href="#key4" style="--c:var(--k4)"><div class="n">钥匙 4</div><div class="t">认通假</div><div class="d">古人的"借字"</div></a>
+    <a href="#key5" style="--c:var(--k5)"><div class="n">钥匙 5</div><div class="t">连熟句</div><div class="d">课文句子、成语当锚</div></a>
+  </div>
+</section>
+
+<section id="key1" style="--c:var(--k1)">
+  <h2><span class="key">钥匙 1 + 2</span>找本义，顺引申</h2>
+  <p class="muted">先看字形猜出本义（树根），再一步步看它怎么长出新意思。每一步都配一句课文和一个成语。</p>
+  <div class="card" id="chain">
+    <div class="tabs" role="tablist"></div>
+    <div class="chain"></div>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<section id="key3" style="--c:var(--k3)">
+  <h2><span class="key">钥匙 3</span>辨古今：书里的 15 个古今异义词</h2>
+  <p class="muted">考纲 150 词的最后 15 个都是双音词：样子和今天一样，意思却不同。先读正面的课文句子猜一猜，再点卡片翻过来对答案。</p>
+  <div class="card" id="flips">
+    <div class="flips"></div>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="all">全部翻开</button>
+      <span class="stepno" data-role="count"></span>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<section id="key4" style="--c:var(--k4)">
+  <h2><span class="key">钥匙 4</span>认通假：古人的"借字"</h2>
+  <p class="muted">古人写字时，有时借一个读音相同或相近的字来用，这叫<b>通假</b>，被借来的字叫"通假字"，原本该写的叫"本字"。翻译时要<b>换回本字</b>，读音也跟着变。</p>
+  <div class="card" id="tj">
+    <div class="stage">
+      <div class="sent"></div>
+      <div class="tjnote"></div>
+    </div>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<section id="key5" style="--c:var(--k5)">
+  <h2><span class="key">钥匙 5</span>连熟句：用成语反推古义</h2>
+  <p class="muted">很多成语里还"冻"着字的古义。你已经会的成语，就是记文言实词最好的锚。先猜成语里加点字的意思，再看它在课文里怎么用。</p>
+  <div class="card" id="idiom">
+    <div class="idioms"></div>
+    <div class="ctrl">
+      <span class="stepno" data-role="score"></span>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>趣记故事：把一个字的几个意思编进一个故事</h2>
+  <p class="muted">一个字的几个意思放进同一个小故事里，比分开背更好记。点亮色的字，看它在这里是什么意思。</p>
+  <div class="card" id="story">
+    <div class="tabs" role="tablist"></div>
+    <div class="story"></div>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="all">全部揭开</button>
+      <span class="stepno" data-role="count"></span>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>每天记词的五步法</h2>
+  <div class="card">
+    <p>以后 40 天打卡，每个词都按这五步走，一个词大约 3 分钟：</p>
+    <div class="steps5">
+      <div><b>① 看字形</b>猜本义（树根）</div>
+      <div><b>② 画链条</b>本义 → 引申义，一条线串起来</div>
+      <div><b>③ 配句子</b>每个意思配一句课文</div>
+      <div><b>④ 找成语</b>能找到就写上，没有就跳过</div>
+      <div><b>⑤ 遮住自测</b>只看句子说意思，第二天再测一次</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>常见误区</h2>
+  <div class="myth">
+    <div class="card"><b>误区 1：用今天的意思去套。</b>"率妻子邑人"的"妻子"是妻子和儿女；"去国怀乡"的"去"是离开，不是前往。看着眼熟的词最容易翻错。</div>
+    <div class="card"><b>误区 2：一个字只背一个意思。</b>"绝"在《三峡》里就有三个意思：阻绝（断）、久绝（消失）、绝巘（极高的）。一定要看句子再定意思。</div>
+    <div class="card"><b>误区 3：只背意思，不带例句。</b>光背"顾：拜访"很快会忘；记住"三顾臣于草庐之中"，意思就跟着句子一起留下来了。</div>
+    <div class="card"><b>误区 4：看不懂就说是通假。</b>只有课本注释或词表里标明的才算通假字（如"说"同"悦"）。自己乱认通假，常常越译越错。</div>
+  </div>
+</section>
+
+<section class="card sum">
+  记实词不靠死背：先找树根（本义），再顺枝杈（引申），<br>提防今义冒充古义，认出借字换本字，每个意思挂一句课文。
+</section>
+
+<section class="lq" id="lq" aria-label="练习">
+  <div class="lq-head"><h2>练习</h2><span class="lq-score"></span></div>
+  <p class="lq-sub">12 道题，由易到难，最后几道是课外文言文（迁移）。每题作答后马上看到解析；点「重做练习」清空重来。</p>
+  <div class="lq-list"></div>
+  <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+</section>
+
+</main>
+
+<script>
+const resets = [];
+window.pageReset = () => resets.forEach(f => f());
+const esc = s => String(s).replace(/[&<>]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[ch]));
+const dotify = (s, w) => esc(s).split(w).join(`<em class="dot">${w}</em>`);
+
+/* ---------- 模块 1：引申链 ---------- */
+const CHAINS = [
+  { w: '兵', glyph: '古字形像<b>两只手举着一把斧子</b>（上面是"斤"，斧头；下面是"廾"，双手）。',
+    root: '本义：兵器',
+    links: [
+      { why: '先看字形：手里拿的东西', m: '兵器、武器', eg: '今南方已定，兵甲已足。', src: '出师表', id: '短兵相接（兵＝兵器）' },
+      { why: '拿兵器的人', m: '士兵、军队', eg: '昨夜见军帖，可汗大点兵。', src: '木兰诗', id: '兵强马壮（兵＝士兵）' },
+    ] },
+  { w: '去', glyph: '古字形上面是一个人（大），下面是洞口、住处（口）：<b>人从住处走开</b>。',
+    root: '本义：离开',
+    links: [
+      { why: '先看字形：人从家里走开', m: '离开', eg: '登斯楼也，则有去国怀乡。', src: '岳阳楼记', id: '何去何从（去＝离开）' },
+      { why: '离开了多远，就是"距离"', m: '距离', eg: '我以日始出时去人近。', src: '两小儿辩日', id: '' },
+      { why: '到了现代，方向反了过来', m: '今义：到某地去（古文里少见）', eg: '古："去国"＝离开国都；今："去北京"＝前往北京。', src: '', id: '' },
+    ] },
+  { w: '穷', glyph: '繁体写作"窮"：上面是"穴"（洞），下面是"躬"（弯着身子）。人<b>钻到山洞最里面，到头了</b>。',
+    root: '本义：尽头、穷尽',
+    links: [
+      { why: '先看字形：路走到尽头', m: '走到尽头、穷尽', eg: '复前行，欲穷其林。', src: '桃花源记', id: '层出不穷（穷＝尽）' },
+      { why: '声音"到头"，就是停止', m: '停止、停息', eg: '蝉则千转不穷。', src: '与朱元思书', id: '无穷无尽' },
+      { why: '钱财"到头"，就是贫穷', m: '贫穷', eg: '所识穷乏者得我与？', src: '鱼我所欲也', id: '穷困潦倒' },
+    ] },
+  { w: '绝', glyph: '古字形像<b>用刀把丝割断</b>（左边是丝，右边是刀）。',
+    root: '本义：把丝弄断',
+    links: [
+      { why: '先看字形：丝断了', m: '断绝、阻断', eg: '至于夏水襄陵，沿溯阻绝。', src: '三峡', id: '络绎不绝（绝＝断）' },
+      { why: '声音断了，就是消失', m: '消失', eg: '空谷传响，哀转久绝。', src: '三峡', id: '' },
+      { why: '和外界断开，就是隔绝', m: '与世隔绝的', eg: '率妻子邑人来此绝境。', src: '桃花源记', id: '' },
+      { why: '走到了断处、顶点，就是"极"', m: '极、非常', eg: '绝巘多生怪柏。', src: '三峡', id: '绝妙（绝＝极）' },
+    ] },
+];
+{
+  const root = document.getElementById('chain');
+  const tabs = root.querySelector('.tabs'), box = root.querySelector('.chain'), cap = root.querySelector('.caption'), no = root.querySelector('.stepno');
+  const btn = a => root.querySelector(`[data-act="${a}"]`);
+  tabs.innerHTML = CHAINS.map((c, i) => `<button type="button" class="tab" data-i="${i}">${c.w}</button>`).join('');
+  const INIT = { ci: 0, step: 0, playing: false }; let S = { ...INIT }, timer = null;
+  const total = () => CHAINS[S.ci].links.length + 1;
+  const build = () => {
+    const c = CHAINS[S.ci];
+    box.innerHTML = `<div class="glyph"><div class="big">${c.w}</div><div>${c.glyph}<div class="src">${c.root}</div></div></div>` +
+      c.links.map(l => `<div class="link"><div class="arrow">${esc(l.why)}</div><div class="mean"><b>${esc(l.m)}</b>` +
+        `<span class="eg">${dotify(l.eg, c.w)} ${l.src ? `<span class="src">《${l.src}》</span>` : ''}</span>` +
+        (l.id ? `<span class="idiom">成语：${esc(l.id)}</span>` : '') + `</div></div>`).join('');
+  };
+  const draw = () => {
+    const c = CHAINS[S.ci];
+    [...tabs.children].forEach((t, i) => t.classList.toggle('on', i === S.ci));
+    const links = [...box.querySelectorAll('.link')];
+    links.forEach((l, i) => { l.classList.toggle('on', i < S.step); l.querySelector('.mean').classList.toggle('now', i === S.step - 1); });
+    cap.innerHTML = S.step === 0 ? `第 1 步：先看字形，找树根。「${c.w}」的${c.root}。`
+      : `第 ${S.step + 1} 步：${esc(c.links[S.step - 1].why)} → <b>${esc(c.links[S.step - 1].m)}</b>。`;
+    no.textContent = `${S.step + 1} / ${total()}`;
+    btn('prev').disabled = S.step === 0; btn('next').disabled = S.step === total() - 1;
+    btn('play').textContent = S.playing ? '⏸ 暂停' : '▶ 播放';
+  };
+  const stop = () => { clearInterval(timer); timer = null; S.playing = false; };
+  const go = n => { S.step = Math.max(0, Math.min(total() - 1, S.step + n)); draw(); };
+  tabs.onclick = e => { const t = e.target.closest('.tab'); if (!t) return; stop(); S.ci = +t.dataset.i; S.step = 0; build(); draw(); };
+  btn('prev').onclick = () => { stop(); go(-1); };
+  btn('next').onclick = () => { stop(); go(1); };
+  btn('play').onclick = () => {
+    if (S.playing) { stop(); draw(); return; }
+    if (S.step === total() - 1) S.step = 0;
+    S.playing = true; draw();
+    timer = setInterval(() => { go(1); if (S.step === total() - 1) { stop(); draw(); } }, 1600);
+  };
+  const reset = () => { stop(); S = { ...INIT }; build(); draw(); };
+  btn('reset').onclick = reset; resets.push(reset); reset();
+}
+
+/* ---------- 模块 2：古今异义翻转卡（考纲第 136～150 号） ---------- */
+const GJ = [
+  { w: '卑鄙', s: '先帝不以臣卑鄙', src: '出师表', o: '身份低微，见识浅陋', n: '品质恶劣' },
+  { w: '布衣', s: '臣本布衣', src: '出师表', o: '平民百姓（古代平民穿布衣）', n: '布做的衣服' },
+  { w: '菲薄', s: '不宜妄自菲薄', src: '出师表', o: '看轻、轻视', n: '多指（数量）少、（质量）差，如"菲薄的礼物"' },
+  { w: '其实', s: '叶徒相似，其实味不同', src: '橘逾淮为枳', o: '两个词：它的果实', n: '副词：实际上' },
+  { w: '亲戚', s: '寡助之至，亲戚畔之', src: '得道多助，失道寡助', o: '内外亲属，连父母兄弟都包括在内', n: '家庭以外的亲属' },
+  { w: '驱驰', s: '遂许先帝以驱驰', src: '出师表', o: '奔走效劳', n: '（车马）快跑' },
+  { w: '无论', s: '乃不知有汉，无论魏晋', src: '桃花源记', o: '不要说，更不必说', n: '连词，表示条件不同、结果不变' },
+  { w: '牺牲', s: '牺牲玉帛，弗敢加也', src: '曹刿论战', o: '祭祀用的猪、牛、羊等', n: '为了正义舍弃生命' },
+  { w: '鸿儒', s: '谈笑有鸿儒', src: '陋室铭', o: '博学的人（鸿：大）', n: '今天很少用' },
+  { w: '白丁', s: '往来无白丁', src: '陋室铭', o: '没有功名的平民', n: '不识字的人' },
+  { w: '阡陌', s: '阡陌交通，鸡犬相闻', src: '桃花源记', o: '田间小路（南北叫阡，东西叫陌）', n: '今天很少用' },
+  { w: '交通', s: '阡陌交通，鸡犬相闻', src: '桃花源记', o: '交错相通', n: '各种运输和邮电事业' },
+  { w: '问津', s: '后遂无问津者', src: '桃花源记', o: '本义是询问渡口，文中指探访、寻访', n: '探问价格或情况（多说"无人问津"）' },
+  { w: '绝境', s: '率妻子邑人来此绝境', src: '桃花源记', o: '与人世隔绝的地方', n: '没有出路的境地' },
+  { w: '妻子', s: '率妻子邑人来此绝境', src: '桃花源记', o: '两个词：妻子和儿女', n: '男子的配偶' },
+];
+{
+  const root = document.getElementById('flips'), box = root.querySelector('.flips'), cnt = root.querySelector('[data-role="count"]');
+  box.innerHTML = GJ.map((g, i) => `<button type="button" class="flip" data-i="${i}" aria-label="${g.w}：点击翻面"><div class="in">
+    <div class="f"><span class="w">${g.w}</span><span class="s">${dotify(g.s, g.w)}</span><span class="src">《${g.src}》</span><span class="hint">先猜古义，再点我翻面 ↻</span></div>
+    <div class="b"><span class="w">${g.w}</span><div><span class="tag old">古</span>${esc(g.o)}</div><div><span class="tag new">今</span>${esc(g.n)}</div></div>
+  </div></button>`).join('');
+  const cards = [...box.children];
+  const INIT = () => ({ open: new Set() }); let S = INIT();
+  const draw = () => { cards.forEach((c, i) => c.classList.toggle('on', S.open.has(i))); cnt.textContent = `已翻 ${S.open.size} / ${GJ.length}`; };
+  box.onclick = e => { const c = e.target.closest('.flip'); if (!c) return; const i = +c.dataset.i; S.open.has(i) ? S.open.delete(i) : S.open.add(i); draw(); };
+  root.querySelector('[data-act="all"]').onclick = () => { GJ.forEach((_, i) => S.open.add(i)); draw(); };
+  const reset = () => { S = INIT(); draw(); };
+  root.querySelector('[data-act="reset"]').onclick = reset; resets.push(reset); reset();
+}
+
+/* ---------- 模块 3：通假字（借字 → 本字） ---------- */
+const TJ = [
+  { pre: '学而时习之，不亦', ch: '说', py: 'shuō', ben: '悦', py2: 'yuè', post: '乎？', src: '论语', tr: '学了又按时温习，不也是很<b>愉快</b>的吗？' },
+  { pre: '甚矣，汝之不', ch: '惠', py: 'huì', ben: '慧', py2: 'huì', post: '！', src: '愚公移山', tr: '你也太不<b>聪明</b>了！（读音没变，意思变了）' },
+  { pre: '', ch: '属', py: 'shǔ', ben: '嘱', py2: 'zhǔ', post: '予作文以记之', src: '岳阳楼记', tr: '<b>嘱托</b>我写一篇文章来记述这件事。' },
+  { pre: '才美不外', ch: '见', py: 'jiàn', ben: '现', py2: 'xiàn', post: '', src: '马说', tr: '（千里马的）才能和美好的素质不能<b>表现</b>在外面。' },
+  { pre: '河曲智叟', ch: '亡', py: 'wáng', ben: '无', py2: 'wú', post: '以应', src: '愚公移山', tr: '河曲的智叟<b>没有</b>话来回答。' },
+];
+{
+  const root = document.getElementById('tj');
+  const stage = root.querySelector('.stage'), sent = root.querySelector('.sent'), note = root.querySelector('.tjnote'),
+        cap = root.querySelector('.caption'), no = root.querySelector('.stepno');
+  const btn = a => root.querySelector(`[data-act="${a}"]`);
+  const INIT = { step: 0, playing: false }; let S = { ...INIT }, timer = null, built = -1;
+  const total = TJ.length * 3;
+  const build = i => {
+    const t = TJ[i];
+    sent.innerHTML = `<span>${esc(t.pre)}</span><span class="slot"><span class="py">${t.py}</span><span class="ch"><span class="old">${t.ch}</span><span class="new">${t.ben}</span></span></span><span>${esc(t.post)}</span>`;
+    built = i;
+  };
+  const draw = () => {
+    const i = Math.floor(S.step / 3), sub = S.step % 3, t = TJ[i];
+    if (built !== i) build(i);
+    stage.classList.toggle('swap', sub >= 1);
+    sent.querySelector('.py').textContent = sub >= 1 ? t.py2 : t.py;
+    note.innerHTML = sub === 0 ? `《${t.src}》` : sub === 1 ? `「${t.ch}」同「${t.ben}」，这里读 <b>${t.py2}</b>` : `译：${t.tr}`;
+    cap.textContent = sub === 0 ? `第 ${i + 1} 句：按平常的意思读「${t.ch}」（${t.py}），句子讲不通。`
+      : sub === 1 ? `换回本字：把借来的「${t.ch}」换成本来该写的「${t.ben}」。`
+      : `换完字，句子就通了。记法：通假字要和本字成对记——「${t.ch}」同「${t.ben}」。`;
+    no.textContent = `${S.step + 1} / ${total}`;
+    btn('prev').disabled = S.step === 0; btn('next').disabled = S.step === total - 1;
+    btn('play').textContent = S.playing ? '⏸ 暂停' : '▶ 播放';
+  };
+  const stop = () => { clearInterval(timer); timer = null; S.playing = false; };
+  const go = n => { S.step = Math.max(0, Math.min(total - 1, S.step + n)); draw(); };
+  btn('prev').onclick = () => { stop(); go(-1); };
+  btn('next').onclick = () => { stop(); go(1); };
+  btn('play').onclick = () => {
+    if (S.playing) { stop(); draw(); return; }
+    if (S.step === total - 1) S.step = 0;
+    S.playing = true; draw();
+    timer = setInterval(() => { go(1); if (S.step === total - 1) { stop(); draw(); } }, 1700);
+  };
+  const reset = () => { stop(); S = { ...INIT }; built = -1; draw(); };
+  btn('reset').onclick = reset; resets.push(reset); reset();
+}
+
+/* ---------- 模块 4：成语迁移 ---------- */
+const IDM = [
+  { idm: '短兵相接', w: '兵', opts: ['士兵', '兵器', '战争'], ans: 1, eg: '今南方已定，兵甲已足。', src: '出师表', why: '"短兵"是刀剑一类的短兵器，"短兵相接"就是近身拿刀剑拼杀。课文里"兵甲"的"兵"也是兵器。' },
+  { idm: '走马观花', w: '走', opts: ['步行', '跑', '离开'], ans: 1, eg: '双兔傍地走，安能辨我是雄雌？', src: '木兰诗', why: '骑着马跑，看花看得很粗略。古文的"走"是跑，今天的"走"（步行）古文里叫"行"。' },
+  { idm: '义无反顾', w: '顾', opts: ['回头看', '拜访', '照顾'], ans: 0, eg: '元方入门不顾。', src: '陈太丘与友期行', why: '为了正义只往前冲，不回头看。元方走进家门，不回头看那个失信的客人。' },
+  { idm: '层出不穷', w: '穷', opts: ['贫穷', '尽、完', '困难'], ans: 1, eg: '复前行，欲穷其林。', src: '桃花源记', why: '一层接一层地出现，没有穷尽。渔人想走到林子的尽头，"穷"也是"尽"。' },
+  { idm: '络绎不绝', w: '绝', opts: ['极', '断', '消失'], ans: 1, eg: '往来而不绝者，滁人游也。', src: '醉翁亭记', why: '前后连着，不断。课文里来来往往不断的，是滁州游人。' },
+  { idm: '徒劳无功', w: '徒', opts: ['步行', '徒弟', '白白地'], ans: 2, eg: '少壮不努力，老大徒伤悲。', src: '长歌行', why: '白白地费力气，没有成效。诗句里也是：年轻时不努力，老了只能白白地伤心。' },
+  { idm: '赴汤蹈火', w: '汤', opts: ['热水', '菜汤', '药汤'], ans: 0, eg: '及其日中如探汤。', src: '两小儿辩日', why: '跳进滚烫的热水，踩上烈火，比喻不怕危险。中午太阳热得像把手伸进热水里。' },
+  { idm: '多多益善', w: '益', opts: ['好处', '更加', '增加'], ans: 1, eg: '香远益清，亭亭净植。', src: '爱莲说', why: '越多越好，"益"是更加。莲花的香气传得越远越清幽。' },
+];
+{
+  const root = document.getElementById('idiom'), box = root.querySelector('.idioms'), sc = root.querySelector('[data-role="score"]');
+  let right = 0, done = 0;
+  const render = () => {
+    right = 0; done = 0;
+    box.innerHTML = IDM.map((d, i) => `<div class="idm" data-i="${i}"><div class="q"><span class="big">${dotify(d.idm, d.w)}</span>　里的「${d.w}」是什么意思？</div>
+      <div class="opts">${d.opts.map((o, j) => `<button type="button" data-j="${j}">${o}</button>`).join('')}</div><div class="why"></div></div>`).join('');
+    sc.textContent = `答对 0 / 0`;
+  };
+  box.onclick = e => {
+    const b = e.target.closest('button'); if (!b) return;
+    const el = b.closest('.idm'), d = IDM[+el.dataset.i], j = +b.dataset.j, ok = j === d.ans;
+    el.querySelectorAll('button').forEach(x => x.disabled = true);
+    el.querySelectorAll('button')[d.ans].classList.add('right'); if (!ok) b.classList.add('wrong');
+    el.classList.add(ok ? 'ok' : 'bad'); done++; if (ok) right++;
+    el.querySelector('.why').innerHTML = `${ok ? '✓' : '✗'} ${esc(d.why)}<br>课文：${dotify(d.eg, d.w)} <span class="src">《${d.src}》</span>`;
+    sc.textContent = `答对 ${right} / ${done}`;
+  };
+  root.querySelector('[data-act="reset"]').onclick = render; resets.push(render); render();
+}
+
+/* ---------- 模块 5：趣记故事（原创，标记 {字|意思}） ---------- */
+const STORIES = [
+  { w: '绝', t: '老琴师的琴弦忽然{绝|断}了。他背着琴进山找好木头，一路走到一处{绝|与世隔绝的}境。山谷里猿猴哀鸣，声音回荡了很久才{绝|消失}。抬头一看，{绝|极高的}壁上长着一棵怪柏。琴师拍手说："拿它做琴，妙{绝|极}了！"' },
+  { w: '去', t: '渔人一早{去|离开}家，小船{去|离开}岸越来越远。他也说不清桃林{去|距离}家有多远，只顾往前划。注意：今天说"去桃林"，是往桃林走；古人说"去桃林"，却是离开桃林——方向正好相反！' },
+  { w: '穷', t: '渔人想{穷|走到尽头}这片桃林，划呀划，水边的蝉鸣千转不{穷|停止}。回到家，正是{穷|深}冬，家里米缸见了底，日子过得很{穷|贫穷}——原来"穷"就是"到头"：路到头、声音到头、冬天到头、钱到头。' },
+  { w: '顾', t: '刘备第一次去草庐没见到诸葛亮，出门时频频回{顾|回头看}。第三次再{顾|拜访}，终于见到了。后来诸葛亮在《出师表》里写："先帝……三{顾|拜访}臣于草庐之中。"' },
+];
+{
+  const root = document.getElementById('story'), tabs = root.querySelector('.tabs'), box = root.querySelector('.story'), cnt = root.querySelector('[data-role="count"]');
+  tabs.innerHTML = STORIES.map((s, i) => `<button type="button" class="tab" data-i="${i}">「${s.w}」的故事</button>`).join('');
+  const INIT = { si: 0 }; let S = { ...INIT };
+  const update = () => { const all = box.querySelectorAll('.wd'), open = box.querySelectorAll('.wd.open'); cnt.textContent = `已揭开 ${open.length} / ${all.length}`; };
+  const draw = () => {
+    [...tabs.children].forEach((t, i) => t.classList.toggle('on', i === S.si));
+    box.innerHTML = esc(STORIES[S.si].t).replace(/\{([^|]+)\|([^}]+)\}/g, '<span class="wd"><button type="button" class="w">$1</button><span class="gloss">$2</span></span>');
+    update();
+  };
+  box.onclick = e => { const b = e.target.closest('button.w'); if (!b) return; b.parentElement.classList.add('open'); update(); };
+  tabs.onclick = e => { const t = e.target.closest('.tab'); if (!t) return; S.si = +t.dataset.i; draw(); };
+  root.querySelector('[data-act="all"]').onclick = () => { box.querySelectorAll('.wd').forEach(x => x.classList.add('open')); update(); };
+  const reset = () => { S = { ...INIT }; draw(); };
+  root.querySelector('[data-act="reset"]').onclick = reset; resets.push(reset); reset();
+}
+
+/* ---------- 练习题 ---------- */
+const D = t => `<em class="dot">${t}</em>`;
+window.LQ_ITEMS = [
+  { type: '选择', q: `「率${D('妻子')}邑人来此绝境」中「妻子」的意思是：（《桃花源记》）`,
+    opts: ['男子的配偶', '妻子和儿女', '妻子的家人', '家里的女眷'], ans: 1,
+    why: '古文里「妻子」是两个词：妻＋子（儿女）。渔人说的是村里人的祖先带着妻子儿女逃到这里。这是最常考的古今异义词。' },
+  { type: '判断', q: '常见误区：「登斯楼也，则有去国怀乡」里的「去」，和今天「去北京」的「去」意思一样。',
+    opts: ['对', '错'], ans: 1,
+    why: '错。古文「去」的本义是离开，「去国」是离开国都；今天的「去」是前往，方向正好相反。见「去」的引申链。' },
+  { type: '选择', q: `「复前行，欲${D('穷')}其林」中「穷」的意思是：（《桃花源记》）`,
+    opts: ['贫穷', '走到尽头', '困难', '停止'], ans: 1,
+    why: '「穷」的本义是尽头。渔人想走到这片林子的尽头。贫穷、停止都是后来从「到头」引申出来的。' },
+  { type: '选择', q: '下列句子中，「绝」的意思是「极、非常」的一项是：',
+    opts: [`沿溯阻${D('绝')}`, `哀转久${D('绝')}`, `${D('绝')}巘多生怪柏`, `率妻子邑人来此${D('绝')}境`], ans: 2,
+    why: '「绝巘」是极高的山峰，「绝」是极。A 是断，B 是消失，D 是与世隔绝的。四个都在「绝」的引申链上，要看句子来定。' },
+  { type: '选择', q: `「才美不外${D('见')}」中的「见」：（《马说》）`,
+    opts: ['读 jiàn，看见', '读 jiàn，拜见', '同「现」，读 xiàn，表现', '表被动'], ans: 2,
+    why: '这里「见」是通假字，同「现」，读 xiàn：千里马的才能不能表现在外面。见通假字动画第 4 句。' },
+  { type: '填空', q: `「学而时习之，不亦${D('说')}乎？」中的「说」同哪个字？（一个字）`,
+    ans: ['悦'], placeholder: '一个字',
+    why: '「说」同「悦」，读 yuè，愉快。通假字一定要和本字成对记。' },
+  { type: '选择', q: `「义无反${D('顾')}」的「顾」是回头看。下列句子中「顾」也是回头看的一项是：`,
+    opts: [`元方入门不${D('顾')}`, `三${D('顾')}臣于草庐之中`, `${D('顾')}野有麦场`, '以上都是'], ans: 0,
+    why: '元方进门不回头看。B「三顾」是拜访；C 课本注释是「看，视」。成语帮你记住本义，但每句还是要看语境。' },
+  { type: '选择', q: '「兵」从「兵器」引申出「士兵、军队」，是因为：',
+    opts: ['两个字长得像', '拿兵器的人就是兵', '古人写了别字', '读音相同'], ans: 1,
+    why: '引申是顺着意思的联系走：兵器 → 拿兵器的人。C、D 说的是通假，和引申不是一回事。' },
+  { type: '选择', q: '下列加点词中，古义和今义基本相同的一项是：',
+    opts: [`率${D('妻子')}邑人`, `后遂无${D('问津')}者`, `可汗大点${D('兵')}`, `臣本${D('布衣')}`], ans: 2,
+    why: '「可汗大点兵」的「兵」是士兵，今天也这样说。A 古义是妻子和儿女，B 古义是探访，D 古义是平民。' },
+  { type: '判断', q: '遇到一个字想不起意思时，直接用它在现代汉语里最常用的意思去翻译，一般不会错。',
+    opts: ['对', '错'], ans: 1,
+    why: '错。很多字古今意思差别很大，比如「走」（跑）、「去」（离开）、「汤」（热水）。应该先想本义和课文例句。' },
+  { type: '选择', q: `【课外迁移】《伯牙鼓琴》：伯牙破琴${D('绝')}弦，终身不复鼓琴。「绝」的意思是：`,
+    opts: ['极', '断', '消失', '隔绝'], ans: 1,
+    why: '伯牙摔破琴，弄断琴弦。这正是「绝」的本义：把丝（弦）弄断。' },
+  { type: '选择', q: `【课外迁移】鲁国有人擅长编草鞋、织白绢，想搬到不穿鞋、不戴帽的越国去。有人对他说：「子必${D('穷')}矣。」「穷」的意思是：（《韩非子》）`,
+    opts: ['走到尽头', '停止', '困窘、贫穷', '深（冬）'], ans: 2,
+    why: '去一个用不着你手艺的地方，你一定会穷困。这是「钱财到头」的引申义，和「所识穷乏者」的「穷」一样。' },
+];
+</script>
+<script>
+/* ---------- 练习题（learn 通用组件） ---------- */
+(() => {
+  const box = document.getElementById('lq');
+  const items = window.LQ_ITEMS || [];
+  const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let answered = 0, right = 0;
+
+  function update() {
+    const all = answered === items.length;
+    score.textContent = `已答 ${answered} / ${items.length} · 答对 ${right}` +
+      (all ? (right === items.length ? ' · 全对！' : ' · 看看解析，再重做一次') : '');
+  }
+
+  function render() {
+    answered = 0; right = 0; list.innerHTML = '';
+    items.forEach((it, i) => {
+      const el = document.createElement('div');
+      el.className = 'lq-item';
+      el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
+      const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
+      const judge = (ok, answer) => {
+        answered++; if (ok) right++;
+        el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
+        why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
+        update();
+      };
+      if (it.opts) {
+        a.classList.add('lq-opts');
+        it.opts.forEach((o, j) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'lq-opt'; b.innerHTML = o;
+          b.onclick = () => {
+            a.querySelectorAll('button').forEach(x => x.disabled = true);
+            a.children[it.ans].classList.add('lq-right');
+            if (j !== it.ans) b.classList.add('lq-wrong');
+            judge(j === it.ans, it.opts[it.ans]);
+          };
+          a.append(b);
+        });
+      } else {
+        a.classList.add('lq-fill');
+        a.innerHTML = `<input type="text" autocomplete="off" spellcheck="false" placeholder="${it.placeholder || '输入答案'}" aria-label="第 ${i + 1} 题答案"><button type="button" class="lq-opt">确定</button>`;
+        const inp = a.querySelector('input'), go = a.querySelector('button');
+        const submit = () => {
+          if (!inp.value.trim()) { inp.focus(); return; }
+          inp.disabled = go.disabled = true;
+          const ok = it.ans.some(x => norm(x) === norm(inp.value));
+          inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
+          judge(ok, it.ans[0]);
+        };
+        go.onclick = submit;
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      }
+      list.append(el);
+    });
+    update();
+  }
+
+  box.querySelector('.lq-redo').addEventListener('click', render);
+  window.resetPage = () => {
+    if (typeof window.pageReset === 'function') window.pageReset();
+    render();
+  };
+  render();
+})();
+</script>
+</body>
+</html>
