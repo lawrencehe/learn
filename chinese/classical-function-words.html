@@ -1,0 +1,700 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>文言六大虚词</title>
+<meta name="description" content="上海中考必考的 6 个文言虚词「之 其 而 以 何 于」：一句总口诀「看邻居定身份」，配用法树分步动画、六词用法表（背诵模式）、虚词侦探，以及 16 道由易到难的练习。">
+<style>
+:root{
+  --bg:var(--up-bg); --surface:var(--up-surface); --surface2:var(--up-surface-2); --ink:var(--up-ink); --muted:var(--up-muted); --line:var(--up-line);
+  --accent:var(--up-accent); --ok:var(--up-ok); --bad:var(--up-bad);
+  /* 六个虚词的语义色 */
+  --w1:#1c7ed6; --w2:#7048e8; --w3:#0c8599; --w4:#e8590c; --w5:#8d6e1f; --w6:#d6336c;
+  /* 左邻 / 右舍 高亮 */
+  --nl-bg:#e7f5ff; --nl-ink:#1864ab; --nr-bg:#fff4e6; --nr-ink:#a14a00;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --w1:#74c0fc; --w2:#b197fc; --w3:#66d9e8; --w4:#ffa94d; --w5:#e0c06a; --w6:#f783ac;
+    --nl-bg:#15324a; --nl-ink:#a5d8ff; --nr-bg:#45290f; --nr-ink:#ffc078; }
+}
+:root[data-theme="dark"]{ --w1:#74c0fc; --w2:#b197fc; --w3:#66d9e8; --w4:#ffa94d; --w5:#e0c06a; --w6:#f783ac;
+  --nl-bg:#15324a; --nl-ink:#a5d8ff; --nr-bg:#45290f; --nr-ink:#ffc078; }
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 var(--up-font);padding:24px 16px 96px}
+main{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:48px}
+h1{font-size:clamp(1.7rem,4.5vw,2.4rem);line-height:1.25;margin:0 0 8px}
+h2{font-size:1.4rem;margin:0 0 8px}
+h3{font-size:1.1rem;margin:0}
+p{margin:0}
+.lead{color:var(--muted)}
+.muted{color:var(--muted);font-size:.92rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--up-radius);box-shadow:var(--up-shadow);padding:16px}
+.analogy{border-left:4px solid var(--accent);display:grid;gap:8px}
+.btn{font:inherit;font-size:14px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--up-surface)}
+.btn.primary:hover:not(:disabled){color:var(--up-surface);opacity:.9}
+.btn:disabled{opacity:.45;cursor:default}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.stepno{font-family:var(--up-mono);color:var(--muted);font-size:.9rem;min-width:56px;text-align:center}
+.caption{min-height:3.4em;margin-top:10px}
+/* 加点字（试卷上的着重号） */
+.dot{font-style:normal;font-weight:700;-webkit-text-emphasis:filled dot;text-emphasis:filled dot;-webkit-text-emphasis-position:under;text-emphasis-position:under right}
+
+/* 砖与水泥 */
+.wall{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center;margin-top:4px}
+.brick{padding:6px 12px;border-radius:6px;background:var(--surface2);border:1.5px solid var(--line);font-weight:600}
+.glue{padding:6px 10px;border-radius:6px;border:2px dashed var(--accent);color:var(--accent);font-weight:700}
+
+/* 总口诀 */
+.formula{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.fx{border-radius:12px;border:2px solid var(--c);padding:10px 8px;text-align:center;background:var(--surface);opacity:.25;transform:translateY(8px);transition:opacity .6s,transform .6s}
+.fx.on{opacity:1;transform:none}
+.fx .big{font-size:2rem;font-weight:700;color:var(--c);line-height:1.2}
+.fx .act{font-weight:700}
+.fx .nm{font-size:.82rem;color:var(--muted);line-height:1.5}
+@media (max-width:520px){.formula{grid-template-columns:repeat(2,1fr)}.fx .big{font-size:1.6rem}}
+
+/* 用法树动画 */
+.tabs{display:flex;flex-wrap:wrap;gap:6px}
+.tab{font:inherit;font-size:15px;padding:4px 14px;border-radius:999px;border:1.5px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.tab .dotc{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c);margin-right:6px;vertical-align:2px}
+.tab.on{border-color:var(--accent);background:var(--up-accent-soft);font-weight:700}
+.stage{border-radius:10px;background:var(--surface2);margin-top:12px;padding:22px 12px 16px;display:grid;gap:12px;justify-items:center}
+.sent{display:flex;flex-wrap:wrap;justify-content:center;gap:1px;font-size:clamp(1.15rem,5vw,2rem);font-weight:600;letter-spacing:.06em}
+.seg{padding:2px 2px;border-radius:8px;border:2px solid transparent;transition:background .6s,color .6s,border-color .6s}
+.seg.T{color:var(--c);border-color:var(--c);padding:2px 6px}
+.on1 .seg.L{background:var(--nl-bg);color:var(--nl-ink)}
+.on1 .seg.R{background:var(--nr-bg);color:var(--nr-ink)}
+.clue{display:flex;flex-wrap:wrap;gap:8px 16px;justify-content:center;font-size:.92rem;min-height:1.8em;opacity:0;transition:opacity .6s}
+.on1 .clue{opacity:1}
+.clue span{border-radius:6px;padding:0 8px}
+.clue .cl{background:var(--nl-bg);color:var(--nl-ink)}
+.clue .cr{background:var(--nr-bg);color:var(--nr-ink)}
+.tree{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:8px;margin-top:12px;position:relative}
+.node{border:2px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--surface);transition:border-color .6s,background .6s,transform .6s,opacity .6s;opacity:.6}
+.node b{display:block;font-size:.98rem}
+.node small{display:block;color:var(--muted);font-size:.8rem;line-height:1.45}
+.node.seen{opacity:1;border-color:var(--c);border-style:dashed}
+.node.hit{opacity:1;border-color:var(--c);border-style:solid;background:var(--up-accent-soft);transform:translateY(-3px)}
+.node.hit b{color:var(--c)}
+.root{font-size:.85rem;color:var(--muted);margin-top:14px}
+.root b{color:var(--c);font-size:1.1rem}
+.tr{margin-top:6px;font-size:.95rem}
+.tr mark{background:transparent;color:var(--c);font-weight:700;border-bottom:2px solid var(--c)}
+.src{font-size:.85rem;color:var(--muted)}
+.xb{display:inline-block;font-size:.72rem;border:1px solid var(--accent);color:var(--accent);border-radius:999px;padding:0 6px;margin-left:4px;vertical-align:1px;line-height:1.5}
+
+/* 用法表 */
+.words{display:grid;gap:12px}
+details.wd{border-left:5px solid var(--c)}
+details.wd>summary{cursor:pointer;list-style:none;display:flex;gap:12px;align-items:center}
+details.wd>summary::-webkit-details-marker{display:none}
+.wd .bigc{font-size:1.8rem;font-weight:800;color:var(--c);width:1.4em;text-align:center}
+.wd .verse{font-weight:600}
+.wd .chev{margin-left:auto;color:var(--muted);transition:transform .3s}
+details.wd[open] .chev{transform:rotate(90deg)}
+.wd .body{margin-top:12px;overflow-x:auto}
+.wd table{border-collapse:collapse;width:100%;font-size:.93rem;min-width:520px}
+.wd td,.wd th{border-top:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+.wd th{color:var(--muted);font-weight:500;font-size:.85rem}
+.wd td.u{white-space:nowrap;font-weight:700;color:var(--c)}
+.wd .eg{display:block}
+@media (max-width:600px){
+  .wd table,.wd tbody{display:block;min-width:0}
+  .wd tr:first-child{display:none}
+  .wd tr{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;border-top:1px solid var(--line);padding:8px 0}
+  .wd td{border:0;padding:0}
+  .wd td:nth-child(3){grid-column:1/-1;color:var(--muted);font-size:.88rem}
+  .wd td:nth-child(4){grid-column:1/-1}
+}
+.k{border-radius:5px;padding:0 2px;transition:filter .3s,background .3s}
+.recite .k{filter:blur(6px);background:var(--surface2);cursor:pointer;user-select:none}
+.recite .k.seen{filter:none;background:var(--up-accent-soft);cursor:default}
+.recite-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+
+/* 虚词侦探 */
+.quiz-sent{font-size:clamp(1.2rem,4.8vw,1.7rem);font-weight:600;text-align:center;padding:22px 8px;background:var(--surface2);border-radius:10px;margin-top:12px;letter-spacing:.05em}
+.quiz-sent .dot{color:var(--c)}
+.pick{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:6px;margin-top:12px}
+.pick button{font:inherit;font-size:14px;padding:8px 4px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.pick button:hover:not(:disabled){border-color:var(--accent)}
+.pick button:disabled{cursor:default}
+.pick button.right{border-color:var(--ok);color:var(--ok);font-weight:700}
+.pick button.wrong{border-color:var(--bad);color:var(--bad);text-decoration:line-through}
+.fb{min-height:3em;margin-top:10px;font-size:.95rem}
+.fb .ok{color:var(--ok)} .fb .bad{color:var(--bad)}
+
+.steps3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.steps3 div{background:var(--surface2);border-radius:8px;padding:8px 10px;font-size:.93rem}
+.steps3 b{color:var(--accent)}
+@media (max-width:520px){.steps3{grid-template-columns:1fr}}
+.myth{display:grid;gap:10px}
+.myth .card b{color:var(--accent)}
+.sum{font-size:1.1rem;font-weight:700;text-align:center;border:2px solid var(--accent)}
+
+@media (prefers-reduced-motion: reduce){.fx,.seg,.clue,.node,.k,.wd .chev{transition:none}}
+
+:root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:var(--ok);--lq-bad:var(--bad)}
+/* ---------- 练习题（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+.lq{display:grid;gap:12px;margin-bottom:56px}
+.lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+.lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
+.lq-sub{margin:0;color:var(--lq-muted);font-size:14px}
+.lq-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--lq-muted);font-variant-numeric:tabular-nums}
+.lq-list{display:grid;gap:10px}
+.lq-item{background:var(--lq-surface);border:1.5px solid var(--lq-line);border-radius:10px;padding:12px 16px;display:grid;gap:10px;min-width:0;color:var(--lq-ink);text-align:left}
+.lq-item.lq-is-ok{border-color:var(--lq-ok)}
+.lq-item.lq-is-bad{border-color:var(--lq-bad)}
+.lq-q{font-size:15px;font-weight:600;line-height:1.8}
+.lq-tag{display:inline-block;font-size:11px;font-weight:500;line-height:1.6;color:var(--lq-muted);border:1px solid var(--lq-line);border-radius:999px;padding:0 8px;margin-right:8px;vertical-align:1px}
+.lq-opts,.lq-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lq .lq-opt,.lq .lq-redo{font:inherit;font-size:14px;line-height:1.6;padding:6px 14px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);cursor:pointer;text-align:left;opacity:1}
+.lq .lq-opt:hover:not(:disabled),.lq .lq-redo:hover{border-color:var(--lq-accent)}
+.lq .lq-opt:disabled{cursor:default;opacity:1}
+.lq .lq-opt.lq-right{border-color:var(--lq-ok);color:var(--lq-ok);font-weight:700}
+.lq .lq-opt.lq-wrong{border-color:var(--lq-bad);color:var(--lq-bad);text-decoration:line-through}
+.lq-fill input{font:inherit;font-size:14px;padding:6px 10px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);width:min(100%,200px)}
+.lq-fill input.lq-right{border-color:var(--lq-ok)}
+.lq-fill input.lq-wrong{border-color:var(--lq-bad)}
+.lq-why{font-size:14px;line-height:1.65;color:var(--lq-muted)}
+.lq-why:empty{display:none}
+.lq-why .lq-ok{color:var(--lq-ok)}
+.lq-why .lq-bad{color:var(--lq-bad)}
+</style>
+</head>
+<body>
+<!-- up-shell:begin（由 scripts/shell.mjs 自动生成，勿手改） -->
+<nav id="up-nav" aria-label="网站导航">
+<a class="up-home" href="/" title="Up 学习站首页"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="up-nav-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c6ef5"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#up-nav-g)"/><path d="M12 52V42a2 2 0 0 1 2-2h10V32a2 2 0 0 1 2-2h10v-8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v30z" fill="#fff"/><circle cx="43" cy="13" r="5.5" fill="#ffa94d"/></svg><span>Up 学习站</span></a>
+<span class="up-sep" aria-hidden="true">›</span><a class="up-cat" href="/chinese">语文</a>
+<span class="up-sep" aria-hidden="true">›</span><span class="up-title">文言六大虚词</span>
+<button id="up-reset" type="button" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+</nav>
+<style>
+:root{--up-bg:#f5f6f8;--up-surface:#ffffff;--up-surface-2:#eef0f4;--up-ink:#1d2127;--up-muted:#626b78;--up-line:#dfe2e8;--up-ok:#2b8a3e;--up-bad:#d6336c;--up-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);--up-font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif;--up-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;--up-radius:12px;--up-accent:#a33a2e;--up-accent-soft:#f8ece8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#f0a08f;--up-accent-soft:#3a2220;color-scheme:dark}}
+:root[data-theme="dark"]{--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#f0a08f;--up-accent-soft:#3a2220;color-scheme:dark}
+html{padding-top:52px;scroll-padding-top:64px}
+#up-nav{position:fixed;top:0;left:0;right:0;z-index:2147483000;height:52px;box-sizing:border-box;display:flex;align-items:center;gap:8px;
+padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));border-top:3px solid var(--up-accent);
+border-bottom:1px solid var(--up-line);background:color-mix(in srgb,var(--up-surface) 88%,transparent);
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:500 14px/1.2 var(--up-font);color:var(--up-ink);text-align:left}
+#up-nav a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none}
+#up-nav a:hover{color:var(--up-accent)}
+#up-nav svg{width:24px;height:24px;flex:none;display:block}
+#up-nav .up-home span{font-weight:700}
+#up-nav .up-cat{color:var(--up-accent);font-weight:600}
+#up-nav .up-sep{color:var(--up-muted);flex:none}
+#up-nav .up-title{color:var(--up-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#up-reset{margin:0 0 0 auto;flex:none;font:600 14px/1 var(--up-font);padding:8px 14px;border-radius:999px;cursor:pointer;
+border:1.5px solid var(--up-accent);background:transparent;color:var(--up-accent);transition:background .2s,color .2s}
+#up-reset:hover,#up-reset:focus-visible{background:var(--up-accent);color:var(--up-surface)}
+#up-reset:focus-visible,#up-nav a:focus-visible{outline:2px solid var(--up-accent);outline-offset:2px}
+@media (max-width:560px){#up-nav .up-home span{display:none}}
+@media print{#up-nav{display:none}html{padding-top:0}}
+</style>
+<script>
+document.getElementById('up-reset').addEventListener('click', function () {
+  if (typeof window.resetPage === 'function') window.resetPage();
+  else console.warn('本页没有定义 window.resetPage()，重置按钮无效');
+  window.scrollTo({ top: 0, behavior: 'auto' });
+});
+</script>
+<!-- up-shell:end -->
+<main>
+
+<section>
+  <h1>文言六大虚词：之 其 而 以 何 于</h1>
+  <p class="lead">上海中考规定要掌握的 6 个文言虚词。它们出现得最多，意思却最"滑"：同一个字，换个位置就换个身份。这一页教你一个办法：<b>看左右邻居，定它的身份</b>。</p>
+</section>
+
+<section class="card analogy">
+  <b>生活比喻：实词是砖，虚词是水泥和合页</b>
+  <div class="wall"><span class="brick">渔人</span><span class="brick">甚</span><span class="brick">异</span><span class="glue">之</span></div>
+  <p>"渔人、异（惊奇）"这样的<b>实词</b>有实实在在的意思，像砖块；"之、而、以"这样的<b>虚词</b>本身意思很淡，管的是"砖怎么连"，像水泥和门上的合页。</p>
+  <p>同一个合页，装在门上管开关，装在柜子上管翻盖——<b>装在哪儿，就干什么活</b>。所以虚词不靠死背一个意思，要看它<b>站在谁旁边</b>。</p>
+</section>
+
+<section>
+  <h2>一句总口诀：六个字各看什么</h2>
+  <p class="muted">点「播放」逐个亮起，后面的动画会把每一句拆开给你看。</p>
+  <div class="card" id="fm">
+    <div class="formula"></div>
+    <div class="ctrl">
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="all">全部显示</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>一步一步看：看邻居 → 定身份</h2>
+  <p class="muted">每一句分三步：① 找到加点的虚词 ② 看它左边、右边是什么 ③ 在下面的「用法树」上点亮它的身份。标「小学学过」的是你已经学过的课文。</p>
+  <div class="card" id="demo">
+    <div class="tabs" role="tablist"></div>
+    <div class="stage">
+      <div class="sent"></div>
+      <div class="clue"></div>
+    </div>
+    <p class="caption"></p>
+    <p class="root"></p>
+    <div class="tree"></div>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>六个虚词用法表</h2>
+  <div class="recite-bar">
+    <p class="muted">点开每个字看全部用法。打开「背诵模式」后，「意思」一栏会被遮住，先自己说，再点一下揭开。</p>
+    <button type="button" class="btn" id="reciteBtn">背诵模式：关</button>
+  </div>
+  <div class="words" id="words" style="margin-top:12px"></div>
+</section>
+
+<section>
+  <h2>虚词侦探：这一句里它是什么身份？</h2>
+  <p class="muted">句子随机出现，题目里还有动画没讲过的新句子。先看邻居，再选身份。</p>
+  <div class="card" id="det">
+    <div class="quiz-sent"></div>
+    <div class="pick"></div>
+    <p class="fb"></p>
+    <div class="ctrl">
+      <button type="button" class="btn primary" data-act="next">下一句 ▶</button>
+      <span class="stepno" data-role="score"></span>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>中考题型：「加点词意义和用法相同的一项」</h2>
+  <div class="card">
+    <p>中考最爱考：给四组句子，每组两个加点词，问哪一组意思用法相同。不要凭感觉，按三步走：</p>
+    <div class="steps3">
+      <div><b>① 拆开</b><br>每组两句分开看，一次只看一句。</div>
+      <div><b>② 各定身份</b><br>用"看邻居"分别判断两个加点词是什么用法。</div>
+      <div><b>③ 再比较</b><br>身份一样才选；只是字一样不算。</div>
+    </div>
+    <p class="muted" style="margin-top:10px">例：「<em class="dot">以</em>子之矛」和「不<em class="dot">以</em>物喜」——前一个后面跟工具（用），后一个后面跟原因（因为），身份不同。练习第 9、12、16 题就是这种题型。</p>
+  </div>
+</section>
+
+<section>
+  <h2>常见误区</h2>
+  <div class="myth">
+    <div class="card"><b>误区 1：「之」就是「的」。</b>只有夹在两个名词中间才是"的"（西山之木石）。跟在动词后面多半是代词（渔人甚异之），夹在主语和谓语中间则不翻译（吾盾之坚）。</div>
+    <div class="card"><b>误区 2：「而」就是「但是」。</b>转折只是四种关系里的一种。先看前后：意思相反才是转折；一先一后是承接；地位平等是并列；前面是方式状态是修饰。</div>
+    <div class="card"><b>误区 3：「于」就是「在」。</b>还有"到、从、向、比"。尤其是"形容词 + 于"（美于徐公），多半是"比"。</div>
+    <div class="card"><b>误区 4：「其」就是「他的」。</b>出现在问句里（其真无马邪？）常是"难道"；在不太肯定的陈述句里（其真不知马也）是"恐怕、大概"。</div>
+  </div>
+</section>
+
+<section class="card sum">
+  虚词不背死义，看左右邻居定身份：<br>之看夹谁，其看语气，而看关系，以看后面，何看问啥，于看前后。
+</section>
+
+<section class="lq" id="lq" aria-label="练习">
+  <div class="lq-head"><h2>练习</h2><span class="lq-score"></span></div>
+  <p class="lq-sub">16 道题，由易到难，最后几道是课外文言文（迁移）。每题作答后马上看到解析；点「重做练习」清空重来。</p>
+  <div class="lq-list"></div>
+  <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+</section>
+
+</main>
+
+<script>
+const resets = [];
+window.pageReset = () => resets.forEach(f => f());
+
+/* 小学学过的篇目，打上标记 */
+const XIAO = new Set(['学弈', '自相矛盾', '精卫填海', '守株待兔', '司马光', '两小儿辨日']);
+const srcHTML = s => `《${s}》` + (XIAO.has(s) ? '<span class="xb">小学学过</span>' : '');
+
+/* ---------- 数据：六个虚词 ----------
+   例句标记：[虚词]  <左邻>  {右舍}；译文里 [..] 是这个虚词对应的译法 */
+const W = [
+  { w: '之', c: 'var(--w1)', act: '看夹谁', tip: '夹名词是"的"，动词后是代词',
+    uses: [
+      { n: '代词', m: '他、它、这件事', r: '跟在动词后面，常在句末' },
+      { n: '助词"的"', m: '的', r: '夹在两个名词中间' },
+      { n: '取消句子独立性', m: '不译', r: '夹在主语和谓语中间' },
+      { n: '音节助词', m: '不译', r: '跟在"久""鼓"后凑音节，不指代' },
+      { n: '宾语前置标志', m: '不译', r: '"何……之有""惟……之为"' },
+      { n: '动词', m: '到、往', r: '后面紧跟地点' },
+    ],
+    ex: [
+      { m: '渔人甚<异>[之]', lt: '动词"异"（对……惊奇）', rt: '句末，后面没东西', u: 0, tr: '渔人对[这种情景]感到很惊奇。', src: '桃花源记' },
+      { m: '常衔<西山>[之]{木石}', lt: '名词"西山"', rt: '名词"木石"', u: 1, tr: '常常衔来西山[的]树枝和石子。', src: '精卫填海' },
+      { m: '<吾盾>[之]{坚}，物莫能陷也', lt: '主语"吾盾"', rt: '谓语"坚"', u: 2, tr: '我的盾很坚固，没有东西能刺穿它。（"之"不译）', src: '自相矛盾' },
+      { m: '<久>[之]，目似瞑', lt: '"久"（时间长）', rt: '停顿，不指代任何东西', u: 3, tr: '过了一会儿，狼的眼睛好像闭上了。（"之"不译）', src: '狼' },
+      { m: '<何陋>[之]{有}', lt: '宾语"何陋"', rt: '动词"有"', u: 4, tr: '有什么简陋的呢？（原来是"有何陋"，"之"不译）', src: '陋室铭' },
+      { m: '<辍耕>[之]{垄上}', lt: '动作"辍耕"（停止耕作）', rt: '地点"垄上"（田埂上）', u: 5, tr: '停止耕作，[走到]田埂上。', src: '陈涉世家' },
+    ],
+    more: [
+      { m: '学而时习[之]', u: 0, src: '论语', tr: '学了又按时温习[它]。' },
+      { m: '小大[之]狱', u: 1, src: '曹刿论战', tr: '大大小小[的]案件。' },
+      { m: '予独爱莲[之]出淤泥而不染', u: 2, src: '爱莲说', tr: '我唯独喜爱莲花从淤泥里长出来却不沾染污秽。（"之"不译）' },
+      { m: '公将鼓[之]', u: 3, src: '曹刿论战', tr: '鲁庄公将要击鼓进军。（"之"不译）' },
+      { m: '惟弈秋[之]为听', u: 4, src: '学弈', tr: '只听弈秋的教导。（原来是"惟听弈秋"，"之"不译）' },
+      { m: '虽与[之]俱学', u: 0, src: '学弈', tr: '虽然和[那个人]一起学习。' },
+    ] },
+  { w: '其', c: 'var(--w2)', act: '看语气', tip: '问号里是"难道"，不肯定是"大概"',
+    uses: [
+      { n: '人称代词', m: '他、他的、他们', r: '指前面说过的人' },
+      { n: '指示代词', m: '那、其中的', r: '"其一……"，或后面跟名词' },
+      { n: '副词·反问', m: '难道、怎么', r: '句末是问号（邪、乎、何）' },
+      { n: '副词·推测', m: '恐怕、大概', r: '陈述句，语气不肯定' },
+    ],
+    ex: [
+      { m: '<见>[其]{发矢}十中八九', lt: '动词"见"', rt: '动作"发矢"（射箭）', u: 0, tr: '看见[他]射箭十支能中八九支。', src: '卖油翁' },
+      { m: '[其]{一人}专心致志', lt: '句首', rt: '"一人"（数量）', u: 1, tr: '[其中的]一个人专心致志。', src: '学弈' },
+      { m: '[其]真无马{邪？}', lt: '句首', rt: '句末问号"邪？"', u: 2, tr: '[难道]真的没有千里马吗？', src: '马说' },
+      { m: '[其]真不知马{也}', lt: '句首', rt: '陈述句"也"，语气不肯定', u: 3, tr: '[恐怕]是真的不认识千里马吧！', src: '马说' },
+    ],
+    more: [
+      { m: '问[其]故', u: 0, src: '两小儿辨日', tr: '（孔子）问[他们]争辩的原因。' },
+      { m: '[其]一犬坐于前', u: 1, src: '狼', tr: '[其中]一只狼像狗一样蹲坐在前面。' },
+      { m: '[其]如土石何？', u: 2, src: '愚公移山', tr: '[又]能把土石怎么样呢？' },
+    ] },
+  { w: '而', c: 'var(--w3)', act: '看关系', tip: '平等、先后、相反、方式',
+    uses: [
+      { n: '并列', m: '又、而且（可不译）', r: '前后地位平等，可以互换' },
+      { n: '承接', m: '然后、就（可不译）', r: '前后动作一先一后' },
+      { n: '转折', m: '但是、却', r: '前后意思相反' },
+      { n: '修饰', m: '着、地（不译）', r: '前面是后面动作的方式、状态' },
+    ],
+    ex: [
+      { m: '<博学>[而]{笃志}', lt: '"博学"（广泛学习）', rt: '"笃志"（坚守志向）——两件事平起平坐', u: 0, tr: '广泛地学习[并且]坚守自己的志向。', src: '论语' },
+      { m: '兔走触株，<折颈>[而]{死}', lt: '先"折颈"', rt: '后"死"——一先一后', u: 1, tr: '兔子跑着撞到树桩上，折断脖子死了。（"而"可不译）', src: '守株待兔' },
+      { m: '<人不知>[而]{不愠}', lt: '别人不了解我', rt: '我不生气——按理该生气，意思相反', u: 2, tr: '别人不了解我，我[却]不生气。', src: '论语' },
+      { m: '康肃<笑>[而]{遣之}', lt: '"笑"（状态）', rt: '"遣之"（动作）——笑着打发', u: 3, tr: '陈康肃笑[着]把他打发走了。', src: '卖油翁' },
+    ],
+    more: [
+      { m: '切问[而]近思', u: 0, src: '论语', tr: '恳切地提问[并且]多考虑眼前的事。' },
+      { m: '温故[而]知新', u: 1, src: '论语', tr: '温习旧知识[从而]得到新的理解和体会。' },
+      { m: '出淤泥[而]不染', u: 2, src: '爱莲说', tr: '从淤泥里长出来[却]不沾染污秽。' },
+      { m: '杂然[而]前陈者', u: 3, src: '醉翁亭记', tr: '杂乱地在前面摆着的。（"而"不译）' },
+    ] },
+  { w: '以', c: 'var(--w4)', act: '看后面', tip: '后跟工具、原因，还是目的',
+    uses: [
+      { n: '介词·凭借', m: '用、拿、凭', r: '后面跟工具、凭借的东西' },
+      { n: '介词·原因', m: '因为', r: '后面跟原因' },
+      { n: '连词·目的', m: '来、用来', r: '连接两个动作，后一个是目的' },
+      { n: '动词', m: '认为', r: '后面跟一个看法' },
+    ],
+    ex: [
+      { m: '[以]{子之矛}，陷子之盾', lt: '句首', rt: '"子之矛"——拿来刺的工具', u: 0, tr: '[用]你的矛，刺你的盾。', src: '自相矛盾' },
+      { m: '不[以]{物}喜，不以己悲', lt: '"不"', rt: '"物"——高兴的原因', u: 1, tr: '不[因为]外物好坏而高兴，不因为自己得失而悲伤。', src: '岳阳楼记' },
+      { m: '<常衔西山之木石>，[以]{堙于东海}', lt: '动作：衔木石', rt: '目的：填东海', u: 2, tr: '常常衔来西山的树枝和石子，[用来]填塞东海。', src: '精卫填海' },
+      { m: '皆[以]{美于徐公}', lt: '"皆"（都）', rt: '一个看法"美于徐公"', u: 3, tr: '都[认为]（我）比徐公美。', src: '邹忌讽齐王纳谏' },
+    ],
+    more: [
+      { m: '[以]我酌油知之', u: 0, src: '卖油翁', tr: '[凭]我倒油（的经验）知道这个道理。' },
+      { m: '[以]其境过清，不可久居', u: 1, src: '小石潭记', tr: '[因为]这里环境过于凄清，不能久留。' },
+      { m: '属予作文[以]记之', u: 2, src: '岳阳楼记', tr: '嘱托我写一篇文章[来]记述这件事。' },
+    ] },
+  { w: '何', c: 'var(--w5)', act: '看问啥', tip: '问东西、问地方、问原因、感叹',
+    uses: [
+      { n: '什么', m: '什么', r: '问东西；"何以"＝凭什么' },
+      { n: '哪、哪里', m: '哪、哪里', r: '后面跟时间、处所' },
+      { n: '为什么', m: '为什么', r: '问原因' },
+      { n: '怎么样', m: '怎么样', r: '"何如""如……何"' },
+      { n: '多么', m: '多么', r: '感叹句，后面跟形容词' },
+    ],
+    ex: [
+      { m: '[何]{陋}之有', lt: '句首', rt: '"陋"——问的是"什么简陋"', u: 0, tr: '有[什么]简陋的呢？', src: '陋室铭' },
+      { m: '[何]{夜}无月？', lt: '句首', rt: '"夜"——问的是哪个时间', u: 1, tr: '[哪]一个夜晚没有月光？', src: '记承天寺夜游' },
+      { m: '而山不加增，[何]{苦}而不平？', lt: '前面讲了理由', rt: '"苦而不平"——问为什么发愁', u: 2, tr: '可是山不会再增高，[为什么]还愁挖不平呢？', src: '愚公移山' },
+      { m: '以子之矛，陷子之盾，[何]{如}？', lt: '假设一件事', rt: '"如"——问结果会怎样', u: 3, tr: '用你的矛刺你的盾，会[怎么样]呢？', src: '自相矛盾' },
+      { m: '水[何]{澹澹}', lt: '"水"', rt: '形容词"澹澹"（水波荡漾）', u: 4, tr: '海水[多么]浩荡啊！', src: '观沧海' },
+    ],
+    more: [
+      { m: '[何]以战？', u: 0, src: '曹刿论战', tr: '凭[什么]作战？' },
+      { m: '[何]处无竹柏？', u: 1, src: '记承天寺夜游', tr: '[哪里]没有竹子和柏树？' },
+      { m: '如太行、王屋[何]？', u: 3, src: '愚公移山', tr: '能把太行、王屋[怎么样]呢？' },
+    ] },
+  { w: '于', c: 'var(--w6)', act: '看前后', tip: '动词后：在、到、从、向；形容词后：比',
+    uses: [
+      { n: '在', m: '在', r: '后面跟地点、时间' },
+      { n: '到', m: '到', r: '后面跟目的地' },
+      { n: '从', m: '从', r: '后面跟来源、出身' },
+      { n: '向、对', m: '向、对、对于', r: '后面跟对象（人）' },
+      { n: '比', m: '比', r: '前面是形容词，在比较' },
+    ],
+    ex: [
+      { m: '群儿<戏>[于]{庭}', lt: '动词"戏"（玩耍）', rt: '地点"庭"（庭院）', u: 0, tr: '一群孩子[在]庭院里玩耍。（翻译时"于庭"移到动词前）', src: '司马光' },
+      { m: '箕畚<运>[于]{渤海之尾}', lt: '动词"运"', rt: '目的地"渤海之尾"', u: 1, tr: '用箕畚把土石运[到]渤海的边上。', src: '愚公移山' },
+      { m: '舜<发>[于]{畎亩之中}', lt: '"发"（被起用）', rt: '出身"畎亩之中"（田野里）', u: 2, tr: '舜[从]田野之中被起用。', src: '生于忧患，死于安乐' },
+      { m: '<告>之[于]{帝}', lt: '动词"告"', rt: '对象"帝"（天帝）', u: 3, tr: '[向]天帝报告这件事。', src: '愚公移山' },
+      { m: '皆以<美>[于]{徐公}', lt: '形容词"美"', rt: '比较对象"徐公"', u: 4, tr: '都认为（我）[比]徐公美。', src: '邹忌讽齐王纳谏' },
+    ],
+    more: [
+      { m: '战[于]长勺', u: 0, src: '曹刿论战', tr: '[在]长勺作战。' },
+      { m: '常衔西山之木石，以堙[于]东海', u: 1, src: '精卫填海', tr: '用来填塞[到]东海里。' },
+      { m: '不义而富且贵，[于]我如浮云', u: 3, src: '论语', tr: '用不正当的手段得来的富贵，[对]我来说就像天上的浮云。' },
+    ] },
+];
+
+const esc = s => s.replace(/[&<>]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[ch]));
+/* 例句标记 → 片段：[..]=T  <..>=L  {..}=R */
+function parse(m) {
+  const segs = []; const re = /\[([^\]]+)\]|<([^>]+)>|\{([^}]+)\}|([^\[<{]+)/g; let x;
+  while ((x = re.exec(m))) segs.push(x[1] ? ['T', x[1]] : x[2] ? ['L', x[2]] : x[3] ? ['R', x[3]] : ['', x[4]]);
+  return segs;
+}
+const plainDot = m => parse(m).map(([k, t]) => k === 'T' ? `<em class="dot">${esc(t)}</em>` : esc(t)).join('');
+const trHTML = tr => esc(tr).replace(/\[([^\]]+)\]/g, '<mark>$1</mark>');
+
+/* ---------- 模块 1：总口诀 ---------- */
+{
+  const root = document.getElementById('fm');
+  const box = root.querySelector('.formula');
+  box.innerHTML = W.map(d => `<div class="fx" style="--c:${d.c}"><div class="big">${d.w}</div><div class="act">${d.act}</div><div class="nm">${d.tip}</div></div>`).join('');
+  const tiles = [...box.children];
+  const btn = a => root.querySelector(`[data-act="${a}"]`);
+  const INIT = { shown: 0 }; let S = { ...INIT }, timer = null;
+  const draw = () => { tiles.forEach((t, i) => t.classList.toggle('on', i < S.shown)); btn('play').textContent = timer ? '⏸ 暂停' : '▶ 播放'; };
+  const stop = () => { clearInterval(timer); timer = null; };
+  btn('play').onclick = () => {
+    if (timer) { stop(); draw(); return; }
+    if (S.shown >= tiles.length) S.shown = 0;
+    timer = setInterval(() => { S.shown++; if (S.shown >= tiles.length) stop(); draw(); }, 900);
+    S.shown++; draw();
+  };
+  btn('all').onclick = () => { stop(); S.shown = tiles.length; draw(); };
+  const reset = () => { stop(); S = { ...INIT }; draw(); };
+  btn('reset').onclick = reset; resets.push(reset); reset();
+}
+
+/* ---------- 模块 2：看邻居 → 定身份（用法树分步动画） ---------- */
+{
+  const root = document.getElementById('demo');
+  const tabs = root.querySelector('.tabs'), stage = root.querySelector('.stage'), sent = root.querySelector('.sent'),
+        clue = root.querySelector('.clue'), cap = root.querySelector('.caption'), rootTxt = root.querySelector('.root'),
+        tree = root.querySelector('.tree'), no = root.querySelector('.stepno');
+  const btn = a => root.querySelector(`[data-act="${a}"]`);
+  tabs.innerHTML = W.map((d, i) => `<button type="button" class="tab" role="tab" data-i="${i}" style="--c:${d.c}"><span class="dotc"></span>${d.w}</button>`).join('');
+  const INIT = { wi: 0, step: 0, playing: false }; let S = { ...INIT }, timer = null;
+  const total = () => W[S.wi].ex.length * 3;
+  const draw = () => {
+    const d = W[S.wi], ei = Math.floor(S.step / 3), sub = S.step % 3, e = d.ex[ei];
+    root.style.setProperty('--c', d.c);
+    [...tabs.children].forEach((t, i) => { t.classList.toggle('on', i === S.wi); t.setAttribute('aria-selected', i === S.wi); });
+    sent.innerHTML = parse(e.m).map(([k, t]) => `<span class="seg ${k}">${esc(t)}</span>`).join('');
+    stage.classList.toggle('on1', sub >= 1);
+    clue.innerHTML = (e.lt ? `<span class="cl">◀ 左邻：${esc(e.lt)}</span>` : '') + (e.rt ? `<span class="cr">右舍：${esc(e.rt)} ▶</span>` : '');
+    rootTxt.innerHTML = `「<b>${d.w}</b>」的用法树（${d.uses.length} 种身份）· 本句出自 ${srcHTML(e.src)}`;
+    tree.innerHTML = d.uses.map((u, i) => {
+      const seen = d.ex.slice(0, ei).some(x => x.u === i);
+      const hit = sub === 2 && e.u === i;
+      return `<div class="node${hit ? ' hit' : seen ? ' seen' : ''}"><b>${esc(u.n)}</b><small>${esc(u.m)}</small><small>${esc(u.r)}</small></div>`;
+    }).join('');
+    const u = d.uses[e.u];
+    cap.innerHTML = sub === 0 ? `第 ${ei + 1} 句：先读原句，找到方框里的「${d.w}」。`
+      : sub === 1 ? `看左邻右舍：蓝色是它左边的词，橙色是它右边的词。`
+      : `定身份：<b style="color:${d.c}">${esc(u.n)}</b>（${esc(u.r)}）。<div class="tr">译：${trHTML(e.tr)}</div>`;
+    no.textContent = `${S.step + 1} / ${total()}`;
+    btn('prev').disabled = S.step === 0; btn('next').disabled = S.step === total() - 1;
+    btn('play').textContent = S.playing ? '⏸ 暂停' : '▶ 播放';
+  };
+  const stop = () => { clearInterval(timer); timer = null; S.playing = false; };
+  const go = n => { S.step = Math.max(0, Math.min(total() - 1, S.step + n)); draw(); };
+  tabs.onclick = ev => { const t = ev.target.closest('.tab'); if (!t) return; stop(); S.wi = +t.dataset.i; S.step = 0; draw(); };
+  btn('prev').onclick = () => { stop(); go(-1); };
+  btn('next').onclick = () => { stop(); go(1); };
+  btn('play').onclick = () => {
+    if (S.playing) { stop(); draw(); return; }
+    if (S.step === total() - 1) S.step = 0;
+    S.playing = true; draw();
+    timer = setInterval(() => { go(1); if (S.step === total() - 1) { stop(); draw(); } }, 1800);
+  };
+  const reset = () => { stop(); S = { ...INIT }; draw(); };
+  btn('reset').onclick = reset; resets.push(reset); reset();
+}
+
+/* ---------- 模块 3：用法表 + 背诵模式 ---------- */
+{
+  const box = document.getElementById('words'), rb = document.getElementById('reciteBtn');
+  box.innerHTML = W.map(d => {
+    const rows = d.uses.map((u, i) => {
+      const egs = [...d.ex, ...d.more].filter(x => x.u === i)
+        .map(x => `<span class="eg">${plainDot(x.m)} <span class="src">${srcHTML(x.src)}</span></span>`).join('');
+      return `<tr><td class="u">${esc(u.n)}</td><td><span class="k">${esc(u.m)}</span></td><td>${esc(u.r)}</td><td>${egs}</td></tr>`;
+    }).join('');
+    return `<details class="card wd" style="--c:${d.c}"><summary><span class="bigc">${d.w}</span><span><span class="verse">${d.w}${d.act}</span><br><span class="muted">${esc(d.tip)} · ${d.uses.length} 种用法</span></span><span class="chev">▶</span></summary>
+      <div class="body"><table><tr><th>身份</th><th>意思</th><th>怎么认（看邻居）</th><th>课内例句</th></tr>${rows}</table></div></details>`;
+  }).join('');
+  const INIT = { recite: false }; let S = { ...INIT };
+  const draw = () => { box.classList.toggle('recite', S.recite); rb.textContent = `背诵模式：${S.recite ? '开' : '关'}`; };
+  rb.onclick = () => { S.recite = !S.recite; box.querySelectorAll('.k.seen').forEach(k => k.classList.remove('seen')); draw(); };
+  box.addEventListener('click', e => { const k = e.target.closest('.k'); if (k && S.recite) k.classList.add('seen'); });
+  const reset = () => { S = { ...INIT }; box.querySelectorAll('details').forEach(x => x.open = false); box.querySelectorAll('.k.seen').forEach(k => k.classList.remove('seen')); draw(); };
+  resets.push(reset); reset();
+}
+
+/* ---------- 模块 4：虚词侦探 ---------- */
+{
+  const root = document.getElementById('det');
+  const qs = root.querySelector('.quiz-sent'), pick = root.querySelector('.pick'), fb = root.querySelector('.fb'), sc = root.querySelector('[data-role="score"]');
+  const btn = a => root.querySelector(`[data-act="${a}"]`);
+  const POOL = W.flatMap((d, wi) => [...d.ex, ...d.more].map(x => ({ ...x, wi })));
+  const shuffle = a => { a = [...a]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const INIT = () => ({ order: shuffle(POOL.map((_, i) => i)), pos: 0, done: false, right: 0, tried: 0 });
+  let S = INIT();
+  const draw = () => {
+    const it = POOL[S.order[S.pos]], d = W[it.wi];
+    root.style.setProperty('--c', d.c);
+    qs.innerHTML = plainDot(it.m) + `<div class="src" style="margin-top:6px">${srcHTML(it.src)} · 加点的「${d.w}」是什么身份？</div>`;
+    pick.innerHTML = d.uses.map((u, i) => `<button type="button" data-i="${i}">${esc(u.n)}</button>`).join('');
+    fb.innerHTML = '';
+    sc.textContent = `${S.right} / ${S.tried}`;
+  };
+  pick.onclick = e => {
+    const b = e.target.closest('button'); if (!b || S.done) return;
+    const it = POOL[S.order[S.pos]], d = W[it.wi], u = d.uses[it.u], ok = +b.dataset.i === it.u;
+    S.done = true; S.tried++; if (ok) S.right++;
+    [...pick.children].forEach(x => { x.disabled = true; });
+    pick.children[it.u].classList.add('right'); if (!ok) b.classList.add('wrong');
+    fb.innerHTML = (ok ? '<b class="ok">✓ 对了。</b>' : '<b class="bad">✗ 不对。</b>') + `这里是「${esc(u.n)}」，${esc(u.r)}。译：${trHTML(it.tr)}`;
+    sc.textContent = `${S.right} / ${S.tried}`;
+  };
+  btn('next').onclick = () => { S.pos = (S.pos + 1) % POOL.length; if (S.pos === 0) S.order = shuffle(S.order); S.done = false; draw(); };
+  const reset = () => { S = INIT(); draw(); };
+  btn('reset').onclick = reset; resets.push(reset); reset();
+}
+
+/* ---------- 练习题 ---------- */
+const D = t => `<em class="dot">${t}</em>`;
+window.LQ_ITEMS = [
+  { type: '选择', q: `「渔人甚异${D('之')}」中的「之」是什么意思？（《桃花源记》）`,
+    opts: ['的', '代词，代渔人看到的情景', '到、往', '不译，凑音节'], ans: 1,
+    why: '「之」跟在动词「异」（对……感到惊奇）后面，又在句末，是代词，指代渔人看到的这番景象。见动画「之」的第 1 句。' },
+  { type: '选择', q: '下列句子中，「之」可以翻译成「的」的一项是：',
+    opts: [`久${D('之')}，目似瞑`, `常衔西山${D('之')}木石`, `何陋${D('之')}有`, `辍耕${D('之')}垄上`], ans: 1,
+    why: '「西山之木石」里「之」夹在两个名词中间，是「的」。A 是音节助词，C 是宾语前置标志，D 是动词「到」。' },
+  { type: '判断', q: '常见误区：文言文里的「之」大多数都可以翻译成「的」。',
+    opts: ['对', '错'], ans: 1,
+    why: '错。「之」有 6 种身份，只有夹在两个名词之间时才是「的」。动词后面的「之」多是代词，主谓之间的「之」不翻译。' },
+  { type: '选择', q: `「人不知${D('而')}不愠」中的「而」表示什么关系？（《论语》）`,
+    opts: ['并列', '承接', '转折', '修饰'], ans: 2,
+    why: '别人不了解我，按理会生气，可我「不愠」——前后意思相反，是转折，译作「却」。' },
+  { type: '选择', q: `「康肃笑${D('而')}遣之」中的「而」表示什么关系？（《卖油翁》）`,
+    opts: ['并列', '承接', '转折', '修饰'], ans: 3,
+    why: '「笑」是「遣之」的状态：笑着打发他走。前面是后面动作的方式，是修饰，不翻译或译成「着」。' },
+  { type: '填空', q: `「水${D('何')}澹澹」中的「何」译为（两个字）：（曹操《观沧海》）`,
+    ans: ['多么'], placeholder: '两个字',
+    why: '这是感叹句，「何」后面跟形容词「澹澹」（水波荡漾），译为「多么」：海水多么浩荡啊！' },
+  { type: '选择', q: `「${D('其')}真无马邪？${D('其')}真不知马也。」两个「其」分别译为：（《马说》）`,
+    opts: ['他的；他的', '难道；恐怕', '恐怕；难道', '那；那'], ans: 1,
+    why: '第一句是反问（句末「邪？」），「其」是「难道」；第二句是不太肯定的陈述，「其」是「恐怕、大概」。「其看语气」。' },
+  { type: '选择', q: `「不${D('以')}物喜，不以己悲」中的「以」是什么意思？（《岳阳楼记》）`,
+    opts: ['用', '因为', '用来', '认为'], ans: 1,
+    why: '「以」后面的「物」是高兴的原因：不因为外物的好坏而高兴。「以看后面」：后面跟原因就是「因为」。' },
+  { type: '选择', q: '下列各组中，加点的「以」意思和用法相同的一项是：',
+    opts: [`${D('以')}子之矛，陷子之盾 ／ ${D('以')}我酌油知之`, `${D('以')}堙于东海 ／ 不${D('以')}物喜`, `皆${D('以')}美于徐公 ／ ${D('以')}其境过清`, `属予作文${D('以')}记之 ／ ${D('以')}子之矛`], ans: 0,
+    why: 'A 两个都是「用、凭」：用你的矛；凭我倒油的经验。B 是「用来」和「因为」；C 是「认为」和「因为」；D 是「来」和「用」。按「拆开—各定身份—再比较」三步做。' },
+  { type: '选择', q: `「皆以美${D('于')}徐公」中的「于」是什么意思？（《邹忌讽齐王纳谏》）`,
+    opts: ['在', '到', '从', '比'], ans: 3,
+    why: '「于」前面是形容词「美」，后面是比较对象「徐公」，所以是「比」：都认为我比徐公美。这正是误区 3。' },
+  { type: '判断', q: '「战于长勺」应翻译为「在长勺作战」，「于长勺」要挪到动词「战」的前面来翻译。',
+    opts: ['对', '错'], ans: 0,
+    why: '对。文言里「于＋地点」常放在动词后面，现代汉语要把「在……」挪到动词前面，这就是状语后置。' },
+  { type: '选择', q: '下列各组中，加点的「之」意思和用法相同的一项是：',
+    opts: [`何陋${D('之')}有 ／ 惟弈秋${D('之')}为听`, `久${D('之')} ／ 渔人甚异${D('之')}`, `小大${D('之')}狱 ／ 辍耕${D('之')}垄上`, `吾盾${D('之')}坚 ／ 学而时习${D('之')}`], ans: 0,
+    why: 'A 两个都是宾语前置的标志（原来是「有何陋」「惟听弈秋」）。B 是音节助词和代词；C 是「的」和「到」；D 是取消句子独立性和代词。' },
+  { type: '选择', q: `「予独爱莲${D('之')}出淤泥而不染」中「之」的用法是：（《爱莲说》）`,
+    opts: ['代词，代莲花', '助词「的」', '用在主语和谓语之间，取消句子独立性，不译', '动词，到'], ans: 2,
+    why: '「莲出淤泥而不染」本是一个完整的句子（主语「莲」＋谓语「出……」）。「之」插在中间，让它变成「爱」的宾语，不翻译。' },
+  { type: '选择', q: `【课外迁移】《郑人买履》：人曰：「${D('何')}不试之${D('以')}足？」加点的「何」「以」分别是：`,
+    opts: ['什么；因为', '为什么；用', '哪里；认为', '多么；来'], ans: 1,
+    why: '别人问他：为什么不用（自己的）脚去试一试呢？「何」问原因，是「为什么」；「以」后面跟工具「足」，是「用」。' },
+  { type: '选择', q: `【课外迁移】《智子疑邻》：「其家甚智其子，${D('而')}疑邻人之父。」这里的「而」表示：`,
+    opts: ['并列，又', '承接，然后', '转折，却', '修饰，着'], ans: 2,
+    why: '富人一家认为自己儿子聪明，却怀疑邻居家老人（偷了东西）——同样的话，对儿子是夸，对邻居是疑，前后相反，是转折。' },
+  { type: '选择', q: `下列各组中，加点的「于」意思和用法相同的一项是：`,
+    opts: [`群儿戏${D('于')}庭 ／ 战${D('于')}长勺`, `告之${D('于')}帝 ／ 舜发${D('于')}畎亩之中`, `皆以美${D('于')}徐公 ／ 运${D('于')}渤海之尾`, `${D('于')}我如浮云 ／ 以堙${D('于')}东海`], ans: 0,
+    why: 'A 两个「于」后面都是地点，都是「在」。B 是「向」和「从」；C 是「比」和「到」；D 是「对于」和「到」。' },
+];
+</script>
+<script>
+/* ---------- 练习题（learn 通用组件） ---------- */
+(() => {
+  const box = document.getElementById('lq');
+  const items = window.LQ_ITEMS || [];
+  const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let answered = 0, right = 0;
+
+  function update() {
+    const all = answered === items.length;
+    score.textContent = `已答 ${answered} / ${items.length} · 答对 ${right}` +
+      (all ? (right === items.length ? ' · 全对！' : ' · 看看解析，再重做一次') : '');
+  }
+
+  function render() {
+    answered = 0; right = 0; list.innerHTML = '';
+    items.forEach((it, i) => {
+      const el = document.createElement('div');
+      el.className = 'lq-item';
+      el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
+      const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
+      const judge = (ok, answer) => {
+        answered++; if (ok) right++;
+        el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
+        why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
+        update();
+      };
+      if (it.opts) {
+        a.classList.add('lq-opts');
+        it.opts.forEach((o, j) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'lq-opt'; b.innerHTML = o;
+          b.onclick = () => {
+            a.querySelectorAll('button').forEach(x => x.disabled = true);
+            a.children[it.ans].classList.add('lq-right');
+            if (j !== it.ans) b.classList.add('lq-wrong');
+            judge(j === it.ans, it.opts[it.ans]);
+          };
+          a.append(b);
+        });
+      } else {
+        a.classList.add('lq-fill');
+        a.innerHTML = `<input type="text" autocomplete="off" spellcheck="false" placeholder="${it.placeholder || '输入答案'}" aria-label="第 ${i + 1} 题答案"><button type="button" class="lq-opt">确定</button>`;
+        const inp = a.querySelector('input'), go = a.querySelector('button');
+        const submit = () => {
+          if (!inp.value.trim()) { inp.focus(); return; }
+          inp.disabled = go.disabled = true;
+          const ok = it.ans.some(x => norm(x) === norm(inp.value));
+          inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
+          judge(ok, it.ans[0]);
+        };
+        go.onclick = submit;
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      }
+      list.append(el);
+    });
+    update();
+  }
+
+  box.querySelector('.lq-redo').addEventListener('click', render);
+  window.resetPage = () => {
+    if (typeof window.pageReset === 'function') window.pageReset();
+    render();
+  };
+  render();
+})();
+</script>
+</body>
+</html>
