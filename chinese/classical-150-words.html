@@ -1,0 +1,1015 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>150 实词 40 天打卡</title>
+<meta name="description" content="上海中考考纲 150 个文言实词词库：每个义项配统编课内例句，按重要程度排成 40 天打卡（每天 3～4 个新词，自动安排第 1、3、7、14 天复习），可遮住词义自测、按篇目筛选，附遗忘曲线动画和练习。">
+<style>
+:root{
+  --bg:var(--up-bg); --surface:var(--up-surface); --surface2:var(--up-surface-2); --ink:var(--up-ink); --muted:var(--up-muted); --line:var(--up-line);
+  --accent:var(--up-accent); --ok:var(--up-ok); --bad:var(--up-bad);
+  --t3:#e8590c; --t2:#1c7ed6; --t1:#7048e8; --t0:#0c8599;   /* ★★★ / ★★ / ★ / 古今异义 */
+  --curve:#1c7ed6; --curve0:#adb5bd;
+  --hide-bg:#e9ecef;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --t3:#ffa94d; --t2:#74c0fc; --t1:#b197fc; --t0:#66d9e8; --curve:#74c0fc; --curve0:#5c636a; --hide-bg:#343a40; }
+}
+:root[data-theme="dark"]{ --t3:#ffa94d; --t2:#74c0fc; --t1:#b197fc; --t0:#66d9e8; --curve:#74c0fc; --curve0:#5c636a; --hide-bg:#343a40; }
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 var(--up-font);padding:24px 16px 96px}
+main{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:48px}
+h1{font-size:clamp(1.7rem,4.5vw,2.4rem);line-height:1.25;margin:0 0 8px}
+h2{font-size:1.4rem;margin:0 0 8px}
+p{margin:0}
+.lead{color:var(--muted)}
+.muted{color:var(--muted);font-size:.92rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--up-radius);box-shadow:var(--up-shadow);padding:16px}
+.analogy{border-left:4px solid var(--accent);display:grid;gap:8px}
+.note{border-left:4px solid var(--t2);font-size:.92rem;display:grid;gap:4px}
+.btn{font:inherit;font-size:14px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--up-surface)}
+.btn.primary:hover:not(:disabled){color:var(--up-surface);opacity:.9}
+.btn.on{border-color:var(--accent);background:var(--up-accent-soft);font-weight:700}
+.btn:disabled{opacity:.45;cursor:default}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.stepno{font-family:var(--up-mono);color:var(--muted);font-size:.9rem;min-width:56px;text-align:center}
+.caption{min-height:3.4em;margin-top:10px}
+.dot{font-style:normal;font-weight:700;-webkit-text-emphasis:filled dot;text-emphasis:filled dot;-webkit-text-emphasis-position:under;text-emphasis-position:under right}
+.src{font-size:.85rem;color:var(--muted)}
+.star{font-size:.75rem;font-weight:700;border-radius:999px;padding:0 7px;border:1.5px solid var(--c);color:var(--c);white-space:nowrap}
+
+/* 遗忘曲线 */
+.curve{width:100%;height:auto;background:var(--surface2);border-radius:10px;margin-top:12px}
+.curve text{font-family:var(--up-font);font-size:12px;fill:var(--muted)}
+.curve path.c{fill:none;stroke:var(--curve);stroke-width:3;transition:d .8s}
+.curve path.c0{fill:none;stroke:var(--curve0);stroke-width:2;stroke-dasharray:6 5}
+.curve circle{fill:var(--accent)}
+@media (prefers-reduced-motion: reduce){.curve path.c{transition:none}}
+
+/* 打卡 */
+.days{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin-top:10px}
+.day{font:inherit;font-family:var(--up-mono);font-size:13px;padding:6px 0;border-radius:6px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;position:relative}
+.day.done{background:var(--up-accent-soft);border-color:var(--accent)}
+.day.done::after{content:'✓';position:absolute;top:-6px;right:-2px;font-size:11px;color:var(--ok);font-weight:800}
+.day.sel{outline:2.5px solid var(--accent);outline-offset:1px;font-weight:800}
+@media (max-width:520px){.days{grid-template-columns:repeat(8,1fr)}}
+.dayhead{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:baseline;justify-content:space-between;margin-top:16px}
+.dayhead h3{margin:0;font-size:1.2rem}
+.review{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px;font-size:.92rem}
+.chip{font:inherit;font-size:14px;font-weight:700;padding:1px 10px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.chip:hover{border-color:var(--accent)}
+.wcards{display:grid;gap:10px;margin-top:12px}
+.wc{border:1.5px solid var(--line);border-left:5px solid var(--c);border-radius:10px;padding:10px 14px;background:var(--surface);scroll-margin-top:70px}
+.wc.flash{animation:flash 1.2s}
+@keyframes flash{0%,60%{background:var(--up-accent-soft)}}
+.wc .h{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
+.wc .w{font-size:1.6rem;font-weight:800;color:var(--c);letter-spacing:.06em}
+.wc .py{font-family:var(--up-mono);color:var(--muted);font-size:.9rem}
+.wc .pg{margin-left:auto;font-size:.8rem;color:var(--muted)}
+.wc ol{margin:6px 0 0;padding-left:1.4em;display:grid;gap:4px}
+.wc li{font-size:.95rem}
+.m{font-weight:700;border-radius:5px;padding:0 3px;transition:filter .3s,background .3s}
+.m .ppy{font-family:var(--up-mono);font-weight:500;font-size:.82rem;color:var(--muted);margin-right:3px}
+.test .m{filter:blur(6px);background:var(--hide-bg);cursor:pointer;user-select:none}
+.test .m.seen{filter:none;background:var(--up-accent-soft);cursor:default}
+.wc .eg{display:block;color:var(--ink)}
+@media (prefers-reduced-motion: reduce){.m{transition:none}.wc.flash{animation:none}}
+
+/* 词库 */
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.tools input[type=search]{font:inherit;font-size:15px;padding:6px 12px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);flex:1 1 220px;min-width:0}
+.texts{margin-top:10px}
+.texts summary{cursor:pointer;color:var(--muted);font-size:.92rem}
+.texts .grid{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:8px;font-size:.9rem}
+.texts label{white-space:nowrap;cursor:pointer}
+.bank{display:grid;gap:8px;margin-top:12px}
+.bank details{border:1.5px solid var(--line);border-left:5px solid var(--c);border-radius:10px;background:var(--surface)}
+.bank summary{cursor:pointer;list-style:none;display:flex;gap:10px;align-items:baseline;padding:8px 12px;flex-wrap:wrap}
+.bank summary::-webkit-details-marker{display:none}
+.bank .no{font-family:var(--up-mono);color:var(--muted);font-size:.8rem;min-width:2.2em}
+.bank .w{font-size:1.25rem;font-weight:800;color:var(--c)}
+.bank .py{font-family:var(--up-mono);color:var(--muted);font-size:.85rem}
+.bank .brief{color:var(--muted);font-size:.85rem;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bank .body{padding:0 14px 10px}
+.bank .body ol{margin:0;padding-left:1.4em;display:grid;gap:4px;font-size:.95rem}
+.bank .dim{opacity:.35}
+.empty{color:var(--muted);text-align:center;padding:20px}
+
+:root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:var(--ok);--lq-bad:var(--bad)}
+/* ---------- 练习题（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+.lq{display:grid;gap:12px;margin-bottom:56px}
+.lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+.lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
+.lq-sub{margin:0;color:var(--lq-muted);font-size:14px}
+.lq-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--lq-muted);font-variant-numeric:tabular-nums}
+.lq-list{display:grid;gap:10px}
+.lq-item{background:var(--lq-surface);border:1.5px solid var(--lq-line);border-radius:10px;padding:12px 16px;display:grid;gap:10px;min-width:0;color:var(--lq-ink);text-align:left}
+.lq-item.lq-is-ok{border-color:var(--lq-ok)}
+.lq-item.lq-is-bad{border-color:var(--lq-bad)}
+.lq-q{font-size:15px;font-weight:600;line-height:1.8}
+.lq-tag{display:inline-block;font-size:11px;font-weight:500;line-height:1.6;color:var(--lq-muted);border:1px solid var(--lq-line);border-radius:999px;padding:0 8px;margin-right:8px;vertical-align:1px}
+.lq-opts,.lq-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lq .lq-opt,.lq .lq-redo{font:inherit;font-size:14px;line-height:1.6;padding:6px 14px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);cursor:pointer;text-align:left;opacity:1}
+.lq .lq-opt:hover:not(:disabled),.lq .lq-redo:hover{border-color:var(--lq-accent)}
+.lq .lq-opt:disabled{cursor:default;opacity:1}
+.lq .lq-opt.lq-right{border-color:var(--lq-ok);color:var(--lq-ok);font-weight:700}
+.lq .lq-opt.lq-wrong{border-color:var(--lq-bad);color:var(--lq-bad);text-decoration:line-through}
+.lq-fill input{font:inherit;font-size:14px;padding:6px 10px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);width:min(100%,200px)}
+.lq-fill input.lq-right{border-color:var(--lq-ok)}
+.lq-fill input.lq-wrong{border-color:var(--lq-bad)}
+.lq-why{font-size:14px;line-height:1.65;color:var(--lq-muted)}
+.lq-why:empty{display:none}
+.lq-why .lq-ok{color:var(--lq-ok)}
+.lq-why .lq-bad{color:var(--lq-bad)}
+</style>
+</head>
+<body>
+<!-- up-shell:begin（由 scripts/shell.mjs 自动生成，勿手改） -->
+<nav id="up-nav" aria-label="网站导航">
+<a class="up-home" href="/" title="Up 学习站首页"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="up-nav-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c6ef5"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#up-nav-g)"/><path d="M12 52V42a2 2 0 0 1 2-2h10V32a2 2 0 0 1 2-2h10v-8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v30z" fill="#fff"/><circle cx="43" cy="13" r="5.5" fill="#ffa94d"/></svg><span>Up 学习站</span></a>
+<span class="up-sep" aria-hidden="true">›</span><a class="up-cat" href="/chinese">语文</a>
+<span class="up-sep" aria-hidden="true">›</span><span class="up-title">150 实词 40 天打卡</span>
+<button id="up-reset" type="button" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+</nav>
+<style>
+:root{--up-bg:#f5f6f8;--up-surface:#ffffff;--up-surface-2:#eef0f4;--up-ink:#1d2127;--up-muted:#626b78;--up-line:#dfe2e8;--up-ok:#2b8a3e;--up-bad:#d6336c;--up-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);--up-font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif;--up-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;--up-radius:12px;--up-accent:#a33a2e;--up-accent-soft:#f8ece8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#f0a08f;--up-accent-soft:#3a2220;color-scheme:dark}}
+:root[data-theme="dark"]{--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#f0a08f;--up-accent-soft:#3a2220;color-scheme:dark}
+html{padding-top:52px;scroll-padding-top:64px}
+#up-nav{position:fixed;top:0;left:0;right:0;z-index:2147483000;height:52px;box-sizing:border-box;display:flex;align-items:center;gap:8px;
+padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));border-top:3px solid var(--up-accent);
+border-bottom:1px solid var(--up-line);background:color-mix(in srgb,var(--up-surface) 88%,transparent);
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:500 14px/1.2 var(--up-font);color:var(--up-ink);text-align:left}
+#up-nav a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none}
+#up-nav a:hover{color:var(--up-accent)}
+#up-nav svg{width:24px;height:24px;flex:none;display:block}
+#up-nav .up-home span{font-weight:700}
+#up-nav .up-cat{color:var(--up-accent);font-weight:600}
+#up-nav .up-sep{color:var(--up-muted);flex:none}
+#up-nav .up-title{color:var(--up-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#up-reset{margin:0 0 0 auto;flex:none;font:600 14px/1 var(--up-font);padding:8px 14px;border-radius:999px;cursor:pointer;
+border:1.5px solid var(--up-accent);background:transparent;color:var(--up-accent);transition:background .2s,color .2s}
+#up-reset:hover,#up-reset:focus-visible{background:var(--up-accent);color:var(--up-surface)}
+#up-reset:focus-visible,#up-nav a:focus-visible{outline:2px solid var(--up-accent);outline-offset:2px}
+@media (max-width:560px){#up-nav .up-home span{display:none}}
+@media print{#up-nav{display:none}html{padding-top:0}}
+</style>
+<script>
+document.getElementById('up-reset').addEventListener('click', function () {
+  if (typeof window.resetPage === 'function') window.resetPage();
+  else console.warn('本页没有定义 window.resetPage()，重置按钮无效');
+  window.scrollTo({ top: 0, behavior: 'auto' });
+});
+</script>
+<!-- up-shell:end -->
+<main>
+
+<section>
+  <h1>150 实词 · 40 天打卡</h1>
+  <p class="lead">上海中考考纲规定的 150 个文言实词，每个意思都配一句课内例句。按重要程度排成 40 天，每天只学 3～4 个新词，复习由页面自动安排。</p>
+</section>
+
+<section class="card note">
+  <b>关于词库的内容</b>
+  <p>词表和编号以中西书局《中考语文文言文150实词详解》（2027 版）为准。义项和例句目前根据统编课本注释和《144 个课内文言实词速记手册》整理，正在逐页按书校对。每个词都标了书的页码，方便对照。</p>
+</section>
+
+<section class="card analogy">
+  <b>生活比喻：记忆像一桶漏水的水</b>
+  <p>刚背完是满桶，之后一直在漏。每复习一次就是加满一次，而且桶底的洞会变小，下一次漏得更慢。</p>
+  <p>所以不用一天背很多，关键是<b>在快漏光之前</b>再加一次水：学完后第 1、3、7、14 天各复习一次。</p>
+  <p>每个词怎么记（找本义、顺引申、辨古今……），见 <a href="classical-content-words.html">文言实词怎么记</a>。</p>
+</section>
+
+<section>
+  <h2>为什么是第 1、3、7、14 天复习？</h2>
+  <p class="muted">蓝线是复习后的记忆，灰色虚线是只学一次、从不复习。一步步看每次复习带来的变化。</p>
+  <div class="card" id="fc">
+    <svg class="curve" viewBox="0 0 640 260" role="img" aria-label="遗忘曲线">
+      <line x1="50" y1="20" x2="50" y2="220" stroke="var(--line)"/><line x1="50" y1="220" x2="620" y2="220" stroke="var(--line)"/>
+      <text x="44" y="24" text-anchor="end">100%</text><text x="44" y="124" text-anchor="end">50%</text><text x="44" y="224" text-anchor="end">0</text>
+      <g class="xt"></g>
+      <path class="c0" d=""/>
+      <path class="c" d=""/>
+      <g class="pts"></g>
+    </svg>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<section id="checkin">
+  <h2>40 天打卡</h2>
+  <p class="muted">点日期看当天的新词和要复习的词。学完点「完成打卡」，日期上会打 ✓（只保存在这台设备的浏览器里）。打开「自测模式」后意思会被遮住，先自己说，再点开对答案。</p>
+  <div class="card" id="ck">
+    <div class="days"></div>
+    <div class="dayhead"><h3></h3><span class="src" data-role="pages"></span></div>
+    <div class="review"></div>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="test">自测模式：关</button>
+      <button type="button" class="btn primary" data-act="done">完成打卡</button>
+      <span class="stepno" data-role="prog"></span>
+      <button type="button" class="btn" data-act="clear">清空打卡记录</button>
+    </div>
+    <div class="wcards"></div>
+  </div>
+</section>
+
+<section>
+  <h2>150 实词词库</h2>
+  <p class="muted">可以搜字、搜意思、搜篇目（比如输入「桃花源记」）。点开一个词看全部义项。</p>
+  <div class="card" id="bank">
+    <div class="tools">
+      <input type="search" placeholder="搜索：字 / 意思 / 篇目" aria-label="搜索词库">
+    </div>
+    <div class="tools" style="margin-top:8px" data-role="tiers"></div>
+    <details class="texts">
+      <summary>只看已学课文（<span data-role="tcount"></span>）</summary>
+      <div class="tools" style="margin-top:8px">
+        <button type="button" class="btn" data-act="only">只看已学课文：关</button>
+        <span class="muted">勾选已经学过的课文，打开开关后，没学过的课文例句会变淡。勾选只保存在这台设备的浏览器里。</span>
+      </div>
+      <div class="grid"></div>
+    </details>
+    <p class="src" data-role="count" style="margin-top:10px"></p>
+    <div class="bank"></div>
+  </div>
+</section>
+
+<section class="lq" id="lq" aria-label="练习">
+  <div class="lq-head"><h2>练习</h2><span class="lq-score"></span></div>
+  <p class="lq-sub">10 道题，题目来自词库，最后两道是课外文言文（迁移）。更多练习见按打卡天分组的题库页（制作中）。</p>
+  <div class="lq-list"></div>
+  <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+</section>
+
+</main>
+
+<script type="text/plain" id="wordsData">
+1 比 bǐ 1
+- 靠近，并列 | 其两膝相比者，各隐卷底衣褶中 | 核舟记
+- 及，等到 | 比至陈，车六七百乘 | 陈涉世家
+2 鄙 bǐ 2
+- 见识浅陋，目光短浅 | 肉食者鄙，未能远谋 | 曹刿论战
+- 边远的地方 | |
+3 兵 bīng 2
+- 兵器，武器 | 今南方已定，兵甲已足 | 出师表
+- 兵器 | 兵革非不坚利也 | 得道多助，失道寡助
+- 士兵，军队 | 昨夜见军帖，可汗大点兵 | 木兰诗
+4 病 bìng 3
+- 困苦不堪 | 向吾不为斯役，则久已病矣 | 捕蛇者说
+- 生病，疾病 | |
+5 乘 chéng 4
+- [chéng] 驾，坐 | 虽乘奔御风，不以疾也 | 三峡
+- [shèng] 量词，辆（古代一车四马叫一乘） | 比至陈，车六七百乘 | 陈涉世家
+6 持 chí 5
+- 拿着 | 于是上乃使使持节诏将军 | 周亚夫军细柳
+- 拿着 | 持节云中，何日遣冯唐 | 江城子·密州出猎
+7 从 cóng 6
+- 跟随 | 隶而从者，崔氏二小生 | 小石潭记
+- 听从，依从 | 小惠未遍，民弗从也 | 曹刿论战
+- 由，自 | 便舍船，从口入 | 桃花源记
+8 达 dá 7
+- 到达 | 指通豫南，达于汉阴 | 愚公移山
+- 显达，显贵 | 不求闻达于诸侯 | 出师表
+9 当 dāng 8
+- 应当 | 当奖率三军，北定中原 | 出师表
+- 对着 | 当窗理云鬓 | 木兰诗
+10 道 dào 9
+- 道路 | 会天大雨，道不通 | 陈涉世家
+- 方法 | 策之不以其道 | 马说
+- 道义，正道 | 得道者多助，失道者寡助 | 得道多助，失道寡助
+- 说，讲 | 不足为外人道也 | 桃花源记
+11 得 dé 10
+- 得到 | 得鱼腹中书 | 陈涉世家
+- 能够 | 余因得遍观群书 | 送东阳马生序
+- 同"德"，感激 | 所识穷乏者得我与 | 鱼我所欲也
+12 尔 ěr 11
+- 你 | 尔安敢轻吾射 | 卖油翁
+- 同"耳"，罢了 | 无他，但手熟尔 | 卖油翁
+- 这样，如此 | 问君何能尔？心远地自偏 | 饮酒（其五）
+13 伐 fá 11
+- 砍伐 | 伐竹取道，下见小潭 | 小石潭记
+- 攻打 | 十年春，齐师伐我 | 曹刿论战
+14 犯 fàn 12
+- 触犯，违犯 | 若有作奸犯科及为忠善者 | 出师表
+15 方 fāng 13
+- 方圆（周围的长度） | 太行、王屋二山，方七百里 | 愚公移山
+- 正，刚刚 | 方欲行，转视积薪后 | 狼
+- 方向，地方 | 今南方已定 | 出师表
+16 负 fù 14
+- 背（东西） | 负者歌于途，行者休于树 | 醉翁亭记
+- 背 | 命夸娥氏二子负二山 | 愚公移山
+- 凭借，依靠 | 负势竞上，互相轩邈 | 与朱元思书
+17 赋 fù 15
+- 赋税 | 则吾斯役之不幸，未若复吾赋不幸之甚也 | 捕蛇者说
+- 一种文体 | 刻唐贤今人诗赋于其上 | 岳阳楼记
+18 更 gēng 15
+- [gēng] 改变，更换 | 更若役，复若赋，则何如 | 捕蛇者说
+- [gēng] 古代夜间计时单位 | 是日更定矣 | 湖心亭看雪
+- [gèng] 另，再 | 士别三日，即更刮目相待 | 孙权劝学
+19 苟 gǒu 16
+- 苟且，暂且 | 苟全性命于乱世 | 出师表
+- 如果 | 苟富贵，无相忘 | 陈涉世家
+20 故 gù 17
+- 原因，缘故 | 既克，公问其故 | 曹刿论战
+- 故意 | 广故数言欲亡，忿恚尉 | 陈涉世家
+- 旧的 | 温故而知新 | 论语
+- 所以 | 故自号曰醉翁也 | 醉翁亭记
+21 顾 gù 18
+- 回头看 | 元方入门不顾 | 陈太丘与友期行
+- 看 | 顾野有麦场 | 狼
+- 拜访 | 三顾臣于草庐之中 | 出师表
+22 观 guān 19
+- 看，观赏 | 予观夫巴陵胜状 | 岳阳楼记
+- 景象 | 此则岳阳楼之大观也 | 岳阳楼记
+23 归 guī 19
+- 回来，返回 | 一屠晚归，担中肉尽 | 狼
+- 女子出嫁 | 男有分，女有归 | 大道之行也
+- 归依，归附 | 微斯人，吾谁与归 | 岳阳楼记
+24 过 guò 20
+- 经过，到 | 及鲁肃过寻阳 | 孙权劝学
+- 犯错误 | 人恒过，然后能改 | 生于忧患，死于安乐
+- 超过，过于 | 以其境过清，不可久居 | 小石潭记
+25 好 hǎo 21
+- [hào] 爱好，喜欢 | 蜀中有杜处士，好书画 | 书戴嵩画牛
+- [hào] 喜欢 | 好读书，不求甚解 | 五柳先生传
+26 号 háo 21
+- [háo] 呼啸，大声叫 | 阴风怒号，浊浪排空 | 岳阳楼记
+- [hào] 取别号 | 故自号曰醉翁也 | 醉翁亭记
+27 还 huán 22
+- 返回 | 兴复汉室，还于旧都 | 出师表
+- 归还 | 计日以还 | 送东阳马生序
+28 会 huì 23
+- 聚会，聚集 | 迁客骚人，多会于此 | 岳阳楼记
+- 恰巧遇上 | 会天大雨，道不通 | 陈涉世家
+- 终将，一定 | 会当凌绝顶，一览众山小 | 望岳
+29 惠 huì 23
+- 恩惠，好处 | 小惠未遍，民弗从也 | 曹刿论战
+- 同"慧"，聪明 | 甚矣，汝之不惠 | 愚公移山
+30 及 jí 24
+- 到，等到 | 及郡下，诣太守 | 桃花源记
+- 比得上 | 徐公何能及君也 | 邹忌讽齐王纳谏
+- 赶上，来得及 | 悲守穷庐，将复何及 | 诫子书
+- 和，以及 | 若有作奸犯科及为忠善者 | 出师表
+31 极 jí 24
+- 非常，很 | 初极狭，才通人 | 桃花源记
+- 到达 | 北通巫峡，南极潇湘 | 岳阳楼记
+- 穷尽，尽头 | 渔歌互答，此乐何极 | 岳阳楼记
+32 计 jì 25
+- 计算 | 而计其长曾不盈寸 | 核舟记
+- 计划，事情 | 今亡亦死，举大计亦死 | 陈涉世家
+- 按……计算 | 手自笔录，计日以还 | 送东阳马生序
+33 济 jì 25
+- 渡（河） | 长风破浪会有时，直挂云帆济沧海 | 行路难（其一）
+34 假 jiǎ 26
+- 借 | 以是人多以书假余 | 送东阳马生序
+- 假装 | 乃悟前狼假寐，盖以诱敌 | 狼
+35 间 jiān 27
+- [jiān] 中间，期间 | 受任于败军之际，奉命于危难之间 | 出师表
+- [jiàn] 参与 | 肉食者谋之，又何间焉 | 曹刿论战
+- [jiàn] 偶然，间或 | 时时而间进 | 邹忌讽齐王纳谏
+- [jiàn] 隔绝 | 遂与外人间隔 | 桃花源记
+36 简 jiǎn 27
+- 选拔 | 是以先帝简拔以遗陛下 | 出师表
+37 见 jiàn 28
+- 看见 | 下见小潭，水尤清冽 | 小石潭记
+- 拜见 | 于是入朝见威王 | 邹忌讽齐王纳谏
+- [xiàn] 同"现"，表现 | 才美不外见 | 马说
+38 竭 jié 29
+- 尽，（士气）枯竭 | 彼竭我盈，故克之 | 曹刿论战
+- 用尽 | 殚其地之出，竭其庐之入 | 捕蛇者说
+39 尽 jìn 29
+- 完，没有了 | 一屠晚归，担中肉尽 | 狼
+- 到……尽头 | 林尽水源，便得一山 | 桃花源记
+40 进 jìn 30
+- 进谏，进言 | 时时而间进 | 邹忌讽齐王纳谏
+- 在朝廷做官 | 是进亦忧，退亦忧 | 岳阳楼记
+- 献出 | 至于斟酌损益，进尽忠言 | 出师表
+41 居 jū 30
+- 居住 | 北山愚公者……面山而居 | 愚公移山
+- 停留 | 以其境过清，不可久居 | 小石潭记
+- 处在 | 居庙堂之高则忧其民 | 岳阳楼记
+- 过了（一段时间） | 居无何，上至 | 周亚夫军细柳
+42 举 jǔ 31
+- 举起，抬起 | 举头望明月 | 静夜思
+- 推举，选拔 | 是以众议举宠为督 | 出师表
+- 发动，起事 | 今亡亦死，举大计亦死 | 陈涉世家
+43 具 jù 32
+- 详细 | 问所从来，具答之 | 桃花源记
+- 具有 | 罔不因势象形，各具情态 | 核舟记
+- 同"俱"，全，都 | 政通人和，百废具兴 | 岳阳楼记
+44 俱 jù 32
+- 都，全 | 湖中人鸟声俱绝 | 湖心亭看雪
+- 都 | 宫中府中，俱为一体 | 出师表
+- 一起 | 虽与之俱学，弗若之矣 | 学弈
+45 聚 jù 33
+- 聚集 | 聚室而谋曰 | 愚公移山
+46 遽 jù 33
+- 就，难道（"何遽"＝怎么就） | 此何遽不为福乎 | 塞翁失马
+- 急忙，立刻 | 遽契其舟 | 刻舟求剑
+47 决 jué 34
+- 判断，判定 | 孔子不能决也 | 两小儿辩日
+48 绝 jué 34
+- 断，断绝 | 至于夏水襄陵，沿溯阻绝 | 三峡
+- 停止，不断 | 往来而不绝者，滁人游也 | 醉翁亭记
+- 消失 | 空谷传响，哀转久绝 | 三峡
+- 与世隔绝的 | 率妻子邑人来此绝境 | 桃花源记
+- 极，非常 | 绝巘多生怪柏 | 三峡
+49 类 lèi 35
+- 像，类似 | 佛印绝类弥勒 | 核舟记
+50 临 lín 35
+- 靠近，面对 | 有亭翼然临于泉上者 | 醉翁亭记
+- 到，来到 | 临溪而渔 | 醉翁亭记
+- 面对 | 执策而临之 | 马说
+- 将要，接近 | 故临崩寄臣以大事也 | 出师表
+- 登上，到 | 东临碣石，以观沧海 | 观沧海
+51 虑 lǜ 36
+- 思虑 | 困于心，衡于虑，而后作 | 生于忧患，死于安乐
+- 心思，想法 | 此皆良实，志虑忠纯 | 出师表
+52 论 lùn 36
+- 评定，判定 | 宜付有司论其刑赏 | 出师表
+- 谈论，议论 | 每与臣论此事 | 出师表
+53 漫 màn 37
+- 随意地，胡乱地 | 漫卷诗书喜欲狂 | 闻官军收河南河北
+54 明 míng 38
+- 明亮 | 山重水复疑无路，柳暗花明又一村 | 游山西村
+- 明察，严明 | 以昭陛下平明之理 | 出师表
+55 名 míng 39
+- 名字 | 军书十二卷，卷卷有爷名 | 木兰诗
+- 命名，取名 | 名之者谁？太守自谓也 | 醉翁亭记
+- 出名，有名 | 山不在高，有仙则名 | 陋室铭
+56 命 mìng 40
+- 命令 | 帝感其诚，命夸娥氏二子负二山 | 愚公移山
+- 性命 | 苟全性命于乱世 | 出师表
+- 使命，命令 | 奉命于危难之间 | 出师表
+57 难 nán 41
+- [nàn] 灾难，危难 | 奉命于危难之间 | 出师表
+- [nán] 困难，不容易 | 行路难，行路难 | 行路难（其一）
+58 平 píng 41
+- 平坦 | 土地平旷，屋舍俨然 | 桃花源记
+- 铲平 | 何苦而不平 | 愚公移山
+- 公正 | 以昭陛下平明之理 | 出师表
+59 戚 qī 42
+- 悲伤 | 蒋氏大戚，汪然出涕 | 捕蛇者说
+- 忧愁（"戚戚"：忧愁的样子） | 不戚戚于贫贱 | 五柳先生传
+60 强 qiáng 42
+- [qiáng] 有余 | 策勋十二转，赏赐百千强 | 木兰诗
+- [qiǎng] 勉强 | 余强饮三大白而别 | 湖心亭看雪
+61 窃 qiè 43
+- 偷窃 | 盗窃乱贼而不作 | 大道之行也
+62 请 qǐng 43
+- 请允许我（敬辞） | 战则请从 | 曹刿论战
+- 请允许我 | 请献十金 | 公输
+63 穷 qióng 43
+- 穷尽，走到尽头 | 复前行，欲穷其林 | 桃花源记
+- 停止，穷尽 | 蝉则千转不穷 | 与朱元思书
+- 贫穷 | 所识穷乏者得我与 | 鱼我所欲也
+64 求 qiú 44
+- 寻找 | 求石兽于水中 | 河中石兽
+- 谋求，追求 | 不求闻达于诸侯 | 出师表
+- 要求，希求 | 安求其能千里也 | 马说
+65 取 qǔ 45
+- 摘取，拿 | 诸儿竞走取之 | 王戎不取道旁李
+- 选取 | 舍生而取义者也 | 鱼我所欲也
+66 去 qù 47
+- 离开 | 登斯楼也，则有去国怀乡 | 岳阳楼记
+- 离开 | 太丘舍去，去后乃至 | 陈太丘与友期行
+- 距离 | 我以日始出时去人近 | 两小儿辩日
+67 全 quán 47
+- 保全 | 苟全性命于乱世 | 出师表
+- 整个，全部 | 全石以为底 | 小石潭记
+68 任 rèn 48
+- 担任，接受任命 | 受任于败军之际 | 出师表
+- 责任，使命 | 故天将降大任于是人也 | 生于忧患，死于安乐
+69 入 rù 49
+- 进入 | 便舍船，从口入 | 桃花源记
+- 收入 | 殚其地之出，竭其庐之入 | 捕蛇者说
+- 在国内 | 入则无法家拂士 | 生于忧患，死于安乐
+70 若 ruò 50
+- 好像 | 山有小口，仿佛若有光 | 桃花源记
+- 你，你的 | 更若役，复若赋 | 捕蛇者说
+- 如果 | 若有作奸犯科及为忠善者 | 出师表
+- 比得上 | 徐公不若君之美也 | 邹忌讽齐王纳谏
+71 善 shàn 51
+- 好的 | 择其善者而从之 | 论语
+- 擅长 | 陈康肃公尧咨善射 | 卖油翁
+- 好（表示同意） | 王曰："善。" | 邹忌讽齐王纳谏
+72 少 shǎo 52
+- [shào] 年轻 | 陈涉少时，尝与人佣耕 | 陈涉世家
+- [shǎo] 稍微（"少时"：一会儿） | 少时，一狼径去 | 狼
+73 舍 shè 53
+- [shè] 房屋 | 土地平旷，屋舍俨然 | 桃花源记
+- [shě] 放弃，舍弃 | 便舍船，从口入 | 桃花源记
+- [shě] 舍弃 | 舍生而取义者也 | 鱼我所欲也
+74 涉 shè 53
+- 粗略地阅读（"涉猎"） | 但当涉猎，见往事耳 | 孙权劝学
+75 生 shēng 54
+- 生存 | 然后知生于忧患 | 生于忧患，死于安乐
+- 生命 | 生，亦我所欲也 | 鱼我所欲也
+- 读书人，学生 | 生以乡人子谒余 | 送东阳马生序
+76 胜 shèng 55
+- [shèng] 优美的 | 予观夫巴陵胜状 | 岳阳楼记
+- [shèng] 战胜 | 此所谓战胜于朝廷 | 邹忌讽齐王纳谏
+- [shēng] 尽（"不胜"：承受不了，非常） | 臣不胜受恩感激 | 出师表
+77 师 shī 55
+- 军队 | 十年春，齐师伐我 | 曹刿论战
+- 老师 | 三人行，必有我师焉 | 论语
+78 施 shī 56
+- 实行（"施行"） | 然后施行，必能裨补阙漏 | 出师表
+79 实 shí 56
+- 果实 | 叶徒相似，其实味不同 | 橘逾淮为枳
+- 诚实，忠实 | 此皆良实，志虑忠纯 | 出师表
+80 食 shí 57
+- [shí] 食物 | 便要还家，设酒杀鸡作食 | 桃花源记
+- [shí] 吃（"一食"：吃一顿） | 一食或尽粟一石 | 马说
+- [sì] 同"饲"，喂 | 食马者不知其能千里而食也 | 马说
+81 使 shǐ 58
+- 派遣 | 上使外将兵 | 陈涉世家
+- 让，使得 | 不宜偏私，使内外异法也 | 出师表
+- 使者 | 于是上乃使使持节诏将军 | 周亚夫军细柳
+- 出使 | 安陵君因使唐雎使于秦 | 唐雎不辱使命
+82 释 shì 58
+- 放下 | 释担而立，睨之 | 卖油翁
+- 放下 | 因释其耒而守株 | 守株待兔
+83 市 shì 59
+- 集市 | 东市买骏马，西市买鞍鞯 | 木兰诗
+- 买 | 愿为市鞍马，从此替爷征 | 木兰诗
+84 恃 shì 59
+- 依靠，凭借 | 子何恃而往 | 为学
+85 数 shù 60
+- [shù] 几，几个 | 又数刀毙之 | 狼
+- [shuò] 屡次，多次 | 扶苏以数谏故 | 陈涉世家
+86 属 shǔ 61
+- [zhǔ] 同"嘱"，嘱托 | 属予作文以记之 | 岳阳楼记
+- [zhǔ] 连接，接连 | 属引凄异，空谷传响 | 三峡
+- [shǔ] 类，一类 | 有良田美池桑竹之属 | 桃花源记
+87 说 shuō 62
+- [shuō] 古代一种文体 | 《马说》《爱莲说》 | 马说
+- [shuō] 陈述，讲 | 诣太守，说如此 | 桃花源记
+- [yuè] 同"悦"，愉快 | 学而时习之，不亦说乎 | 论语
+88 素 sù 62
+- 白色的 | 素湍绿潭，回清倒影 | 三峡
+- 朴素，不加装饰 | 可以调素琴，阅金经 | 陋室铭
+- 向来，一向 | 吴广素爱人 | 陈涉世家
+89 汤 tāng 63
+- [tāng] 热水 | 及其日中如探汤 | 两小儿辩日
+- [tāng] 热水 | 媵人持汤沃灌 | 送东阳马生序
+- [shāng] 水流大而急（"汤汤"） | 浩浩汤汤，横无际涯 | 岳阳楼记
+90 徒 tú 63
+- 只，仅仅 | 叶徒相似，其实味不同 | 橘逾淮为枳
+- 白白地 | 少壮不努力，老大徒伤悲 | 长歌行
+91 亡 wáng 64
+- 逃跑 | 今亡亦死，举大计亦死 | 陈涉世家
+- 灭亡 | 此诚危急存亡之秋也 | 出师表
+- [wú] 同"无"，没有 | 河曲智叟亡以应 | 愚公移山
+92 为 wéi 65
+- [wéi] 做，雕刻成 | 能以径寸之木，为宫室、器皿、人物 | 核舟记
+- [wéi] 作为，成为 | 全石以为底 | 小石潭记
+- [wéi] 是 | 宫中府中，俱为一体 | 出师表
+- [wéi] 被 | 兔不可复得，而身为宋国笑 | 守株待兔
+- [wèi] 对，向 | 不足为外人道也 | 桃花源记
+93 委 wěi 66
+- 舍弃，丢下 | 与人期行，相委而去 | 陈太丘与友期行
+94 务 wù 66
+- 事务 | 蒙辞以军中多务 | 孙权劝学
+95 鲜 xiān 67
+- [xiān] 鲜艳，美丽 | 芳草鲜美，落英缤纷 | 桃花源记
+- [xiǎn] 少 | 陶后鲜有闻 | 爱莲说
+96 向 xiàng 67
+- 先前，从前 | 便扶向路，处处志之 | 桃花源记
+- 从前 | 向吾不为斯役，则久已病矣 | 捕蛇者说
+- 朝着，对着 | 眈眈相向 | 狼
+97 效 xiào 68
+- 效果，成效（"奏效"） | 不效，则治臣之罪 | 出师表
+- 任务，效力 | 愿陛下托臣以讨贼兴复之效 | 出师表
+98 谢 xiè 68
+- 道歉，认错 | 长跪而谢之 | 唐雎不辱使命
+99 信 xìn 69
+- 信用，守信 | 日中不至，则是无信 | 陈太丘与友期行
+- 相信，信任 | 愿陛下亲之信之 | 出师表
+- 诚信，信用 | 小信未孚，神弗福也 | 曹刿论战
+100 行 xíng 70
+- [xíng] 走 | 复前行，欲穷其林 | 桃花源记
+- [xíng] 品行 | 将军向宠，性行淑均 | 出师表
+- [háng] 行列，指军队 | 必能使行阵和睦 | 出师表
+101 形 xíng 71
+- 形体，身体 | 无丝竹之乱耳，无案牍之劳形 | 陋室铭
+- 形状，形象 | 罔不因势象形 | 核舟记
+102 兴 xīng 71
+- 兴起，兴办 | 政通人和，百废具兴 | 岳阳楼记
+- 复兴 | 兴复汉室，还于旧都 | 出师表
+103 修 xiū 72
+- 长，高 | 邹忌修八尺有余 | 邹忌讽齐王纳谏
+- 修建 | 乃重修岳阳楼 | 岳阳楼记
+- 培养 | 讲信修睦 | 大道之行也
+- 修养 | 静以修身，俭以养德 | 诫子书
+104 徐 xú 72
+- 缓慢，慢慢地 | 于是天子乃按辔徐行 | 周亚夫军细柳
+105 许 xǔ 73
+- 答应，允诺 | 由是感激，遂许先帝以驱驰 | 出师表
+- 赞同 | 杂然相许 | 愚公移山
+- 表示约数（左右） | 潭中鱼可百许头 | 小石潭记
+106 寻 xún 73
+- 寻找 | 寻向所志，遂迷 | 桃花源记
+- 不久 | 未果，寻病终 | 桃花源记
+107 业 yè 74
+- 学业 | 业有不精，德有不成者 | 送东阳马生序
+- 事业 | 先帝创业未半而中道崩殂 | 出师表
+108 遗 yí 75
+- [yí] 留下 | 以光先帝遗德 | 出师表
+- [wèi] 给予，赠送 | 是以先帝简拔以遗陛下 | 出师表
+- [wèi] 赠送（的东西） | 父母岁有裘葛之遗 | 送东阳马生序
+109 贻 yí 75
+- 赠送 | 尝贻余核舟一 | 核舟记
+110 夷 yí 76
+- 平 | 其船背稍夷，则题名其上 | 核舟记
+111 异 yì 76
+- 不同 | 览物之情，得无异乎 | 岳阳楼记
+- 奇异，特别 | 奇山异水，天下独绝 | 与朱元思书
+- 对……感到惊异 | 渔人甚异之 | 桃花源记
+112 易 yì 77
+- 交换 | 寡人欲以五百里之地易安陵 | 唐雎不辱使命
+- 交替，改变 | 寒暑易节，始一反焉 | 愚公移山
+113 诣 yì 77
+- 到，拜访 | 及郡下，诣太守 | 桃花源记
+- 拜访 | 孔君平诣其父 | 杨氏之子
+114 益 yì 78
+- 更加 | 香远益清，亭亭净植 | 爱莲说
+- 好处 | 自以为大有所益 | 孙权劝学
+- 增加（"损益"：减少和增加） | 至于斟酌损益，进尽忠言 | 出师表
+115 阴 yīn 78
+- 阴天，阴暗 | 朝晖夕阴，气象万千 | 岳阳楼记
+- 树荫 | 佳木秀而繁阴 | 醉翁亭记
+- 山的北面、水的南面 | 指通豫南，达于汉阴 | 愚公移山
+116 引 yǐn 79
+- 拉 | 友人惭，下车引之 | 陈太丘与友期行
+- 延长 | 属引凄异，空谷传响 | 三峡
+117 盈 yíng 79
+- （士气）旺盛 | 彼竭我盈，故克之 | 曹刿论战
+- 满 | 而计其长曾不盈寸 | 核舟记
+118 余 yú 80
+- 我 | 尝贻余核舟一 | 核舟记
+- 多，剩余 | 邹忌修八尺有余 | 邹忌讽齐王纳谏
+- 剩下的 | 以残年余力，曾不能毁山之一毛 | 愚公移山
+119 狱 yù 81
+- 案件 | 小大之狱，虽不能察，必以情 | 曹刿论战
+120 御 yù 81
+- 驾驭，驾（车） | 虽乘奔御风，不以疾也 | 三峡
+121 缘 yuán 82
+- 沿着 | 缘溪行，忘路之远近 | 桃花源记
+- 因为 | 不识庐山真面目，只缘身在此山中 | 题西林壁
+122 远 yuǎn 82
+- （距离）远 | 香远益清，亭亭净植 | 爱莲说
+- 偏远（的地方） | 处江湖之远则忧其君 | 岳阳楼记
+123 云 yún 83
+- 说 | 孔子云：何陋之有 | 陋室铭
+- 云 | 天与云与山与水，上下一白 | 湖心亭看雪
+124 章 zhāng 83
+- 篇章，文章 | 常著文章自娱 | 五柳先生传
+125 知 zhī 84
+- 知道，了解 | 人不知而不愠 | 论语
+- [zhì] 同"智"，聪明 | 孰为汝多知乎 | 两小儿辩日
+126 止 zhǐ 85
+- 停止 | 一狼得骨止 | 狼
+- 阻止 | 河曲智叟笑而止之 | 愚公移山
+- 同"只"，仅仅 | 止有剩骨 | 狼
+127 志 zhì 86
+- 立志 | 吾十有五而志于学 | 论语
+- 做标记 | 便扶向路，处处志之 | 桃花源记
+- 志向 | 博学而笃志 | 论语
+128 致 zhì 86
+- 得到 | 家贫，无从致书以观 | 送东阳马生序
+129 质 zhì 87
+- 询问 | 援疑质理，俯身倾耳以请 | 送东阳马生序
+- 资质，禀性（"天质"） | 非天质之卑，则心不若余之专耳 | 送东阳马生序
+130 专 zhuān 87
+- 独自享有 | 衣食所安，弗敢专也，必以分人 | 曹刿论战
+- 专一 | 其一人专心致志 | 学弈
+131 走 zǒu 88
+- 跑 | 双兔傍地走，安能辨我是雄雌 | 木兰诗
+- 跑 | 兔走触株，折颈而死 | 守株待兔
+132 足 zú 88
+- 足够，充足 | 今南方已定，兵甲已足 | 出师表
+- 值得 | 不足为外人道也 | 桃花源记
+133 卒 zú 89
+- 士兵 | 骑千余，卒数万人 | 陈涉世家
+- 最终，终于 | 卒获有所闻 | 送东阳马生序
+134 作 zuò 90
+- 兴起，奋起 | 困于心，衡于虑，而后作 | 生于忧患，死于安乐
+- 振作 | 一鼓作气 | 曹刿论战
+- 耕作，劳作 | 其中往来种作 | 桃花源记
+- 建造 | 作亭者谁？山之僧智仙也 | 醉翁亭记
+135 坐 zuò 91
+- 像狗一样蹲坐 | 其一犬坐于前 | 狼
+- 因为 | 停车坐爱枫林晚 | 山行
+136 卑鄙 bēi bǐ 92
+- 古：身份低微，见识浅陋（今：品质恶劣） | 先帝不以臣卑鄙 | 出师表
+137 布衣 bù yī 92
+- 古：平民（今：布做的衣服） | 臣本布衣，躬耕于南阳 | 出师表
+138 菲薄 fěi bó 92
+- 古：看轻，轻视（今：多指少而差） | 不宜妄自菲薄 | 出师表
+139 其实 qí shí 93
+- 古：它的果实（今：实际上） | 叶徒相似，其实味不同 | 橘逾淮为枳
+140 亲戚 qīn qī 93
+- 古：内外亲属，包括父母兄弟（今：家庭以外的亲属） | 寡助之至，亲戚畔之 | 得道多助，失道寡助
+141 驱驰 qū chí 93
+- 古：奔走效劳（今：快跑） | 由是感激，遂许先帝以驱驰 | 出师表
+142 无论 wú lùn 94
+- 古：不要说，更不必说（今：连词，表条件） | 乃不知有汉，无论魏晋 | 桃花源记
+143 牺牲 xī shēng 94
+- 古：祭祀用的猪、牛、羊等（今：为正义舍弃生命） | 牺牲玉帛，弗敢加也 | 曹刿论战
+144 鸿儒 hóng rú 94
+- 古：博学的人（今：少用） | 谈笑有鸿儒，往来无白丁 | 陋室铭
+145 白丁 bái dīng 95
+- 古：没有功名的平民（今：不识字的人） | 谈笑有鸿儒，往来无白丁 | 陋室铭
+146 阡陌 qiān mò 95
+- 古：田间小路（今：少用） | 阡陌交通，鸡犬相闻 | 桃花源记
+147 交通 jiāo tōng 95
+- 古：交错相通（今：运输和邮电事业） | 阡陌交通，鸡犬相闻 | 桃花源记
+148 问津 wèn jīn 96
+- 古：询问渡口，文中指探访（今：探问价格或情况） | 后遂无问津者 | 桃花源记
+149 绝境 jué jìng 96
+- 古：与人世隔绝的地方（今：没有出路的境地） | 率妻子邑人来此绝境 | 桃花源记
+150 妻子 qī zǐ 96
+- 古：妻子和儿女（今：男子的配偶） | 率妻子邑人来此绝境 | 桃花源记
+</script>
+<script>
+const resets = [];
+window.pageReset = () => resets.forEach(f => f());
+const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+};
+
+/* ---------- 数据：考纲 150 词（序号、页码按书目录） ---------- */
+const WORDS = [];
+document.getElementById('wordsData').textContent.trim().split('\n').forEach(line => {
+  let m;
+  if ((m = line.match(/^(\d+) (\S+) (.+?) (\d+)$/))) WORDS.push({ n: +m[1], w: m[2], py: m[3], pg: +m[4], s: [] });
+  else if ((m = line.match(/^- (?:\[([^\]]+)\] )?(.*)$/))) { const [mm, eg = '', src = ''] = m[2].split('|').map(v => v.trim()); WORDS.at(-1).s.push({ py: m[1] || '', m: mm, eg, src }); }
+});
+/* 优先级：三份材料（书 150、名校 120、手册 144）都收 ★★★，两份 ★★，只有书 ★，双音古今异义词单列 */
+const T3 = '鄙 兵 从 道 负 故 顾 归 过 及 假 间 见 举 绝 类 穷 去 若 少 胜 使 数 属 说 素 徒 亡 谢 信 修 徐 许 遗 易 知 致 走 卒'.split(' ');
+const T2 = '比 病 乘 当 得 方 更 观 会 极 尽 居 具 临 明 名 强 窃 请 善 舍 涉 师 食 市 汤 为 向 行 兴 贻 异 益 阴 引 盈 狱 止 志 质 足 作 坐'.split(' ');
+const TIERS = [
+  { k: 3, name: '★★★ 核心', c: 'var(--t3)' }, { k: 2, name: '★★ 重点', c: 'var(--t2)' },
+  { k: 1, name: '★ 一般', c: 'var(--t1)' }, { k: 0, name: '古今异义', c: 'var(--t0)' },
+];
+WORDS.forEach(x => { x.t = x.w.length > 1 ? 0 : T3.includes(x.w) ? 3 : T2.includes(x.w) ? 2 : 1; x.c = TIERS.find(t => t.k === x.t).c; });
+/* 40 天：按优先级排序，前 30 天每天 4 个，后 10 天每天 3 个 */
+const ORDER = [...WORDS].sort((a, b) => (b.t || -1) - (a.t || -1) || a.n - b.n);
+const DAYS = []; { let i = 0; for (let d = 0; d < 40; d++) { const k = d < 30 ? 4 : 3; DAYS.push(ORDER.slice(i, i + k)); i += k; } }
+DAYS.forEach((ws, d) => ws.forEach(x => { x.day = d + 1; }));
+const REVIEW_GAPS = [1, 3, 7, 14];
+const XIAO = new Set(['学弈', '两小儿辩日', '守株待兔', '书戴嵩画牛', '杨氏之子', '王戎不取道旁李', '静夜思', '题西林壁', '山行']);
+const ALLSRC = [...new Set(WORDS.flatMap(x => x.s.map(s => s.src)).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'zh'));
+
+const dotify = (s, w) => w.length > 1 ? esc(s).split(w).join(`<em class="dot">${w}</em>`) : esc(s).replace(new RegExp(w, 'g'), `<em class="dot">${w}</em>`);
+const senseHTML = (x, s, dim) => `<li${dim ? ' class="dim"' : ''}><span class="m">${s.py ? `<span class="ppy">${s.py}</span>` : ''}${esc(s.m)}</span>` +
+  (s.eg ? `<span class="eg">${dotify(s.eg, x.w)} ${s.src ? `<span class="src">《${esc(s.src)}》</span>` : ''}</span>` : '<span class="src">（暂无课内例句）</span>') + `</li>`;
+const tierStar = x => `<span class="star" style="--c:${x.c}">${TIERS.find(t => t.k === x.t).name}</span>`;
+
+/* ---------- 模块 1：遗忘曲线 ---------- */
+{
+  const root = document.getElementById('fc'), svg = root.querySelector('svg');
+  const pc = svg.querySelector('path.c'), p0 = svg.querySelector('path.c0'), pts = svg.querySelector('.pts'), cap = root.querySelector('.caption'), no = root.querySelector('.stepno');
+  const btn = a => root.querySelector(`[data-act="${a}"]`);
+  const X = d => 50 + d * 570 / 21, Y = r => 220 - r * 200;
+  svg.querySelector('.xt').innerHTML = [0, 1, 3, 7, 14, 21].map(d => `<text x="${X(d)}" y="238" text-anchor="middle">${d}</text>`).join('') + `<text x="620" y="256" text-anchor="end">学完后的第几天 →</text>`;
+  const REV = [1, 3, 7, 14];
+  const STEPS = [
+    '第 1 步：只学一次。记忆从 100% 一路往下掉，几天后就只剩一小半了。',
+    '第 2 步：第 1 天复习一次。记忆加满，而且之后掉得比上次慢。',
+    '第 3 步：第 3 天再复习。线越来越平，忘得越来越慢。',
+    '第 4 步：第 7 天再复习。到这里，一个星期都不太会忘了。',
+    '第 5 步：第 14 天最后复习一次。蓝线基本平了：这个词已经进了长期记忆。灰线是不复习的结果，差距一目了然。',
+  ];
+  const curve = k => {   // k 次复习后的记忆曲线（指数遗忘，每复习一次"漏得更慢"）
+    const marks = [0, ...REV.slice(0, k)], S = [2, 4, 9, 20, 60];
+    let d = '';
+    marks.forEach((t0, i) => {
+      const t1 = i + 1 < marks.length ? marks[i + 1] : 21;
+      for (let t = t0; t <= t1 + 1e-9; t += 0.25) d += `${d ? 'L' : 'M'}${X(t).toFixed(1)} ${Y(Math.exp(-(t - t0) / S[i])).toFixed(1)} `;
+      if (i + 1 < marks.length) d += `L${X(t1).toFixed(1)} ${Y(1)} `;
+    });
+    return d;
+  };
+  p0.setAttribute('d', curve(0));
+  const INIT = { step: 0, playing: false }; let S = { ...INIT }, timer = null;
+  const draw = () => {
+    pc.setAttribute('d', curve(S.step));
+    p0.style.opacity = S.step ? 1 : 0;
+    pts.innerHTML = REV.slice(0, S.step).map(d => `<circle cx="${X(d)}" cy="${Y(1)}" r="5"/>`).join('');
+    cap.textContent = STEPS[S.step]; no.textContent = `${S.step + 1} / ${STEPS.length}`;
+    btn('prev').disabled = S.step === 0; btn('next').disabled = S.step === STEPS.length - 1;
+    btn('play').textContent = S.playing ? '⏸ 暂停' : '▶ 播放';
+  };
+  const stop = () => { clearInterval(timer); timer = null; S.playing = false; };
+  const go = n => { S.step = Math.max(0, Math.min(STEPS.length - 1, S.step + n)); draw(); };
+  btn('prev').onclick = () => { stop(); go(-1); };
+  btn('next').onclick = () => { stop(); go(1); };
+  btn('play').onclick = () => {
+    if (S.playing) { stop(); draw(); return; }
+    if (S.step === STEPS.length - 1) S.step = 0;
+    S.playing = true; draw();
+    timer = setInterval(() => { go(1); if (S.step === STEPS.length - 1) { stop(); draw(); } }, 1800);
+  };
+  const reset = () => { stop(); S = { ...INIT }; draw(); };
+  btn('reset').onclick = reset; resets.push(reset); reset();
+}
+
+/* ---------- 模块 2：40 天打卡 ---------- */
+{
+  const root = document.getElementById('ck');
+  const daysBox = root.querySelector('.days'), head = root.querySelector('.dayhead h3'), pages = root.querySelector('[data-role="pages"]'),
+        rev = root.querySelector('.review'), cards = root.querySelector('.wcards'), prog = root.querySelector('[data-role="prog"]');
+  const btn = a => root.querySelector(`[data-act="${a}"]`);
+  const KEY = 'wy150-done';
+  let done = new Set(store.get(KEY, []));
+  daysBox.innerHTML = DAYS.map((_, d) => `<button type="button" class="day" data-d="${d + 1}" aria-label="第 ${d + 1} 天">${d + 1}</button>`).join('');
+  const firstTodo = () => { for (let d = 1; d <= 40; d++) if (!done.has(d)) return d; return 40; };
+  let S = { day: firstTodo(), test: false };
+  const card = x => `<div class="wc" style="--c:${x.c}" id="wc-${x.n}"><div class="h"><span class="w">${x.w}</span><span class="py">${x.py}</span>${tierStar(x)}<span class="pg">考纲第 ${x.n} 号 · 书第 ${x.pg} 页</span></div><ol>${x.s.map(s => senseHTML(x, s)).join('')}</ol></div>`;
+  const draw = () => {
+    [...daysBox.children].forEach(b => { const d = +b.dataset.d; b.classList.toggle('done', done.has(d)); b.classList.toggle('sel', d === S.day); });
+    const ws = DAYS[S.day - 1];
+    head.textContent = `第 ${S.day} 天 · 新词：${ws.map(x => x.w).join('、')}`;
+    pages.textContent = `书第 ${[...new Set(ws.map(x => x.pg))].sort((a, b) => a - b).join('、')} 页`;
+    const revDays = REVIEW_GAPS.map(g => S.day - g).filter(d => d >= 1);
+    rev.innerHTML = revDays.length ? '今天复习：' + revDays.map(d => `<span class="src">第 ${d} 天</span>` + DAYS[d - 1].map(x => `<button type="button" class="chip" data-n="${x.n}" style="color:${x.c}">${x.w}</button>`).join('')).join(' ')
+      : '<span class="src">第 1 天没有要复习的词，从明天开始会自动出现复习清单。</span>';
+    cards.innerHTML = ws.map(card).join('');
+    cards.classList.toggle('test', S.test);
+    btn('test').textContent = `自测模式：${S.test ? '开' : '关'}`; btn('test').classList.toggle('on', S.test);
+    btn('done').textContent = done.has(S.day) ? '✓ 已完成（点击取消）' : '完成打卡';
+    prog.textContent = `已完成 ${done.size} / 40 天`;
+  };
+  daysBox.onclick = e => { const b = e.target.closest('.day'); if (!b) return; S.day = +b.dataset.d; draw(); };
+  rev.onclick = e => {
+    const b = e.target.closest('.chip'); if (!b) return;
+    const x = WORDS.find(w => w.n === +b.dataset.n);
+    let el = document.getElementById('wc-' + x.n);
+    if (!el) { cards.insertAdjacentHTML('beforeend', card(x)); el = document.getElementById('wc-' + x.n); }
+    el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
+    el.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
+  };
+  cards.onclick = e => { const m = e.target.closest('.m'); if (m && S.test) m.classList.add('seen'); };
+  btn('test').onclick = () => { S.test = !S.test; draw(); };
+  btn('done').onclick = () => { done.has(S.day) ? done.delete(S.day) : done.add(S.day); store.set(KEY, [...done]); draw(); };
+  btn('clear').onclick = () => { if (!done.size || !confirm('确定清空全部 40 天的打卡记录吗？')) return; done = new Set(); store.set(KEY, []); S.day = 1; draw(); };
+  const reset = () => { S = { day: firstTodo(), test: false }; draw(); };
+  resets.push(reset); reset();
+}
+
+/* ---------- 模块 3：词库 ---------- */
+{
+  const root = document.getElementById('bank');
+  const q = root.querySelector('input[type=search]'), tiersBox = root.querySelector('[data-role="tiers"]'), grid = root.querySelector('.texts .grid'),
+        tcount = root.querySelector('[data-role="tcount"]'), count = root.querySelector('[data-role="count"]'), list = root.querySelector('.bank'), only = root.querySelector('[data-act="only"]');
+  const KEY = 'wy150-texts';
+  let learned = new Set(store.get(KEY, [...XIAO]));
+  tiersBox.innerHTML = `<button type="button" class="btn" data-t="all">全部 150</button>` + TIERS.map(t => `<button type="button" class="btn" data-t="${t.k}">${t.name}（${WORDS.filter(x => x.t === t.k).length}）</button>`).join('');
+  grid.innerHTML = ALLSRC.map(s => `<label><input type="checkbox" value="${esc(s)}"> ${esc(s)}</label>`).join('');
+  const INIT = () => ({ q: '', tier: 'all', only: false });
+  let S = INIT();
+  const draw = () => {
+    q.value = S.q;
+    [...tiersBox.children].forEach(b => b.classList.toggle('on', b.dataset.t === String(S.tier)));
+    grid.querySelectorAll('input').forEach(i => { i.checked = learned.has(i.value); });
+    tcount.textContent = `已勾选 ${learned.size} 篇`;
+    only.textContent = `只看已学课文：${S.only ? '开' : '关'}`; only.classList.toggle('on', S.only);
+    const kw = S.q.trim();
+    const hits = WORDS.filter(x => (S.tier === 'all' || x.t === +S.tier) &&
+      (!kw || x.w.includes(kw) || x.s.some(s => s.m.includes(kw) || s.eg.includes(kw) || s.src.includes(kw))) &&
+      (!S.only || x.s.some(s => learned.has(s.src))));
+    count.textContent = `共 ${hits.length} 个词` + (S.only ? '（只显示有已学课文例句的词）' : '');
+    list.innerHTML = hits.length ? hits.map(x => `<details style="--c:${x.c}"><summary><span class="no">${x.n}</span><span class="w">${x.w}</span><span class="py">${x.py}</span><span class="brief">${esc(x.s.map(s => s.m.replace(/（.*?）/g, '')).filter((v, i, a) => a.indexOf(v) === i).join('；'))}</span>${tierStar(x)}<span class="src">第 ${x.day} 天</span></summary>` +
+      `<div class="body"><ol>${x.s.map(s => senseHTML(x, s, S.only && !learned.has(s.src))).join('')}</ol><p class="src" style="margin-top:6px">考纲第 ${x.n} 号 · 书第 ${x.pg} 页</p></div></details>`).join('')
+      : '<p class="empty">没有找到，换个关键词试试。</p>';
+  };
+  q.addEventListener('input', () => { S.q = q.value; draw(); });
+  tiersBox.onclick = e => { const b = e.target.closest('[data-t]'); if (!b) return; S.tier = b.dataset.t; draw(); };
+  grid.onchange = e => { const i = e.target; i.checked ? learned.add(i.value) : learned.delete(i.value); store.set(KEY, [...learned]); draw(); };
+  only.onclick = () => { S.only = !S.only; draw(); };
+  const reset = () => { S = INIT(); root.querySelector('.texts').open = false; draw(); };
+  resets.push(reset); reset();
+}
+
+/* ---------- 练习题 ---------- */
+const D = t => `<em class="dot">${t}</em>`;
+window.LQ_ITEMS = [
+  { type: '选择', q: `「初${D('极')}狭，才通人」中「极」的意思是：（《桃花源记》）`,
+    opts: ['尽头', '非常', '到达', '最高点'], ans: 1,
+    why: '洞口起初非常狭窄，只能容一个人通过。「极」在这里修饰形容词「狭」，是「非常」。' },
+  { type: '选择', q: `「愿为${D('市')}鞍马，从此替爷征」中「市」的意思是：（《木兰诗》）`,
+    opts: ['集市', '城市', '买', '卖'], ans: 2,
+    why: '「市」在这里作动词，「买」：愿意为此去买鞍马。同一首诗里「东市买骏马」的「市」才是集市。' },
+  { type: '选择', q: `「食马者不知其能千里而${D('食')}也」中加点的「食」：（《马说》）`,
+    opts: ['读 shí，吃', '读 shí，食物', '读 sì，同「饲」，喂', '读 shí，一顿饭'], ans: 2,
+    why: '喂马的人不知道它能日行千里而（按普通马的方法）喂养它。句首「食马者」和这个加点的「食」都读 sì，同「饲」。' },
+  { type: '选择', q: `「扶苏以${D('数')}谏故，上使外将兵」中「数」的读音和意思是：（《陈涉世家》）`,
+    opts: ['shù，几个', 'shǔ，数落', 'shuò，屡次', 'shù，数目'], ans: 2,
+    why: '扶苏因为屡次劝谏的缘故，被皇上派到外地带兵。表示「屡次」时读 shuò。「又数刀毙之」的「数」才是「几」，读 shù。' },
+  { type: '判断', q: '间隔复习就是每天把学过的所有词都从头复习一遍。',
+    opts: ['对', '错'], ans: 1,
+    why: '错。每天全部重来太累，也没必要。按遗忘曲线，在学完后的第 1、3、7、14 天各复习一次就够了。打卡页每天会自动列出要复习的词。' },
+  { type: '选择', q: '下列各组中，加点词意思相同的一项是：',
+    opts: [`太丘舍${D('去')} ／ 则有${D('去')}国怀乡`, `一屠晚${D('归')} ／ 女有${D('归')}`, `及鲁肃${D('过')}寻阳 ／ 人恒${D('过')}`, `${D('少')}时，一狼径去 ／ 陈涉${D('少')}时`], ans: 0,
+    why: 'A 两个「去」都是离开。B 是回家和女子出嫁；C 是经过和犯错误；D 是稍微（少时＝一会儿，读 shǎo）和年轻（读 shào）。' },
+  { type: '填空', q: `「未果，${D('寻')}病终」中「寻」的意思是（两个字）：（《桃花源记》）`,
+    ans: ['不久', '随即', '很快'], placeholder: '两个字',
+    why: '刘子骥没有找到桃花源，不久就病死了。同一篇里「寻向所志」的「寻」是寻找，一词多义要看句子。' },
+  { type: '判断', q: `「政通人和，百废${D('具')}兴」中的「具」同「俱」，意思是「全，都」。`,
+    opts: ['对', '错'], ans: 0,
+    why: '对。各种荒废的事业都兴办起来了。「问所从来，具答之」的「具」则是「详细」。' },
+  { type: '选择', q: `【课外迁移】《郑人买履》：反归取之。及反，${D('市')}罢，遂不得履。「市」的意思是：`,
+    opts: ['买', '集市', '城市', '卖'], ans: 1,
+    why: '郑人回家取量好的尺码，等他再回来，集市已经散了。「市罢」的「市」是名词「集市」，和「东市买骏马」一样。' },
+  { type: '选择', q: `【课外迁移】《列子》：伯牙${D('善')}鼓琴，钟子期${D('善')}听。两个「善」的意思是：`,
+    opts: ['好的', '擅长，善于', '友好', '好（表示同意）'], ans: 1,
+    why: '伯牙擅长弹琴，钟子期擅长听琴。和「陈康肃公尧咨善射」的「善」一样，后面跟一个动作，就是「擅长」。' },
+];
+</script>
+<script>
+/* ---------- 练习题（learn 通用组件） ---------- */
+(() => {
+  const box = document.getElementById('lq');
+  const items = window.LQ_ITEMS || [];
+  const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let answered = 0, right = 0;
+
+  function update() {
+    const all = answered === items.length;
+    score.textContent = `已答 ${answered} / ${items.length} · 答对 ${right}` +
+      (all ? (right === items.length ? ' · 全对！' : ' · 看看解析，再重做一次') : '');
+  }
+
+  function render() {
+    answered = 0; right = 0; list.innerHTML = '';
+    items.forEach((it, i) => {
+      const el = document.createElement('div');
+      el.className = 'lq-item';
+      el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
+      const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
+      const judge = (ok, answer) => {
+        answered++; if (ok) right++;
+        el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
+        why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
+        update();
+      };
+      if (it.opts) {
+        a.classList.add('lq-opts');
+        it.opts.forEach((o, j) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'lq-opt'; b.innerHTML = o;
+          b.onclick = () => {
+            a.querySelectorAll('button').forEach(x => x.disabled = true);
+            a.children[it.ans].classList.add('lq-right');
+            if (j !== it.ans) b.classList.add('lq-wrong');
+            judge(j === it.ans, it.opts[it.ans]);
+          };
+          a.append(b);
+        });
+      } else {
+        a.classList.add('lq-fill');
+        a.innerHTML = `<input type="text" autocomplete="off" spellcheck="false" placeholder="${it.placeholder || '输入答案'}" aria-label="第 ${i + 1} 题答案"><button type="button" class="lq-opt">确定</button>`;
+        const inp = a.querySelector('input'), go = a.querySelector('button');
+        const submit = () => {
+          if (!inp.value.trim()) { inp.focus(); return; }
+          inp.disabled = go.disabled = true;
+          const ok = it.ans.some(x => norm(x) === norm(inp.value));
+          inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
+          judge(ok, it.ans[0]);
+        };
+        go.onclick = submit;
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      }
+      list.append(el);
+    });
+    update();
+  }
+
+  box.querySelector('.lq-redo').addEventListener('click', render);
+  window.resetPage = () => {
+    if (typeof window.pageReset === 'function') window.pageReset();
+    render();
+  };
+  render();
+})();
+</script>
+</body>
+</html>
