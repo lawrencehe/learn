@@ -77,7 +77,7 @@ p{margin:0}
 .m .ppy{font-family:var(--up-mono);font-weight:500;font-size:.82rem;color:var(--muted);margin-right:3px}
 .test .m{filter:blur(6px);background:var(--hide-bg);cursor:pointer;user-select:none}
 .test .m.seen{filter:none;background:var(--up-accent-soft);cursor:default}
-.wc .eg{display:block;color:var(--ink)}
+.eg{display:block;color:var(--ink)}
 @media (prefers-reduced-motion: reduce){.m{transition:none}.wc.flash{animation:none}}
 
 /* 词库 */
@@ -97,7 +97,10 @@ p{margin:0}
 .bank .brief{color:var(--muted);font-size:.85rem;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .bank .body{padding:0 14px 10px}
 .bank .body ol{margin:0;padding-left:1.4em;display:grid;gap:4px;font-size:.95rem}
-.bank .dim{opacity:.35}
+.dim{opacity:.35}
+.pos{display:inline-block;font-size:.72rem;color:var(--muted);border:1px solid var(--line);border-radius:5px;padding:0 5px;margin-right:6px;vertical-align:1px}
+.vb{font-size:.72rem;color:var(--muted);border:1px dashed var(--line);border-radius:999px;padding:0 7px;white-space:nowrap}
+.vb.ok{color:var(--ok);border:1px solid var(--ok)}
 .empty{color:var(--muted);text-align:center;padding:20px}
 
 :root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:var(--ok);--lq-bad:var(--bad)}
@@ -176,7 +179,7 @@ document.getElementById('up-reset').addEventListener('click', function () {
 
 <section class="card note">
   <b>关于词库的内容</b>
-  <p>词表和编号以中西书局《中考语文文言文150实词详解》（2027 版）为准。义项和例句目前根据统编课本注释和《144 个课内文言实词速记手册》整理，正在逐页按书校对。每个词都标了书的页码，方便对照。</p>
+  <p>词表和编号以中西书局《中考语文文言文150实词详解》（2027 版）为准。标「已按书校对」的词，义项、例句和出处与书一致（<span data-role="okcount"></span>）；其余的词暂按统编课本注释整理，正在逐页按书校对。书里的例句有一部分来自高中或课外篇目，照书保留。</p>
 </section>
 
 <section class="card analogy">
@@ -260,13 +263,19 @@ document.getElementById('up-reset').addEventListener('click', function () {
 1 比 bǐ 1
 - 靠近，并列 | 其两膝相比者，各隐卷底衣褶中 | 核舟记
 - 及，等到 | 比至陈，车六七百乘 | 陈涉世家
-2 鄙 bǐ 2
-- 见识浅陋，目光短浅 | 肉食者鄙，未能远谋 | 曹刿论战
-- 边远的地方 | |
-3 兵 bīng 2
-- 兵器，武器 | 今南方已定，兵甲已足 | 出师表
-- 兵器 | 兵革非不坚利也 | 得道多助，失道寡助
-- 士兵，军队 | 昨夜见军帖，可汗大点兵 | 木兰诗
+2 鄙 bǐ 2 ✓
+- {名} 边邑，边远的地方 | 蜀之鄙有二僧：其一贫，其一富 | 为学
+- {动} 轻视，鄙视 | 孔子鄙其小器 | 训俭示康
+- {形} 浅陋，目光短浅 | 肉食者鄙，未能远谋 | 曹刿论战
++ 先帝不以臣卑鄙（卑：身份低下） | 出师表
+- {形} 卑微，轻贱 | 人贱物亦鄙，不足迎后人 | 孔雀东南飞
+3 兵 bīng 2 ✓
+- {名} 兵器，武器 | 兵革非不坚利也，米粟非不多也（革：代指盔甲） | 得道多助，失道寡助
++ 今南方已定，兵甲已足 | 出师表
+- {名} 军队，士兵 | 扶苏以数谏故，上使外将兵 | 陈涉世家
+- {名} 战争，战火 | 寄书长不达，况乃未休兵 | 月夜忆舍弟
+- {名} 用兵策略 | 故上兵伐谋，其次伐交 | 谋攻
+- {动} 带兵打仗 | 兵，死地也，而括易言之 | 赵括将兵
 4 病 bìng 3
 - 困苦不堪 | 向吾不为斯役，则久已病矣 | 捕蛇者说
 - 生病，疾病 | |
@@ -276,21 +285,41 @@ document.getElementById('up-reset').addEventListener('click', function () {
 6 持 chí 5
 - 拿着 | 于是上乃使使持节诏将军 | 周亚夫军细柳
 - 拿着 | 持节云中，何日遣冯唐 | 江城子·密州出猎
-7 从 cóng 6
-- 跟随 | 隶而从者，崔氏二小生 | 小石潭记
-- 听从，依从 | 小惠未遍，民弗从也 | 曹刿论战
-- 由，自 | 便舍船，从口入 | 桃花源记
+7 从 cóng 6 ✓
+- {动} 跟随，跟从 | 战则请从 | 曹刿论战
++ 太守归而宾客从也 | 醉翁亭记
+- {动} 使……跟从，带领 | 沛公旦日从百余骑来见项王 | 鸿门宴
+- {动} 追赶，追随 | 一狼得骨止，一狼仍从 | 狼
+- {动} 追寻 | 溯游从之，宛在水中央 | 蒹葭
+- {动} 顺从，听从 | 小惠未遍，民弗从也 | 曹刿论战
++ 七十而从心所欲，不逾矩 | 〈论语〉十二章
++ 乃诈称公子扶苏、项燕，从民欲也 | 陈涉世家
+- {动} 顺着，听任 | 从流飘荡，任意东西 | 与朱元思书
+- {动} 采纳 | 择其善者而从之 | 〈论语〉十二章
+- {动} 采取某一种办法 | 无从致书以观 | 送东阳马生序
+- {介} 由，自 | 旦日，客从外来 | 邹忌讽齐王纳谏
++ 从小丘西行百二十步 | 小石潭记
+- {介} 跟，向 | 尝趋百里外，从乡之先达执经叩问 | 送东阳马生序
 8 达 dá 7
 - 到达 | 指通豫南，达于汉阴 | 愚公移山
 - 显达，显贵 | 不求闻达于诸侯 | 出师表
 9 当 dāng 8
 - 应当 | 当奖率三军，北定中原 | 出师表
 - 对着 | 当窗理云鬓 | 木兰诗
-10 道 dào 9
-- 道路 | 会天大雨，道不通 | 陈涉世家
-- 方法 | 策之不以其道 | 马说
-- 道义，正道 | 得道者多助，失道者寡助 | 得道多助，失道寡助
-- 说，讲 | 不足为外人道也 | 桃花源记
+10 道 dào 9 ✓
+- {名} 路，道路 | 会天大雨，道不通 | 陈涉世家
+- {名} 途径，方法 | 策之不以其道 | 马说
++ 妾妇之道也 | 孟子
+- {名} 事理，道理 | 以咨诹善道，察纳雅言 | 出师表
++ 虽有至道，弗学，不知其善也 | 虽有嘉肴
+- {名} 道义，仁道 | 得道者多助，失道者寡助 | 得道多助，失道寡助
++ 伐无道，诛暴秦 | 陈涉世家
+- {名} 学说，主张 | 既加冠，益慕圣贤之道 | 送东阳马生序
+- {动} 谈论，讲述 | 不足为外人道也 | 桃花源记
++ 国人道之，闻之于宋君 | 穿井得一人
+- {动} 取道，道经 | 从郦山下，道芷阳间行 | 鸿门宴
+- {动} 行，走 | 余始循以入，道少半 | 登泰山记
+- {大道} 古代社会治世的最高理想 | 大道之行也，天下为公 | 大道之行也
 11 得 dé 10
 - 得到 | 得鱼腹中书 | 陈涉世家
 - 能够 | 余因得遍观群书 | 送东阳马生序
@@ -308,10 +337,16 @@ document.getElementById('up-reset').addEventListener('click', function () {
 - 方圆（周围的长度） | 太行、王屋二山，方七百里 | 愚公移山
 - 正，刚刚 | 方欲行，转视积薪后 | 狼
 - 方向，地方 | 今南方已定 | 出师表
-16 负 fù 14
-- 背（东西） | 负者歌于途，行者休于树 | 醉翁亭记
-- 背 | 命夸娥氏二子负二山 | 愚公移山
-- 凭借，依靠 | 负势竞上，互相轩邈 | 与朱元思书
+16 负 fù 14 ✓
+- {动} 背，以背载物 | 帝感其诚，命夸娥氏二子负二山 | 愚公移山
++ 负者歌于途，行者休于树 | 醉翁亭记
+- {动} 担负，承载 | 使负栋之柱，多于南亩之农夫 | 阿房宫赋
+- {动} 依仗，凭借 | 负势竞上，互相轩邈 | 与朱元思书
+- {动} 辜负，对不起 | 师略授小计，此来为不负也 | 崂山道士
+- {动} 违背，背弃 | 律前负汉归匈奴 | 苏武传
+- {动} 背负，背靠 | 绝云气，负青天，然后图南 | 逍遥游
+- {动} （被）覆盖 | 苍山负雪，明烛天南 | 登泰山记
+- {动} 失败，与"胜"相对 | 不知彼而知己，一胜一负 | 谋攻
 17 赋 fù 15
 - 赋税 | 则吾斯役之不幸，未若复吾赋不幸之甚也 | 捕蛇者说
 - 一种文体 | 刻唐贤今人诗赋于其上 | 岳阳楼记
@@ -322,11 +357,21 @@ document.getElementById('up-reset').addEventListener('click', function () {
 19 苟 gǒu 16
 - 苟且，暂且 | 苟全性命于乱世 | 出师表
 - 如果 | 苟富贵，无相忘 | 陈涉世家
-20 故 gù 17
-- 原因，缘故 | 既克，公问其故 | 曹刿论战
-- 故意 | 广故数言欲亡，忿恚尉 | 陈涉世家
-- 旧的 | 温故而知新 | 论语
-- 所以 | 故自号曰醉翁也 | 醉翁亭记
+20 故 gù 17 ✓
+- {名} 缘故，原因 | 既克，公问其故 | 曹刿论战
++ 扶苏以数谏故，上使外将兵 | 陈涉世家
+- {名} 原先，过去 | 骨已尽矣，而两狼之并驱如故 | 狼
+- {名} 旧的知识 | 温故而知新，可以为师矣 | 〈论语〉十二章
+- {副} 故意 | 广故数言欲亡，忿恚尉 | 陈涉世家
+- {副} 特意，特地 | 余故道为学之难以告之 | 送东阳马生序
+- {副} 仍旧，还是 | 祭以牛羊，故不得福 | 李寄斩蛇
+- {副} 通"固"，本来，一向 | 宋将军故自负，且欲观客所为，力请客 | 大铁椎传
+- {连} 因此，所以 | 吾视其辙乱，望其旗靡，故逐之 | 曹刿论战
++ 故圣人不察存亡而察其所以然 | 关尹子教射
++ 故天将降大任于是人也 | 生于忧患，死于安乐
++ 故临崩寄臣以大事也 | 出师表
+- {是故} 因此，所以 | 是故所欲有甚于生者，所欲有甚于死者 | 鱼我所欲也
+- {故人} 故交，老友 | 西出阳关无故人 | 送元二使安西
 21 顾 gù 18
 - 回头看 | 元方入门不顾 | 陈太丘与友期行
 - 看 | 顾野有麦场 | 狼
@@ -758,8 +803,11 @@ const store = {
 const WORDS = [];
 document.getElementById('wordsData').textContent.trim().split('\n').forEach(line => {
   let m;
-  if ((m = line.match(/^(\d+) (\S+) (.+?) (\d+)$/))) WORDS.push({ n: +m[1], w: m[2], py: m[3], pg: +m[4], s: [] });
-  else if ((m = line.match(/^- (?:\[([^\]]+)\] )?(.*)$/))) { const [mm, eg = '', src = ''] = m[2].split('|').map(v => v.trim()); WORDS.at(-1).s.push({ py: m[1] || '', m: mm, eg, src }); }
+  if ((m = line.match(/^(\d+) (\S+) (.+?) (\d+)( ✓)?$/))) WORDS.push({ n: +m[1], w: m[2], py: m[3], pg: +m[4], ok: !!m[5], s: [] });
+  else if ((m = line.match(/^- (?:\{([^}]+)\} )?(?:\[([^\]]+)\] )?(.*)$/))) {
+    const [mm, eg = '', src = ''] = m[3].split('|').map(v => v.trim());
+    WORDS.at(-1).s.push({ pos: m[1] || '', py: m[2] || '', m: mm, ex: eg ? [{ eg, src }] : [] });
+  } else if ((m = line.match(/^\+ (.*)$/))) { const [eg, src = ''] = m[1].split('|').map(v => v.trim()); WORDS.at(-1).s.at(-1).ex.push({ eg, src }); }
 });
 /* 优先级：三份材料（书 150、名校 120、手册 144）都收 ★★★，两份 ★★，只有书 ★，双音古今异义词单列 */
 const T3 = '鄙 兵 从 道 负 故 顾 归 过 及 假 间 见 举 绝 类 穷 去 若 少 胜 使 数 属 说 素 徒 亡 谢 信 修 徐 许 遗 易 知 致 走 卒'.split(' ');
@@ -774,12 +822,16 @@ const ORDER = [...WORDS].sort((a, b) => (b.t || -1) - (a.t || -1) || a.n - b.n);
 const DAYS = []; { let i = 0; for (let d = 0; d < 40; d++) { const k = d < 30 ? 4 : 3; DAYS.push(ORDER.slice(i, i + k)); i += k; } }
 DAYS.forEach((ws, d) => ws.forEach(x => { x.day = d + 1; }));
 const REVIEW_GAPS = [1, 3, 7, 14];
+document.querySelector('[data-role="okcount"]').textContent = `已校对 ${WORDS.filter(x => x.ok).length} / 150 个`;
 const XIAO = new Set(['学弈', '两小儿辩日', '守株待兔', '书戴嵩画牛', '杨氏之子', '王戎不取道旁李', '静夜思', '题西林壁', '山行']);
-const ALLSRC = [...new Set(WORDS.flatMap(x => x.s.map(s => s.src)).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'zh'));
+const ALLSRC = [...new Set(WORDS.flatMap(x => x.s.flatMap(s => s.ex.map(e => e.src))).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'zh'));
 
 const dotify = (s, w) => w.length > 1 ? esc(s).split(w).join(`<em class="dot">${w}</em>`) : esc(s).replace(new RegExp(w, 'g'), `<em class="dot">${w}</em>`);
-const senseHTML = (x, s, dim) => `<li${dim ? ' class="dim"' : ''}><span class="m">${s.py ? `<span class="ppy">${s.py}</span>` : ''}${esc(s.m)}</span>` +
-  (s.eg ? `<span class="eg">${dotify(s.eg, x.w)} ${s.src ? `<span class="src">《${esc(s.src)}》</span>` : ''}</span>` : '<span class="src">（暂无课内例句）</span>') + `</li>`;
+const POS = { 名: '名词', 动: '动词', 形: '形容词', 副: '副词', 介: '介词', 连: '连词', 代: '代词', 数: '数词', 量: '量词', 助: '助词' };
+/* learned：只看已学课文时传入已学篇目集合，没学过的例句变淡 */
+const senseHTML = (x, s, learned) => `<li>${s.pos ? `<span class="pos">${POS[s.pos] || esc(s.pos)}</span>` : ''}<span class="m">${s.py ? `<span class="ppy">${s.py}</span>` : ''}${esc(s.m)}</span>` +
+  (s.ex.length ? s.ex.map(e => `<span class="eg${learned && !learned.has(e.src) ? ' dim' : ''}">${dotify(e.eg, x.w)} ${e.src ? `<span class="src">《${esc(e.src)}》</span>` : ''}</span>`).join('') : '<span class="src">（暂无课内例句）</span>') + `</li>`;
+const okBadge = x => x.ok ? '<span class="vb ok">已按书校对</span>' : '<span class="vb">待按书校对</span>';
 const tierStar = x => `<span class="star" style="--c:${x.c}">${TIERS.find(t => t.k === x.t).name}</span>`;
 
 /* ---------- 模块 1：遗忘曲线 ---------- */
@@ -842,7 +894,7 @@ const tierStar = x => `<span class="star" style="--c:${x.c}">${TIERS.find(t => t
   daysBox.innerHTML = DAYS.map((_, d) => `<button type="button" class="day" data-d="${d + 1}" aria-label="第 ${d + 1} 天">${d + 1}</button>`).join('');
   const firstTodo = () => { for (let d = 1; d <= 40; d++) if (!done.has(d)) return d; return 40; };
   let S = { day: firstTodo(), test: false };
-  const card = x => `<div class="wc" style="--c:${x.c}" id="wc-${x.n}"><div class="h"><span class="w">${x.w}</span><span class="py">${x.py}</span>${tierStar(x)}<span class="pg">考纲第 ${x.n} 号 · 书第 ${x.pg} 页</span></div><ol>${x.s.map(s => senseHTML(x, s)).join('')}</ol></div>`;
+  const card = x => `<div class="wc" style="--c:${x.c}" id="wc-${x.n}"><div class="h"><span class="w">${x.w}</span><span class="py">${x.py}</span>${tierStar(x)}${okBadge(x)}<span class="pg">考纲第 ${x.n} 号 · 书第 ${x.pg} 页</span></div><ol>${x.s.map(s => senseHTML(x, s)).join('')}</ol></div>`;
   const draw = () => {
     [...daysBox.children].forEach(b => { const d = +b.dataset.d; b.classList.toggle('done', done.has(d)); b.classList.toggle('sel', d === S.day); });
     const ws = DAYS[S.day - 1];
@@ -893,11 +945,11 @@ const tierStar = x => `<span class="star" style="--c:${x.c}">${TIERS.find(t => t
     only.textContent = `只看已学课文：${S.only ? '开' : '关'}`; only.classList.toggle('on', S.only);
     const kw = S.q.trim();
     const hits = WORDS.filter(x => (S.tier === 'all' || x.t === +S.tier) &&
-      (!kw || x.w.includes(kw) || x.s.some(s => s.m.includes(kw) || s.eg.includes(kw) || s.src.includes(kw))) &&
-      (!S.only || x.s.some(s => learned.has(s.src))));
+      (!kw || x.w.includes(kw) || x.s.some(s => s.m.includes(kw) || s.ex.some(e => e.eg.includes(kw) || e.src.includes(kw)))) &&
+      (!S.only || x.s.some(s => s.ex.some(e => learned.has(e.src)))));
     count.textContent = `共 ${hits.length} 个词` + (S.only ? '（只显示有已学课文例句的词）' : '');
     list.innerHTML = hits.length ? hits.map(x => `<details style="--c:${x.c}"><summary><span class="no">${x.n}</span><span class="w">${x.w}</span><span class="py">${x.py}</span><span class="brief">${esc(x.s.map(s => s.m.replace(/（.*?）/g, '')).filter((v, i, a) => a.indexOf(v) === i).join('；'))}</span>${tierStar(x)}<span class="src">第 ${x.day} 天</span></summary>` +
-      `<div class="body"><ol>${x.s.map(s => senseHTML(x, s, S.only && !learned.has(s.src))).join('')}</ol><p class="src" style="margin-top:6px">考纲第 ${x.n} 号 · 书第 ${x.pg} 页</p></div></details>`).join('')
+      `<div class="body"><ol>${x.s.map(s => senseHTML(x, s, S.only ? learned : null)).join('')}</ol><p class="src" style="margin-top:6px">考纲第 ${x.n} 号 · 书第 ${x.pg} 页 · ${okBadge(x)}</p></div></details>`).join('')
       : '<p class="empty">没有找到，换个关键词试试。</p>';
   };
   q.addEventListener('input', () => { S.q = q.value; draw(); });
