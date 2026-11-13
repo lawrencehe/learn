@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>文言人称代词</title>
+<meta name="description" content="文言文里的「我、你、他」怎么说：吾我余予、汝尔若而乃、其之彼，外加谦称、敬称、复数和「他」的陷阱，动画分组 + 查词卡 + 分拣小游戏。">
+<style>
+:root{
+  --bg:var(--up-bg); --surface:var(--up-surface); --surface2:var(--up-surface-2); --ink:var(--up-ink); --muted:var(--up-muted); --line:var(--up-line);
+  --accent:var(--up-accent); --ok:var(--up-ok); --bad:var(--up-bad);
+  --p1:#1c7ed6; --p1s:#e7f1fc;   /* 第一人称：我 */
+  --p2:#2b8a3e; --p2s:#e6f4ea;   /* 第二人称：你 */
+  --p3:#7048e8; --p3s:#efebfd;   /* 第三人称：他 */
+  --trap:#868e96;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --p1:#74c0fc; --p1s:#1b2a3a; --p2:#8ce99a; --p2s:#1b3122; --p3:#b197fc; --p3s:#29223f; --trap:#adb5bd; }
+}
+:root[data-theme="dark"]{ --p1:#74c0fc; --p1s:#1b2a3a; --p2:#8ce99a; --p2s:#1b3122; --p3:#b197fc; --p3s:#29223f; --trap:#adb5bd; }
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 var(--up-font);padding:24px 16px 96px}
+main{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:48px}
+h1{font-size:clamp(1.7rem,4.5vw,2.4rem);line-height:1.25;margin:0 0 8px}
+h2{font-size:1.4rem;margin:0 0 8px}
+h3{font-size:1.08rem;margin:0 0 6px}
+p{margin:0}
+.lead{color:var(--muted)}
+.muted{color:var(--muted);font-size:.92rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--up-radius);box-shadow:var(--up-shadow);padding:16px}
+.analogy{border-left:4px solid var(--accent)}
+.btn{font:inherit;font-size:14px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--up-surface)}
+.btn:disabled{opacity:.45;cursor:default}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.stepno{font-family:var(--up-mono);color:var(--muted);font-size:.9rem;min-width:56px;text-align:center}
+.caption{min-height:3.4em;margin-top:10px}
+.p1{color:var(--p1)} .p2{color:var(--p2)} .p3{color:var(--p3)}
+b.k{font-weight:700}
+
+/* ---------- 舞台：三个角色 ---------- */
+.stage{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;background:var(--surface2);border-radius:10px;padding:12px 8px;min-height:330px}
+.col{display:flex;flex-direction:column;align-items:center;gap:8px;border-radius:10px;padding:8px 4px;transition:background .6s}
+.col.on{background:var(--surface)}
+.who{display:flex;flex-direction:column;align-items:center;gap:2px}
+.face{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;font-size:24px;font-weight:800;border:3px solid currentColor;background:var(--surface)}
+.who .role{font-weight:700;font-size:13px}
+.who .sub{font-size:12px;color:var(--muted);text-align:center;line-height:1.3}
+.chips{display:flex;flex-wrap:wrap;justify-content:center;gap:5px;align-content:flex-start}
+.grp{display:flex;flex-direction:column;align-items:center;gap:4px;width:100%;opacity:0;transform:translateY(-14px) scale(.9);transition:opacity .7s,transform .7s;max-height:0;overflow:hidden}
+.grp.show{opacity:1;transform:none;max-height:200px}
+.grp .gl{font-size:11px;color:var(--muted);letter-spacing:.05em}
+.chip{display:inline-block;padding:2px 9px;border-radius:999px;font-weight:700;font-size:15px;border:1.5px solid currentColor;background:var(--surface)}
+.grp.hot .chip{box-shadow:0 0 0 3px var(--accent-soft, var(--up-accent-soft))}
+.chip.cross{color:var(--trap);text-decoration:line-through}
+.bubble{grid-column:1/-1;text-align:center;font-size:14px;color:var(--muted)}
+@media (max-width:520px){ .face{width:42px;height:42px;font-size:21px} .chip{font-size:14px;padding:1px 7px} }
+
+/* ---------- 查词卡 ---------- */
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 10px}
+.tab{font:inherit;font-size:14px;padding:4px 12px;border-radius:999px;border:1.5px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.tab.on{background:var(--accent);border-color:var(--accent);color:var(--up-surface)}
+.words{display:flex;flex-wrap:wrap;gap:8px}
+.wbtn{font:inherit;font-size:17px;font-weight:700;min-width:48px;padding:6px 12px;border-radius:10px;border:2px solid currentColor;background:var(--surface);cursor:pointer;transition:transform .3s,background .3s}
+.wbtn.b1{color:var(--p1)} .wbtn.b2{color:var(--p2)} .wbtn.b3{color:var(--p3)} .wbtn.b0{color:var(--trap)}
+.wbtn.on.b1{background:var(--p1s)} .wbtn.on.b2{background:var(--p2s)} .wbtn.on.b3{background:var(--p3s)} .wbtn.on.b0{background:var(--surface2)}
+.wbtn.on{transform:translateY(-3px)}
+.wbtn small{font-size:11px;font-weight:500;margin-left:3px}
+.detail{margin-top:12px;min-height:130px;border-radius:10px;background:var(--surface2);padding:12px 14px}
+.detail .big{font-size:28px;font-weight:800;margin-right:8px}
+.detail .tag{display:inline-block;font-size:12px;border:1px solid var(--line);border-radius:999px;padding:0 8px;margin-right:6px;color:var(--muted);vertical-align:4px}
+.detail .ex{margin-top:6px;font-size:17px}
+.detail .ex em{font-style:normal;font-weight:800;border-bottom:3px solid currentColor}
+.detail .tr{color:var(--muted);font-size:14px;margin-top:2px}
+.fadein{animation:fi .6s ease}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ---------- 第三人称位置 ---------- */
+.slots{display:grid;gap:10px}
+.slot{display:grid;grid-template-columns:64px 1fr;gap:10px;align-items:center}
+.slot .w{font-size:26px;font-weight:800;color:var(--p3);text-align:center;border:2px solid var(--p3);border-radius:10px;background:var(--p3s)}
+.slot .s{font-size:16px}
+.slot .s em{font-style:normal;font-weight:800;color:var(--p3)}
+.slot .r{font-size:13px;color:var(--muted)}
+
+/* ---------- 分拣游戏 ---------- */
+.pool{display:flex;flex-wrap:wrap;gap:8px;min-height:48px;padding:8px;border:1.5px dashed var(--line);border-radius:10px}
+.pc{font:inherit;font-size:17px;font-weight:700;padding:4px 12px;border-radius:8px;border:2px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.pc.sel{border-color:var(--accent);color:var(--accent);transform:translateY(-3px)}
+.pc.shake{animation:sh .5s}
+@keyframes sh{0%,100%{transform:none}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.bins{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.bin{border:2px solid currentColor;border-radius:10px;padding:8px;min-height:96px;cursor:pointer;background:var(--surface)}
+.bin.b1{color:var(--p1)} .bin.b2{color:var(--p2)} .bin.b3{color:var(--p3)}
+.bin h3{font-size:15px;margin:0 0 6px;text-align:center}
+.bin .in{display:flex;flex-wrap:wrap;gap:4px;justify-content:center}
+.bin .in span{font-weight:700;padding:0 6px;border-radius:6px;border:1.5px solid currentColor;animation:fi .5s}
+.gamemsg{min-height:1.7em;margin-top:8px}
+@media (prefers-reduced-motion: reduce){ .grp,.col,.wbtn,.fadein,.pc.shake,.bin .in span{transition:none;animation:none} }
+
+/* ---------- 表格 ---------- */
+.tbl{width:100%;border-collapse:collapse;font-size:14.5px}
+.tbl th,.tbl td{border-bottom:1px solid var(--line);padding:7px 6px;text-align:left;vertical-align:top}
+.tbl th{color:var(--muted);font-weight:600;white-space:nowrap}
+.tblwrap{overflow-x:auto}
+.mis{display:grid;gap:10px}
+.sum{border-left:4px solid var(--accent);font-size:17px}
+
+:root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:var(--ok);--lq-bad:var(--bad)}
+/* ---------- 练习题（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+.lq{display:grid;gap:12px;margin-bottom:56px}
+.lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+.lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
+.lq-sub{margin:0;color:var(--lq-muted);font-size:14px}
+.lq-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--lq-muted);font-variant-numeric:tabular-nums}
+.lq-list{display:grid;gap:10px}
+.lq-item{background:var(--lq-surface);border:1.5px solid var(--lq-line);border-radius:10px;padding:12px 16px;display:grid;gap:10px;min-width:0;color:var(--lq-ink);text-align:left}
+.lq-item.lq-is-ok{border-color:var(--lq-ok)}
+.lq-item.lq-is-bad{border-color:var(--lq-bad)}
+.lq-q{font-size:15px;font-weight:600;line-height:1.6}
+.lq-tag{display:inline-block;font-size:11px;font-weight:500;line-height:1.6;color:var(--lq-muted);border:1px solid var(--lq-line);border-radius:999px;padding:0 8px;margin-right:8px;vertical-align:1px}
+.lq-opts,.lq-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lq .lq-opt,.lq .lq-redo{font:inherit;font-size:14px;line-height:1.4;padding:6px 14px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);cursor:pointer;text-align:left;opacity:1}
+.lq .lq-opt:hover:not(:disabled),.lq .lq-redo:hover{border-color:var(--lq-accent)}
+.lq .lq-opt:disabled{cursor:default;opacity:1}
+.lq .lq-opt.lq-right{border-color:var(--lq-ok);color:var(--lq-ok);font-weight:700}
+.lq .lq-opt.lq-wrong{border-color:var(--lq-bad);color:var(--lq-bad);text-decoration:line-through}
+.lq-fill input{font:inherit;font-size:14px;padding:6px 10px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);width:min(100%,200px)}
+.lq-fill input.lq-right{border-color:var(--lq-ok)}
+.lq-fill input.lq-wrong{border-color:var(--lq-bad)}
+.lq-why{font-size:14px;line-height:1.65;color:var(--lq-muted)}
+.lq-why:empty{display:none}
+.lq-why .lq-ok{color:var(--lq-ok)}
+.lq-why .lq-bad{color:var(--lq-bad)}
+</style>
+</head>
+<body>
+<!-- up-shell:begin（由 scripts/shell.mjs 自动生成，勿手改） -->
+<nav id="up-nav" aria-label="网站导航">
+<a class="up-home" href="/" title="Up 学习站首页"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="up-nav-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c6ef5"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#up-nav-g)"/><path d="M12 52V42a2 2 0 0 1 2-2h10V32a2 2 0 0 1 2-2h10v-8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v30z" fill="#fff"/><circle cx="43" cy="13" r="5.5" fill="#ffa94d"/></svg><span>Up 学习站</span></a>
+<span class="up-sep" aria-hidden="true">›</span><a class="up-cat" href="/chinese">语文</a>
+<span class="up-sep" aria-hidden="true">›</span><span class="up-title">文言人称代词</span>
+<button id="up-reset" type="button" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+</nav>
+<style>
+:root{--up-bg:#f5f6f8;--up-surface:#ffffff;--up-surface-2:#eef0f4;--up-ink:#1d2127;--up-muted:#626b78;--up-line:#dfe2e8;--up-ok:#2b8a3e;--up-bad:#d6336c;--up-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);--up-font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif;--up-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;--up-radius:12px;--up-accent:#a33a2e;--up-accent-soft:#f8ece8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#f0a08f;--up-accent-soft:#3a2220;color-scheme:dark}}
+:root[data-theme="dark"]{--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#f0a08f;--up-accent-soft:#3a2220;color-scheme:dark}
+html{padding-top:52px;scroll-padding-top:64px}
+#up-nav{position:fixed;top:0;left:0;right:0;z-index:2147483000;height:52px;box-sizing:border-box;display:flex;align-items:center;gap:8px;
+padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));border-top:3px solid var(--up-accent);
+border-bottom:1px solid var(--up-line);background:color-mix(in srgb,var(--up-surface) 88%,transparent);
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:500 14px/1.2 var(--up-font);color:var(--up-ink);text-align:left}
+#up-nav a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none}
+#up-nav a:hover{color:var(--up-accent)}
+#up-nav svg{width:24px;height:24px;flex:none;display:block}
+#up-nav .up-home span{font-weight:700}
+#up-nav .up-cat{color:var(--up-accent);font-weight:600}
+#up-nav .up-sep{color:var(--up-muted);flex:none}
+#up-nav .up-title{color:var(--up-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#up-reset{margin:0 0 0 auto;flex:none;font:600 14px/1 var(--up-font);padding:8px 14px;border-radius:999px;cursor:pointer;
+border:1.5px solid var(--up-accent);background:transparent;color:var(--up-accent);transition:background .2s,color .2s}
+#up-reset:hover,#up-reset:focus-visible{background:var(--up-accent);color:var(--up-surface)}
+#up-reset:focus-visible,#up-nav a:focus-visible{outline:2px solid var(--up-accent);outline-offset:2px}
+@media (max-width:560px){#up-nav .up-home span{display:none}}
+@media print{#up-nav{display:none}html{padding-top:0}}
+</style>
+<script>
+document.getElementById('up-reset').addEventListener('click', function () {
+  if (typeof window.resetPage === 'function') window.resetPage();
+  else console.warn('本页没有定义 window.resetPage()，重置按钮无效');
+  window.scrollTo({ top: 0, behavior: 'auto' });
+});
+</script>
+<!-- up-shell:end -->
+<main>
+
+<section>
+  <h1>文言人称代词</h1>
+  <p class="lead">现代汉语里"我、你、他"三个字就够了，文言文却有一大串：吾、余、予、汝、尔、若、其、之……这一页帮你把它们按"我 / 你 / 他"分好抽屉，再看看谦称、敬称和几个容易踩的坑。</p>
+</section>
+
+<section class="card analogy">
+  <b>生活比喻：一场对话里的三个座位。</b><br>
+  任何一句话都有三个"座位"：<b class="p1">说话的人</b>（第一人称）、<b class="p2">听话的人</b>（第二人称）、<b class="p3">被谈论的人</b>（第三人称）。
+  文言里每个座位上可以坐好几个字，有的普通、有的客气（谦称/敬称），选哪个字，要看<b>说话人身份</b>和<b>对谁说</b>。
+</section>
+
+<!-- 分步动画：把代词放进三个座位 -->
+<section>
+  <h2>一步一步：给三个座位放字</h2>
+  <div class="card" id="demo">
+    <div class="stage">
+      <div class="col" data-col="1">
+        <div class="who p1"><div class="face">我</div><div class="role">第一人称</div><div class="sub">说话的人</div></div>
+        <div class="grp p1" data-g="1"><span class="gl">普通说法</span><div class="chips"><span class="chip">吾</span><span class="chip">我</span><span class="chip">余</span><span class="chip">予</span></div></div>
+        <div class="grp p1" data-g="2"><span class="gl">谦称·放低自己</span><div class="chips"><span class="chip">臣</span><span class="chip">仆</span><span class="chip">愚</span><span class="chip">鄙人</span></div></div>
+        <div class="grp p1" data-g="3"><span class="gl">君王自称</span><div class="chips"><span class="chip">朕</span><span class="chip">寡人</span><span class="chip">孤</span></div></div>
+        <div class="grp p1" data-g="7"><span class="gl">复数</span><div class="chips"><span class="chip">吾辈</span><span class="chip">我曹</span></div></div>
+      </div>
+      <div class="col" data-col="2">
+        <div class="who p2"><div class="face">你</div><div class="role">第二人称</div><div class="sub">听话的人</div></div>
+        <div class="grp p2" data-g="4"><span class="gl">普通说法</span><div class="chips"><span class="chip">汝(女)</span><span class="chip">尔</span><span class="chip">若</span><span class="chip">而</span><span class="chip">乃</span></div></div>
+        <div class="grp p2" data-g="5"><span class="gl">敬称·抬高对方</span><div class="chips"><span class="chip">子</span><span class="chip">君</span><span class="chip">公</span><span class="chip">卿</span><span class="chip">足下</span></div></div>
+        <div class="grp p2" data-g="7"><span class="gl">复数</span><div class="chips"><span class="chip">尔曹</span><span class="chip">若属</span></div></div>
+      </div>
+      <div class="col" data-col="3">
+        <div class="who p3"><div class="face">他</div><div class="role">第三人称</div><div class="sub">被谈论的人</div></div>
+        <div class="grp p3" data-g="6"><span class="gl">借用指示代词</span><div class="chips"><span class="chip">之</span><span class="chip">其</span><span class="chip">彼</span></div></div>
+        <div class="grp p3" data-g="6"><span class="gl">后起口语</span><div class="chips"><span class="chip">渠</span><span class="chip">伊</span></div></div>
+        <div class="grp" data-g="8" style="color:var(--trap)"><span class="gl">陷阱</span><div class="chips"><span class="chip cross">他</span></div><span class="gl">先秦＝"别的"</span></div>
+      </div>
+    </div>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<!-- 查词卡 -->
+<section>
+  <h2>查词卡：每个字配一句课文</h2>
+  <p class="muted">点一个字，看它的意思、语气色彩和课文例句。上面的标签可以只看某一类。</p>
+  <div class="card" id="dict">
+    <div class="tabs"></div>
+    <div class="words"></div>
+    <div class="detail"></div>
+  </div>
+</section>
+
+<!-- 第三人称专讲 -->
+<section>
+  <h2>为什么"他"最难找？</h2>
+  <p>上古汉语<b>没有一个专门的"他"</b>。要说"他"，就借用指示代词（本来是"这、那"），而且它们<b>各管一个位置</b>：</p>
+  <div class="card slots" style="margin-top:12px">
+    <div class="slot"><div class="w">之</div><div><div class="s">公与<em>之</em>乘，战于长勺。<span class="muted">《曹刿论战》</span></div><div class="r">只当<b>宾语</b>（放在动词、介词后）：庄公和<b>他</b>同乘一辆战车。不能当主语。</div></div></div>
+    <div class="slot"><div class="w">其</div><div><div class="s">吾视<em>其</em>辙乱，望<em>其</em>旗靡。<span class="muted">《曹刿论战》</span></div><div class="r">多当<b>定语</b>＝"他的 / 他们的"：我看<b>他们的</b>车辙乱了。</div></div></div>
+    <div class="slot"><div class="w">彼</div><div><div class="s"><em>彼</em>竭我盈，故克之。<span class="muted">《曹刿论战》</span></div><div class="r">本义"那"，可当<b>主语</b>：<b>他们</b>（齐军）士气耗尽，我们士气正旺。</div></div></div>
+    <div class="slot"><div class="w">渠</div><div><div class="s">问<em>渠</em>那得清如许？<span class="muted">朱熹《观书有感》</span></div><div class="r">后来的口语词＝"他 / 它"：问<b>它</b>（方塘）怎么这样清澈。</div></div></div>
+  </div>
+</section>
+
+<!-- 分拣游戏 -->
+<section>
+  <h2>自己试试：把字放进抽屉</h2>
+  <p class="muted">先点上面的一个字，再点它该去的抽屉。放错会抖一下并给提示。</p>
+  <div class="card" id="game">
+    <div class="pool"></div>
+    <div class="bins">
+      <div class="bin b1" data-p="1"><h3>我（第一人称）</h3><div class="in"></div></div>
+      <div class="bin b2" data-p="2"><h3>你（第二人称）</h3><div class="in"></div></div>
+      <div class="bin b3" data-p="3"><h3>他（第三人称）</h3><div class="in"></div></div>
+    </div>
+    <p class="gamemsg"></p>
+    <div class="ctrl"><button type="button" class="btn" data-act="reset">↺ 重置本模块</button></div>
+  </div>
+</section>
+
+<!-- 速查表 -->
+<section>
+  <h2>速查总表</h2>
+  <div class="card tblwrap">
+    <table class="tbl">
+      <tr><th></th><th>普通说法</th><th>客气说法</th><th>复数</th></tr>
+      <tr><td class="p1"><b>我</b></td><td>吾、我、余、予</td><td>谦称：臣、仆、愚、鄙人、在下、不才<br>君王：朕（秦以后皇帝专用）、寡人、孤</td><td>吾辈、吾侪、我曹、我等</td></tr>
+      <tr><td class="p2"><b>你</b></td><td>汝（女）、尔、若、而、乃<br><span class="muted">"而、乃"多作"你的"</span></td><td>敬称：子、君、公、先生、足下<br>上对下/亲昵：卿</td><td>尔曹、尔等、若属、汝辈</td></tr>
+      <tr><td class="p3"><b>他</b></td><td>之（宾语）、其（他的）、彼（主语）<br>渠、伊（后起口语）</td><td>—</td><td>同形，看上下文：之、其、彼都能指"他们"</td></tr>
+    </table>
+  </div>
+  <p class="muted" style="margin-top:8px">另有两个"自己人"：<b>自、己</b>＝"自己"（己所不欲，勿施于人）；<b>人</b>＝"别人"。</p>
+</section>
+
+<section>
+  <h2>常见误区</h2>
+  <div class="mis">
+    <div class="card"><b>误区 1：见到"他"就译成"他"。</b>先秦的"他"意思是"别的"：「王顾左右而言<b>他</b>」＝齐宣王左右张望，说起<b>别的</b>事来（《孟子》）。</div>
+    <div class="card"><b>误区 2："我"只指一个人。</b>文言代词单复数常同形：「彼竭<b>我</b>盈」的"我"是"我们（鲁军）"，「故克<b>之</b>」的"之"是"他们（齐军）"。</div>
+    <div class="card"><b>误区 3："而、乃、若"永远是连词/副词。</b>它们也能当"你"：「家祭无忘告<b>乃</b>翁」＝告诉<b>你的</b>父亲；「<b>若</b>入前为寿」＝<b>你</b>进去敬酒。判断方法：放在名词前或句首当主语、译成"你/你的"通顺，就是代词。</div>
+    <div class="card"><b>拓展：吾和我不完全一样。</b>先秦"吾"多作主语、定语，一般不放在动词后当宾语；"我"哪个位置都行。所以《庄子》说「今者<b>吾</b>丧<b>我</b>」，而不说"我丧吾"。</div>
+  </div>
+</section>
+
+<section class="card sum">
+  <b>一句话总结：</b>我＝吾我余予（谦称臣仆愚，君王朕寡人孤）；你＝汝尔若而乃（敬称子君公足下）；他＝之其彼（宾语用之、"他的"用其），而先秦的"他"是"别的"。
+</section>
+
+<section class="lq" id="lq" aria-label="练习">
+  <div class="lq-head"><h2>练习</h2><span class="lq-score"></span></div>
+  <p class="lq-sub">学完上面的内容，来检验一下。每题作答后马上看到解析；点「重做练习」清空重来。</p>
+  <div class="lq-list"></div>
+  <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+</section>
+
+</main>
+
+<script>
+const resets = [];
+window.pageReset = () => resets.forEach(f => f());
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- 分步动画：三个座位 ---------- */
+{
+  const root = document.getElementById('demo');
+  const cap = root.querySelector('.caption'), no = root.querySelector('.stepno');
+  const btn = act => root.querySelector(`[data-act="${act}"]`);
+  const STEPS = [
+    { col: 0, text: '一句话里有三个座位：说话的「我」、听话的「你」、被谈论的「他」。下面一组一组把文言代词放进去。' },
+    { col: 1, text: '「我」的普通说法：吾、我、余、予。如「吾日三省吾身」「予独爱莲之出淤泥而不染」。' },
+    { col: 1, text: '谦称：臣、仆、愚、鄙人——把自己说低一点表示礼貌。如诸葛亮对刘禅说「臣本布衣」「愚以为……」。' },
+    { col: 1, text: '君王自称：寡人、孤（谦虚地说"少德的人""孤单的人"）；朕本来人人可用，秦始皇以后成了皇帝专用。' },
+    { col: 2, text: '「你」的普通说法：汝（也写作"女"）、尔、若、而、乃。语气平直，多用于长辈对晚辈或平辈。"而、乃"常作"你的"。' },
+    { col: 2, text: '敬称：子、君、公、足下——抬高对方，相当于"您"。卿是君主对臣子、或亲友间的亲切称呼。' },
+    { col: 3, text: '「他」最特别：先秦没有专用字，借指示代词之、其、彼来用；渠、伊是后来口语里才出现的。' },
+    { col: 0, text: '加上辈、曹、等、属、侪就成了复数：吾辈、我曹（我们），尔曹、若属（你们）。不过很多时候单复数同形，要看上下文。' },
+    { col: 3, text: '最后一个陷阱：先秦的「他」不是第三人称，而是"别的"——「王顾左右而言他」＝说起别的事。' },
+  ];
+  const INIT = { step: 0, playing: false };
+  let S = { ...INIT }, timer = null;
+  const draw = () => {
+    const s = STEPS[S.step];
+    root.querySelectorAll('.grp').forEach(g => {
+      const n = +g.dataset.g;
+      g.classList.toggle('show', n <= S.step);
+      g.classList.toggle('hot', n === S.step);
+    });
+    root.querySelectorAll('.col').forEach(c => c.classList.toggle('on', +c.dataset.col === s.col));
+    cap.textContent = s.text; no.textContent = `${S.step + 1} / ${STEPS.length}`;
+    btn('prev').disabled = S.step === 0; btn('next').disabled = S.step === STEPS.length - 1;
+    btn('play').textContent = S.playing ? '⏸ 暂停' : '▶ 播放';
+  };
+  const stop = () => { clearInterval(timer); timer = null; S.playing = false; };
+  const go = d => { S.step = Math.max(0, Math.min(STEPS.length - 1, S.step + d)); draw(); };
+  btn('prev').onclick = () => { stop(); go(-1); };
+  btn('next').onclick = () => { stop(); go(1); };
+  btn('play').onclick = () => {
+    if (S.playing) { stop(); draw(); return; }
+    if (S.step === STEPS.length - 1) S.step = 0;
+    S.playing = true; draw();
+    timer = setInterval(() => { go(1); if (S.step === STEPS.length - 1) { stop(); draw(); } }, reduced ? 3000 : 2600);
+  };
+  const reset = () => { stop(); S = { ...INIT }; draw(); };
+  btn('reset').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+/* ---------- 查词卡 ---------- */
+const WORDS = [
+  { w: '吾', p: 1, tag: '普通', note: '最常用的"我"。多作主语、定语（"我的"）；先秦一般不放在动词后当宾语。', ex: '<em>吾</em>日三省<em>吾</em>身。', src: '《论语·学而》', tr: '我每天多次反省自己。' },
+  { w: '我', p: 1, tag: '普通', note: '主语、宾语、定语都能做，用法最全；也常指"我们"。', ex: '三人行，必有<em>我</em>师焉。', src: '《论语·述而》', tr: '几个人同行，其中一定有可以做我老师的人。' },
+  { w: '余', p: 1, tag: '普通', note: '"我"，散文、游记里很常见。', ex: '<em>余</em>强饮三大白而别。', src: '张岱《湖心亭看雪》', tr: '我勉强喝了三大杯酒，然后告别。' },
+  { w: '予', p: 1, tag: '普通', note: '与"余"同音同义（读 yú），作"我"讲。', ex: '<em>予</em>独爱莲之出淤泥而不染。', src: '周敦颐《爱莲说》', tr: '我唯独喜爱莲花从淤泥里长出来却不沾染污秽。' },
+  { w: '臣', p: 1, tag: '谦称', note: '臣子对君主的自称。', ex: '<em>臣</em>本布衣，躬耕于南阳。', src: '诸葛亮《出师表》', tr: '我本来是个平民，在南阳亲自耕田。' },
+  { w: '愚', p: 1, tag: '谦称', note: '"我（愚笨的人）"，常见"愚以为"＝我认为。', ex: '<em>愚</em>以为宫中之事，事无大小，悉以咨之。', src: '诸葛亮《出师表》', tr: '我认为宫中的事情，不论大小，都拿来征求他们的意见。' },
+  { w: '仆', p: 1, tag: '谦称', note: '"我"的谦称，类似"在下"，多用于书信。', ex: '<em>仆</em>诚已著此书。', src: '司马迁《报任安书》', tr: '我确实已经写成了这部书。' },
+  { w: '寡人', p: 1, tag: '君王', note: '诸侯国君的谦称，"寡德之人"。', ex: '<em>寡人</em>欲以五百里之地易安陵。', src: '《唐雎不辱使命》', tr: '我想用五百里的土地换安陵。' },
+  { w: '孤', p: 1, tag: '君王', note: '君王谦称（孤家）。', ex: '<em>孤</em>岂欲卿治经为博士邪！', src: '《孙权劝学》', tr: '我难道是想让你钻研儒家经典当博士吗！' },
+  { w: '朕', p: 1, tag: '君王', note: '先秦人人可用；秦始皇起成为皇帝专用的自称。', ex: '<em>朕</em>皇考曰伯庸。', src: '屈原《离骚》', tr: '我已故的父亲名叫伯庸。（屈原不是皇帝，说明先秦"朕"人人能用）' },
+  { w: '汝', p: 2, tag: '普通', note: '最常用的"你"，也写作"女"。语气直接，多用于长辈对晚辈、平辈之间。', ex: '<em>汝</em>心之固，固不可彻。', src: '《愚公移山》', tr: '你思想顽固，顽固到不能改变的地步。' },
+  { w: '尔', p: 2, tag: '普通', note: '"你"，语气较随便，有时带轻视。', ex: '<em>尔</em>安敢轻吾射！', src: '欧阳修《卖油翁》', tr: '你怎么敢轻视我射箭的本领！' },
+  { w: '若', p: 2, tag: '普通', note: '"你"；"若属"＝你们。', ex: '<em>若</em>入前为寿。', src: '《鸿门宴》', tr: '你进去上前敬酒祝寿。' },
+  { w: '而', p: 2, tag: '普通', note: '多作定语"你的"。', ex: '夫差！<em>而</em>忘越王之杀<em>而</em>父乎？', src: '《左传·定公十四年》', tr: '夫差！你忘了越王杀了你的父亲吗？' },
+  { w: '乃', p: 2, tag: '普通', note: '多作定语"你的"。', ex: '家祭无忘告<em>乃</em>翁。', src: '陆游《示儿》', tr: '家祭的时候别忘了告诉你的父亲（我）。' },
+  { w: '子', p: 2, tag: '敬称', note: '对人的尊称，"您"。', ex: '以<em>子</em>之矛，陷<em>子</em>之盾，何如？', src: '《韩非子·自相矛盾》', tr: '用您的矛刺您的盾，会怎么样？' },
+  { w: '君', p: 2, tag: '敬称', note: '"您"，客气的称呼。', ex: '<em>君</em>与家父期日中。', src: '《陈太丘与友期行》', tr: '您和我父亲约定在正午。' },
+  { w: '公', p: 2, tag: '敬称', note: '"您 / 诸位"，对长者、尊者或众人。', ex: '<em>公</em>之视廉将军孰与秦王？', src: '《廉颇蔺相如列传》', tr: '你们看廉将军和秦王相比，谁更厉害？' },
+  { w: '卿', p: 2, tag: '亲称', note: '君对臣、长辈对晚辈、夫妻朋友间的亲切称呼。', ex: '<em>卿</em>今当涂掌事，不可不学！', src: '《孙权劝学》', tr: '你如今当权掌管事务，不可以不学习！' },
+  { w: '足下', p: 2, tag: '敬称', note: '"您"，多用于同辈、书信。', ex: '<em>足下</em>事皆成，有功。', src: '《陈涉世家》', tr: '你们的事都能成功，会建立功业。' },
+  { w: '之', p: 3, tag: '宾语', note: '"他 / 她 / 它 / 他们"，只能作宾语。', ex: '公与<em>之</em>乘，战于长勺。', src: '《曹刿论战》', tr: '鲁庄公和他（曹刿）同乘一辆战车，在长勺作战。' },
+  { w: '其', p: 3, tag: '定语', note: '多作"他的 / 他们的"。', ex: '吾视<em>其</em>辙乱，望<em>其</em>旗靡。', src: '《曹刿论战》', tr: '我看他们的车轮痕迹乱了，望见他们的旗子倒下了。' },
+  { w: '彼', p: 3, tag: '主语', note: '本义"那"，引申为"他 / 他们"，可作主语。', ex: '<em>彼</em>竭我盈，故克之。', src: '《曹刿论战》', tr: '他们的士气耗尽，我们的士气正旺盛，所以战胜了他们。' },
+  { w: '渠', p: 3, tag: '后起', note: '后来口语里的"他 / 它"。', ex: '问<em>渠</em>那得清如许？', src: '朱熹《观书有感》', tr: '问它（方塘）为什么这样清澈？' },
+  { w: '他', p: 0, tag: '陷阱', note: '先秦"他"＝"别的、其他的"，不是第三人称。', ex: '王顾左右而言<em>他</em>。', src: '《孟子·梁惠王下》', tr: '齐宣王左右张望，说起别的事来。' },
+];
+{
+  const root = document.getElementById('dict');
+  const tabs = root.querySelector('.tabs'), words = root.querySelector('.words'), det = root.querySelector('.detail');
+  const TABS = [['all', '全部'], [1, '我'], [2, '你'], [3, '他'], [0, '陷阱']];
+  const PN = { 1: '第一人称·我', 2: '第二人称·你', 3: '第三人称·他', 0: '不是人称代词' };
+  const INIT = { tab: 'all', sel: -1 };
+  let S = { ...INIT };
+  const draw = () => {
+    tabs.innerHTML = '';
+    TABS.forEach(([k, label]) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'tab' + (S.tab === k ? ' on' : ''); b.textContent = label;
+      b.onclick = () => { S.tab = k; draw(); };
+      tabs.append(b);
+    });
+    words.innerHTML = '';
+    WORDS.forEach((d, i) => {
+      if (S.tab !== 'all' && d.p !== S.tab) return;
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = `wbtn b${d.p}` + (S.sel === i ? ' on' : '');
+      b.innerHTML = `${d.w}<small>${d.tag}</small>`;
+      b.onclick = () => { S.sel = i; draw(); };
+      words.append(b);
+    });
+    if (S.sel < 0) { det.innerHTML = '<span class="muted">← 点上面任意一个字，这里显示它的意思和课文例句。</span>'; det.className = 'detail'; return; }
+    const d = WORDS[S.sel];
+    det.className = 'detail fadein';
+    det.innerHTML = `<div><span class="big ${d.p ? 'p' + d.p : ''}" ${d.p ? '' : 'style="color:var(--trap)"'}>${d.w}</span><span class="tag">${PN[d.p]}</span><span class="tag">${d.tag}</span></div>
+      <div>${d.note}</div>
+      <div class="ex ${d.p ? 'p' + d.p : ''}" ${d.p ? '' : 'style="color:var(--trap)"'}><span style="color:var(--ink)">${d.ex.replace(/<em>/g, `<em class="${d.p ? 'p' + d.p : ''}">`)}</span> <span class="muted">${d.src}</span></div>
+      <div class="tr">译：${d.tr}</div>`;
+  };
+  const reset = () => { S = { ...INIT }; draw(); };
+  resets.push(reset);
+  reset();
+}
+
+/* ---------- 分拣游戏 ---------- */
+{
+  const root = document.getElementById('game');
+  const pool = root.querySelector('.pool'), msg = root.querySelector('.gamemsg');
+  const ITEMS = [
+    ['余', 1, '余＝我，《湖心亭看雪》"余强饮三大白而别"。'], ['尔', 2, '尔＝你，"尔安敢轻吾射"。'], ['其', 3, '其＝他的/他们的，"吾视其辙乱"。'],
+    ['寡人', 1, '寡人是国君的谦称，指自己。'], ['足下', 2, '足下是敬称，相当于"您"。'], ['彼', 3, '彼＝他们，"彼竭我盈"。'],
+    ['予', 1, '予＝我，"予独爱莲"。'], ['若', 2, '若＝你，"若入前为寿"。'], ['之', 3, '之放在动词后当宾语，＝他/它。'],
+    ['愚', 1, '愚是谦称"我"，"愚以为"。'], ['乃', 2, '乃＝你的，"告乃翁"。'], ['渠', 3, '渠是后起口语"他/它"，"问渠那得清如许"。'],
+  ];
+  const INIT = () => ({ sel: -1, placed: {}, tries: 0 });
+  let S = INIT();
+  const draw = () => {
+    pool.innerHTML = '';
+    ITEMS.forEach(([w], i) => {
+      if (S.placed[i]) return;
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'pc' + (S.sel === i ? ' sel' : ''); b.textContent = w; b.dataset.i = i;
+      b.onclick = () => { S.sel = S.sel === i ? -1 : i; draw(); };
+      pool.append(b);
+    });
+    root.querySelectorAll('.bin').forEach(bin => {
+      const p = +bin.dataset.p, inn = bin.querySelector('.in');
+      inn.innerHTML = ITEMS.map(([w, q], i) => S.placed[i] && q === p ? `<span>${w}</span>` : '').join('');
+    });
+    const n = Object.keys(S.placed).length;
+    if (n === ITEMS.length) msg.innerHTML = `<b style="color:var(--ok)">全部放好！</b>共点了 ${S.tries} 次，${S.tries === ITEMS.length ? '一次没错，厉害！' : '错的那几个再回查词卡看看。'}`;
+    else if (!msg.dataset.keep) msg.textContent = n ? `已放好 ${n} / ${ITEMS.length}` : '先点一个字，再点抽屉。';
+    delete msg.dataset.keep;
+  };
+  root.querySelectorAll('.bin').forEach(bin => bin.onclick = () => {
+    if (S.sel < 0) { msg.textContent = '先在上面选一个字。'; return; }
+    const i = S.sel, [w, p, why] = ITEMS[i];
+    S.tries++;
+    if (+bin.dataset.p === p) {
+      S.placed[i] = true; S.sel = -1;
+      msg.innerHTML = `<span style="color:var(--ok)">✓ ${why}</span>`; msg.dataset.keep = 1;
+      draw();
+    } else {
+      msg.innerHTML = `<span style="color:var(--bad)">✗「${w}」不放这里。</span>提示：${p === 1 ? '它是说话人对自己的称呼。' : p === 2 ? '它是对听话人的称呼。' : '它指被谈论的第三方。'}`;
+      const el = pool.querySelector(`[data-i="${i}"]`);
+      if (el && !reduced) { el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); }
+    }
+  });
+  const reset = () => { S = INIT(); msg.textContent = ''; draw(); };
+  root.querySelector('[data-act="reset"]').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+/* ---------- 练习 ---------- */
+window.LQ_ITEMS = [
+  { type: '选择', q: '「<b>尔</b>安敢轻吾射」（《卖油翁》）中的「尔」指：', opts: ['我', '你', '他', '这样'], ans: 1,
+    why: '尔是第二人称"你"。陈尧咨对卖油翁说：你怎么敢轻视我的射箭本领！句中的"吾"才是"我"。' },
+  { type: '选择', q: '下列哪个字<b>不是</b>第一人称"我"？', opts: ['余', '予', '朕', '乃'], ans: 3,
+    why: '乃是第二人称，多作"你的"（家祭无忘告乃翁）。余、予是普通的"我"，朕是先秦通用、秦以后皇帝专用的"我"。' },
+  { type: '判断', q: '「王顾左右而言<b>他</b>」中的「他」指齐宣王身边的人。', opts: ['对', '错'], ans: 1,
+    why: '常见误区。先秦"他"不是第三人称，而是"别的"：齐宣王左右张望，说起别的事来（见动画第 9 步）。' },
+  { type: '选择', q: '下列称呼中，属于诸侯国君<b>自称</b>的是：', opts: ['足下', '寡人', '卿', '君'], ans: 1,
+    why: '寡人＝"少德之人"，是国君的谦称（寡人欲以五百里之地易安陵）。足下、君是称对方"您"，卿是君主称臣子"你"。' },
+  { type: '填空', q: '「家祭无忘告<b>乃翁</b>」（陆游《示儿》）中「乃翁」的意思是______。', ans: ['你的父亲', '你父亲', '你的爸爸', '你爸爸', '你爹', '你的父亲（我）', '你的父亲(我)'], placeholder: '如：××的××',
+    why: '乃＝你的，翁＝父亲。陆游嘱咐儿子：收复中原那天，家祭时别忘了告诉你的父亲——也就是陆游自己。' },
+  { type: '选择', q: '「彼竭<b>我</b>盈，故克之」中的「我」指：', opts: ['曹刿一个人', '鲁庄公一个人', '我们（鲁军）', '你们'], ans: 2,
+    why: '文言代词单复数常同形。这里"彼"是齐军（他们），"我"是鲁军（我们），"之"也是"他们"。' },
+  { type: '判断', q: '"之"作第三人称代词时，可以放在句首当主语，比如"之去矣"＝他走了。', opts: ['对', '错'], ans: 1,
+    why: '"之"作代词只当宾语（公与之乘、渔人甚异之）。要当主语，用"彼"或直接重复名词；"他的"则用"其"。' },
+  { type: '选择', q: '<b>迁移应用</b>：一位学生写信向老师请教，下面哪种说法最得体？', opts: ['汝可教我否？', '愚冒昧，敢问先生。', '寡人欲问尔。', '朕有一事问若。'], ans: 1,
+    why: '对尊长要"自谦+敬人"：自称用谦称"愚"，称对方用敬称"先生"。汝、尔、若语气直接甚至轻慢；寡人、朕是君王自称，学生不能用。' },
+];
+</script>
+<script>
+/* ---------- 练习题（learn 通用组件） ----------
+   题目来自 window.LQ_ITEMS：{type, q, opts, ans: 选项下标, why} 或填空题 {type, q, ans: [可接受答案…], why}
+   定义 window.resetPage()（导航条「重置」按钮调用）：先调用页面自己的 window.pageReset()，再清空练习 */
+(() => {
+  const box = document.getElementById('lq');
+  const items = window.LQ_ITEMS || [];
+  const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let answered = 0, right = 0;
+
+  function update() {
+    const all = answered === items.length;
+    score.textContent = `已答 ${answered} / ${items.length} · 答对 ${right}` +
+      (all ? (right === items.length ? ' · 全对！' : ' · 看看解析，再重做一次') : '');
+  }
+
+  function render() {
+    answered = 0; right = 0; list.innerHTML = '';
+    items.forEach((it, i) => {
+      const el = document.createElement('div');
+      el.className = 'lq-item';
+      el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
+      const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
+      const judge = (ok, answer) => {
+        answered++; if (ok) right++;
+        el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
+        why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
+        update();
+      };
+      if (it.opts) {
+        a.classList.add('lq-opts');
+        it.opts.forEach((o, j) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'lq-opt'; b.innerHTML = o;
+          b.onclick = () => {
+            a.querySelectorAll('button').forEach(x => x.disabled = true);
+            a.children[it.ans].classList.add('lq-right');
+            if (j !== it.ans) b.classList.add('lq-wrong');
+            judge(j === it.ans, it.opts[it.ans]);
+          };
+          a.append(b);
+        });
+      } else {
+        a.classList.add('lq-fill');
+        a.innerHTML = `<input type="text" autocomplete="off" spellcheck="false" placeholder="${it.placeholder || '输入答案'}" aria-label="第 ${i + 1} 题答案"><button type="button" class="lq-opt">确定</button>`;
+        const inp = a.querySelector('input'), go = a.querySelector('button');
+        const submit = () => {
+          if (!inp.value.trim()) { inp.focus(); return; }
+          inp.disabled = go.disabled = true;
+          const ok = it.ans.some(x => norm(x) === norm(inp.value));
+          inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
+          judge(ok, it.ans[0]);
+        };
+        go.onclick = submit;
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      }
+      list.append(el);
+    });
+    update();
+  }
+
+  box.querySelector('.lq-redo').addEventListener('click', render);
+  // 导航条的「重置」按钮调用它：页面各模块 + 练习题一起恢复初始状态
+  window.resetPage = () => {
+    if (typeof window.pageReset === 'function') window.pageReset();
+    render();
+  };
+  render();
+})();
+</script>
+</body>
+</html>
