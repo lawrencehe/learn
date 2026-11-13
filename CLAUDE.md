@@ -26,7 +26,7 @@
 2. **新类目**（用户同意新增后才做）：创建目录，在 `scripts/build.mjs` 的 `CATEGORIES` 里加一项（id、中文名、图标字符、简介），在 `scripts/shell.mjs` 的 `ACCENTS` 里配主色，并同步更新本文件和 `.claude/rules/learn-html.md` 里的类目表。
 3. **构建**：`npm run build`。它会把统一导航条同步进各页面源文件（`↻ 已同步导航条` 提示属正常，修改时间保持不变）。确认输出里各类目篇数符合预期，并处理 `⚠` 警告。
 4. **部署**：`npm run deploy`，直接执行，不用确认。
-5. **线上验证**：`curl -s -o /dev/null -w "%{http_code}" https://up.yiwei.website/<类目>/<文件名>` 返回 200，且首页能搜到这一篇。改名或删除时，旧地址会变成 404，要告诉用户。
+5. **线上验证**：站点有登录门禁，未登录访问一律 303 跳到 `/login`。用 `curl -s -o /dev/null -w "%{http_code}" https://up.yiwei.website/<类目>/<文件名>` 返回 303 只说明部署在线；页面本身是否存在，以 `dist/<类目>/<文件名>.html` 已生成、构建输出篇数正确为准。改名或删除时，旧地址会变成 404（登录后可见），要告诉用户。
 6. **留档**：`git add -A && git commit -m "<类目>: <主题>" && git push`（远程仓库 `git@github.com:lawrencehe/learn.git`，所有项目资料——html、CLAUDE.md、skills、rules、docs、脚本等——都推送到这里）。
 7. **交付**：给出线上链接 `https://up.yiwei.website/<类目>/<文件名>`（不带 `.html`）和本地链接 `file:///home/opc/learn/<类目>/<文件名>.html`。
 
@@ -53,7 +53,7 @@
 
 ## 其他
 
-- 线上站点：https://up.yiwei.website（Cloudflare Workers 静态资源，完全公开，无需登录）。其他 wrangler 命令用 `npm run cf -- <命令>`，例如回滚用 `npm run cf -- rollback`。
+- 线上站点：https://up.yiwei.website（Cloudflare Workers 静态资源 + 登录门禁）。`worker/index.js` 先拦截所有请求：账号密码是 Cloudflare secret `AUTH_USER` / `AUTH_PASS`（用 `npm run cf -- secret put <名字>` 设置，切勿读取或输出），登录后发签名 Cookie，15 天有效，`/logout` 退出；改密码会让所有已登录设备失效。其他 wrangler 命令用 `npm run cf -- <命令>`，例如回滚用 `npm run cf -- rollback`。
 - 部署凭据 `CLOUDFLARE_API_TOKEN`、`CLOUDFLARE_ACCOUNT_ID` 放在 `~/.config/cloudflare/up-learn.env`，由 `scripts/cf.sh` 读取，切勿读取或输出其内容。
 - 只有各类目目录里的 `.html` 会被发布（见 `scripts/build.mjs`），网站首页（学科分类 + 搜索 + 最近更新）和各类目目录页都由该脚本自动生成，不要手写；新增类目时同步修改脚本里的 `CATEGORIES`，并在 `scripts/shell.mjs` 的 `ACCENTS` 里给它配一个主色（浅色、深色各一组）。
 - 全站外壳（导航条、`--up-*` 设计变量、类目主色）只在 `scripts/shell.mjs` 一处定义，想改导航条样式就改这里，重新 build + deploy 后全站生效。不引入前端框架。网站 logo（`site/favicon.svg`、`site/apple-touch-icon.png`）和 `site/` 下其他文件原样发布到网站根目录。

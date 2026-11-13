@@ -167,7 +167,7 @@ ${ICONS}
 <body>
 <main>
 ${body}
-<footer>${SITE} · 一个知识点一个页面，用动画讲明白</footer>
+<footer>${SITE} · 一个知识点一个页面，用动画讲明白 · <a href="/logout" style="text-decoration:underline">退出登录</a></footer>
 </main>
 ${script}
 </body>
