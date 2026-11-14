@@ -122,32 +122,41 @@ ul.tight li{margin:4px 0}
   .cell{transition:none}
 }
 
-:root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:var(--ok);--lq-bad:var(--bad)}
-/* ---------- 练习题（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
-.lq{display:grid;gap:12px;margin-bottom:56px}
-.lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
-.lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
-.lq-sub{margin:0;color:var(--lq-muted);font-size:14px}
-.lq-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--lq-muted);font-variant-numeric:tabular-nums}
-.lq-list{display:grid;gap:10px}
-.lq-item{background:var(--lq-surface);border:1.5px solid var(--lq-line);border-radius:10px;padding:12px 16px;display:grid;gap:10px;min-width:0;color:var(--lq-ink);text-align:left}
-.lq-item.lq-is-ok{border-color:var(--lq-ok)}
-.lq-item.lq-is-bad{border-color:var(--lq-bad)}
-.lq-q{font-size:15px;font-weight:600;line-height:1.6}
-.lq-tag{display:inline-block;font-size:11px;font-weight:500;line-height:1.6;color:var(--lq-muted);border:1px solid var(--lq-line);border-radius:999px;padding:0 8px;margin-right:8px;vertical-align:1px}
-.lq-opts,.lq-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.lq .lq-opt,.lq .lq-redo{font:inherit;font-size:14px;line-height:1.4;padding:6px 14px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);cursor:pointer;text-align:left;opacity:1}
-.lq .lq-opt:hover:not(:disabled),.lq .lq-redo:hover{border-color:var(--lq-accent)}
-.lq .lq-opt:disabled{cursor:default;opacity:1}
-.lq .lq-opt.lq-right{border-color:var(--lq-ok);color:var(--lq-ok);font-weight:700}
-.lq .lq-opt.lq-wrong{border-color:var(--lq-bad);color:var(--lq-bad);text-decoration:line-through}
-.lq-fill input{font:inherit;font-size:14px;padding:6px 10px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);width:min(100%,260px)}
-.lq-fill input.lq-right{border-color:var(--lq-ok)}
-.lq-fill input.lq-wrong{border-color:var(--lq-bad)}
-.lq-why{font-size:14px;line-height:1.65;color:var(--lq-muted)}
-.lq-why:empty{display:none}
-.lq-why .lq-ok{color:var(--lq-ok)}
-.lq-why .lq-bad{color:var(--lq-bad)}
+/* ---- 题库 ---- */
+.bank-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+.bank-score{font-family:var(--up-mono);font-size:13px;color:var(--muted)}
+#bankTabs{position:sticky;top:52px;z-index:2;background:var(--bg);padding:8px 0}
+#bankTabs .btn small{display:block;font-family:var(--up-mono);font-size:11px;color:var(--muted);font-weight:400}
+.bq-h{margin:20px 0 8px;padding-left:10px;border-left:4px solid var(--accent)}
+.bq-list{display:grid;gap:10px}
+.bq{background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;gap:8px;min-width:0}
+.bq.ok{border-color:var(--ok)} .bq.bad{border-color:var(--bad)}
+.bq-q{font-size:15px;line-height:1.9}
+.bq-n{color:var(--muted);font-family:var(--up-mono);font-size:13px}
+.bq-a{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.bq-a > .bq-q{flex-basis:100%}
+.bq-btn,.bq-tok{font:inherit;font-size:14px;line-height:1.4;padding:5px 12px;border-radius:8px;border:1.5px solid var(--line);background:transparent;color:var(--ink);cursor:pointer;text-align:left}
+.bq-tok{font-family:var(--up-mono);padding:4px 8px}
+.bq-btn:hover:not(:disabled),.bq-tok:hover:not(:disabled){border-color:var(--accent)}
+.bq-btn:disabled,.bq-tok:disabled{cursor:default}
+.bq-btn.right,.bq-tok.right{border-color:var(--ok);color:var(--ok);font-weight:700}
+.bq-btn.wrong,.bq-tok.wrong{border-color:var(--bad);color:var(--bad);text-decoration:line-through}
+.bq-in{font:inherit;font-family:var(--up-mono);font-size:14px;padding:2px 8px;margin:0 2px;border-radius:6px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);width:8.5em;max-width:100%}
+.bq-in.wide{width:100%}
+.bq-in.right{border-color:var(--ok)} .bq-in.wrong{border-color:var(--bad)}
+.bq-row{display:grid;gap:2px;flex-basis:100%;font-size:13.5px;color:var(--muted)}
+.bq-wd{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px 12px;flex-basis:100%}
+.bq-wd label{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-family:var(--up-mono);font-size:14px}
+.bq-wd label span{min-width:4.5em}
+.bq-wd .bq-in{width:7em}
+.bq-wd em{font-style:normal;color:var(--ok);font-size:13px}
+.bq-why{font-size:14px;line-height:1.7;color:var(--muted)}
+.bq-why:empty{display:none}
+.bq-why .g{color:var(--ok)} .bq-why .r{color:var(--bad)}
+.bq-why .alt{font-size:13px}
+.bq-why .bq-btn{font-size:12.5px;padding:2px 8px;margin-top:4px}
+.sign-add{color:var(--accent)}
+.sign-warn{font-size:13.5px;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -313,11 +322,13 @@ document.getElementById('up-reset').addEventListener('click', function () {
   <b>一句话总结：</b>先定<b>时间</b>（过去 / 现在 / 将来），再定<b>样子</b>（一般 / 进行 be + doing / 完成 have + done），最后找<b>助动词</b>变否定和疑问；从句里「主将从现」。
 </section>
 
-<section class="lq" id="lq" aria-label="练习">
-  <div class="lq-head"><h2>练习：讲义真题训练</h2><span class="lq-score"></span></div>
-  <p class="lq-sub">题目选自兰生中学《初中英语八大时态总结练习》（含讲义里的中考真题），按时态顺序排列，最后几题综合。讲义没有附答案，以下答案与解析为本页整理。填空题多个空用空格隔开。</p>
-  <div class="lq-list"></div>
-  <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+<section id="bank" aria-label="练习">
+  <div class="bank-head"><h2>练习：讲义全部题目</h2><span class="bank-score" id="bankScore"></span></div>
+  <p class="sub">兰生中学《初中英语八大时态总结练习》里的题目全部收在这里，按时态分页，顺序与讲义一致（讲义重复的题也保留了）。讲义没有附答案，答案与解析为本页整理；讲义中有印刷错误或划线丢失的地方，题目里都注明了。<br>
+  题型：选择题点选；填空题在横线处输入，多个空分别填；改错题点出错误的词；句型转换整句输入（缩写和全写都算对，写法不同但正确可点「算对」）；单词变形表填完点「检查全部」。</p>
+  <div class="chips" id="bankTabs"></div>
+  <div id="bankBody"></div>
+  <div class="ctrl"><button type="button" class="btn" id="bankRedoTab">↻ 重做本时态</button><button type="button" class="btn" id="bankRedoAll">↻ 全部重做</button></div>
 </section>
 
 </main>
@@ -331,28 +342,28 @@ const $ = id => document.getElementById(id);
 const COLS = ['past', 'now', 'fut'], COLN = ['过去', '现在', '将来'], ROWN = ['一般', '进行', '完成'];
 const T = [
   { id: 'sp', name: '一般现在时', c: 1, r: 0, f: 'do / does', fl: 'am / is / are；主语 + do / does',
-    use: '经常、习惯的动作；现在的状态、性格、能力；客观真理。', sign: 'always, usually, often, sometimes, never, every day, on Sundays, once a week',
+    use: '经常、习惯的动作；现在的状态、性格、能力；客观真理。', sign: 'always, usually, often, sometimes, never, on Sundays, every day / week / month / year, once a week', add: 'seldom, hardly ever, twice a week, every morning, at weekends', warn: '讲客观真理、性格能力时往往没有标志词，要看意思（The earth goes around the sun.）。',
     ex: 'She often <b class="v">goes</b> to school on foot.', ex2: 'The earth <b class="v">goes</b> around the sun.', tip: '主语是三单（he / she / it / 单个人或物）时动词加 -s / -es。' },
   { id: 'spa', name: '一般过去时', c: 0, r: 0, f: 'did', fl: 'was / were；主语 + 动词过去式',
-    use: '过去某时发生的动作或状态；过去经常发生的动作。', sign: 'yesterday, last week, ... ago, just now, in 2010, the day before yesterday',
+    use: '过去某时发生的动作或状态；过去经常发生的动作。', sign: 'yesterday, the day before yesterday, last night / week / month / year, two days ago, just now, in the past, at that time', add: 'then, the other day, in 2010, when I was young, this morning（上午已过去）, a moment ago', warn: 'in the past 单独用是过去时；in the past few years 是现在完成时。',
     ex: 'I <b class="v">got</b> up at seven yesterday.', ex2: 'He always <b class="v">went</b> to school by car last term.', tip: '过去式不分人称（be 除外：was / were）。' },
   { id: 'sf', name: '一般将来时', c: 2, r: 0, f: 'will do / be going to do', fl: '主语 + will / shall + 动词原形；am / is / are going to + 原形',
-    use: '将要发生的动作或状态。be going to 偏「计划、打算、有迹象」。', sign: 'tomorrow, soon, next week, in a few days, the day after tomorrow, in the future',
+    use: '将要发生的动作或状态。be going to 偏「计划、打算、有迹象」。', sign: 'tomorrow, tomorrow morning, the day after tomorrow, soon, next week / month / year, in a few days, in the future, this afternoon, one hour later', add: 'tonight, this evening, in + 时段（in three days）, someday, from now on', warn: 'in + 时段 表示「多久以后」用将来时；... later 更常用在过去叙述里，讲将来时 in an hour 更地道。',
     ex: 'Mother <b class="v">will give</b> me a present on my next birthday.', ex2: 'Look at the clouds! It <b class="v">is going to rain</b>.', tip: '还有：现在进行时表计划（I am leaving tomorrow.）、be about to do（马上就要）。' },
   { id: 'pp', name: '现在进行时', c: 1, r: 1, f: 'am / is / are doing', fl: '主语 + am / is / are + doing',
-    use: '说话这一刻正在进行；这段时间里正在做的事。', sign: 'now, Look! Listen! at the moment, right now, these days, this week',
+    use: '说话这一刻正在进行；这段时间里正在做的事。', sign: 'now, right now, Look! Listen! at the moment, these days / weeks, this week / month, at present, today, this evening, while', add: "It's ... o'clock now. Be quiet! / Don't ...（提示正在发生）", warn: '讲义写的 at the present 应为 at present；know、like、want 等状态动词就算有 now 也不用进行时。',
     ex: `Don't sing. The baby <b class="v">is sleeping</b>.`, ex2: 'I <b class="v">am working</b> on the farm this week.', tip: '这一刻「正在」＝录像镜头对准现在。' },
   { id: 'pap', name: '过去进行时', c: 0, r: 1, f: 'was / were doing', fl: '主语 + was / were + doing',
-    use: '过去某一时刻 / 某一段时间正在进行的动作。', sign: 'at this time yesterday, at 8 last night, from 3 to 4 yesterday, when / while ...',
+    use: '过去某一时刻 / 某一段时间正在进行的动作。', sign: 'at that time, last night / Saturday / evening（配具体时刻）, the whole morning, all day, from nine to ten, when, while, just now, a moment ago', add: 'at this time yesterday, this time yesterday, at that moment, at + 时刻 + 过去时间（at 8 last night）', warn: 'yesterday、last night、just now 单独出现通常用一般过去时；配上具体时刻 / 时段或 when / while 背景才用过去进行时。',
     ex: 'He fell asleep when he <b class="v">was reading</b>.', ex2: 'While my mother <b class="v">was cooking</b>, my father <b class="v">was watching</b> TV.', tip: 'know、like、want、have（拥有）等状态动词不用进行时。' },
   { id: 'fp', name: '将来进行时', c: 2, r: 1, f: 'will be doing', fl: '主语 + will / shall + be + doing',
-    use: '将来某一时刻正在进行的动作；按计划要发生的事（语气委婉）。', sign: 'at this time tomorrow, at 9 tonight, this time next week',
+    use: '将来某一时刻正在进行的动作；按计划要发生的事（语气委婉）。', sign: 'by this time, tomorrow evening, this evening, on Sunday, soon, in two days', add: 'at this time tomorrow, this time next week, at + 时刻 + tomorrow / tonight（at 9 tonight）', warn: '讲义列的 soon、in two days、on Sunday 也是一般将来时的标志，只有表示「将来那一刻正在做」才用将来进行时。',
     ex: 'At this time tomorrow I <b class="v">will be flying</b> to Shanghai.', ex2: 'When <b class="v">will</b> you <b class="v">be visiting</b> us again?', tip: '把过去进行时的 was / were 换成 will be 就是它。' },
   { id: 'pf', name: '现在完成时', c: 1, r: 2, f: 'have / has done', fl: '主语 + have / has + 过去分词',
-    use: '过去的动作对现在造成的影响或结果；从过去一直持续到现在。', sign: 'already, yet, just, ever, never, before, so far, recently, for + 时段, since + 时间点',
+    use: '过去的动作对现在造成的影响或结果；从过去一直持续到现在。', sign: 'already, yet, just, before, recently, lately, still, never, ever, twice, on several occasions, in the past few days / years, these few years, this morning / week / year, so far, up to now, till now, up to the present, since + 时间', add: 'for + 时段, since + 时段 + ago, since + 一般过去时从句, It is / has been + 时段 + since ..., three times', warn: 'just now 是一般过去时；this morning 只有在上午还没过去时才配现在完成时。',
     ex: 'My father <b class="v">has gone</b> to work.', ex2: 'I <b class="v">have lived</b> here since 1998.', tip: '不能和 yesterday、ago、just now、last week 等「过去时间点」连用。' },
   { id: 'paf', name: '过去完成时', c: 0, r: 2, f: 'had done', fl: '主语 + had + 过去分词',
-    use: '在过去某时刻 / 某动作之前已经完成的动作——「过去的过去」。', sign: 'by + 过去时间（by the end of last term）, before / when / after + 过去时从句',
+    use: '在过去某时刻 / 某动作之前已经完成的动作——「过去的过去」。', sign: 'by, before, when', add: 'by + 过去时间（by the end of last term）, by the time + 过去时从句, after / as soon as + 过去时从句, until, 主句是 said / told / thought 的宾语从句', warn: '过去完成时必须有「过去参照点」。没有参照点时用现在完成时（I have been to Shanghai before.）。',
     ex: 'By nine last night, we <b class="v">had got</b> 200 pictures.', ex2: 'When I arrived at the station, the train <b class="v">had left</b>.', tip: '必须有一个「过去的参照点」，它本身用一般过去时。' },
 ];
 const colVar = t => `var(--${COLS[t.c]})`;
@@ -411,7 +422,7 @@ const colVar = t => `var(--${COLS[t.c]})`;
     info.innerHTML = `<h3 style="color:${colVar(t)}">${t.name} = ${COLN[t.c]} × ${ROWN[t.r]}</h3>
       <div class="row"><span class="k">结构</span><span><span class="formula">${t.fl}</span></span></div>
       <div class="row"><span class="k">用法</span><span>${t.use}</span></div>
-      <div class="row"><span class="k">标志词</span><span class="en">${t.sign}</span></div>
+      <div class="row"><span class="k">标志词</span><span><span class="en">${t.sign}</span><br><span class="sign-add">＋补充：<span class="en">${t.add}</span></span><br><span class="sign-warn">⚠ ${t.warn}</span></span></div>
       <div class="row"><span class="k">例句</span><span class="en">${t.ex}<br>${t.ex2}</span></div>
       <div class="row"><span class="k">提醒</span><span>${t.tip}</span></div>`;
     no.textContent = `${S.i + 1} / ${T.length}`;
@@ -624,6 +635,13 @@ const colVar = t => `var(--${COLS[t.c]})`;
     ['at the moment', 'pp', '此刻，现在进行时。'],
     ['from 3 to 4 yesterday afternoon', 'pap', '过去的一段具体时间里在做，过去进行时。'],
     ['by the time he arrived', 'paf', '他到的时候（过去）之前已经…，过去完成时。'],
+    ['in the past few years', 'pf', '在过去几年里（一直到现在），现在完成时。注意和 in the past 区分。'],
+    ['at present', 'pp', '目前、现在，现在进行时（讲义写成 at the present）。'],
+    ['in three days', 'sf', 'in + 时段 = 多久以后，一般将来时。'],
+    ['the other day', 'spa', '前几天，一般过去时。'],
+    ['lately / recently', 'pf', '最近（一段时间以来），现在完成时。'],
+    ['this time next week', 'fp', '下周这个时候正在做，将来进行时。'],
+    ['once a week', 'sp', '频率词，一般现在时。'],
   ];
   const INIT = { i: 0, picked: null, right: 0 };
   let S = { ...INIT };
@@ -657,161 +675,548 @@ const colVar = t => `var(--${COLS[t.c]})`;
 
 /* ================= 总表（静态） ================= */
 $('sum').innerHTML = T.map(t => `<div class="card" style="--c:${colVar(t)}"><h3 style="color:${colVar(t)}">${t.name}</h3>
-  <p><span class="formula">${t.fl}</span></p><p class="en" style="color:var(--muted)">${t.sign}</p><p class="en">${t.ex}</p></div>`).join('');
+  <p><span class="formula">${t.fl}</span></p><p class="en" style="color:var(--muted)">${t.sign}</p><p class="en sign-add">＋ ${t.add}</p><p class="en">${t.ex}</p></div>`).join('');
 
-/* ================= 练习题 ================= */
-const F = (...w) => { const out = []; [' ', ', ', '，', ' / ', '/'].forEach(s => out.push(w.join(s))); return out; };
-window.LQ_ITEMS = [
-  // 一般现在时
-  { type: '选择 · 一般现在', q: 'Uncle Wang never ___ English, because he ___ know how to say it.', opts: [`speak, doesn't`, `speak, don't`, `speaks, don't`, `speaks, doesn't`], ans: 3,
-    why: '主语 Uncle Wang 是三单：肯定句动词加 -s（speaks）；否定句请出 doesn\'t（不是 don\'t）。never 本身就是否定，不再加 doesn\'t。' },
-  { type: '中考真题', q: 'Jenny! Do you know that one-third of the boys in our class ___ the singer Zhang Shaohan?', opts: ['like', 'likes', 'liking'], ans: 0,
-    why: '「分数 + of + 名词」，谓语看 of 后面的名词：the boys 是复数 → like。不要被 one-third 骗成单数。' },
-  { type: '判断 · 常见误区', q: '"Does he likes going fishing?" 这句话是对的。', opts: ['对', '错'], ans: 1,
-    why: 'Does 已经背走了三单的 -s，后面动词要用原形：Does he like going fishing?（见句式变换机·一般现在时第 3 步）' },
-  { type: '填空 · 一般现在', q: 'What ___ he usually ___ (do) after school?（两个空）', ans: F('does', 'do'), placeholder: '例如 is doing',
-    why: 'usually → 一般现在时；主语 he 三单，疑问句用 does，后面动词用原形 do。' },
-  { type: '中考真题', q: 'Now my father ___ his bike to work every day instead of driving.', opts: ['ride', 'rode', 'rides', 'will ride'], ans: 2,
-    why: 'every day → 习惯动作，一般现在时；my father 三单 → rides。' },
-  // 一般过去时
-  { type: '选择 · 一般过去', q: '— ___ he ___ a good rest? — No, he didn\'t.', opts: ['Do, had', 'Did, have', 'Did, had', 'Was, had'], ans: 1,
-    why: '答语 didn\'t → 一般过去时，用 Did 提问；Did 已经表示「过去」，后面动词用原形 have。C 犯了「双重变形」错误。' },
-  { type: '选择 · 一般过去', q: 'What did you see ___?', opts: ['now', 'every day', 'these days', 'just now'], ans: 3,
-    why: 'did 是过去时，要配过去时间：just now（刚才）。now / every day / these days 都不是过去时间。' },
-  { type: '选择 · 一般过去', q: '— When did May come back from Hong Kong? — She ___ from Hong Kong last Friday.', opts: ['come back', 'comes back', 'returned back', 'came back'], ans: 3,
-    why: 'last Friday → 一般过去时，come 的过去式是 came。C 错在 return 本身就是「回来」，再加 back 重复了。' },
-  { type: '改错 · 一般过去', q: '改错：He often goes home at 6:00 last month. 应把 goes 改成？', ans: ['went'], placeholder: '填一个词',
-    why: 'last month 是过去时间，often 只说明「经常」，过去经常做的事也用一般过去时：went。' },
-  // 一般将来时
-  { type: '选择 · 一般将来', q: 'There ___ a meeting tomorrow afternoon.', opts: ['will be going to', 'will going to be', 'is going to be', 'will go to be'], ans: 2,
-    why: 'there be 的将来时：There is going to be / There will be。A 把 will 和 be going to 叠用；B、D 结构不存在。' },
-  { type: '选择 · 一般将来', q: 'He ___ very busy this week, he ___ free next week.', opts: ['is, will', 'will, is', 'is, will be', 'is, is'], ans: 2,
-    why: 'this week → 现在的状态 is；next week → 将来 will be。A 的 will 后面缺了 be 动词原形。' },
-  { type: '选择 · 一般将来', q: 'I ___ for Tibet next Wednesday.', opts: ['am leaving', 'will leaving', 'leaves', 'is going to leaving'], ans: 0,
-    why: 'leave、go、come、arrive、start 等表「位移」的动词，可以用现在进行时表示按计划将要发生的事。B、D 结构错（will / to 后要原形），C 人称错。' },
-  { type: '判断 · 常见误区', q: '"Are you going to swim? — Yes, I will." 答语是对的。', opts: ['对', '错'], ans: 1,
-    why: '问句用的是 be going to，开关是 are，回答也要用 be：Yes, I am.' },
-  { type: '填空 · 主将从现', q: 'Mike ___ (not believe) this until he ___ (see) it with his own eyes.（两个空，第一个空写缩写或两个词都行）', ans: [...F(`won't believe`, 'sees'), ...F('will not believe', 'sees')], placeholder: '先填主句，再填从句',
-    why: '主句是将来 → won\'t believe；until 引导的时间状语从句「主将从现」，用一般现在时 sees（Mike 三单）。' },
-  // 现在进行时
-  { type: '选择 · 现在进行', q: 'We ___ any Chinese classes on Friday.', opts: [`are having`, `aren't having`, `don't have`, 'are have'], ans: 2,
-    why: '陷阱：on Friday 指「每个星期五」的课表安排，是经常性的，用一般现在时否定 don\'t have，不是进行时。' },
-  { type: '填空 · 现在进行', q: `Don't sing. The baby ___ (sleep).（两个词）`, ans: ['is sleeping', "'s sleeping"], placeholder: '例如 is doing',
-    why: '「别唱了」说明宝宝此刻正在睡，现在进行时 is sleeping。' },
-  { type: '填空 · 动词变形', q: 'lie（躺；说谎）的 -ing 形式是？', ans: ['lying'], placeholder: '一个单词',
-    why: '以 ie 结尾的动词，变 ie 为 y 再加 -ing：lie → lying，die → dying，tie → tying（可在动词变形器里试试）。' },
-  // 过去进行时
-  { type: '选择 · 过去进行', q: 'What ___ from three to four yesterday afternoon?', opts: ['have you done', 'had you done', 'did you do', 'were you doing'], ans: 3,
-    why: 'from three to four yesterday afternoon 是过去一段具体时间，问「那时在做什么」用过去进行时。' },
-  { type: '选择 · 过去进行', q: `— I called you yesterday evening, but there was no answer. — Oh, I'm sorry. I ___ dinner at my friend's home.`, opts: ['have', 'had', 'was having', 'have had'], ans: 2,
-    why: '解释「你打电话那一刻我正在干什么」，过去某一时刻正在进行 → was having。' },
-  { type: '选择 · 过去进行', q: 'My mother ___ while my father ___ TV.', opts: ['cooked; was watching', 'was cooking; was watching', 'was cooked; watched', 'cooked; watched'], ans: 1,
-    why: 'while 连接两个同时持续的动作，两边都用过去进行时（见易混辨析「when / while」）。' },
-  { type: '选择 · 过去进行', q: 'Was it raining hard when you ___ this morning?', opts: ['left', 'leaves', 'was leaving', 'would leave'], ans: 0,
-    why: '「下雨」是背景（过去进行），「离开」是一下子的短动作，用一般过去时 left。' },
-  // 将来进行时
-  { type: '选择 · 将来进行', q: 'I feel so excited! At this time tomorrow morning I ___ to Shanghai.', opts: ['will be flying', 'will fly', 'have been flying', 'have flown'], ans: 0,
-    why: 'at this time tomorrow → 将来某一时刻正在进行，将来进行时 will be flying。' },
-  { type: '选择 · 将来进行', q: `Don't phone Tom at two o'clock this afternoon, when he ___ a meeting.`, opts: ['will attend', 'attends', 'is to attend', 'will be attending'], ans: 3,
-    why: '「下午两点那一刻他正在开会」，将来某一时刻正在进行 → will be attending。（讲义原题选项有排版错误，这里整理了选项。）' },
-  // 现在完成时
-  { type: '选择 · 现在完成', q: 'Jane has ___ to Beijing. She will come back tomorrow.', opts: ['been', 'gone', 'went', 'never been'], ans: 1,
-    why: '明天才回来 → 人现在不在这里，has gone to（去了未回）。has been to 是「去过已回」。' },
-  { type: '选择 · 现在完成', q: 'It is ten years ___ I last saw her.', opts: ['after', 'since', 'for', 'that'], ans: 1,
-    why: '固定句型 It is / has been + 时段 + since + 一般过去时从句：自从上次见她已经十年了。' },
-  { type: '选择 · 现在完成', q: '— Do you know Lydia very well? — Yes, she and I ___ friends since we were very young.', opts: ['have made', 'have become', 'have been', 'have turned'], ans: 2,
-    why: 'since 表示持续，要用延续性的状态 be friends；make / become friends 是一下子的动作，不能配 since。' },
-  { type: '选择 · 现在完成', q: 'The Smiths ___ in China for 8 years.', opts: ['has lived', 'lived', 'have been', 'live'], ans: 2,
-    why: 'The Smiths = 史密斯一家，复数 → have；for 8 years 持续到现在 → have been（in China）。A 错在 has，B、D 时态不对。' },
-  { type: '选择 · 现在完成', q: '— ___ you ever ___ to the US? — Yes, twice.', opts: ['Have, gone', 'Have, been', 'Do, go', 'Were, going'], ans: 1,
-    why: 'ever + twice 是在问经历 → have been to（去过）。' },
-  { type: '填空 · 常见误区', q: 'The old man ___ last year. He has ___ for a year. (die)（两个空，第二空写两个词）', ans: F('died', 'been dead'), placeholder: '例如 did been done',
-    why: 'last year → died；for a year 要持续，die 是短暂动词，换成状态 be dead：has been dead。' },
-  { type: '填空 · 现在完成', q: 'Half an hour ___ (pass) since the train ___ (leave).（两个空，第一空两个词）', ans: [...F('has passed', 'left'), ...F(`'s passed`, 'left')], placeholder: '先主句后从句',
-    why: 'since 从句用一般过去时 left；主句到现在为止 → 现在完成时 has passed。' },
-  // 过去完成时
-  { type: '填空 · 过去完成', q: 'When I ___ (arrive) at the station, he ___ (leave).（两个空，第二空两个词）', ans: F('arrived', 'had left'), placeholder: '先从句后主句',
-    why: '「我到」是过去参照点 → arrived；「他走」发生在我到之前 → 过去的过去，had left。' },
-  { type: '填空 · 过去完成', q: 'We ___ (learn) about 4000 English words by the end of last term.（两个词）', ans: ['had learned', 'had learnt'], placeholder: '两个词',
-    why: 'by + 过去时间（by the end of last term）→ 到那时已经完成，过去完成时。' },
-  { type: '填空 · 过去完成', q: 'She told me she ___ (be) to Sanya three times.（两个词）', ans: ['had been'], placeholder: '两个词',
-    why: '主句 told 是过去，「去过三次」发生在告诉我之前 → had been。（对比：直接说就是 She has been to Sanya three times.）' },
-  // 综合迁移
-  { type: '迁移应用', q: '你周日下午三点给同学打电话他没接。第二天他解释：「我那时正在上钢琴课。」最地道的说法是：', opts: ['I had a piano lesson at three.', 'I was having a piano lesson at that time.', 'I have had a piano lesson.', 'I am having a piano lesson.'], ans: 1,
-    why: '解释「过去那一刻在干什么」→ 过去进行时，和讲义「I was having dinner at my friend\'s home」是同一个用法。' },
-  { type: '迁移应用', q: 'Look at the dark clouds! It ___.', opts: ['rains', 'rained', 'is going to rain', 'has rained'], ans: 2,
-    why: '眼前有迹象（乌云）预测马上要发生 → be going to。见易混辨析「will vs be going to」。' },
+/* ================= 讲义全部题目（题库） ================= */
+// 题型构造器：C 选择 / J 判断正误 / F 填空（___ 为空，答案按空给，| 分隔可接受写法）/ S 点出错词（改错）/ TF 句型转换 / WD 单词变形表
+const C = (q, o, a, w) => ({ k: 'c', q, o, a, w });
+const J = (q, a, w) => ({ k: 'c', q: `判断正误：${q}`, o: ['正确', '错误'], a: a ? 0 : 1, w });
+const F = (q, a, w) => ({ k: 'f', q, a, w });
+const S = (q, bad, fix, w) => ({ k: 's', q, bad, fix, w });
+const TF = (q, tasks, w) => ({ k: 'tf', q, tasks, w });
+const WD = (list, w) => ({ k: 'wd', q: '在每个词后面写出它的变形，填完点「检查全部」。', list: list.split(',').map(x => x.trim().split(/\s*=\s*/)), w });
+const NO_LINE = '（讲义此处的划线没有印出来，本页指定提问对象）';
+
+const BANK = [
+{ t: 'sp', groups: [
+  { h: '小试牛刀：写出动词的第三人称单数', items: [
+    WD('wash = washes, match = matches, study = studies, finish = finishes, go = goes, snow = snows, carry = carries, stop = stops, see = sees, drive = drives, let = lets, teach = teaches, keep = keeps, join = joins, put = puts, do = does, drink = drinks, toy = toys, play = plays, begin = begins, take = takes, run = runs, fly = flies, talk = talks, stay = stays, look = looks, watch = watches, think = thinks, carry = carries, fix = fixes',
+      's / x / sh / ch / o 结尾加 -es（washes, matches, goes, does, fixes）；辅音 + y 变 ies（studies, carries, flies）；元音 + y 直接加 s（toys, plays, stays）；其余直接加 -s。讲义里 carry 出现了两次。'),
+  ] },
+  { h: '单项选择', items: [
+    C('There ___ an English film at the cinema now.', ['is', 'are', 'am', 'be'], 0, 'there be 看后面的名词：an English film 是单数 → is。'),
+    C('The picture ___ nice.', ['look', 'looks', 'looked', 'be look'], 1, 'look 在这里是系动词「看起来」，主语 the picture 是三单 → looks。'),
+    C('He sits down and soon ___ asleep.', ['fall', 'falling', 'falled', 'falls'], 3, 'and 连接两个并列谓语，前面 sits 是一般现在时三单，后面也要 falls。'),
+    C('The water ___ sweet.', ['drinking', 'drinks', 'drink', 'to drink'], 1, 'drink 在这里作系动词「喝起来」，主语 the water 不可数、按三单 → drinks。'),
+    C('I ___ up at six but Mike ___ up at seven.', ['get, gets', 'get, get', 'gets, get', 'getting, to get'], 0, 'I 后用原形 get；Mike 三单 → gets。'),
+    C('My father ___ for eight hours every day.', ['working', 'works', 'work', 'to work'], 1, 'every day → 一般现在时；my father 三单 → works。'),
+    C(`Uncle Wang never ___ English, because he ___ know how to say it.`, [`speak, doesn't`, `speak, don't`, `speaks, don't`, `speaks, doesn't`], 3, 'never 本身表否定，动词照常变三单 speaks；后句三单否定用 doesn\'t。'),
+    C('On Sunday my daughter ___ watching TV and my son ___ to play football with his friends.', ['like, want', 'likes, want', 'like, wants', 'likes, wants'], 3, 'my daughter、my son 都是三单 → likes, wants。'),
+    C('Su Yang usually ___ some clothes on Sunday.', ['washed', 'washs', 'washes', 'washing'], 2, 'usually → 一般现在时；wash 以 sh 结尾加 -es。'),
+    C('Su Hai and Su Yang ___ eight lessons this term.', ['have', 'has', 'haves', 'having'], 0, '主语是两个人（复数）→ have。'),
+  ] },
+  { h: '用所给词的正确形式填空', items: [
+    F('A. We often ___ (not play) on the playground.', [`don't play|do not play`], '主语 we，否定请出 don\'t，动词用原形。'),
+    F('B. ___ you ___ (brush) your teeth every day?', ['Do', 'brush'], 'every day → 一般现在时；主语 you，疑问句用 Do，动词原形。'),
+    F('C. How many lessons ___ your classmate ___ (have) on Sunday?', ['does', 'have'], 'your classmate 三单，疑问用 does，后面 have 用原形。'),
+    F('D. It ___ (take) me two hours to finish my homework every day.', ['takes'], 'It takes sb. 时间 to do sth.；every day → takes。'),
+    F('E. The child often ___ (watch) TV in the evening.', ['watches'], 'often → 一般现在时；watch 以 ch 结尾加 -es。'),
+    F('F. What ___ (do) he usually ___ (do) after school?', ['does', 'do'], '第一个 do 是助动词（三单 does），第二个是实义动词，用原形。'),
+    F('G. John ___ (study) Math, Chinese, English, Science and Art at school.', ['studies'], '辅音 + y 结尾：变 y 为 i 加 -es。'),
+    F('H. Mr. Wang often ___ (go) to Shanghai.', ['goes'], 'o 结尾加 -es。'),
+    F('I. There ___ (be) a football match on TV every morning.', ['is'], 'a football match 单数；every morning → is。'),
+    F('J. We ___ (not watch) TV on Monday.', [`don't watch|do not watch`], 'on Monday 指每周一的习惯，一般现在时否定。'),
+  ] },
+  { h: '句式训练', items: [
+    TF('Do you like to play football after school?', [['肯定句', 'I like to play football after school.|I like playing football after school.'], ['肯定 / 否定回答', `Yes, I do. No, I don't.`]], '问句里的 you 回答时变成 I；用 do / don\'t 回答。'),
+    TF('I have many books.', [['否定句', `I don't have many books.|I haven't many books.`], ['一般疑问句', 'Do you have many books?'], ['肯定回答', 'Yes, I do.'], ['否定回答', `No, I don't.`]], 'have 是实义动词「有」，否定和疑问请出 do；I 变 you。'),
+    TF(`Nancy doesn't run fast.`, [['肯定句', 'Nancy runs fast.']], '去掉 doesn\'t，-s 还给动词：runs。'),
+    TF(`I usually play football on Friday afternoon.${NO_LINE}`, [['否定句', `I don't usually play football on Friday afternoon.|I usually don't play football on Friday afternoon.`], ['一般疑问句', 'Do you usually play football on Friday afternoon?'], ['特殊疑问句（对 on Friday afternoon 提问）', 'When do you usually play football?'], ['肯定 / 否定回答', `Yes, I do. No, I don't.`]], '对时间提问用 When；疑问句里 I 变 you。'),
+    TF(`Tom does his homework at home.${NO_LINE}`, [['否定句', `Tom doesn't do his homework at home.`], ['一般疑问句', 'Does Tom do his homework at home?'], ['特殊疑问句（对 at home 提问）', 'Where does Tom do his homework?']], 'does 在这里是实义动词「做」，变否定、疑问时还要再请一个助动词 does：doesn\'t do / Does ... do。'),
+    TF(`Mike has two letters for him.${NO_LINE}`, [['否定句', `Mike doesn't have two letters for him.|Mike hasn't two letters for him.`], ['一般疑问句', 'Does Mike have two letters for him?'], ['特殊疑问句（对 two 提问）', 'How many letters does Mike have for him?'], ['否定回答', `No, he doesn't.`]], 'has 是实义动词「有」→ doesn\'t have / Does ... have（不能直接 Has Mike ...，那是英式旧用法）。'),
+  ] },
+  { h: '判断正误', items: [
+    J('Is your brother speak English?', false, 'be 和实义动词不能一起用：Does your brother speak English?'),
+    J('Does he likes going fishing?', false, 'does 后用原形：Does he like going fishing?'),
+    J('Jane do his homework every morning.', false, 'Jane 三单 → does；Jane 是女孩，his 也应为 her：Jane does her homework every morning.'),
+    J('He like play basketball with his friends.', false, 'He likes playing（或 to play）basketball with his friends. 三单 + like doing。'),
+    J('We eats dinner at six and go to bed at eleven.', false, '主语 we → eat。'),
+    J('My dog runs fast.', true, 'my dog 三单，runs 正确。'),
+    J('He speak English very well.', false, 'He speaks English very well.'),
+    J('What do they usually do on Saturday.', true, '语法正确（they 用 do），只是句末应该用问号。'),
+    J(`My mother don't have breakfast this morning.`, false, 'this morning 指今天上午（已过去），应为 My mother didn\'t have breakfast this morning.；就算是一般现在时，三单也要 doesn\'t。'),
+    J('I like reading books on the library every day.', false, '介词错误：in the library。'),
+  ] },
+  { h: '中考真题', items: [
+    C('Jenny! Do you know that one-third of the boys in our class ___ the singer Zhang Shaohan?', ['like', 'likes', 'liking'], 0, '分数 + of + 名词，谓语看名词：the boys 复数 → like。'),
+    C('The sense of happiness will increase if you ___ what you like to do.', ['do', 'did', 'will do'], 0, '主将从现：if 从句用一般现在时，主语 you → do。'),
+    C('Betty will ring me up when she ___ in Beijing.', ['arrive', 'arrives', 'arrived', 'will arrive'], 1, '主将从现：when 从句用一般现在时，she 三单 → arrives。'),
+    F('If you ___ your homework, you can go out to play football.（讲义无选项，填一个合适的动词）', ['finish|have finished|do|complete'], 'if 条件从句用一般现在时：If you finish your homework ...'),
+    C('Now my father ___ his bike to work every day instead of driving.', ['ride', 'rode', 'rides', 'will ride'], 2, 'every day → 一般现在时三单 rides。'),
+    C('This girl is ready to help people any time. When she is on the bus, she always ___ her seat to someone in need.', ['gives', 'give', 'gave', 'giving'], 0, 'always + 一般现在时；she 三单 → gives。'),
+  ] },
+] },
+
+{ t: 'spa', groups: [
+  { h: '写出不规则动词的过去式', items: [
+    WD('am / is = was, are = were, do = did, see = saw, say = said, give = gave, get = got, go = went, come = came, has / have = had, eat = ate, take = took, run = ran, sing = sang, put = put, write = wrote, speak = spoke, ride = rode, swim = swam, sit = sat, spend = spent, drink = drank, sleep = slept, stand = stood, read = read',
+      '这些都是不规则变化，只能背。put、read 过去式拼写不变（read 读音变成 /red/）。'),
+  ] },
+  { h: '用所给单词正确形式填空', items: [
+    F('We ___ (enjoy) ourselves at the party last night.', ['enjoyed'], 'last night → 一般过去时。enjoy 是元音 + y，直接加 -ed。'),
+    F('Jack ___ (study) for the English test last Sunday.', ['studied'], '辅音 + y：变 y 为 i 加 -ed。'),
+    F('___ you ___ (go) to the Great Wall last year?', ['Did', 'go'], 'Did 提问，动词用原形。'),
+    F('What day ___ (be) it yesterday?', ['was'], 'yesterday，主语 it → was。'),
+    F('The old man ___ (be) ill and went to see a doctor.', ['was'], '和后面 went 并列，过去时 was。'),
+    F('We ___ (have) a party last night.', ['had'], 'have 的过去式 had。'),
+    F('We ___ (visit) the museum and went home.', ['visited'], 'and 后是 went，前面也用过去式。visit 重音在前，不双写。'),
+    F('— How ___ (be) the students? — They were very friendly.', ['were'], '答语 were，主语 the students 复数 → were。'),
+    F('My mother ___ (not do) housework yesterday.', [`didn't do|did not do`], '否定请出 didn\'t，后面 do 用原形。'),
+    F(`— ___ he ___ (have) lunch at nine? — No, he didn't.`, ['Did', 'have'], '答语 didn\'t → Did 提问，have 用原形。'),
+    F('They ___ (buy) a guitar yesterday.', ['bought'], 'buy – bought。'),
+    F('The cat ___ (eat) a bird yesterday night.', ['ate'], 'eat – ate。（「昨晚」更地道的说法是 last night。）'),
+    F('They ___ (play) chess in the classroom last PE lesson.', ['played'], 'last PE lesson → 过去时。'),
+    F('Nancy ___ (pick) up oranges on the farm last week.', ['picked'], 'last week → picked。'),
+    F('My mother ___ (cook) a nice food last Spring Festival.', ['cooked'], 'last Spring Festival → cooked。'),
+    F('I ___ (be) at school just now.', ['was'], 'just now = 刚才，一般过去时。'),
+    F('He ___ (be) at the camp last week.', ['was'], 'last week → was。'),
+    F('The mobile phone ___ (be) on the table yesterday evening.', ['was'], 'yesterday evening → was。'),
+    F('I ___ (make) a model ship with Mike yesterday.', ['made'], 'make – made。'),
+    F('What ___ (do) you do last month?', ['did'], '助动词 did 提问，后面的 do 是实义动词原形。'),
+  ] },
+  { h: '单项选择', items: [
+    C('Lee ___ his mobile phone at home.', ['leave', 'leaves', 'leaved', 'left'], 3, '说的是已经发生的事（手机忘在家里了），用一般过去时；leave 的过去式是 left，没有 leaved。'),
+    C(`___ he ___ a good rest? — No, he didn't.`, ['Do, had', 'Did, have', 'Did, had', 'Was, had'], 1, 'Did + 原形。'),
+    C('As soon as he ___, he ___ to his family.', ['arrived, writes', 'arrived, written', 'arrived, wrote', 'arriveds, write'], 2, '两个动作都在过去：arrived, wrote。'),
+    C('Mr. Black was late because he ___ his way.', ['losted', 'lose', 'loses', 'lost'], 3, 'was late → 过去；lose – lost。'),
+    C('When ___ Lee ___ school this morning?', ['did, got to', 'did, get to', 'did, get', 'did, got'], 1, 'did + 原形；到达某地 get to + 地点。'),
+    C('Will you please say it again? I ___ quite ___ you.', [`didn't, hear`, `don't, heard`, `didn't, heard`, `don't, hear`], 0, '「刚才没听清」是过去的事：didn\'t hear。'),
+    C('___ you ___ at six o\'clock yesterday?', ['Do, get up', 'Did, get up', 'Do, got up', 'Did, got up'], 1, 'yesterday → Did + 原形。'),
+    C('What did you see ___?', ['now', 'every day', 'these days', 'just now'], 3, 'did 配过去时间 just now。'),
+    C('He went into the room and ___ the door.', ['lock', 'locking', 'locks', 'locked'], 3, 'and 并列，前面 went，后面也用过去式 locked。'),
+    C('— What ___ you ___ last week? — I bought a bag.', ['did, buy', 'did, bought', 'do, buy', 'do, bought'], 0, 'last week → did + 原形 buy。'),
+    C('— ___ he ___ his lunch? — Yes, he did.', ['Does, has', 'Does, have', 'Did, have', 'Did, had'], 2, '答语 did → Did + have。'),
+    C(`— Did the thieves ___ into the car? — No, they ___.`, [`fell, didn't`, 'fall（落下）, did', `jump（跳）, didn't`, 'jump, did'], 2, 'Did 后用原形，排除 A；No 后面要否定 didn\'t，排除 B、D。'),
+    C('— When did May come back from Hong Kong? — She ___ from Hong Kong last Friday.', ['come back', 'comes back', 'returned back', 'came back'], 3, 'last Friday → came back；return 本身含「回」，不说 return back。'),
+    C('___ she ___ this dictionary in the bookshop nearby last week?', ['Did, buy', 'Does, buy', 'Did, bought', 'Does, buys'], 0, 'last week → Did + 原形。'),
+    C('He ___ to the station this morning and was ___ for the train.', ['hurry, in time', 'hurries, on time', 'hurried, in time', 'hurried, at time'], 2, '和 was 并列用过去式 hurried；be in time for 及时赶上。'),
+  ] },
+  { h: '句型转换', items: [
+    F('Frank read an interesting book about history.（一般疑问句）<br>___ Frank ___ an interesting book about history?', ['Did', 'read'], '主语 Frank 三单，若是现在时 read 应为 reads，所以这里的 read 是过去式 → Did ... read（原形）。'),
+    F('Thomas spent RMB 10 on this book.（否定句）<br>Thomas ___ RMB 10 on this book.', [`didn't spend|did not spend`], 'spent → didn\'t spend。'),
+    F(`I didn't have any friends.（一般疑问句）<br>___ ___ have ___ friends?`, ['Did', 'you', 'any'], 'I 变 you；疑问句仍用 any。'),
+    F(`She watched TV after supper.（对 watched TV 提问${NO_LINE}）<br>___ ___ she ___ after supper?`, ['What', 'did', 'do'], '对动作提问：What did ... do?'),
+    F('There was some orange in the fridge.（一般疑问句）<br>___ there ___ orange in the fridge?', ['Was', 'any'], 'there be 疑问把 was 提前；some 在疑问句里变 any。'),
+  ] },
+  { h: '改错题：点出错误的词', items: [
+    S('How is Jane yesterday?', [1], 'How was Jane yesterday?', 'yesterday → is 改 was。'),
+    S('He go to school by bus last week.', [1], 'He went to school by bus last week.', 'last week → went。'),
+    S('He often goes home at 6:00 last month.', [2], 'He often went home at 6:00 last month.', 'last month：过去经常做的事也用一般过去时。'),
+    S('I can fly kites seven years ago.', [1], 'I could fly kites seven years ago.', '... ago → can 改过去式 could。'),
+    S('Did you saw him just now.', [2], 'Did you see him just now?', 'Did 后用原形 see；句末改问号。'),
+    S(`Tom wasn't watch TV last night.`, [1, 2], `Tom didn't watch TV last night.（或 Tom wasn't watching TV last night.）`, 'wasn\'t 后不能接原形：改 didn\'t watch，或改成过去进行时 wasn\'t watching。'),
+    S(`I didn't my homework yesterday.`, [1, 2], `I didn't do my homework yesterday.`, '缺实义动词：didn\'t 只是助动词，后面要有 do。'),
+    S('He wait for you three hours ago.', [1], 'He waited for you three hours ago.', '... ago → waited。'),
+    S('Who find it just now?', [1], 'Who found it just now?', 'just now → found。'),
+    S('What did he last week?', [2, 3], 'What did he do last week?', '缺实义动词 do：What did he do ...?'),
+  ] },
+  { h: '综合训练', items: [
+    TF(`They read English last night.${NO_LINE}`, [['否定句', `They didn't read English last night.`], ['一般疑问句', 'Did they read English last night?'], ['肯定 / 否定回答', `Yes, they did. No, they didn't.`], ['对 last night 提问', 'When did they read English?']], 'last night → read 是过去式；变否定、疑问后用原形 read（拼写相同）。'),
+    TF(`She didn't buy a dictionary last week.${NO_LINE}`, [['肯定句', 'She bought a dictionary last week.'], ['一般疑问句', 'Did she buy a dictionary last week?'], ['肯定 / 否定回答', `Yes, she did. No, she didn't.`], ['对 a dictionary 提问', 'What did she buy last week?']], '去掉 didn\'t，buy 变回过去式 bought。'),
+  ] },
+] },
+
+{ t: 'sf', groups: [
+  { h: '课堂练习', items: [
+    C('There ___ a meeting tomorrow afternoon.', ['will be going to', 'will going to be', 'is going to be', 'will go to be'], 2, 'There is going to be / There will be。'),
+    C('Mike ___ here next month.', [`isn't work`, `doesn't working`, `isn't going to working`, `won't work`], 3, 'won\'t + 原形。其余结构都错。'),
+    C('He ___ very busy this week, he ___ free next week.（讲义漏印 busy）', ['is, will', 'will, is', 'is, will be', 'is, is'], 2, 'this week → is；next week → will be（will 后不能缺动词）。'),
+    C('Mother ___ me a nice present on my next birthday.', ['gives', 'are going to give', 'gives', 'will give'], 3, 'next birthday → 将来；mother 单数，不能用 are going to。'),
+    C('He ___ her a beautiful hat on her next birthday.（讲义选项 C 印成 is going to giving，已更正）', ['gives', 'will giving', 'is going to give', 'gave'], 2, 'be going to + 原形。'),
+    C('He ___ in three days.', ['came back', 'will come back', 'is going to coming back', 'will coming back'], 1, 'in + 时段 → 将来；will + 原形。'),
+    C('The day after tomorrow, we ___ a football match.', ['will watch', 'is going to watch', 'watches', 'will watching'], 0, '主语 we，B 的 is 不对；will + 原形。'),
+    C('They ___ an English meeting next Sunday.', ['are going to have', 'is going to have', 'will having', 'having'], 0, '主语 they → are going to have。'),
+    C('___ you ___ free next Monday?', ['Are, be', 'Will, be', 'Do, be', 'Will, are'], 1, 'Will + 主语 + be。'),
+    C('I ___ for Tibet next Wednesday.', ['am leaving', 'will leaving', 'leaves', 'is going to leaving'], 0, 'leave 等位移动词可用现在进行时表计划。'),
+  ] },
+  { h: '句型转换', items: [
+    F('The girls are going to take acting lessons.（改为否定句）<br>The girls ___ ___ to take acting lessons.', [`aren't`, 'going'], '在 are 后加 not。'),
+    F('The students have a school trip in spring.（用 next week 改写）<br>The students ___ ___ ___ ___ a school trip next week.', ['are', 'going', 'to', 'have'], '四个空 → be going to + 原形。'),
+    F(`They are going to meet outside the school gate.（对 outside the school gate 提问${NO_LINE}）<br>___ ___ they going to meet?`, ['Where', 'are'], '对地点提问用 Where。'),
+  ] },
+  { h: '改错：点出错误的词', items: [
+    S('He will sing and dances for us tomorrow.', [4], 'He will sing and dance for us tomorrow.', 'will 管两个动词，都用原形。'),
+    S('Are you going to swim? —Yes, I will.', [7], 'Are you going to swim? —Yes, I am.', '用什么问就用什么答：are → am。'),
+    S('He will help Jim with his English every day.', [1, 2], 'He helps Jim with his English every day.', 'every day 是习惯 → 一般现在时。（讲义划线没印出来，若原题换成 tomorrow 则 will help 正确。）'),
+    S('Will her sister sings a song for me tomorrow?', [3], 'Will her sister sing a song for me tomorrow?', 'will 后用原形。'),
+    S(`They willn't plant trees next week.`, [1], `They won't plant trees next week.`, 'will not 的缩写是 won\'t。'),
+    S('Are they going to plays basketball tomorrow?', [4], 'Are they going to play basketball tomorrow?', 'be going to + 原形。'),
+    S('Will we go to visit the factory tomorrow?', [0], 'Shall we go to visit the factory tomorrow?', '第一人称征求意见用 Shall I / Shall we。'),
+    S('Paul will be going to make dumplings for Emma.', [1, 2], 'Paul is going to make dumplings for Emma.（或 Paul will make ...）', 'will 和 be going to 不能叠用。'),
+    S('Are the boys going to the Great Wall next month? —Yes, they will.', [12], 'Are the boys going to the Great Wall next month? —Yes, they are.', '用 are 问，用 are 答。'),
+  ] },
+  { h: '综合训练（划线部分：is going to play football / will clean the windows）', items: [
+    TF('Jim <u>is going to play football</u> tomorrow.', [['否定句', `Jim isn't going to play football tomorrow.`], ['一般疑问句', 'Is Jim going to play football tomorrow?'], ['肯定 / 否定回答', `Yes, he is. No, he isn't.`], ['特殊疑问句（对划线部分提问）', 'What is Jim going to do tomorrow?']], '对「做什么」提问：What is ... going to do?'),
+    TF('Mary <u>will clean the windows</u> next week.', [['否定句', `Mary won't clean the windows next week.`], ['一般疑问句', 'Will Mary clean the windows next week?'], ['肯定 / 否定回答', `Yes, she will. No, she won't.`], ['特殊疑问句（对划线部分提问）', 'What will Mary do next week?']], 'What will ... do?'),
+  ] },
+  { h: '巩固提升：用所给动词的适当形式填空（多以一般将来时为主）', items: [
+    F('I ___ (leave) right now. I ___ (finish) my work before I ___ (leave).', [`am leaving|will leave|'m leaving|'ll leave`, `will finish|'ll finish`, 'leave'], 'right now 马上要走 → am leaving / will leave；before 从句「主将从现」用 leave。'),
+    F('How long ___ you ___ (study) in our country?', ['will', 'study'], '问将来：will + 原形。'),
+    F('I ___ (plan) to be here for about one more year.', ['plan|am planning'], '「计划」是现在的想法，用一般现在时（am planning 也可）。'),
+    F('I ___ (hope) to visit the other parts of your country.', ['hope'], '「希望」是现在的心理状态，用一般现在时。'),
+    F('What ___ you ___ (do) after you ___ (leave) here?', ['will', 'do', 'leave'], '主句将来 will do；after 从句主将从现 leave。'),
+    F('I ___ (return) home and ___ (get) a job.', [`will return|'ll return|am going to return`, 'get|will get'], 'will 后两个动词共用 will，第二空写 get 即可。'),
+    F('I ___ (be) tired. I ___ (go) to bed early tonight.', ['am', `will go|'ll go|am going to go`], '现在累 → am；tonight → will go。'),
+    F(`Mary's birthday is next Monday, her mother ___ (give) her a present.`, ['will give|is going to give'], 'next Monday → 将来。'),
+    F('It is very cold these days. It ___ (snow) soon.', ['will snow|is going to snow'], 'soon → 将来；有迹象也可用 is going to。'),
+    F('— ___ you ___ (be) here this Saturday?', ['Will', 'be'], 'Will + 主语 + be。'),
+    F('— No. I ___ (visit) my teacher.', [`will visit|am going to visit|am visiting|'ll visit`], '这个周六要做的事 → 将来。'),
+    F(`— ___ I ___ (get) you a copy of today's newspaper? — Thank you.`, ['Shall', 'get'], '主动提供帮助：Shall I ...?'),
+    F(`I am afraid there ___ (be) a meeting this afternoon. I can't join you.`, ['will be|is going to be'], 'there be 将来时：there will be / there is going to be。'),
+    F('Mike ___ (believe, not) this until he ___ (see) it with his own eyes.', [`won't believe|will not believe`, 'sees'], 'until 从句主将从现。'),
+    F(`Most of us don't think their team ___ (win).`, [`will win|is going to win`], '比赛结果在将来 → will win。'),
+  ] },
+] },
+
+{ t: 'pp', groups: [
+  { h: '试一试：写出动词的 -ing 形式', items: [
+    WD('give = giving, use = using, move = moving, skate = skating, draw = drawing, tell = telling, ring = ringing, wear = wearing, get = getting, put = putting, hit = hitting, stop = stopping, keep = keeping, hurt = hurting, know = knowing, lie = lying, die = dying, begin = beginning, forget = forgetting, save = saving, teach = teaching, read = reading, write = writing, exercise = exercising, like = liking, dance = dancing, run = running, sit = sitting, control = controlling, die = dying',
+      '不发音的 e 去 e（giving, writing）；ie 变 y（lying, dying）；重读闭音节双写（getting, stopping, beginning, forgetting, controlling）；hurt、keep 等元音不是单个字母或结尾两个辅音，不双写。讲义里 die 出现两次。'),
+  ] },
+  { h: '单项选择', items: [
+    C(`I'm ___ a book in the room.`, ['watching', 'seeing', 'reading', 'looking'], 2, '看书用 read。'),
+    C('We ___ any Chinese classes on Friday.', ['are having', `aren't having`, `don't have`, 'are have'], 2, 'on Friday 指每周五的课表 → 一般现在时。'),
+    C('Tom ___ an English class now.', ['is having', 'has', 'having', 'have'], 0, 'now → is having。'),
+    C('Are you playing basketball? No, we ___.', [`isn't`, `aren't`, 'not', `don't`], 1, '用 are 问，用 aren\'t 答。'),
+    C('Jackie is ___ with Jim. They are good ___.', ['running; friend', 'running; friends', 'runing; friends', `run; friend's`], 1, 'run 双写 n；they 复数 → friends。'),
+    C('The children are ___ TV.', ['watch', 'seeing', 'watching', 'reading'], 2, '看电视 watch TV。'),
+    C('Listen! Kate ___ now, she always ___.（讲义选项 B、D 重复且有误，已更正 B）', ['sings, is singing', 'is singing, sings', 'sang, singing', 'is singing, sing'], 1, 'now → is singing；always → 一般现在时三单 sings。'),
+    C('Look, my mother is ___ Mike.', ['talk with', 'talk to', 'talking to', 'talks with'], 2, 'is + doing。'),
+    C('Look, Liu Mei ___ a book under the tree.', ['is finding', 'is looking', 'reading', 'is reading'], 3, 'Look → 现在进行；看书 read。'),
+    C('What ___ you doing? I ___ football.（讲义此句多印了 playing，已更正）', ['is, am playing', 'are, playing', 'is, are playing', 'are, am playing'], 3, 'you → are；I → am playing。'),
+  ] },
+  { h: '用所给词的正确形式填空', items: [
+    F('It ___ (rain) heavily outside now. You must stay at home.', [`is raining|'s raining`], 'now → is raining。'),
+    F(`Don't sing. The baby ___ (sleep).`, [`is sleeping|'s sleeping`], '宝宝此刻正在睡。'),
+    F('These boys ___ (play) tennis on the playground.', ['are playing'], '描述眼前的情景，现在进行时。'),
+    F('My mother ___ (cook) in the kitchen.', ['is cooking'], '正在厨房做饭。'),
+    F('The boy ___ (draw) a picture now.', ['is drawing'], 'now → is drawing。'),
+    F('Listen. Some girls ___ (sing) in the classroom.', ['are singing'], 'Listen → 正在。'),
+    F('My mother ___ (cook) some nice food now.', ['is cooking'], 'now。'),
+    F('What ___ you ___ (do) now?', ['are', 'doing'], 'What are you doing now?'),
+    F('Look, they ___ (have) an English lesson.', ['are having'], 'have a lesson 是动作「上课」，可以用进行时。'),
+    F('They ___ (not water) the flowers now.', [`aren't watering|are not watering`], 'are + not + doing。'),
+    F('Look! The girls ___ (dance) in the classroom.', ['are dancing'], 'dance 去 e 加 -ing。'),
+    F('What is our granddaughter doing? She ___ (listen) to music.', [`is listening|'s listening`], '问句是进行时，答句也是。'),
+    F(`It's 5 o'clock now. We ___ (have) supper now.`, [`are having|'re having`], 'now。'),
+    F('___ Helen ___ (wash) clothes? Yes, she is.', ['Is', 'washing'], '答语 she is → Is ... washing?'),
+  ] },
+  { h: '句型转换', items: [
+    TF('They are doing housework.', [['一般疑问句', 'Are they doing housework?'], ['否定句', `They aren't doing housework.`]], 'are 提前 / are 后加 not。'),
+    TF('The students are cleaning the classroom.', [['一般疑问句', 'Are the students cleaning the classroom?'], ['肯定 / 否定回答', `Yes, they are. No, they aren't.`]], '主语 the students → 回答用 they。'),
+    TF(`I'm playing the football in the playground.`, [['否定句', `I'm not playing football in the playground.|I'm not playing the football in the playground.`]], 'am 后加 not（I\'m not，没有 amn\'t）。另外球类运动前不加 the：play football。'),
+    TF('Tom is reading books in his study.', [['一般疑问句', 'Is Tom reading books in his study?']], 'is 提前。'),
+    TF('My mother is cooking some nice food now.', [['一般疑问句', 'Is your mother cooking any nice food now?|Is your mother cooking some nice food now?'], ['肯定 / 否定回答', `Yes, she is. No, she isn't.`]], 'my 变 your；疑问句 some 一般改 any。'),
+    TF('They are not watering the flowers now.', [['肯定句', 'They are watering the flowers now.']], '去掉 not。'),
+    TF('The boy is playing basketball.', [['否定句', `The boy isn't playing basketball.`], ['一般疑问句', 'Is the boy playing basketball?'], ['肯定 / 否定回答', `Yes, he is. No, he isn't.`], ['对 The boy 提问', 'Who is playing basketball?']], '对人（主语）提问用 Who，语序不变。'),
+  ] },
+  { h: '巩固提高：造句', items: [
+    TF('she, the window, open, now（用现在进行时连词成句）', [['句子', 'She is opening the window now.']], 'open 重音在前，不双写：opening。'),
+    TF('is, who, the window, cleaning?（连词成句）', [['句子', 'Who is cleaning the window?']], '主语是 who 的特殊疑问句。'),
+    TF('She is closing the door now.（改成否定句）', [['否定句', `She isn't closing the door now.`]], 'is 后加 not。'),
+    TF('You are doing your homework.（用 "I" 作主语改写句子）', [['句子', 'I am doing my homework.']], 'are 跟着变 am，your 变 my。'),
+    TF('they, the tree, sing, now, under（用现在进行时连词成句）', [['句子', 'They are singing under the tree now.']], 'are singing + 地点 + 时间。'),
+    TF('The Young Pioneers are helping the old woman.（改成一般疑问句）', [['一般疑问句', 'Are the Young Pioneers helping the old woman?']], 'are 提前。'),
+    TF('She is closing the door now.（改成否定句，讲义第 7 题与第 3 题相同）', [['否定句', `She isn't closing the door now.`]], '同第 3 题。'),
+    TF('The Young Pioneers are helping the old woman.（改为一般疑问句，讲义第 8 题与第 6 题相同）', [['一般疑问句', 'Are the Young Pioneers helping the old woman?']], '同第 6 题。'),
+    TF('The boy is playing basketball.', [['否定句', `The boy isn't playing basketball.`], ['一般疑问句', 'Is the boy playing basketball?'], ['肯定 / 否定回答', `Yes, he is. No, he isn't.`], ['对 "is playing basketball" 提问', 'What is the boy doing?'], ['对 "The boy" 提问', 'Who is playing basketball?']], '问动作 What ... doing；问人 Who。'),
+  ] },
+] },
+
+{ t: 'pap', groups: [
+  { h: '课堂练习', items: [
+    C('What ___ from three to four yesterday afternoon?', ['have you done', 'had you done', 'did you do', 'were you doing'], 3, '过去一段具体时间里正在做 → 过去进行时。'),
+    C(`— I called you yesterday evening, but there was no answer. — Oh, I'm sorry. I ___ dinner at my friend's home.（讲义 A 项印成 home，应为 have）`, ['have', 'had', 'was having', 'have had'], 2, '解释对方打电话那一刻我正在做什么。'),
+    C('My mother ___ while my father ___ TV.', ['cooked; was watching', 'was cooking; was watching', 'was cooked; watched', 'cooked; watched'], 1, 'while 连接两个同时进行的动作。'),
+    C('When I got home, my son ___ the music.', ['am listening to', 'listened to', 'was listening to', 'was listening'], 2, '我到家那一刻他正在听；listen to + 宾语。'),
+    C('We heard a cry when we ___ TV last night.', ['were watching', 'would watch', 'watch', 'watched'], 0, '长的背景动作用过去进行时。'),
+    C('She asked him whether he ___ back for lunch.', ['come', 'was coming', 'came', 'had come'], 1, '主句是过去时，从句里「要回来」是过去看将来，用过去进行时表示计划。'),
+    C('The teacher ___ when I came into the classroom.', ['is drawing', 'draws', 'has drawn', 'was drawing'], 3, '我进教室那一刻老师正在画。'),
+    C('The pizza ___ by my mother. Would you like to have some?', ['makes', 'was making', 'made', 'was made'], 3, 'pizza 是被做的，by my mother → 被动语态 was made。'),
+    C('Nobody noticed what she ___ at the moment.', ['will do', 'was doing', 'has done', 'had done'], 1, '主句 noticed 过去，at the moment 那一刻正在做。'),
+    C('Was it raining hard when you ___ this morning?', ['left', 'leaves', 'was leaving', 'would leave'], 0, '离开是短动作 → 一般过去时。'),
+  ] },
+  { h: '填空', items: [
+    F('___ they ___ (feed) the animals at 5:00 yesterday afternoon?', ['Were', 'feeding'], '过去某一时刻正在做。'),
+    F('Mrs. Green ___ (not wash) clothes at this time yesterday.', [`wasn't washing|was not washing`], 'at this time yesterday。'),
+    F('Grandpa ___ (mend) his clock when I reached home.', ['was mending'], '我到家时他正在修。'),
+    F('As I ___ (walk) in the park, I saw some children playing games.', ['was walking'], 'as = 当……的时候，持续的背景动作。'),
+    F('John ___ (work) all day.', ['was working|worked'], 'all day（过去一整天）强调持续 → was working；只陈述事实也可用 worked。'),
+    F(`What ___ you ___ (do) at ten o'clock yesterday?`, ['were', 'doing'], 'at ten o\'clock yesterday。'),
+    F('This time yesterday, Mary ___ (mend) her bike.', ['was mending'], 'this time yesterday。'),
+    F('While my mother ___ (watch) TV, I ___ (read) books.', ['was watching', 'was reading'], 'while 两个动作同时进行。'),
+    F('It was six. Miss Green ___ (have) dinner.', ['was having'], '六点那一刻。'),
+  ] },
+] },
+
+{ t: 'fp', groups: [
+  { h: '课堂练习', items: [
+    C('I feel so excited! At this time tomorrow morning I ___ to Shanghai.', ['will be flying', 'will fly', 'have been flying', 'have flown'], 0, 'at this time tomorrow → 将来进行时。'),
+    C('— Shall we make it next Saturday morning? — Sorry. I ___ a friend off at the airport then.', ['see', 'was seeing', 'will have seen', 'will be seeing'], 3, 'then = 下周六上午那时，正在送朋友。'),
+    C('Ring me at 5 am? No, not that early! I ___.', ['sleep', 'will sleep', 'have been sleeping', 'will be sleeping'], 3, '早上 5 点那时我还在睡。'),
+    C('I feel so excited! At this time tomorrow morning, I ___ to Shanghai.（讲义重复题）', ['will be flying', 'will fly', 'have been flying', 'have flown'], 0, '同第 1 题。'),
+    C('At this time tomorrow ___ over the Atlantic.', ['we are going to fly', 'we will be flying', 'we shall fly', 'we are to fly'], 1, 'at this time tomorrow。'),
+    C('Please do not call me at 8 p.m. because I ___ to Beijing.', ['am going to fly', 'will be flying', 'will fly', 'am to fly'], 1, '晚上 8 点那一刻正在飞。'),
+    C('What ___ you ___ this time next Friday?', ['will; do', 'have; been doing', 'are; doing', 'will; be doing'], 3, 'this time next Friday。'),
+    C(`Don't phone Tom at two o'clock this afternoon, when he ___ a meeting.（讲义原选项）`, ['how', 'why', 'is to attend', 'will be attending'], 3, '下午两点那一刻正在开会；A、B 是印刷错误的无关选项。'),
+    C(`At nine o'clock tonight I ___ my homework.`, ['will do', 'do', 'did', 'will be doing'], 3, '今晚九点那一刻正在做。'),
+    C('I feel so excited! At this time tomorrow morning I ___ to Shanghai.（讲义重复题）', ['will fly', 'will be flying', 'have been flying', 'have flown'], 1, '同第 1 题，只是选项顺序变了。'),
+  ] },
+  { h: '句型训练', items: [
+    TF(`I'll be seeing Tom tomorrow.${NO_LINE}`, [['否定句', `I won't be seeing Tom tomorrow.`], ['一般疑问句', 'Will you be seeing Tom tomorrow?'], ['特殊疑问句（对 Tom 提问）', 'Who will you be seeing tomorrow?|Whom will you be seeing tomorrow?'], ['肯定 / 否定回答', `Yes, I will. No, I won't.`]], '只有 will 是开关：否定加在 will 后，疑问把 will 提前。'),
+    TF(`We will be meeting again at 5 tomorrow afternoon.${NO_LINE}`, [['否定句', `We won't be meeting again at 5 tomorrow afternoon.`], ['一般疑问句', 'Will you be meeting again at 5 tomorrow afternoon?|Will we be meeting again at 5 tomorrow afternoon?'], ['特殊疑问句（对 at 5 tomorrow afternoon 提问）', 'When will you be meeting again?|What time will you be meeting again?|When will we be meeting again?'], ['肯定 / 否定回答', `Yes, we will. No, we won't.`]], '问时间 When / What time。'),
+    TF(`The minister will be giving a speech on international affairs.${NO_LINE}`, [['否定句', `The minister won't be giving a speech on international affairs.`], ['一般疑问句', 'Will the minister be giving a speech on international affairs?'], ['特殊疑问句（对 giving a speech on international affairs 提问）', 'What will the minister be doing?'], ['肯定 / 否定回答', `Yes, he will. No, he won't.|Yes, she will. No, she won't.`]], '问动作：What will ... be doing?'),
+  ] },
+] },
+
+{ t: 'pf', groups: [
+  { h: '练习', items: [
+    C('How long have you ___ here?', ['come', 'got', 'arrived', 'been'], 3, 'How long 要配延续性的 be。'),
+    C('My grandpa died ___.', ['at the age of my 2', 'for 2 years', 'when I was 2', 'my age was 6'], 2, 'died 是过去的短暂动作，配过去时间 when I was 2；不能配 for 2 years。'),
+    C('Jane has ___ to Beijing. She will come back tomorrow.', ['been', 'gone', 'went', 'never been'], 1, '还没回来 → has gone to。'),
+    C('It is ten years ___ I last saw her.', ['after', 'since', 'for', 'that'], 1, 'It is + 时段 + since + 过去时从句。'),
+    C('— Who will go to the station to meet Lorry? — I will. I ___ her several times.', ['met', 'have met', 'had met', 'will meet'], 1, 'several times 讲经历 → have met。'),
+    C('— What a nice dress! How long ___ you ___ it? — Just 2 weeks.', ['will, buy', 'did, buy', 'are, having', 'have, had'], 3, 'buy 短暂，How long 要换成 have had。'),
+    C('— Do you know Lydia very well? — Yes, she and I ___ friends since we were very young.', ['have made', 'have become', 'have been', 'have turned'], 2, 'since 要配延续性的 be friends。'),
+    C('The Smiths ___ in China for 8 years.', ['has lived', 'lived', 'have been', 'live'], 2, 'The Smiths 复数 → have been。'),
+    C('— Hello, this is Mr. Green speaking. Can I speak to Mr. Black? — Sorry. He ___ the BaiNiao Park.', ['has been to', 'has gone to', 'went to', 'will go to'], 1, '人不在 → has gone to。'),
+    C('— ___ you ever ___ to the US? — Yes, twice.', ['Have, gone', 'Have, been', 'Do, go', 'Were, going'], 1, '经历 → have been to。'),
+  ] },
+  { h: '句型转换', items: [
+    F('I have been to Macau before.（改为否定句）<br>I ___ been to Macau before.', [`haven't|have not|have never`], 'have 后加 not。'),
+    F(`He hasn't come to school because he was ill.（对 because he was ill 提问）<br>___ ___ he come to school?`, ['Why', `hasn't`], '对原因提问用 Why，否定的 hasn\'t 保留。'),
+    F('I bought a new bike just now.（用 just 改写）<br>I ___ just ___ a new bike.', ['have', 'bought'], 'just（刚刚）→ 现在完成时 have just bought。'),
+    F('We began to learn English three years ago.（改为同义句）<br>We ___ ___ English ___ three years.', ['have', 'learned|learnt', 'for'], '「三年前开始学」= 「已经学了三年」：have learned ... for three years。'),
+    F('He has never surfed, ___ ___?（改成反意疑问句）', ['has', 'he'], 'never 是否定，反问部分用肯定：has he?'),
+    F('They have been here since 2000.（对 since 2000 提问）<br>___ ___ have they been here?', ['How', 'long'], '对 since / for 提问用 How long。'),
+    F('The old man ___ last year. He has ___ for a year.（die，动词填空）', ['died', 'been dead'], 'last year → died；for a year 要用状态 been dead。'),
+    F('Miss Gao left an hour ago.（同义句转换）<br>Miss Gao has ___ ___ ___ an hour ago.', ['been', 'away', 'since'], 'leave 短暂 → be away；since + 时段 + ago。（也可以说 has been away for an hour。）'),
+  ] },
+  { h: '提升训练：用适当的时态填空', items: [
+    F(`She's ___ (live) here ever since she was ten.`, ['lived'], 'She\'s = She has，后接过去分词。'),
+    F('Both of them ___ (be) in Hongkong for ten days.', ['have been'], 'for ten days 持续到现在。'),
+    F('Both of them ___ (come) to Hongkong ten days ago.', ['came'], 'ten days ago → 一般过去时。对比上一题。'),
+    F('Half an hour ___ (pass) since the train ___ (leave).', [`has passed|'s passed`, 'left'], 'since 从句用过去时，主句用现在完成时。'),
+    F('Mary ___ (lose) her pen. ___ you ___ (see) it here and there?', [`has lost|'s lost`, 'Have', 'seen'], '笔现在还没找到 → has lost；问「见过没有」→ Have you seen。'),
+    F('___ you ___ (find) your watch yet?', ['Have', 'found'], 'yet → 现在完成时。'),
+    F('— Are you thirsty? — No. I ___ just ___ (have) some orange.', ['have', 'had'], 'just → have just had。'),
+    F('We ___ already ___ (return) the book.', ['have', 'returned'], 'already → have already returned。'),
+    F('___ they ___ (build) a new school in the village?', ['Have', 'built'], 'build – built – built。'),
+    F('I ___ (not finish) my homework. Can you help me?', [`haven't finished|have not finished`], '到现在还没完成。'),
+    F('My father ___ (read) the novel twice.', [`has read|'s read`], 'twice 讲经历 → has read。'),
+    F('I ___ (buy) a book just now.', ['bought'], 'just now → 一般过去时。'),
+    F('I ___ (lose) my watch yesterday.（讲义印成 lost）', ['lost'], 'yesterday → 一般过去时。'),
+    F('My father ___ (read) this book since yesterday.', ['has read|has been reading'], 'since yesterday → 现在完成时（has been reading 是完成进行时，更强调一直在读）。'),
+  ] },
+  { h: '句式训练', items: [
+    F('I have been there for two days.<br>___ ___ ___ you ___ ___?', ['How', 'long', 'have', 'been', 'there'], '对 for two days 提问：How long have you been there?'),
+    F('My father has lived here since 2000.<br>___ ___ ___ your father ___ ___?', ['How', 'long', 'has', 'lived', 'here'], 'How long has your father lived here?'),
+    F('He left here yesterday.<br>___ ___ he ___ ___?', ['When', 'did', 'leave', 'here'], 'yesterday 是过去时间点，用 When did ...（不能用 How long）。'),
+    F('They bought a book two hours ago.<br>___ ___ they ___ a book?', ['When', 'did', 'buy'], '... ago → When did they buy a book?'),
+  ] },
+  { h: '综合训练', items: [
+    TF(`He has been a soldier for three years.（对 for three years 提问${NO_LINE}）`, [['否定句', `He hasn't been a soldier for three years.`], ['一般疑问句', 'Has he been a soldier for three years?'], ['肯定 / 否定回答', `Yes, he has. No, he hasn't.`], ['划线部分提问', 'How long has he been a soldier?']], 'has 是开关。'),
+    TF(`Has your brother been away from home for a long time?（对 for a long time 提问${NO_LINE}）`, [['肯定句', 'My brother has been away from home for a long time.'], ['否定句', `My brother hasn't been away from home for a long time.`], ['肯定 / 否定回答', `Yes, he has. No, he hasn't.`], ['划线部分提问', 'How long has your brother been away from home?']], '变陈述句时 your 改 my。'),
+  ] },
+] },
+
+{ t: 'paf', groups: [
+  { h: '语法填空', items: [
+    F('We ___ (paint) the house before we ___ (move) in.', ['had painted', 'moved'], '先刷房子，后搬进去：先发生的用 had done。'),
+    F('That rich old man ___ (make) a will before he ___ (die).', ['had made', 'died'], '先立遗嘱，后去世。'),
+    F('They ___ (study) the map of the country before they ___ (leave).', ['had studied', 'left'], '先研究地图，后出发。'),
+    F('The robbers ___ (run away) before the policemen ___ (arrive).', ['had run away', 'arrived'], '警察到之前强盗已经跑了。'),
+    F('I ___ (turn off) all the lights before I ___ (go) to bed.', ['had turned off', 'went'], '先关灯后睡觉。'),
+    F('Paul ___ (go) out with Jane after he ___ (make) a phone call.', ['went', 'had made'], 'after 后面是先发生的动作 → had made。'),
+    F('Tom ___ (say) he ___ (read) the book twice.', ['said', 'had read'], '说之前就读过了。'),
+    F('Our plan ___ (fail) because we ___ (make) a bad mistake.', ['failed', 'had made'], '先犯错，后失败。'),
+    F('When the chairman ___ (finish) speaking, he ___ (leave) the hall.', ['had finished', 'left'], '讲完之后才离开。'),
+    F('The Reads were having lunch when I ___ (get) to their house.', ['got'], '我到的那一刻他们正在吃饭（前半句已给出）。'),
+    F('When I ___ (arrive) at the station, he ___ (leave).', ['arrived', 'had left'], '我到时他已经走了。'),
+    F('We ___ (learn) about 4000 English words by the end of last term.', ['had learned|had learnt'], 'by + 过去时间。'),
+    F('I waited until he ___ (finish) his homework.', ['had finished|finished'], 'until 后表示先完成的动作，用 had finished（用 finished 也常见）。'),
+    F('We were surprised at what she ___ (do).', ['had done'], '她做的事在我们吃惊之前。'),
+    F('She ___ (not go) to Qingdao because she ___ (go) there before.', [`didn't go|did not go`, 'had been'], '以前去过（已回来）→ had been，不是 had gone。'),
+    F('He ___ (not tell) you the news yet.', [`hasn't told|has not told`], '陷阱：没有过去参照点，yet → 现在完成时。'),
+    F('He said he ___ (give) the book to the teacher.', ['had given'], 'said 之前已经给了。'),
+    F('I ___ (be) to Shanghai before.', [`have been|'ve been`], '陷阱：没有过去参照点，讲经历 → 现在完成时。'),
+    F('She told me she ___ (be) to Sanya three times.', ['had been'], 'told 之前去过三次。'),
+    F('She ___ (play) the guitar while her sister ___ (sing).', ['was playing', 'was singing'], '陷阱：while 两个动作同时进行 → 过去进行时。'),
+  ] },
+  { h: '句型转换', items: [
+    TF('I had sold the ticket when she came.（改否定句）', [['否定句', `I hadn't sold the ticket when she came.`]], 'had 后加 not。'),
+    TF('She had sung a song to us before she danced.（改否定句）', [['否定句', `She hadn't sung a song to us before she danced.`]], 'had 后加 not。'),
+    TF('They began to climb the mountain after they had bought all the food and drink.（否定，讲义原句误印为 climbed）', [['否定句', `They didn't begin to climb the mountain after they had bought all the food and drink.`]], '否定主句：began → didn\'t begin。'),
+    TF('By 10:00 am, I had been very hungry.（改一般疑问）', [['一般疑问句', 'Had you been very hungry by 10:00 am?|By 10:00 am, had you been very hungry?']], 'Had 提前，I 变 you。'),
+    TF('Lucy had already completed the project when I arrived.（改一般疑问）', [['一般疑问句', 'Had Lucy completed the project yet when you arrived?|Had Lucy completed the project when you arrived?|Had Lucy already completed the project when you arrived?']], 'Had 提前，I 变 you；疑问句里 already 一般改为 yet。'),
+    TF('By the time he got to the airport, the plane had taken off.（改一般疑问）', [['一般疑问句', 'Had the plane taken off by the time he got to the airport?|By the time he got to the airport, had the plane taken off?']], 'Had 提前。'),
+    TF(`He had broken his arm when I saw him.（对 his arm 提问${NO_LINE}）`, [['特殊疑问句', 'What had he broken when you saw him?']], '对物提问 What + had + 主语 + done。'),
+    TF(`When he had read the note, he ate it.（对 ate it 提问${NO_LINE}）`, [['特殊疑问句', 'What did he do when he had read the note?|What did he do after he had read the note?']], '主句是一般过去时，对动作提问 What did he do ...?'),
+    TF(`Jack didn't go to the cinema because he had seen the film.（对 because 部分提问）`, [['特殊疑问句', `Why didn't Jack go to the cinema?`]], '原因 → Why。'),
+    TF(`We had had the toys for ten years before we gave them to the child.（对 for ten years 提问${NO_LINE}）`, [['特殊疑问句', 'How long had you had the toys before you gave them to the child?']], 'How long + had + 主语 + had（第一个 had 是助动词，第二个是「拥有」的过去分词）。'),
+    TF(`She had written the book by the end of 1960.（对 the book 提问${NO_LINE}）`, [['特殊疑问句', 'What had she written by the end of 1960?']], 'What had she written ...?'),
+    TF('We cooked the dumplings. We ate them up.（用过去完成时连接两句）', [['合并句', 'We ate up the dumplings after we had cooked them.|After we had cooked the dumplings, we ate them up.|We had cooked the dumplings before we ate them up.|We ate the dumplings up after we had cooked them.']], '先做的「煮」用 had cooked。'),
+    TF(`Jim's father mended the car. It was broken.（用过去完成时连接两句）`, [['合并句', `Jim's father mended the car which had been broken.|Jim's father mended the car that had been broken.|Jim's father mended the car which had broken down.|Jim's father mended the car that had broken down.`]], '车坏在修之前 → had been broken / had broken down。'),
+    TF('We had our tests. Then we had a long holiday.（用过去完成时连接两句）', [['合并句', 'We had a long holiday after we had had our tests.|After we had had our tests, we had a long holiday.|We had had our tests before we had a long holiday.']], '先考试 → had had our tests。'),
+    TF('He showed us a picture. Then he showed us around the house.（用过去完成时连接两句）', [['合并句', 'He showed us around the house after he had shown us a picture.|After he had shown us a picture, he showed us around the house.|He had shown us a picture before he showed us around the house.']], 'show – showed – shown。'),
+  ] },
+] },
+
+{ t: 'ext', groups: [
+  { h: '本页补充：换个场景用一用（非讲义题）', items: [
+    C('你周日下午三点给同学打电话他没接。第二天他解释「我那时正在上钢琴课」，最地道的说法是：', ['I had a piano lesson at three.', 'I was having a piano lesson at that time.', 'I have had a piano lesson.', 'I am having a piano lesson.'], 1, '解释「过去那一刻在干什么」→ 过去进行时。'),
+    C('Look at the dark clouds! It ___.', ['rains', 'rained', 'is going to rain', 'has rained'], 2, '眼前有迹象 → be going to。'),
+    C('你回家发现钥匙找不到了，进不了门。你给妈妈打电话说：', ['I lost my key yesterday.', 'I have lost my key.', 'I had lost my key.', 'I am losing my key.'], 1, '强调「现在进不了门」这个结果 → 现在完成时。'),
+    C('—Where is Tom? —He ___ to the library. He will be back in an hour.', ['has been', 'has gone', 'went', 'goes'], 1, '人还没回来 → has gone to。'),
+  ] },
+] },
 ];
-</script>
-<script>
-/* ---------- 练习题（learn 通用组件） ----------
-   题目来自 window.LQ_ITEMS：{type, q, opts, ans: 选项下标, why} 或填空题 {type, q, ans: [可接受答案…], why}
-   定义 window.resetPage()（导航条「重置」按钮调用）：先调用页面自己的 window.pageReset()，再清空练习 */
-(() => {
-  const box = document.getElementById('lq');
-  const items = window.LQ_ITEMS || [];
-  const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
-  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/[’‘]/g, "'").replace(/\s+/g, '');
-  let answered = 0, right = 0;
 
-  function update() {
-    const all = answered === items.length;
-    score.textContent = `已答 ${answered} / ${items.length} · 答对 ${right}` +
-      (all ? (right === items.length ? ' · 全对！' : ' · 看看解析，再重做一次') : '');
-  }
+/* ---------- 题库组件 ---------- */
+{
+  const TN = Object.fromEntries(T.map(t => [t.id, t.name])); TN.ext = '补充迁移';
+  const root = $('bank'), tabs = $('bankTabs'), body = $('bankBody'), score = $('bankScore');
+  const norm = s => String(s).toLowerCase().replace(/[’‘`]/g, "'")
+    .replace(/\bwon't\b/g, 'will not').replace(/\bshan't\b/g, 'shall not').replace(/\bcan't\b/g, 'can not').replace(/\bcannot\b/g, 'can not')
+    .replace(/n't\b/g, ' not').replace(/'m\b/g, ' am').replace(/'re\b/g, ' are').replace(/'ve\b/g, ' have').replace(/'ll\b/g, ' will')
+    .replace(/<[^>]+>/g, ' ').replace(/[.,?!;:，。？！、；：…—"“”()（）\/-]+/g, ' ').replace(/\s+/g, ' ').trim();
+  const alts = a => a.split('|');
+  const match = (val, a) => alts(a).some(x => norm(x) === norm(val));
+  const INIT = { tab: 0 };
+  let S = { ...INIT };
+  const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
 
-  function render() {
-    answered = 0; right = 0; list.innerHTML = '';
-    items.forEach((it, i) => {
-      const el = document.createElement('div');
-      el.className = 'lq-item';
-      el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
-      const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
-      const judge = (ok, answer) => {
-        answered++; if (ok) right++;
-        el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
-        why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
-        update();
-      };
-      if (it.opts) {
-        a.classList.add('lq-opts');
-        it.opts.forEach((o, j) => {
-          const b = document.createElement('button');
-          b.type = 'button'; b.className = 'lq-opt'; b.innerHTML = o;
-          b.onclick = () => {
-            a.querySelectorAll('button').forEach(x => x.disabled = true);
-            a.children[it.ans].classList.add('lq-right');
-            if (j !== it.ans) b.classList.add('lq-wrong');
-            judge(j === it.ans, it.opts[it.ans]);
-          };
-          a.append(b);
-        });
-      } else {
-        a.classList.add('lq-fill');
-        a.innerHTML = `<input type="text" autocomplete="off" spellcheck="false" placeholder="${it.placeholder || '输入答案'}" aria-label="第 ${i + 1} 题答案"><button type="button" class="lq-opt">确定</button>`;
-        const inp = a.querySelector('input'), go = a.querySelector('button');
-        const submit = () => {
-          if (!inp.value.trim()) { inp.focus(); return; }
-          inp.disabled = go.disabled = true;
-          const ok = it.ans.some(x => norm(x) === norm(inp.value));
-          inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
-          judge(ok, it.ans[0]);
-        };
-        go.onclick = submit;
-        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
-      }
-      list.append(el);
-    });
-    update();
-  }
-
-  box.querySelector('.lq-redo').addEventListener('click', render);
-  window.resetPage = () => {
-    if (typeof window.pageReset === 'function') window.pageReset();
-    render();
+  const finish = (el, ok, msg) => {
+    el.classList.add('done', ok ? 'ok' : 'bad');
+    el.querySelector('.bq-why').innerHTML = (ok ? '<b class="g">✓ 正确。</b>' : '<b class="r">✗ 不对。</b>') + msg;
+    stats();
   };
-  render();
-})();
+  const selfOk = el => {           // 句型转换：写法不同但意思对时，允许自评算对
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'bq-btn'; b.textContent = '我的写法也对，算对';
+    b.onclick = () => { el.classList.remove('bad'); el.classList.add('ok'); b.remove(); stats(); };
+    el.querySelector('.bq-why').append(' ', b);
+  };
+
+  const build = (it, n) => {
+    const el = document.createElement('div');
+    el.className = 'bq';
+    const qhtml = it.k === 'f' ? '' : `<div class="bq-q"><span class="bq-n">${n}.</span> ${it.k === 's' ? '点出句中错误的词：' : it.q}</div>`;
+    el.innerHTML = qhtml + '<div class="bq-a"></div><div class="bq-why"></div>';
+    const a = el.querySelector('.bq-a');
+    if (it.k === 'c') {
+      it.o.forEach((o, j) => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'bq-btn'; b.innerHTML = `${'ABCD'[j] && it.o.length > 2 ? 'ABCD'[j] + '. ' : ''}${o}`;
+        b.onclick = () => {
+          a.querySelectorAll('button').forEach(x => x.disabled = true);
+          a.children[it.a].classList.add('right');
+          if (j !== it.a) b.classList.add('wrong');
+          finish(el, j === it.a, (j === it.a ? '' : `答案：${it.o[it.a]}。`) + it.w);
+        };
+        a.append(b);
+      });
+    } else if (it.k === 'f') {
+      let i = 0;
+      const html = it.q.replace(/___/g, () => `<input type="text" class="bq-in" data-i="${i++}" autocomplete="off" spellcheck="false" aria-label="第 ${i} 空">`);
+      a.innerHTML = `<div class="bq-q"><span class="bq-n">${n}.</span> ${html}</div>`;
+      const go = document.createElement('button');
+      go.type = 'button'; go.className = 'bq-btn'; go.textContent = '确定';
+      a.append(go);
+      const ins = [...a.querySelectorAll('input')];
+      const submit = () => {
+        if (ins.every(x => !x.value.trim())) { ins[0].focus(); return; }
+        let ok = true;
+        ins.forEach((x, k) => { const r = match(x.value, it.a[k]); ok = ok && r; x.classList.add(r ? 'right' : 'wrong'); x.disabled = true; });
+        go.disabled = true;
+        finish(el, ok, `答案：${it.a.map(x => `<b>${alts(x)[0]}</b>`).join(' / ')}。${it.w}`);
+      };
+      go.onclick = submit;
+      ins.forEach(x => x.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); }));
+    } else if (it.k === 's') {
+      const toks = it.q.split(' ');
+      toks.forEach((w, j) => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'bq-tok'; b.textContent = w;
+        b.onclick = () => {
+          a.querySelectorAll('button').forEach(x => x.disabled = true);
+          it.bad.forEach(k => a.children[k].classList.add('right'));
+          const ok = it.bad.includes(j);
+          if (!ok) b.classList.add('wrong');
+          finish(el, ok, `改正：<span class="en">${it.fix}</span> ${it.w}`);
+        };
+        a.append(b);
+      });
+    } else if (it.k === 'tf') {
+      a.innerHTML = it.tasks.map(([lab], k) => `<label class="bq-row"><span>${lab}</span><input type="text" class="bq-in wide" data-k="${k}" autocomplete="off" spellcheck="false"></label>`).join('');
+      const go = document.createElement('button');
+      go.type = 'button'; go.className = 'bq-btn'; go.textContent = '检查';
+      a.append(go);
+      const ins = [...a.querySelectorAll('input')];
+      go.onclick = () => {
+        if (ins.every(x => !x.value.trim())) { ins[0].focus(); return; }
+        let ok = true;
+        ins.forEach((x, k) => { const r = match(x.value, it.tasks[k][1]); ok = ok && r; x.classList.add(r ? 'right' : 'wrong'); x.disabled = true; });
+        go.disabled = true;
+        finish(el, ok, '参考答案：' + it.tasks.map(([lab, ans]) => `<br>· ${lab}：<span class="en">${esc(alts(ans)[0])}</span>${alts(ans).length > 1 ? `<span class="alt">（也可：${alts(ans).slice(1).map(esc).join('；')}）</span>` : ''}`).join('') + `<br>${it.w}`);
+        if (!ok) selfOk(el);
+      };
+    } else if (it.k === 'wd') {
+      a.innerHTML = `<div class="bq-wd">${it.list.map(([w], k) => `<label><span>${w}</span><input type="text" class="bq-in" data-k="${k}" autocomplete="off" spellcheck="false"></label>`).join('')}</div>`;
+      const go = document.createElement('button');
+      go.type = 'button'; go.className = 'bq-btn'; go.textContent = '检查全部';
+      a.append(go);
+      const ins = [...a.querySelectorAll('input')];
+      go.onclick = () => {
+        let c = 0;
+        ins.forEach((x, k) => {
+          const r = match(x.value, it.list[k][1]); if (r) c++;
+          x.classList.add(r ? 'right' : 'wrong'); x.disabled = true;
+          if (!r) x.insertAdjacentHTML('afterend', `<em>${it.list[k][1]}</em>`);
+        });
+        go.disabled = true;
+        finish(el, c === ins.length, `答对 ${c} / ${ins.length}。${it.w}`);
+      };
+    }
+    return el;
+  };
+
+  const panels = [];
+  const renderPanel = i => {
+    const p = panels[i]; p.innerHTML = '';
+    BANK[i].groups.forEach(g => {
+      p.insertAdjacentHTML('beforeend', `<h3 class="bq-h">${g.h}</h3>`);
+      const list = document.createElement('div'); list.className = 'bq-list';
+      g.items.forEach((it, k) => list.append(build(it, k + 1)));
+      p.append(list);
+    });
+    stats();
+  };
+  const stats = () => {
+    let A = 0, R = 0, N = 0;
+    panels.forEach((p, i) => {
+      const n = p.querySelectorAll('.bq').length, d = p.querySelectorAll('.bq.done').length, r = p.querySelectorAll('.bq.ok').length;
+      N += n; A += d; R += r;
+      const b = tabs.children[i]; if (b) b.querySelector('small').textContent = d ? `${r}/${n}` : `${n} 题`;
+    });
+    score.textContent = `全部 ${N} 题 · 已答 ${A} · 答对 ${R}` + (A === N ? '（全部完成！）' : '');
+  };
+  BANK.forEach((b, i) => {
+    tabs.insertAdjacentHTML('beforeend', `<button type="button" class="btn" data-i="${i}">${TN[b.t]}<small></small></button>`);
+    const p = document.createElement('div'); p.className = 'bq-panel'; body.append(p); panels.push(p);
+  });
+  tabs.querySelectorAll('button').forEach(b => b.onclick = () => { S.tab = +b.dataset.i; show(); });
+  const show = () => {
+    panels.forEach((p, i) => p.hidden = i !== S.tab);
+    tabs.querySelectorAll('button').forEach((b, i) => b.classList.toggle('on', i === S.tab));
+  };
+  $('bankRedoTab').onclick = () => renderPanel(S.tab);
+  $('bankRedoAll').onclick = () => BANK.forEach((_, i) => renderPanel(i));
+  const reset = () => { S = { ...INIT }; BANK.forEach((_, i) => renderPanel(i)); show(); };
+  resets.push(reset);
+  reset();
+}
+window.resetPage = () => window.pageReset();
 </script>
 </body>
 </html>
