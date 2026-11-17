@@ -1,6 +1,21 @@
 {
   "date": "2026-11-16",
   "pages": "p1-4",
+  "quiz": [
+    {"type": "选择", "q": "My uncle moved to Canada five years ago. He has lived ______ since then.", "opts": ["to abroad", "abroad", "in abroad"], "ans": 1, "why": "abroad 是副词，前面不能加 to 或 in（见 #5 abroad 的名师点拨）。同理 go abroad 出国、live abroad 在国外生活。"},
+    {"type": "选择", "q": "There is a dictionary ______ the desk. You can use it.", "opts": ["above", "over", "on"], "ans": 2, "why": "字典放在书桌表面，有接触，用 on。above 是笼统的上方，over 是正上方，两者都不接触（#4 above 的名师点拨）。"},
+    {"type": "判断", "q": "above 的反义词是 under。", "opts": ["对", "错"], "ans": 1, "why": "常见误区。书上写的是：above 的反义词为 below；over 的反义词才是 under。"},
+    {"type": "选择", "q": "—How about ______ to the museum this Sunday?　—Good idea!", "opts": ["go", "going", "to go"], "ans": 1, "why": "how about / what about 后面接 doing sth.（#3 about 的常用词组）。about 是介词，介词后面的动词要用 -ing 形式。"},
+    {"type": "填空", "q": "Tom is ill, so he is ______ (able) to come to school today.", "ans": ["unable"], "placeholder": "用 able 的适当形式", "why": "生病了，所以“不能”来上学，要用反义词 unable（un- 表示否定，见 #1 ability 的词形拓展）。注意不是 disable，disable 是动词“使伤残”。"},
+    {"type": "填空", "q": "He ______ (accept) the invitation and came to my birthday party yesterday.", "ans": ["accepted"], "placeholder": "用 accept 的适当形式", "why": "yesterday 表示过去，用一般过去时 accepted（#6 accept）。accept 的反义词是 refuse，记搭配 refuse to do sth.。"},
+    {"type": "选择", "q": "My aunt is a famous ______. She has acted in many films.", "opts": ["actor", "actress", "acting"], "ans": 1, "why": "阿姨是女性，女演员用 actress，actor 是男演员；acting 是“表演”这件事，不是人（#12 act 的词形拓展）。"},
+    {"type": "填空", "q": "I didn’t plan it. I met my old classmate in the street ______ accident yesterday.", "ans": ["by"], "placeholder": "填一个介词", "why": "by accident 偶然地（#7 accident 的常用词组），相当于副词 accidentally。"},
+    {"type": "选择", "q": "They took an active part ______ the school sports meeting.", "opts": ["on", "in", "at"], "ans": 1, "why": "take an active part in 积极参与（#13 active 的常用词组）。介词固定用 in，同理 take part in 参加。"},
+    {"type": "填空", "q": "Our school offers many after-school ______ (activity), such as singing, gardening and robotics.", "ans": ["activities"], "placeholder": "用 activity 的适当形式", "why": "many 后面要用可数名词复数。activity 以“辅音字母 + y”结尾，变 y 为 i 再加 -es：activities（#14 activity，书上标了“复 activities”）。"},
+    {"type": "填空", "q": "Winning the first prize gave her a great sense of ______ (achieve).", "ans": ["achievement"], "placeholder": "用 achieve 的适当形式", "why": "of 后面要用名词。achieve 的名词是 achievement（成就），a sense of achievement 就是课堂笔记里的“成就感”。"},
+    {"type": "填空", "q": "Please copy the numbers ______ (accurate). One small mistake can cause big trouble.", "ans": ["accurately"], "placeholder": "用 accurate 的适当形式", "why": "修饰动词 copy 要用副词：accurate（adj. 准确的）→ accurately（adv. 准确地）。accuracy 是名词“准确性”（#8 accurate 的词形拓展）。"},
+    {"type": "选择", "q": "When I was cleaning my room, I ______ an old photo of my grandpa.", "opts": ["came across", "went across", "acted out"], "ans": 0, "why": "come across（偶然）遇见、发现（#11 across 的常用词组）。go across 是“穿过”（课堂笔记），act out 是“表演”。迁移：同一个 across，搭配的动词不同，意思完全不同。"}
+  ],
   "words": [
     {
       "no": 1, "w": "ability", "ipa": "/əˈbɪləti/", "star": true, "unit": "G6下U1",

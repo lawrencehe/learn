@@ -11,6 +11,8 @@
   der 词形拓展 [{w, pos, zh}]   ph 常用词组 [{en, zh}]，可用 [方括号] 指定填空位置，不标则整条默写
   syn 近义 / ant 反义 [文本]    tips [{title, lines}] 名师点拨    proverb {en, zh} 谚语
   nph 课堂笔记里补充的词/词组（格式同 ph，也会出题）   ntip 课堂笔记里的文字提示
+批次的 "quiz"：这批词的中考风格练习题（页面底部「练习」），8～12 道，题型混合、含误区和迁移：
+  选择/判断 {type, q, opts, ans: 正确选项下标, why}；填空 {type, q, ans: [可接受答案…], placeholder, why}
 批次文件可选 "phonemes": {"词": {"us": IPA, "gb": IPA}} 给多音词手动指定读音。
 
 音频：每批 4 个文件 site/audio/vocab/<日期>.<us|gb>[.ex].js（base64 mp3；.ex 是例句/谚语），
@@ -43,6 +45,13 @@ def speech(s):
 
 def check(b, f):
     assert re.fullmatch(r"\d{4}-\d{2}-\d{2}", b.get("date", "")), f"{f}: date 格式应为 YYYY-MM-DD"
+    for i, q in enumerate(b.get("quiz", []), 1):
+        where = f"{f} 练习第 {i} 题"
+        assert q.get("q") and q.get("why") and q.get("type"), f"{where}: 缺少 type/q/why"
+        if "opts" in q:
+            assert isinstance(q["ans"], int) and 0 <= q["ans"] < len(q["opts"]), f"{where}: ans 应是选项下标"
+        else:
+            assert isinstance(q["ans"], list) and q["ans"], f"{where}: 填空题 ans 应是答案列表"
     for w in b["words"]:
         where = f"{f} #{w.get('no')} {w.get('w')}"
         for k in ("no", "w", "ipa", "senses"):
