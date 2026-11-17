@@ -1,0 +1,215 @@
+{
+  "date": "2026-11-16",
+  "pages": "p1-4",
+  "words": [
+    {
+      "no": 1, "w": "ability", "ipa": "/əˈbɪləti/", "star": true, "unit": "G6下U1",
+      "forms": "复 abilities",
+      "senses": [{"pos": "n.", "zh": "能力，才能，本领"}],
+      "ex": [{"en": "Sue has the [ability] to succeed in business.", "zh": "苏有能力在商业上取得成功。"}],
+      "der": [
+        {"w": "able", "pos": "adj.", "zh": "能够的；有能力的"},
+        {"w": "enable", "pos": "v.", "zh": "使……能够，使……有能力"},
+        {"w": "disable", "pos": "v.", "zh": "使伤残；使丧失能力"},
+        {"w": "disabled", "pos": "adj.", "zh": "丧失能力的；有残疾的；无能力的"},
+        {"w": "unable", "pos": "adj.", "zh": "不能的；不会的"}
+      ],
+      "ph": [{"en": "have the [ability] to do sth.", "zh": "具备做某事的能力"}],
+      "nph": [{"en": "business", "zh": "n. 商业（busy 变 y 为 i，加 -ness）"}],
+      "ntip": ["en- 表示“使……”：able → enable", "dis- 表示否定，构成反义动词：able → disable", "-ed 构成形容词：disable → disabled", "un- 表示否定：able → unable"]
+    },
+    {
+      "no": 2, "w": "able", "ipa": "/ˈeɪbl/", "star": true, "unit": "G8上U6",
+      "senses": [{"pos": "adj.", "zh": "能够的；有能力的"}],
+      "ex": [{"en": "Leave the reference books behind, or you won't be [able] to think by yourself.", "zh": "把参考书放一边，否则你将无法独立思考。"}],
+      "ph": [{"en": "sb. be [able] to do sth.", "zh": "某人能够做某事"}],
+      "ant": ["unable"],
+      "nph": [{"en": "reference", "zh": "n. 参考（refer + -ence）"}],
+      "ntip": ["be able to ≈ can"]
+    },
+    {
+      "no": 3, "w": "about", "ipa": "/əˈbaʊt/", "star": true, "unit": "",
+      "senses": [{"pos": "adv.", "zh": "大约；到处，四处"}, {"pos": "prep.", "zh": "关于"}],
+      "ex": [
+        {"en": "It takes [about] half an hour to ride from this park to Shanghai Museum.", "zh": "从这个公园骑车到上海博物馆大约需要半个小时。"},
+        {"en": "Mr. Johnson is always kind to his students and he really cares [about] them.", "zh": "约翰逊先生对他的学生总是很好，他真的很关心他们。"},
+        {"en": "You'd better not ask too many personal questions [about] someone's age and salary.", "zh": "你最好不要问太多关于某人年龄和薪水的私人问题。"}
+      ],
+      "ph": [{"en": "how [about] doing sth. = what about doing sth.", "zh": "做某事如何"}],
+      "nph": [
+        {"en": "[care] about sb.", "zh": "关心某人"},
+        {"en": "had better ([not]) do sth.", "zh": "最好（不要）做某事"}
+      ]
+    },
+    {
+      "no": 4, "w": "above", "ipa": "/əˈbʌv/", "star": false, "unit": "G7上U3",
+      "senses": [{"pos": "prep.", "zh": "在……上面"}, {"pos": "adv.", "zh": "（水平）超过，更多，更大"}],
+      "ex": [
+        {"en": "Keep your head [above] the water.", "zh": "保持头部在水面以上。"},
+        {"en": "This job requires a bachelor's degree or [above].", "zh": "这份工作需要本科及以上学历。"}
+      ],
+      "ph": [{"en": "[above] all", "zh": "首先，尤其是；最重要的是"}],
+      "ant": ["below"],
+      "tips": [{"title": "名师点拨", "lines": [
+        "above 是常考单词，所以学生一定要知道 above、over 和 on 在表示位置时的用法区别：",
+        "above 指笼统的上方，表示位置之高；反义词为 below。例如：The water came above our knees. 水没过了我们的膝盖。",
+        "over 指垂直的上方，比较精确，反义词为 under。例如：The light is over my head. 灯在我头顶上方。",
+        "on 指“在……上面”，两者有表面接触，表示一件东西在另一件之上。例如：There is a book on the desk. 桌子上有一本书。"
+      ]}],
+      "nph": [
+        {"en": "[first] of all", "zh": "首先（≈ above all）"},
+        {"en": "a [bachelor's] degree", "zh": "学士学位（本科学历）"}
+      ]
+    },
+    {
+      "no": 5, "w": "abroad", "ipa": "/əˈbrɔːd/", "star": false, "unit": "",
+      "senses": [{"pos": "adv.", "zh": "到（在）国外"}],
+      "ex": [
+        {"en": "He had to make a choice between staying with his parents and going [abroad].", "zh": "与父母住在一起还是出国，他不得不作出选择。"},
+        {"en": "My brother is living [abroad].", "zh": "我哥哥在国外生活。"}
+      ],
+      "ph": [{"en": "go [abroad]", "zh": "出国"}],
+      "tips": [{"title": "名师点拨", "lines": [
+        "abroad 是常考单词，所以学生一定要掌握其固定搭配：abroad 前面不能加 to 或 in，因为 abroad 是副词。"
+      ]}],
+      "nph": [
+        {"en": "at home and [abroad]", "zh": "在国内外（abroad 是副词）"},
+        {"en": "[have] to do sth.", "zh": "不得不做某事"}
+      ]
+    },
+    {
+      "no": 6, "w": "accept", "ipa": "/əkˈsept/", "star": true, "unit": "G6下U1",
+      "senses": [{"pos": "v.", "zh": "接受，同意"}],
+      "ex": [{"en": "They [accepted] responsibility for the accident.", "zh": "他们承担了这次事故的责任。"}],
+      "der": [{"w": "acceptable", "pos": "adj.", "zh": "可接受的"}],
+      "syn": ["agree to have"],
+      "ant": ["refuse"],
+      "nph": [
+        {"en": "[duty]", "zh": "n. 责任（≈ responsibility）"},
+        {"en": "be [responsible] for doing sth.", "zh": "对做某事负责"},
+        {"en": "[agree] to do sth.", "zh": "同意做某事"},
+        {"en": "[refuse] to do sth.", "zh": "拒绝做某事"}
+      ]
+    },
+    {
+      "no": 7, "w": "accident", "ipa": "/ˈæksɪdənt/", "star": false, "unit": "G7下U4",
+      "senses": [{"pos": "n.", "zh": "事故；意外；偶然的事"}],
+      "ex": [{"en": "He was injured in a traffic [accident].", "zh": "他在一次交通事故中受伤。"}],
+      "der": [
+        {"w": "accidental", "pos": "adj.", "zh": "意外的"},
+        {"w": "accidentally", "pos": "adv.", "zh": "意外地；偶然地"}
+      ],
+      "ph": [{"en": "[by] accident", "zh": "偶然地"}],
+      "nph": [
+        {"en": "traffic [light]", "zh": "红绿灯"},
+        {"en": "[hurt]", "zh": "v. 使受伤（≈ injure）"}
+      ],
+      "ntip": ["by accident 在句中作状语，相当于副词 accidentally"]
+    },
+    {
+      "no": 8, "w": "accurate", "ipa": "/ˈækjərət/", "star": false, "unit": "",
+      "senses": [{"pos": "adj.", "zh": "准确的"}],
+      "ex": [{"en": "The manager impressed on his office staff the importance of keeping [accurate] records.", "zh": "经理让办公室职员认识到做精确记录的重要性。"}],
+      "der": [
+        {"w": "accuracy", "pos": "n.", "zh": "准确性"},
+        {"w": "accurately", "pos": "adv.", "zh": "准确地；精确地"}
+      ],
+      "nph": [{"en": "[impress] on sb. sth.", "zh": "让某人认识到某事（sth. 是名词）"}]
+    },
+    {
+      "no": 9, "w": "ache", "ipa": "/eɪk/", "star": false, "unit": "G8下U6",
+      "senses": [{"pos": "n.", "zh": "（身体某部位的）疼；痛"}, {"pos": "v.", "zh": "疼痛"}],
+      "ex": [
+        {"en": "She could feel an [ache] in her back.", "zh": "她能感觉到背部的疼痛。"},
+        {"en": "My head [aches] after studying for a long time.", "zh": "长时间学习后，我的头很疼。"}
+      ],
+      "nph": [
+        {"en": "headache", "zh": "n. 头痛"},
+        {"en": "stomachache", "zh": "n. 胃痛"}
+      ]
+    },
+    {
+      "no": 10, "w": "achieve", "ipa": "/əˈtʃiːv/", "star": false, "unit": "",
+      "senses": [{"pos": "v.", "zh": "达到，获得"}],
+      "ex": [{"en": "As an English learner, the larger vocabulary you have, the more success you may [achieve].", "zh": "作为一名英语学习者，你的词汇量越大，你最终获得的成功也就越大。"}],
+      "der": [{"w": "achievement", "pos": "n.", "zh": "成就；达成"}],
+      "nph": [
+        {"en": "a sense of [achievement]", "zh": "成就感"},
+        {"en": "[achieve] success", "zh": "获得成功"}
+      ]
+    },
+    {
+      "no": 11, "w": "across", "ipa": "/əˈkrɒs/", "star": true, "unit": "G6下U3",
+      "senses": [{"pos": "prep. & adv.", "zh": "横过，穿过"}],
+      "ex": [
+        {"en": "She ran [across] the field to catch up with her friends.", "zh": "她跑过田野赶上朋友们。"},
+        {"en": "The river measures about 30 metres [across].", "zh": "这条河宽约 30 米。"}
+      ],
+      "der": [{"w": "cross", "pos": "n. / v.", "zh": "n. 十字形的东西；v. 越过，穿过"}],
+      "ph": [{"en": "[come] across", "zh": "（偶然）遇见，碰见，发现"}],
+      "nph": [
+        {"en": "[measure]", "zh": "v. 测量"},
+        {"en": "crossroads", "zh": "n. 十字路口"},
+        {"en": "go [across]", "zh": "穿过"}
+      ]
+    },
+    {
+      "no": 12, "w": "act", "ipa": "/ækt/", "star": true, "unit": "G6下U6",
+      "senses": [{"pos": "v.", "zh": "表演，扮演（角色）；行动"}, {"pos": "n.", "zh": "行动"}],
+      "ex": [
+        {"en": "The actor who [acted] in the TV series last night became famous in his thirties.", "zh": "昨晚电视剧中的这位演员，在他 30 多岁时就成名了。"},
+        {"en": "His selfless [act] of kindness touched everyone's heart.", "zh": "他无私的善举触动了每个人的心。"}
+      ],
+      "der": [
+        {"w": "acting", "pos": "n.", "zh": "表演"},
+        {"w": "action", "pos": "n.", "zh": "行动；行为过程"},
+        {"w": "active", "pos": "adj.", "zh": "积极的；活跃的；充满活力的"},
+        {"w": "actively", "pos": "adv.", "zh": "积极地"},
+        {"w": "activity", "pos": "n.", "zh": "活动"},
+        {"w": "actor", "pos": "n.", "zh": "男演员"},
+        {"w": "actress", "pos": "n.", "zh": "女演员"}
+      ],
+      "ph": [{"en": "act [out]", "zh": "表演"}],
+      "proverb": {"en": "Think well before you act.", "zh": "三思而后行。"},
+      "nph": [
+        {"en": "in one's [thirties]", "zh": "在某人三十多岁时（同理 teens / twenties …）"},
+        {"en": "[famous]", "zh": "adj. 著名的"},
+        {"en": "take [action]", "zh": "采取行动"}
+      ],
+      "ntip": ["例句里 who acted in the TV series last night 修饰前面的 the actor（定语从句）"]
+    },
+    {
+      "no": 13, "w": "active", "ipa": "/ˈæktɪv/", "star": true, "unit": "G6上U4",
+      "senses": [{"pos": "adj.", "zh": "积极的；活跃的；充满活力的"}],
+      "ex": [{"en": "They took an [active] part in the singing competition yesterday.", "zh": "他们昨天积极参加了唱歌比赛。"}],
+      "ph": [
+        {"en": "live an [active] life", "zh": "过着积极的生活"},
+        {"en": "keep [active] and healthy", "zh": "保持活跃健康"},
+        {"en": "take an active part [in]", "zh": "积极参与"}
+      ],
+      "nph": [{"en": "[competition]", "zh": "n. 比赛"}]
+    },
+    {
+      "no": 14, "w": "activity", "ipa": "/ækˈtɪvəti/", "star": true, "unit": "G6上U1",
+      "forms": "复 activities",
+      "senses": [{"pos": "n.", "zh": "活动"}],
+      "ex": [{"en": "Our school club offers various [activities], such as singing, gardening, and robotics.", "zh": "我们的学校社团提供各种各样的活动，如唱歌、园艺和机器人制作。"}],
+      "nph": [
+        {"en": "take [part] in an activity", "zh": "参加活动"},
+        {"en": "[such] as A, B and C", "zh": "例如 A、B 和 C（≈ for example）"}
+      ]
+    },
+    {
+      "no": 15, "w": "actor", "ipa": "/ˈæktə(r)/", "star": true, "unit": "G7上U3",
+      "senses": [{"pos": "n.", "zh": "男演员"}],
+      "ex": [{"en": "Nowadays too many boys want to become [actors].", "zh": "现在太多男孩都想成为演员。"}],
+      "nph": [{"en": "[nowadays]", "zh": "adv. 现如今"}]
+    },
+    {
+      "no": 16, "w": "actress", "ipa": "/ˈæktrəs/", "star": true, "unit": "G7上U3",
+      "senses": [{"pos": "n.", "zh": "女演员"}],
+      "ex": [{"en": "Emma, an [actress], has become a superstar because of her hard work and talent.", "zh": "艾玛是一位女演员，因为她的努力和才华成为了超级明星。"}],
+      "ntip": ["an actress 补充说明 Emma 是谁，相当于 (who is) an actress"]
+    }
+  ]
+}
