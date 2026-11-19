@@ -1,0 +1,177 @@
+{
+  "date": "2026-11-18",
+  "pages": "p22-24",
+  "quiz": [
+    {"type": "选择", "q": "______ big ball it is!", "opts": ["How", "What", "What a"], "ans": 2, "why": "感叹句两种句型：What + a/an + 形容词 + 名词 + 主语 + 谓语！ How + 形容词 + 主语 + 谓语！这里形容词后面有名词 ball，所以用 What a（#123 ball 的课堂笔记：How big this ball is! = What a big ball it is!）。"},
+    {"type": "选择", "q": "______ bad the weather is today!", "opts": ["What", "What a", "How"], "ans": 2, "why": "bad 后面紧跟的是主语 the weather，没有“a + 形容词 + 名词”的结构，所以用 How（#119 bad 的例句 How bad he is!）。weather 不可数，也不能用 What a。"},
+    {"type": "填空", "q": "This is the ______ (bad) film I have ever seen.", "ans": ["worst"], "placeholder": "用 bad 的适当形式", "why": "the + 最高级 + I have ever seen（我看过的最……的）。bad 是不规则变化：bad → worse → worst（#119 bad）。"},
+    {"type": "填空", "q": "Eating too much sugar is bad ______ your teeth.", "ans": ["for"], "placeholder": "填一个介词", "why": "be bad for 对……有害（#119 bad 的常用词组）。反过来 be good for 对……有好处。"},
+    {"type": "选择", "q": "After school, my brother often plays ______ basketball with his friends.", "opts": ["the", "a", "／（不填）"], "ans": 2, "why": "常见误区。球类名词前不用冠词：play basketball / football（#131 basketball 的名师点拨），棋牌类也一样：play chess / cards。但乐器前要加 the：play the piano。"},
+    {"type": "选择", "q": "The new schoolbag ______ my mother 200 yuan.", "opts": ["spent", "cost", "paid"], "ans": 1, "why": "主语是东西（schoolbag），用 cost：物 + cost + 人 + 钱（#120 bag 的课堂笔记）。spend 的主语必须是人：My mother spent 200 yuan on the schoolbag.（spend 的过去式是 spent）"},
+    {"type": "填空", "q": "He slipped on the ice and lost his ______.", "ans": ["balance"], "placeholder": "填一个名词", "why": "lose one's balance 失去平衡，对应 keep one's balance 保持平衡（#122 balance 的例句和课堂笔记）。"},
+    {"type": "填空", "q": "We should eat a ______ (balance) diet to stay healthy.", "ans": ["balanced"], "placeholder": "用 balance 的适当形式", "why": "修饰名词 diet 要用形容词：balance n. 平衡 → balanced adj. 均衡的（#122 balance 的词形拓展，-ed 读 /t/）。a balanced diet 均衡的饮食，作文常用。"},
+    {"type": "填空", "q": "My uncle is a ______ (bake). He makes delicious bread every morning.", "ans": ["baker"], "placeholder": "用 bake 的适当形式", "why": "a 后面要人：bake v. 烘焙 → baker n. 面包师傅；bakery 是面包店，是地方不是人（#121 bakery 的词形拓展）。"},
+    {"type": "判断", "q": "bank 只有“银行”一个意思。", "opts": ["对", "错"], "ans": 1, "why": "bank 还有“岸”的意思：The swans gracefully swam along the bank. 天鹅沿着河岸游水（#126 bank 的第二个例句）。看到 river bank 不要翻成“河银行”。"},
+    {"type": "填空", "q": "The film is ______ (base) on a true story.", "ans": ["based"], "placeholder": "用 base 的适当形式", "why": "be based on 以……为基础、根据……改编（#128 base 的课堂笔记）。"},
+    {"type": "选择", "q": "Be careful while ______ the busy road.", "opts": ["cross", "crossing", "crossed"], "ans": 1, "why": "迁移：while crossing = while (you are) crossing，状语从句省略了“主语 + be”，和 #131 的 while (he was) playing basketball 是同一个结构，动词保留 -ing 形式。"}
+  ],
+  "words": [
+    {
+      "no": 116, "w": "baby", "ipa": "/ˈbeɪbi/", "star": false, "unit": "",
+      "forms": "复 babies",
+      "senses": [{"pos": "n.", "zh": "婴儿"}],
+      "ex": [{"en": "Please walk as gently as possible because her two [babies] are sleeping in the room.", "zh": "走路时请尽量轻一点，因为她的两个孩子正在房间里睡觉。"}],
+      "nph": [{"en": "as gently as [possible]", "zh": "尽可能轻（as + 形容词/副词原级 + as possible 尽可能……）"}]
+    },
+    {
+      "no": 117, "w": "back", "ipa": "/bæk/", "star": true, "unit": "",
+      "senses": [{"pos": "adv.", "zh": "回（原处）；向后"}, {"pos": "n.", "zh": "背后；后部；背"}, {"pos": "adj.", "zh": "背后的"}],
+      "ex": [
+        {"en": "Old photos bring [back] memories of freedom and happiness.", "zh": "老照片唤起了人们对自由与欢乐的回忆。"},
+        {"en": "Three people can sit in the [back] of his car.", "zh": "他的汽车后排可以坐三个人。"},
+        {"en": "I wondered about the [back] story of that mysterious painting.", "zh": "我对那幅神秘画作背后的故事感到好奇。"}
+      ],
+      "ant": ["front"],
+      "nph": [
+        {"en": "go [back] home", "zh": "回家"},
+        {"en": "in [front] of", "zh": "在……前面（back 的反义词 front）"},
+        {"en": "happiness", "zh": "n. 幸福；快乐（happy adj. 变 y 为 i，加 -ness）"},
+        {"en": "mystery", "zh": "n. 神秘的事；谜（mysterious adj. 神秘的）"}
+      ],
+      "ntip": ["the back story 里 back 是形容词“背后的”"]
+    },
+    {
+      "no": 118, "w": "background", "ipa": "/ˈbækɡraʊnd/", "star": false, "unit": "",
+      "senses": [{"pos": "n.", "zh": "背景"}],
+      "ex": [{"en": "The mountains form a [background] to this photograph of the family.", "zh": "这幅家庭照以群山为背景。"}],
+      "nph": [{"en": "[form]", "zh": "v. 形成"}]
+    },
+    {
+      "no": 119, "w": "bad", "ipa": "/bæd/", "star": true, "unit": "",
+      "forms": "比较级 worse /wɜːs/，最高级 worst /wɜːst/",
+      "senses": [{"pos": "adj.", "zh": "坏的；有害的，不利的；糟糕的，可惜的；严重的"}],
+      "ex": [
+        {"en": "How [bad] he is!", "zh": "他真坏！"},
+        {"en": "It's [bad] for your eyes.", "zh": "这对眼睛有害。"},
+        {"en": "It's too [bad] that Tim's uncle has formed an unhealthy habit of drinking and smoking.", "zh": "蒂姆的叔叔已养成了饮酒和吸烟的不良习惯，这太糟糕了。"}
+      ],
+      "der": [{"w": "badly", "pos": "adv.", "zh": "有害地；非常；严重地"}],
+      "ph": [{"en": "be bad [for]", "zh": "对……有害"}],
+      "ant": ["good"],
+      "nph": [{"en": "What a bad [man] he is!", "zh": "他真是个坏人！（= How bad he is!）"}],
+      "ntip": ["感叹句：How + 形容词 + 主语 + 谓语！ / What + a + 形容词 + 名词 + 主语 + 谓语！"]
+    },
+    {
+      "no": 120, "w": "bag", "ipa": "/bæɡ/", "star": true, "unit": "",
+      "senses": [{"pos": "n.", "zh": "书包；提包；袋子"}],
+      "ex": [{"en": "He didn't want to tell me how much the [bag] cost.", "zh": "他不想告诉我这个包花了多少钱。"}],
+      "nph": [
+        {"en": "[cost]", "zh": "v. 花费（主语是物：物 + cost）"},
+        {"en": "[spend]", "zh": "v. 花费（主语是人：人 + spend）"}
+      ]
+    },
+    {
+      "no": 121, "w": "bakery", "ipa": "/ˈbeɪkəri/", "star": false, "unit": "",
+      "forms": "复 bakeries",
+      "senses": [{"pos": "n.", "zh": "面包店"}],
+      "ex": [{"en": "This [bakery] is big.", "zh": "这家面包店很大。"}],
+      "der": [
+        {"w": "bake", "pos": "v.", "zh": "烘焙"},
+        {"w": "baker", "pos": "n.", "zh": "面包师傅"}
+      ]
+    },
+    {
+      "no": 122, "w": "balance", "ipa": "/ˈbæləns/", "star": 2, "unit": "G7下U5",
+      "senses": [{"pos": "n.", "zh": "平衡"}],
+      "ex": [
+        {"en": "A small child has to learn to keep his [balance] before he can walk far.", "zh": "小孩要先学会保持平衡才能走远。"},
+        {"en": "He slipped and lost his [balance].", "zh": "他一滑，便失去了平衡。"}
+      ],
+      "der": [{"w": "balanced", "pos": "adj.", "zh": "保持（或显示）平衡的"}],
+      "nph": [{"en": "keep one's [balance]", "zh": "保持平衡"}],
+      "ntip": ["balanced 结尾的 -ed 读 /t/"]
+    },
+    {
+      "no": 123, "w": "ball", "ipa": "/bɔːl/", "star": false, "unit": "",
+      "senses": [{"pos": "n.", "zh": "球"}],
+      "ex": [{"en": "How big this [ball] is!", "zh": "这个球好大啊！"}],
+      "nph": [{"en": "[What] a big ball it is!", "zh": "这是多么大的一个球啊！（= How big this ball is!）"}]
+    },
+    {
+      "no": 124, "w": "balloon", "ipa": "/bəˈluːn/", "star": false, "unit": "G6上U2",
+      "senses": [{"pos": "n.", "zh": "气球"}],
+      "ex": [{"en": "Look! There is a [balloon] in the sky.", "zh": "看！天上有个气球。"}]
+    },
+    {
+      "no": 125, "w": "banana", "ipa": "/bəˈnɑːnə/", "star": false, "unit": "",
+      "senses": [{"pos": "n.", "zh": "香蕉"}],
+      "ex": [{"en": "There is a [banana] on the desk.", "zh": "桌子上有根香蕉。"}]
+    },
+    {
+      "no": 126, "w": "bank", "ipa": "/bæŋk/", "star": true, "unit": "G7上U6 G8下U3",
+      "senses": [{"pos": "n.", "zh": "银行；岸"}],
+      "ex": [
+        {"en": "Three [banks] were robbed by that robber so someone reported to the police about the robbery.", "zh": "那个劫匪抢劫了三家银行，于是有人向警方报了案。"},
+        {"en": "The swans gracefully swam along the [bank].", "zh": "天鹅优雅地沿着河岸游水。"}
+      ],
+      "nph": [
+        {"en": "[robber]", "zh": "n. 强盗；劫匪（rob v. 抢劫）"},
+        {"en": "[robbery]", "zh": "n. 抢劫（案）"}
+      ]
+    },
+    {
+      "no": 127, "w": "bar", "ipa": "/bɑː(r)/", "star": false, "unit": "",
+      "senses": [{"pos": "n.", "zh": "酒吧；条；块；棒"}],
+      "ex": [
+        {"en": "There is a [bar] in the hotel.", "zh": "在这家酒店里有个酒吧。"},
+        {"en": "She ordered a protein [bar] to refuel after her workout.", "zh": "她锻炼后要了一根蛋白棒来补充能量。"}
+      ],
+      "nph": [
+        {"en": "alcohol", "zh": "n. 乙醇；酒精"},
+        {"en": "wine", "zh": "n. 葡萄酒"},
+        {"en": "beer", "zh": "n. 啤酒"},
+        {"en": "[workout]", "zh": "n. 锻炼"},
+        {"en": "[fuel]", "zh": "n. 燃料；v. 给……加燃料（refuel 补充能量）"}
+      ]
+    },
+    {
+      "no": 128, "w": "base", "ipa": "/beɪs/", "star": true, "unit": "",
+      "senses": [{"pos": "n.", "zh": "根据地，基地；基础"}],
+      "ex": [{"en": "Many languages have Latin as their [base].", "zh": "许多语言都是以拉丁语为基础的。"}],
+      "nph": [
+        {"en": "have sth. as the [base]", "zh": "以某物为基础"},
+        {"en": "be [based] on", "zh": "以……为基础；根据……"}
+      ]
+    },
+    {
+      "no": 129, "w": "basic", "ipa": "/ˈbeɪsɪk/", "star": false, "unit": "G7下U6",
+      "senses": [{"pos": "adj.", "zh": "基本的；基础的"}],
+      "ex": [{"en": "You need the [basic] knowledge of IT to apply for this job.", "zh": "申请这份工作你需要具备基本的信息技术知识。"}],
+      "der": [
+        {"w": "base", "pos": "n.", "zh": "根据地；基地；基础"},
+        {"w": "basically", "pos": "adv.", "zh": "主要地；基本上"},
+        {"w": "basics", "pos": "n.", "zh": "基本需要；基本设施"}
+      ],
+      "nph": [
+        {"en": "knowledge", "zh": "n. 知识（know v. 知道）"},
+        {"en": "apply [for]", "zh": "申请"}
+      ],
+      "ntip": ["basic → basically：以 -ic 结尾的形容词变副词，加 -ally"]
+    },
+    {
+      "no": 130, "w": "basket", "ipa": "/ˈbɑːskɪt/", "star": false, "unit": "G6上U4",
+      "senses": [{"pos": "n.", "zh": "篮子；（篮球运动的）篮"}],
+      "ex": [{"en": "Those [baskets] are full of fruits.", "zh": "那些篮子装满水果。"}],
+      "nph": [{"en": "be full [of]", "zh": "装满……；充满……"}],
+      "ntip": ["basket + ball → basketball 篮球"]
+    },
+    {
+      "no": 131, "w": "basketball", "ipa": "/ˈbɑːskɪtbɔːl/", "star": true, "unit": "",
+      "senses": [{"pos": "n.", "zh": "篮球"}],
+      "ex": [{"en": "— Jack hurt his arms while playing [basketball] yesterday afternoon. — I'm sorry to hear that.", "zh": "——杰克昨天下午打篮球时把手臂弄伤了。——听到这个消息我很难过。"}],
+      "tips": [{"title": "名师点拨", "lines": ["basketball 是常考单词，所以学生一定要牢记：在球类的名词前不能用冠词。"]}],
+      "nph": [{"en": "play [chess] / cards", "zh": "下棋 / 打牌（棋牌类前也不用冠词）"}],
+      "ntip": ["while playing basketball = while (he was) playing basketball：状语从句省略了“主语 + be”"]
+    }
+  ]
+}

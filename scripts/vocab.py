@@ -6,7 +6,7 @@
 每批一个文件 data/english-vocab/<学习日期>.json：
   {"date": "2026-11-16", "pages": "p1-4", "words": [词条…]}
 词条字段（照考纲书转录）：
-  no 书上序号  w 单词  ipa 音标  star 书上带 * 号  unit 教材单元（如 G6下U1）  forms 复数/变形说明
+  no 书上序号  w 单词  ipa 音标  star 书上带 * 号（两颗 ** 写 2）  unit 教材单元（如 G6下U1）  forms 复数/变形说明
   senses [{pos, zh}]   ex 例句 [{en, zh}]，en 里用 [方括号] 标出考的那个词（填空题挖掉它）
   der 词形拓展 [{w, pos, zh}]   ph 常用词组 [{en, zh}]，可用 [方括号] 指定填空位置，不标则整条默写
   syn 近义 / ant 反义 [文本]    tips [{title, lines}] 名师点拨    proverb {en, zh} 谚语
@@ -38,7 +38,7 @@ def speech(s):
     s = re.sub(r"\bsb\.'s", "somebody's", s)
     s = re.sub(r"\bsb\.", "somebody", s)
     s = re.sub(r"\bsth\.", "something", s)
-    s = s.replace(" = ", ", ").replace("……", " ").replace("…", " ")
+    s = s.replace(" = ", ", ").replace(" / ", ", ").replace("……", " ").replace("…", " ")
     s = re.sub(r"[()]", "", s)
     return re.sub(r"\s+", " ", s).strip()
 
