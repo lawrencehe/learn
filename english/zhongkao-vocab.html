@@ -232,7 +232,7 @@ document.getElementById('up-reset').addEventListener('click', function () {
 
 <section id="review">
   <h2>今日复习</h2>
-  <p class="lead small">复习时间是学完后的第 1、2、4、7、15、30、60、120 天，到期的批次会自动勾上。哪天漏做了，手动勾上补做即可。</p>
+  <p class="lead small">复习时间是学完后的第 1、2、4、7、15、30、60、120 天，到期的批次会自动勾上。晚了一两天也没关系：没做的批次会一直显示「到期」，做完后下一次从实际完成那天往后排。复习记录和易错本保存在这台设备的浏览器里。</p>
   <div class="card" style="margin-top:10px">
     <div class="field"><span class="lbl">发音</span>
       <span class="seg" id="accent"><button type="button" data-v="us">美音</button><button type="button" data-v="gb">英音</button></span>
@@ -262,7 +262,7 @@ document.getElementById('up-reset').addEventListener('click', function () {
 
 <section class="lq" id="lq" aria-label="练习">
   <div class="lq-head"><h2>练习</h2><span class="lq-score"></span></div>
-  <p class="lq-sub">每学一批新词，这里就多一组中考风格的题：固定搭配、词形转换、易混词。默认练最新一批，也可以选以前的批次，或从所有已学的批次里随机抽题。</p>
+  <p class="lq-sub">每学一批新词，这里就多一组中考风格的题：固定搭配、词形转换、易混词。默认练最新一批，也可以选以前的批次，或从所有已学的批次里随机抽题。答错的题会进上面的「易错本」。</p>
   <div class="ctrl" style="margin-top:0"><select id="lqSel" class="search" style="width:auto;max-width:100%"></select></div>
   <div class="lq-list"></div>
   <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
@@ -436,6 +436,26 @@ const WB = {
   hit(id) { const o = this.get(); if (o[id]) { if (--o[id] <= 0) delete o[id]; this.set(o); } },
 };
 
+/* ---------- 复习记录（存在本机浏览器里）：每批每轮实际完成的日期，下一轮从实际完成那天往后排 ---------- */
+// 开始记录之前的轮次，默认按原计划完成了
+const TRACK_START = '2026-11-19';
+const LOG = {
+  key: 'zk-vocab-log',
+  get() { try { return JSON.parse(localStorage.getItem(this.key)) || {}; } catch { return {}; } },
+  set(o) { try { localStorage.setItem(this.key, JSON.stringify(o)); } catch {} },
+  done(b) {                                            // 这批已完成的各轮日期
+    const o = this.get();
+    if (o[b.date]) return o[b.date];
+    return INTERVALS.map(n => addDays(b.date, n)).filter(d => d < TRACK_START);
+  },
+  add(b, day) { const o = this.get(); o[b.date] = [...this.done(b), day]; this.set(o); },
+};
+function nextDue(b) {                                  // 下一轮的轮次和日期
+  const done = LOG.done(b), n = done.length;
+  if (n >= INTERVALS.length) return null;
+  return { round: n + 1, date: n ? addDays(done[n - 1], INTERVALS[n] - INTERVALS[n - 1]) : addDays(b.date, INTERVALS[0]) };
+}
+
 /* ---------- 题目生成 ---------- */
 const TYPES = [
   { k: 'word', label: '中→英拼写' }, { k: 'der', label: '衍生词' }, { k: 'ph', label: '书上词组' },
@@ -461,7 +481,14 @@ function itemsFor(w, T) {
     prompt: `<div class="en">${blankify(e.en)}</div><div class="zh">${esc(e.zh)}</div>`, ans: blankOf(e.en), full: plain(e.en), say: e.en }));
   return out;
 }
-const ALL_ITEMS = WORDS.flatMap(w => itemsFor(w, { word: 1, der: 1, ph: 1, nph: 1, ex: 1, recall: 1 }));
+// 底部「练习」的题也能进易错本
+const QUIZ_ITEMS = BATCHES.flatMap(b => (b.quiz || []).map((q, i) => {
+  q.id = `q:${b.date}:${i}`;
+  return { id: q.id, tag: '练习题', qz: q, w: { date: b.date, no: '' } };
+}));
+const ALL_ITEMS = [...WORDS.flatMap(w => itemsFor(w, { word: 1, der: 1, ph: 1, nph: 1, ex: 1, recall: 1 })), ...QUIZ_ITEMS];
+const qzAns = q => q.opts ? q.opts[q.ans] : q.ans[0];
+const stripTags = h => h.replace(/<[^>]+>/g, '');
 
 /* ---------- 今日复习：选批次 + 题型 ---------- */
 // 按复习轮次自动出题：第 1 次全面复习，越往后越集中在核心（拼写 + 词组），保证每天的量做得完
@@ -480,10 +507,14 @@ function status(b) {
   const d = dayDiff(R.day, b.date);
   if (d < 0) return { txt: '还没学到', due: false };
   if (d === 0) return { txt: '这天新学', due: false, round: 1 };
-  const k = INTERVALS.indexOf(d);
-  if (k >= 0) return { txt: `到期：第 ${k + 1} 次复习（学后第 ${d} 天）`, due: true, round: k + 1 };
-  const nx = INTERVALS.find(n => n > d), past = INTERVALS.filter(n => n < d).length;
-  return { txt: nx ? `下次复习 ${md(addDays(b.date, nx))}` : '8 轮复习已完成，按需抽查', due: false, round: past };
+  const done = LOG.done(b), nx = nextDue(b);
+  if (done[done.length - 1] === R.day) return { txt: `✓ 这天已完成第 ${done.length} 次复习${nx ? `，下次 ${md(nx.date)}` : ''}`, due: false, round: done.length };
+  if (!nx) return { txt: '8 轮复习已完成，按需抽查', due: false, round: INTERVALS.length };
+  if (nx.date <= R.day) {
+    const late = dayDiff(R.day, nx.date);
+    return { txt: `到期：第 ${nx.round} 次复习${late ? `（比计划晚 ${late} 天，没关系，后面会顺延）` : ''}`, due: true, round: nx.round };
+  }
+  return { txt: `下次复习 ${md(nx.date)}（第 ${nx.round} 次）`, due: false, round: nx.round };
 }
 function drawReview() {
   $('day').value = R.day;
@@ -493,8 +524,8 @@ function drawReview() {
     return `<label class="bt${st.due ? ' due' : ''}"><input type="checkbox" data-date="${b.date}"${R.sel.has(b.date) ? ' checked' : ''}>
       <b>${md(b.date)}</b><span>第 ${b.idx} 批 · ${range(b)} · ${b.words.length} 词</span><span class="st">${st.txt}</span>${n ? `<span class="muted small">· ${n} 题</span>` : ''}</label>`;
   });
-  const none = !BATCHES.some(b => status(b).due);
-  $('batches').innerHTML = (none ? '<div class="empty">这一天没有到期的批次。可以手动勾选想复习的批次。</div>' : '') + rows.join('');
+  const none = !BATCHES.some(b => status(b).due), doneToday = BATCHES.some(b => LOG.done(b).at(-1) === R.day);
+  $('batches').innerHTML = (none ? `<div class="empty">${doneToday ? '✓ 这天到期的复习都做完了。想多练可以手动勾选批次。' : '这一天没有到期的批次。可以手动勾选想复习的批次。'}</div>` : '') + rows.join('');
   $('types').innerHTML = `<span class="seg" id="mode"><button type="button" data-v="auto" class="${R.auto ? 'on' : ''}">按轮次自动（推荐）</button><button type="button" data-v="custom" class="${R.auto ? '' : 'on'}">自己选</button></span>` +
     (R.auto ? `<span class="muted small" style="flex-basis:100%">${PLAN_TEXT}</span>`
             : TYPES.map(t => `<label class="chk"><input type="checkbox" data-type="${t.k}"${R.types[t.k] ? ' checked' : ''}>${t.label}</label>`).join(''));
@@ -518,17 +549,17 @@ $('toToday').onclick = () => { R.day = todayStr(); R.sel = null; drawReview(); }
 resets.push(() => { R = R_INIT(); drawReview(); });
 
 /* ---------- 自测 ---------- */
-const QZ_INIT = () => ({ on: false, queue: [], i: 0, first: 0, right: 0, wrong: [], answered: false, ok: false, hint: false, shown: false });
+const QZ_INIT = () => ({ on: false, queue: [], i: 0, first: 0, right: 0, wrong: [], answered: false, ok: false, hint: false, shown: false, pick: -1, mark: [], logged: '' });
 let QZ = QZ_INIT();
 const quiz = $('quiz');
-function startQuiz(items) {
+function startQuiz(items, mark = []) {
   if (!items.length) return;
-  QZ = QZ_INIT(); QZ.on = true; QZ.queue = shuffle(items.map(it => ({ ...it })));
-  const hasEx = items.some(it => EXKEYS.has(speech(it.say)));
-  [...new Set(items.map(it => it.w.date))].forEach(d => { loadAudio(d); if (hasEx) loadAudio(d, SET.accent, 'ex'); });
+  QZ = QZ_INIT(); QZ.on = true; QZ.queue = shuffle(items.map(it => ({ ...it }))); QZ.mark = mark;
+  const hasEx = items.some(it => it.say && EXKEYS.has(speech(it.say)));
+  [...new Set(items.filter(it => it.say).map(it => it.w.date))].forEach(d => { loadAudio(d); if (hasEx) loadAudio(d, SET.accent, 'ex'); });
   drawQuiz(); quiz.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
-$('start').onclick = () => startQuiz(sessionItems());
+$('start').onclick = () => startQuiz(sessionItems(), BATCHES.filter(b => R.sel.has(b.date) && status(b).due));
 $('wrongStart').onclick = () => { const wb = WB.get(); startQuiz(ALL_ITEMS.filter(it => wb[it.id])); };
 const hintOf = s => s.split(' ').map(t => t[0] + t.slice(1).replace(/[a-z]/gi, '_')).join('   ').split('').join(' ');
 function drawQuiz() {
@@ -536,10 +567,19 @@ function drawQuiz() {
   quiz.hidden = false;
   if (QZ.i >= QZ.queue.length) return drawDone();
   const it = QZ.queue[QZ.i], w = it.w;
-  let h = `<div class="qtop"><span><span class="qtag${it.note ? ' note' : ''}">${it.tag}</span>${it.retry ? '再来一次 · ' : ''}#${w.no} · ${md(w.date)}学</span>
+  let h = `<div class="qtop"><span><span class="qtag${it.note ? ' note' : ''}">${it.tag}</span>${it.retry ? '再来一次 · ' : ''}${w.no ? `#${w.no} · ` : ''}${md(w.date)}学</span>
     <span>${QZ.i + 1} / ${QZ.queue.length}　首答对 ${QZ.right} / ${QZ.first}</span></div>
     <div class="bar"><i style="width:${QZ.i / QZ.queue.length * 100}%"></i></div>`;
-  if (it.recall) {
+  if (it.qz) {
+    const q = it.qz;
+    h += `<div class="qp"><div class="en">${q.q}</div></div><div class="ansrow">`;
+    if (q.opts) h += q.opts.map((o, j) => `<button type="button" class="btn" data-q="opt" data-i="${j}"${QZ.answered ? ` disabled style="${j === q.ans ? 'border-color:var(--ok);color:var(--ok);font-weight:700' : j === QZ.pick ? 'border-color:var(--bad);color:var(--bad);text-decoration:line-through' : ''}"` : ''}>${o}</button>`).join('');
+    else {
+      h += `<input type="text" id="qin" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${esc(q.placeholder || '输入答案')}"${QZ.answered ? ` disabled class="${QZ.ok ? 'ok' : 'bad'}" value="${esc(QZ.typed)}"` : ''}>`;
+      if (!QZ.answered) h += `<button type="button" class="btn primary" data-q="check">确定</button><button type="button" class="btn" data-q="give">不会</button>`;
+    }
+    h += `</div>`;
+  } else if (it.recall) {
     h += `<div class="qp"><div class="big">${esc(w.w)} ${spk(w.w, w.date)}</div><div class="ipa">${esc(w.ipa)}</div><div class="from">说出它的意思，再点「看答案」</div></div>`;
     if (!QZ.shown) h += `<div class="ansrow"><button type="button" class="btn primary" data-q="show">看答案</button></div>`;
     else if (!QZ.answered) h += `<div class="fb"><div class="zh">${esc(it.ans)}</div></div><div class="ansrow">
@@ -551,7 +591,10 @@ function drawQuiz() {
     if (!QZ.answered) h += `<button type="button" class="btn primary" data-q="check">确定</button><button type="button" class="btn" data-q="hint"${QZ.hint ? ' disabled' : ''}>提示首字母</button><button type="button" class="btn" data-q="give">不会</button>`;
     h += `</div>`;
   }
-  if (QZ.answered) {
+  if (QZ.answered && it.qz) {
+    h += `<div class="fb">${QZ.ok ? '<span class="r">✓ 正确</span>' : `<span class="w">✗ 正确答案：${qzAns(it.qz)}</span>`}<div class="small">${it.qz.why}</div></div>
+      <div class="ansrow"><button type="button" class="btn primary" data-q="next">${QZ.i + 1 < QZ.queue.length ? '下一题 ▶' : '看结果'}</button></div>`;
+  } else if (QZ.answered) {
     const full = it.full && it.full !== it.ans ? `<div class="full">${esc(it.full)} ${spk(it.say, w.date)}</div>` : '';
     h += `<div class="fb">${QZ.ok ? '<span class="r">✓ 正确</span>' : `<span class="w">✗ 正确答案：${esc(it.recall ? '记下来，过一会儿再考你' : it.ans)}</span>`}
       ${it.recall ? '' : `<div><b>${esc(it.ans)}</b> ${full ? '' : spk(it.say, w.date)}</div>`}${full}
@@ -571,12 +614,16 @@ function judge(ok) {
   if (ok) WB.hit(it.id);
   else { WB.miss(it.id); if (!it.retry) QZ.queue.push({ ...it, retry: true }); }
   drawQuiz(); drawReview();
-  if (SET.auto) play(it.say, it.w.date);
+  if (SET.auto && it.say) play(it.say, it.w.date);
 }
 function drawDone() {
+  if (QZ.mark.length && !QZ.logged) {
+    QZ.mark.forEach(b => LOG.add(b, R.day));
+    QZ.logged = QZ.mark.map(b => { const nx = nextDue(b); return `第 ${b.idx} 批完成第 ${LOG.done(b).length} 次复习${nx ? `，下次 ${md(nx.date)}` : '，8 轮全部完成'}`; }).join('；') + '。';
+  }
   const pct = QZ.first ? Math.round(QZ.right / QZ.first * 100) : 0;
-  quiz.innerHTML = `<h3>本次复习完成 🎉</h3><p>首次就答对 <b>${QZ.right} / ${QZ.first}</b>（${pct}%）。${QZ.wrong.length ? '答错的题已经在本次后面重做过，也记进了易错本，之后点「易错本专练」再练，连续答对两次才移出。' : ''}</p>
-    ${QZ.wrong.length ? `<div class="done-list">${QZ.wrong.map(it => `<div>· <b>${esc(it.recall ? it.w.w : (it.full || it.ans))}</b> ${spk(it.say, it.w.date)} <span class="muted small">${esc(it.recall ? it.ans : it.tag + ' · #' + it.w.no + ' ' + it.w.w)}</span></div>`).join('')}</div>` : '<p class="muted">一题没错，太棒了！</p>'}
+  quiz.innerHTML = `<h3>本次复习完成 🎉</h3><p>首次就答对 <b>${QZ.right} / ${QZ.first}</b>（${pct}%）。${QZ.logged ? `<br>已记录：${QZ.logged}` : ''}${QZ.wrong.length ? '答错的题已经在本次后面重做过，也记进了易错本，之后点「易错本专练」再练，连续答对两次才移出。' : ''}</p>
+    ${QZ.wrong.length ? `<div class="done-list">${QZ.wrong.map(it => it.qz ? `<div>· <b>${qzAns(it.qz)}</b> <span class="muted small">练习题 · ${esc(stripTags(it.qz.q))}</span></div>` : `<div>· <b>${esc(it.recall ? it.w.w : (it.full || it.ans))}</b> ${spk(it.say, it.w.date)} <span class="muted small">${esc(it.recall ? it.ans : it.tag + ' · #' + it.w.no + ' ' + it.w.w)}</span></div>`).join('')}</div>` : '<p class="muted">一题没错，太棒了！</p>'}
     <div class="ctrl">${QZ.wrong.length ? '<button type="button" class="btn primary" data-q="again">只练这些错题</button>' : ''}<button type="button" class="btn" data-q="quit">关闭</button></div>`;
   drawReview();
 }
@@ -584,14 +631,16 @@ quiz.addEventListener('click', e => {
   const a = e.target.closest('[data-q]')?.dataset.q;
   if (!a) return;
   const it = QZ.queue[QZ.i];
-  if (a === 'check') { const v = $('qin').value; if (!v.trim()) return $('qin').focus(); QZ.typed = v; judge(norm(v) === norm(it.ans)); }
+  if (a === 'check') { const v = $('qin').value; if (!v.trim()) return $('qin').focus(); QZ.typed = v; judge(it.qz ? it.qz.ans.some(x => norm(x) === norm(v)) : norm(v) === norm(it.ans)); }
+  else if (a === 'opt') { if (QZ.answered) return; QZ.pick = +e.target.closest('[data-i]').dataset.i; judge(QZ.pick === it.qz.ans); }
   else if (a === 'hint') { QZ.hint = true; const v = $('qin').value; drawQuiz(); $('qin').value = v; }
   else if (a === 'give') { QZ.typed = $('qin').value; judge(false); }
   else if (a === 'show') { QZ.shown = true; drawQuiz(); play(it.say, it.w.date); }
   else if (a === 'yes') judge(true);
   else if (a === 'no') judge(false);
-  else if (a === 'next') { QZ.i++; QZ.answered = QZ.hint = QZ.shown = false; QZ.typed = ''; drawQuiz(); }
+  else if (a === 'next') { QZ.i++; QZ.answered = QZ.hint = QZ.shown = false; QZ.typed = ''; QZ.pick = -1; drawQuiz(); }
   else if (a === 'again') startQuiz(QZ.wrong.map(x => ({ ...x, retry: false })));
+  else if (a === 'wbStart') $('wrongStart').click();
   else if (a === 'quit') { QZ = QZ_INIT(); drawQuiz(); drawReview(); }
 });
 quiz.addEventListener('keydown', e => {
@@ -663,6 +712,8 @@ window.pageReset();
     sel.value = v;
     window.LQ_ITEMS = v === MIX ? shuffle(withQ.flatMap(b => b.quiz)).slice(0, MIX_N) : (withQ.find(b => b.date === v)?.quiz || []);
   };
+  // 练习答错 → 进易错本；之后答对两次移出（和复习题同一个易错本）
+  window.lqOnAnswer = (q, ok) => { if (!q.id) return; ok ? WB.hit(q.id) : WB.miss(q.id); drawReview(); };
   sel.onchange = () => { pick(sel.value); window.lqRender?.(); };
   resets.push(() => pick(INIT));
   pick(INIT);
@@ -693,6 +744,7 @@ window.pageReset();
       const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
       const judge = (ok, answer) => {
         answered++; if (ok) right++;
+        if (typeof window.lqOnAnswer === 'function') window.lqOnAnswer(it, ok);
         el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
         why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
         update();
