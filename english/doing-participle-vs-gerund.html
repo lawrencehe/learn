@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>进行时 doing vs 动名词</title>
+<meta name="description" content="be doing 里的 doing 是名词吗？名词怎么能做谓语？用两句话并排拆解：现在分词 vs 动名词、助动词 be vs 系动词 be、替换测试与调换测试，再看 -ing 为什么长得一模一样。">
+<style>
+:root{
+  --bg:var(--up-bg); --surface:var(--up-surface); --surface2:var(--up-surface-2); --ink:var(--up-ink); --muted:var(--up-muted); --line:var(--up-line);
+  --accent:var(--up-accent); --ok:var(--up-ok); --bad:var(--up-bad);
+  --ptc:#1c7ed6; --ptc-soft:#e7f1fc;     /* 现在分词 / 进行时 */
+  --ger:#e8590c; --ger-soft:#fff0e6;     /* 动名词 / 名词身份 */
+  --subj:#7048e8;                        /* 主语 */
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --ptc:#74c0fc; --ptc-soft:#16283a; --ger:#ffa94d; --ger-soft:#3a2614; --subj:#b197fc; }
+}
+:root[data-theme="dark"]{ --ptc:#74c0fc; --ptc-soft:#16283a; --ger:#ffa94d; --ger-soft:#3a2614; --subj:#b197fc; }
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 var(--up-font);padding:24px 16px 96px}
+main{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:48px}
+h1{font-size:clamp(1.6rem,4.5vw,2.3rem);line-height:1.3;margin:0 0 8px}
+h2{font-size:1.4rem;margin:0 0 8px}
+h3{font-size:1.05rem;margin:0 0 6px}
+p{margin:0}
+p+p{margin-top:8px}
+.lead{color:var(--muted)}
+.muted{color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--up-radius);box-shadow:var(--up-shadow);padding:16px}
+.analogy{border-left:4px solid var(--accent)}
+.answer{border-left:4px solid var(--ger)}
+.en{font-family:Georgia,"Times New Roman",serif;font-size:1.05em}
+.p{color:var(--ptc);font-weight:700}
+.g{color:var(--ger);font-weight:700}
+.s{color:var(--subj);font-weight:700}
+.btn{font:inherit;font-size:14px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--up-surface)}
+.btn:disabled{opacity:.45;cursor:default}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.stepno{font-family:var(--up-mono);color:var(--muted);font-size:.9rem;min-width:56px;text-align:center}
+.caption{min-height:4.2em;margin-top:12px}
+
+/* 中文类比 */
+.zh-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.zh-pair div{background:var(--surface2);border-radius:10px;padding:10px 12px}
+@media (max-width:560px){.zh-pair{grid-template-columns:1fr}}
+
+/* 双句拆解舞台 */
+.stage{background:var(--surface2);border-radius:10px;padding:14px 12px;margin-top:12px;display:grid;gap:14px}
+.row{display:grid;grid-template-columns:44px 1fr;gap:8px;align-items:start}
+.rowlab{font-weight:700;font-size:13px;border-radius:8px;text-align:center;padding:6px 0;margin-top:2px}
+.rowA .rowlab{background:var(--ptc-soft);color:var(--ptc)}
+.rowB .rowlab{background:var(--ger-soft);color:var(--ger)}
+.sent{display:flex;flex-wrap:wrap;gap:8px 6px;align-items:flex-start}
+.tok{display:flex;flex-direction:column;align-items:center;gap:2px}
+.word{font-family:Georgia,"Times New Roman",serif;font-size:1.25rem;padding:3px 10px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);transition:background .7s,border-color .7s,color .7s,transform .7s;white-space:nowrap}
+.tag{font-size:12px;min-height:1.5em;color:var(--muted);transition:opacity .7s;white-space:nowrap}
+.word.subj{border-color:var(--subj);color:var(--subj)}
+.word.ptc{border-color:var(--ptc);background:var(--ptc-soft);color:var(--ptc)}
+.word.ger{border-color:var(--ger);background:var(--ger-soft);color:var(--ger)}
+.word.aux{border-color:var(--ptc);border-style:dashed;color:var(--ptc)}
+.word.lnk{border-color:var(--ger);border-style:dashed;color:var(--ger)}
+.word.new{transform:translateY(-3px);font-weight:700}
+.tag.subj{color:var(--subj)} .tag.ptc,.tag.aux{color:var(--ptc)} .tag.ger,.tag.lnk{color:var(--ger)}
+.grp{display:flex;flex-direction:column;align-items:stretch;gap:2px;animation:fadein .7s}
+.grp>.inner{display:flex;gap:6px}
+.grp>.brace{border:2px solid currentColor;border-top:none;height:8px;border-radius:0 0 6px 6px}
+.grp>.glab{font-size:12px;font-weight:700;text-align:center;white-space:nowrap}
+.rowA .grp{color:var(--ptc)} .rowB .grp{color:var(--ger)}
+.verdict{grid-column:2;font-size:14px;min-height:1.5em}
+.verdict .ok{color:var(--ok);font-weight:700} .verdict .bad{color:var(--bad);font-weight:700}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+
+/* 对照表 */
+.cmp{width:100%;border-collapse:collapse;font-size:15px}
+.cmp th,.cmp td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:top}
+.cmp th:first-child{width:22%;color:var(--muted);font-weight:500}
+.cmp thead th{font-weight:700}
+.cmp thead th.p{color:var(--ptc)} .cmp thead th.g{color:var(--ger)}
+.tblwrap{overflow-x:auto}
+
+/* 结构图 */
+.tree{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.tree>div{border:1.5px solid var(--line);border-radius:10px;padding:12px}
+.tree .tA{border-color:var(--ptc)} .tree .tB{border-color:var(--ger)}
+.formula{font-family:var(--up-mono);font-size:14px;background:var(--surface2);border-radius:8px;padding:6px 10px;margin:6px 0;overflow-x:auto;white-space:nowrap}
+@media (max-width:640px){.tree{grid-template-columns:1fr}}
+
+/* 分类小游戏 */
+.game{display:grid;gap:10px;margin-top:12px}
+.gi{border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;display:grid;gap:8px;background:var(--surface)}
+.gi.is-ok{border-color:var(--ok)} .gi.is-bad{border-color:var(--bad)}
+.gi .gs{font-family:Georgia,"Times New Roman",serif;font-size:1.1rem}
+.gi .gs b{text-decoration:underline;text-underline-offset:3px}
+.gbtns{display:flex;flex-wrap:wrap;gap:8px}
+.gbtn{font:inherit;font-size:14px;padding:4px 12px;border-radius:8px;border:1.5px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.gbtn.bp:hover:not(:disabled){border-color:var(--ptc);color:var(--ptc)}
+.gbtn.bg:hover:not(:disabled){border-color:var(--ger);color:var(--ger)}
+.gbtn:disabled{cursor:default}
+.gbtn.right{border-color:var(--ok);color:var(--ok);font-weight:700}
+.gbtn.wrong{border-color:var(--bad);color:var(--bad);text-decoration:line-through}
+.gwhy{font-size:14px;color:var(--muted)}
+.gwhy:empty{display:none}
+.gscore{font-family:var(--up-mono);font-size:13px;color:var(--muted)}
+
+/* 历史时间线 */
+.hist{background:var(--surface2);border-radius:10px;padding:14px;margin-top:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.era{border-radius:10px;padding:10px;background:var(--surface);border:1.5px solid var(--line);opacity:.35;transition:opacity .7s,border-color .7s}
+.era.on{opacity:1;border-color:var(--accent)}
+.era h3{font-size:14px;color:var(--muted)}
+.form{font-family:Georgia,"Times New Roman",serif;font-size:1.15rem;margin:4px 0;padding:2px 8px;border-radius:6px;display:inline-block}
+.form.fp{background:var(--ptc-soft);color:var(--ptc)} .form.fg{background:var(--ger-soft);color:var(--ger)}
+.form.fm{background:linear-gradient(90deg,var(--ptc-soft),var(--ger-soft));color:var(--ink);font-weight:700}
+.era small{display:block;color:var(--muted);font-size:12px;line-height:1.5}
+@media (max-width:640px){.hist{grid-template-columns:1fr}}
+
+.myth{display:grid;gap:10px}
+.myth>div{border-left:4px solid var(--bad);padding:8px 12px;background:var(--surface);border-radius:0 10px 10px 0;border-top:1px solid var(--line);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.myth b.x{color:var(--bad)}
+.sum{font-size:1.1rem;text-align:center;border:2px solid var(--accent);background:var(--up-accent-soft)}
+
+@media (prefers-reduced-motion: reduce){
+  .word,.tag,.era{transition:none} .grp{animation:none}
+}
+
+:root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:var(--ok);--lq-bad:var(--bad)}
+/* ---------- 练习题（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+.lq{display:grid;gap:12px;margin-bottom:56px}
+.lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+.lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
+.lq-sub{margin:0;color:var(--lq-muted);font-size:14px}
+.lq-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--lq-muted);font-variant-numeric:tabular-nums}
+.lq-list{display:grid;gap:10px}
+.lq-item{background:var(--lq-surface);border:1.5px solid var(--lq-line);border-radius:10px;padding:12px 16px;display:grid;gap:10px;min-width:0;color:var(--lq-ink);text-align:left}
+.lq-item.lq-is-ok{border-color:var(--lq-ok)}
+.lq-item.lq-is-bad{border-color:var(--lq-bad)}
+.lq-q{font-size:15px;font-weight:600;line-height:1.6}
+.lq-tag{display:inline-block;font-size:11px;font-weight:500;line-height:1.6;color:var(--lq-muted);border:1px solid var(--lq-line);border-radius:999px;padding:0 8px;margin-right:8px;vertical-align:1px}
+.lq-opts,.lq-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lq .lq-opt,.lq .lq-redo{font:inherit;font-size:14px;line-height:1.4;padding:6px 14px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);cursor:pointer;text-align:left;opacity:1}
+.lq .lq-opt:hover:not(:disabled),.lq .lq-redo:hover{border-color:var(--lq-accent)}
+.lq .lq-opt:disabled{cursor:default;opacity:1}
+.lq .lq-opt.lq-right{border-color:var(--lq-ok);color:var(--lq-ok);font-weight:700}
+.lq .lq-opt.lq-wrong{border-color:var(--lq-bad);color:var(--lq-bad);text-decoration:line-through}
+.lq-fill input{font:inherit;font-size:14px;padding:6px 10px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);width:min(100%,200px)}
+.lq-fill input.lq-right{border-color:var(--lq-ok)}
+.lq-fill input.lq-wrong{border-color:var(--lq-bad)}
+.lq-why{font-size:14px;line-height:1.65;color:var(--lq-muted)}
+.lq-why:empty{display:none}
+.lq-why .lq-ok{color:var(--lq-ok)}
+.lq-why .lq-bad{color:var(--lq-bad)}
+</style>
+</head>
+<body>
+<!-- up-shell:begin（由 scripts/shell.mjs 自动生成，勿手改） -->
+<nav id="up-nav" aria-label="网站导航">
+<a class="up-home" href="/" title="Up 学习站首页"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="up-nav-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c6ef5"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#up-nav-g)"/><path d="M12 52V42a2 2 0 0 1 2-2h10V32a2 2 0 0 1 2-2h10v-8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v30z" fill="#fff"/><circle cx="43" cy="13" r="5.5" fill="#ffa94d"/></svg><span>Up 学习站</span></a>
+<span class="up-sep" aria-hidden="true">›</span><a class="up-cat" href="/english">英语</a>
+<span class="up-sep" aria-hidden="true">›</span><span class="up-title">进行时 doing vs 动名词</span>
+<button id="up-reset" type="button" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+</nav>
+<style>
+:root{--up-bg:#f5f6f8;--up-surface:#ffffff;--up-surface-2:#eef0f4;--up-ink:#1d2127;--up-muted:#626b78;--up-line:#dfe2e8;--up-ok:#2b8a3e;--up-bad:#d6336c;--up-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);--up-font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif;--up-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;--up-radius:12px;--up-accent:#2f9e44;--up-accent-soft:#ebfbee}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#69db7c;--up-accent-soft:#1b3222;color-scheme:dark}}
+:root[data-theme="dark"]{--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#69db7c;--up-accent-soft:#1b3222;color-scheme:dark}
+html{padding-top:52px;scroll-padding-top:64px}
+#up-nav{position:fixed;top:0;left:0;right:0;z-index:2147483000;height:52px;box-sizing:border-box;display:flex;align-items:center;gap:8px;
+padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));border-top:3px solid var(--up-accent);
+border-bottom:1px solid var(--up-line);background:color-mix(in srgb,var(--up-surface) 88%,transparent);
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:500 14px/1.2 var(--up-font);color:var(--up-ink);text-align:left}
+#up-nav a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none}
+#up-nav a:hover{color:var(--up-accent)}
+#up-nav svg{width:24px;height:24px;flex:none;display:block}
+#up-nav .up-home span{font-weight:700}
+#up-nav .up-cat{color:var(--up-accent);font-weight:600}
+#up-nav .up-sep{color:var(--up-muted);flex:none}
+#up-nav .up-title{color:var(--up-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#up-reset{margin:0 0 0 auto;flex:none;font:600 14px/1 var(--up-font);padding:8px 14px;border-radius:999px;cursor:pointer;
+border:1.5px solid var(--up-accent);background:transparent;color:var(--up-accent);transition:background .2s,color .2s}
+#up-reset:hover,#up-reset:focus-visible{background:var(--up-accent);color:var(--up-surface)}
+#up-reset:focus-visible,#up-nav a:focus-visible{outline:2px solid var(--up-accent);outline-offset:2px}
+@media (max-width:560px){#up-nav .up-home span{display:none}}
+@media print{#up-nav{display:none}html{padding-top:0}}
+</style>
+<script>
+document.getElementById('up-reset').addEventListener('click', function () {
+  if (typeof window.resetPage === 'function') window.resetPage();
+  else console.warn('本页没有定义 window.resetPage()，重置按钮无效');
+  window.scrollTo({ top: 0, behavior: 'auto' });
+});
+</script>
+<!-- up-shell:end -->
+<main>
+
+<section>
+  <h1>be doing 里的 doing 是名词吗？</h1>
+  <p class="lead">你的疑问：<span class="en">I am <b>swimming</b>.</span> 里 be doing 作谓语；可 doing 有时又是动名词（名词），名词怎么能做谓语？</p>
+</section>
+
+<section class="card answer">
+  <h3>先给结论</h3>
+  <p>这是<b>两种不同的情况，不能混为一谈</b>。-ing 这个「样子」背后其实有两种身份：</p>
+  <p>① 进行时里的 doing 是 <span class="p">现在分词</span>（动词的一种形式，不是名词），它和助动词 be 合起来<b>整体</b>当谓语；</p>
+  <p>② <span class="g">动名词</span>才是名词身份，它在 <span class="en">My hobby is <b>swimming</b>.</span> 这种句子里当的是<b>表语</b>（放在系动词 is 后面，说明主语「是什么」）。</p>
+</section>
+
+<section class="card analogy">
+  <b>生活比喻：中文里的「学习」</b>
+  <p>中文也有一模一样的现象——同一个词「学习」，换个位置身份就变了：</p>
+  <div class="zh-pair">
+    <div>他<b>正在</b><span class="p">学习</span>。<br><small class="muted">「谁在学习？」——他在学。这是<b>动作</b>（动词）。</small></div>
+    <div>我的任务<b>是</b><span class="g">学习</span>。<br><small class="muted">任务自己不会学习；「学习」是在说任务<b>是什么</b>（名词）。</small></div>
+  </div>
+  <p style="margin-top:10px">长得一样不代表身份一样，<b>看它站在哪、干什么</b>。英语的 -ing 也是这个道理。</p>
+</section>
+
+<!-- 模块 1：两句并排拆解 -->
+<section>
+  <h2>并排拆开两句话，一步一步看</h2>
+  <p class="muted">A 句是现在进行时，B 句是「系动词 + 动名词」。它们表面结构一模一样，我们用两个小测试把它们分开。</p>
+  <div class="card" id="demo">
+    <div class="stage">
+      <div class="row rowA"><div class="rowlab">A 句</div><div class="sent"></div><div class="verdict"></div></div>
+      <div class="row rowB"><div class="rowlab">B 句</div><div class="sent"></div><div class="verdict"></div></div>
+    </div>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>「名词能做谓语吗？」——要分清谓语和表语</h2>
+  <p>「谓语」说的是主语<b>怎么样 / 做什么</b>。它有两种长相：</p>
+  <div class="tree">
+    <div class="tA">
+      <h3 class="p">① 动词型谓语（进行时属于这种）</h3>
+      <div class="formula">I | am swimming</div>
+      <p><b>am swimming</b> 合起来是<b>一个</b>谓语动词。am 是<b>助动词</b>，只负责标出「现在、第一人称」，自己没有「是」的意思；真正表示动作的是 swimming。</p>
+      <p class="muted">里面没有名词，所以根本不存在「名词做谓语」。</p>
+    </div>
+    <div class="tB">
+      <h3 class="g">② 系表结构（系动词 + 表语）</h3>
+      <div class="formula">My hobby | is | swimming</div>
+      <p><b>is</b> 是<b>系动词</b>，意思接近「＝」；后面的 <b>swimming</b> 是动名词，作<b>表语</b>，告诉你「爱好＝游泳这件事」。</p>
+      <p class="muted">名词确实能进入谓语部分——但身份是<b>表语</b>，必须靠系动词连接，就像 <span class="en">He is <b>a teacher</b>.</span> 一样。</p>
+    </div>
+  </div>
+  <p style="margin-top:12px">所以准确的说法是：<b>名词不能单独当谓语动词</b>，但可以在系动词后面当<b>表语</b>；而进行时里的 doing 不是名词，它是动词的分词形式。</p>
+</section>
+
+<section>
+  <h2>一张表对照</h2>
+  <div class="card tblwrap">
+    <table class="cmp">
+      <thead><tr><th></th><th class="p">A：I am swimming.</th><th class="g">B：My hobby is swimming.</th></tr></thead>
+      <tbody>
+        <tr><th>-ing 叫什么</th><td>现在分词</td><td>动名词</td></tr>
+        <tr><th>-ing 像什么词</th><td>像动词 / 形容词：描述主语「正处于…中」</td><td>像名词：「游泳这件事」</td></tr>
+        <tr><th>be 的身份</th><td>助动词（不翻译成「是」）</td><td>系动词（≈「是」「＝」）</td></tr>
+        <tr><th>句子成分</th><td>am swimming 整体作谓语</td><td>is 系动词 + swimming 表语</td></tr>
+        <tr><th>谁在做动作</th><td>主语 I 自己在游</td><td>主语 hobby 不会游泳</td></tr>
+        <tr><th>换成名词</th><td><span class="en">I am music.</span> ✗</td><td><span class="en">My hobby is music.</span> ✓</td></tr>
+        <tr><th>前后对调</th><td><span class="en">Swimming am I.</span> ✗</td><td><span class="en">Swimming is my hobby.</span> ✓</td></tr>
+        <tr><th>时态</th><td>现在进行时</td><td>一般现在时（不是进行时！）</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 模块 2：分类小游戏 -->
+<section>
+  <h2>自己试试：这个 -ing 是哪种身份？</h2>
+  <p class="muted">每句先问自己「主语在做这个动作吗？」，拿不准就做替换测试：把 -ing 换成一个名词，句子还通吗？</p>
+  <div class="card" id="game">
+    <div class="gscore"></div>
+    <div class="game"></div>
+    <div class="ctrl"><button type="button" class="btn" data-act="reset">↺ 重置本模块</button></div>
+  </div>
+</section>
+
+<!-- 模块 3：历史 -->
+<section>
+  <h2>为什么它俩长得一模一样？</h2>
+  <p class="muted">一千年前，它们其实是两个不同的词尾，后来读音、拼写慢慢合流成了 -ing。</p>
+  <div class="card" id="hist">
+    <div class="hist">
+      <div class="era" data-i="0"><h3>古英语（约 1000 年前）</h3>
+        <span class="form fp">huntiende</span><small>分词：正在打猎的</small>
+        <span class="form fg">huntung</span><small>名词：打猎这件事</small></div>
+      <div class="era" data-i="1"><h3>中古英语（约 12–15 世纪）</h3>
+        <span class="form fp">huntinde</span><small>分词词尾 -ende 弱化成 -inde，读起来越来越像 -ing</small>
+        <span class="form fg">hunting</span><small>名词词尾 -ung 变成 -ing</small></div>
+      <div class="era" data-i="2"><h3>现代英语</h3>
+        <span class="form fm">hunting</span><small>两条路合成一个样子；身份只能靠句子里的位置和作用来判断</small></div>
+    </div>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>常见误区</h2>
+  <div class="myth">
+    <div><b class="x">✗ 看到 -ing 就是动名词</b><br>-ing 至少有两种身份。在 be 后面、主语自己在做这个动作时，它是现在分词，和 be 组成进行时。</div>
+    <div><b class="x">✗ My hobby is swimming. 是现在进行时</b><br>不是。这里 is 是系动词，句子是一般现在时；swimming 是动名词作表语。把它换成 music 照样通顺就是证据。</div>
+    <div><b class="x">✗ I am swimming = 我「是」游泳</b><br>进行时里的 be 是助动词，不表示「是」。am swimming 是一个整体，意思是「正在游」。</div>
+    <div><b class="x">✗ 名词永远不能出现在谓语里</b><br>名词可以在系动词后作表语（He is a teacher. / My hobby is swimming.），这叫系表结构作谓语。它只是不能自己当谓语<b>动词</b>。</div>
+  </div>
+</section>
+
+<section class="card sum">
+  <b>一句话总结：</b>-ing 长得一样，身份看位置——<span class="p">主语自己在做 → 现在分词，be doing 整体是谓语</span>；<span class="g">在说主语「是什么」→ 动名词，作表语</span>。
+</section>
+
+<section class="lq" id="lq" aria-label="练习">
+  <div class="lq-head"><h2>练习</h2><span class="lq-score"></span></div>
+  <p class="lq-sub">学完上面的内容，来检验一下。每题作答后马上看到解析；点「重做练习」清空重来。</p>
+  <div class="lq-list"></div>
+  <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+</section>
+
+</main>
+
+<script>
+const resets = [];
+window.pageReset = () => resets.forEach(f => f());
+
+/* 通用分步控制器 */
+function stepper(root, n, draw, ms) {
+  const no = root.querySelector('.stepno');
+  const btn = act => root.querySelector(`[data-act="${act}"]`);
+  const INIT = { step: 0, playing: false };
+  let S = { ...INIT }, timer = null;
+  const paint = () => {
+    draw(S.step);
+    no.textContent = `${S.step + 1} / ${n}`;
+    btn('prev').disabled = S.step === 0; btn('next').disabled = S.step === n - 1;
+    btn('play').textContent = S.playing ? '⏸ 暂停' : '▶ 播放';
+  };
+  const stop = () => { clearInterval(timer); timer = null; S.playing = false; };
+  const go = d => { S.step = Math.max(0, Math.min(n - 1, S.step + d)); paint(); };
+  btn('prev').onclick = () => { stop(); go(-1); };
+  btn('next').onclick = () => { stop(); go(1); };
+  btn('play').onclick = () => {
+    if (S.playing) { stop(); paint(); return; }
+    if (S.step === n - 1) S.step = 0;
+    S.playing = true; paint();
+    timer = setInterval(() => { go(1); if (S.step === n - 1) { stop(); paint(); } }, ms);
+  };
+  const reset = () => { stop(); S = { ...INIT }; paint(); };
+  btn('reset').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+/* ---------- 模块 1：双句拆解 ---------- */
+{
+  const root = document.getElementById('demo');
+  const rows = [root.querySelector('.rowA'), root.querySelector('.rowB')];
+  const cap = root.querySelector('.caption');
+  const T = (w, cls = '', tag = '') => ({ w, cls, tag });
+  const A0 = [T('I'), T('am'), T('swimming.')];
+  const B0 = [T('My hobby'), T('is'), T('swimming.')];
+  const STEPS = [
+    { A: { t: A0 }, B: { t: B0 },
+      text: '两句表面一模一样：主语 + be + swimming。如果只看外形，会以为两个 swimming 是同一个东西。' },
+    { A: { t: [T('I', 'subj', '主语'), T('am'), T('swimming.')], v: '谁在游泳？<span class="ok">我自己在游 ✓</span>' },
+      B: { t: [T('My hobby', 'subj', '主语'), T('is'), T('swimming.')], v: '谁在游泳？<span class="bad">爱好不会游泳 ✗</span>' },
+      text: '第一个问题：主语自己在做这个动作吗？A 句是「我」在游；B 句的主语是「爱好」，它不会游泳——swimming 是在说爱好「是什么」。' },
+    { A: { t: [T('I', 'subj', '主语'), T('am'), T('music.', 'new', '换成名词')], v: '<span class="bad">I am music. 不通 ✗</span>' },
+      B: { t: [T('My hobby', 'subj', '主语'), T('is'), T('music.', 'new', '换成名词')], v: '<span class="ok">My hobby is music. 通 ✓</span>' },
+      text: '替换测试：把 swimming 换成名词 music。B 句照样通顺 → B 里的 swimming 站在名词的位置上；A 句不通 → A 里的 swimming 不是名词。' },
+    { A: { t: [T('Swimming', 'new'), T('am'), T('I.', 'subj')], v: '<span class="bad">Swimming am I. 不通 ✗</span>' },
+      B: { t: [T('Swimming', 'new'), T('is'), T('my hobby.', 'subj')], v: '<span class="ok">Swimming is my hobby. 意思不变 ✓</span>' },
+      text: '调换测试：B 句的 is 像个等号「爱好 ＝ 游泳」，两边对调意思不变；A 句一对调就散架了，因为 am 和 swimming 本来就是绑在一起的。' },
+    { A: { t: [T('I', 'subj', '主语'), T('am', 'aux', '助动词'), T('swimming.', 'ptc', '现在分词')] },
+      B: { t: [T('My hobby', 'subj', '主语'), T('is', 'lnk', '系动词 ≈ ＝'), T('swimming.', 'ger', '动名词（名词）')] },
+      text: '身份揭晓：A 句 am 是助动词（不当「是」讲），swimming 是现在分词；B 句 is 是系动词，swimming 是动名词——同一个样子，两种身份。' },
+    { A: { t: [T('I', 'subj', '主语'), T('am', 'aux', '助动词'), T('swimming.', 'ptc', '现在分词')], g: [1, 2, '谓语动词（一个整体）'], v: '现在进行时' },
+      B: { t: [T('My hobby', 'subj', '主语'), T('is', 'lnk', '系动词'), T('swimming.', 'ger', '表语')], g: [1, 2, '谓语 = 系动词 + 表语'], v: '一般现在时（系表结构）' },
+      text: '回到你的问题：A 句的谓语 am swimming 里根本没有名词；B 句里名词 swimming 确实在谓语部分，但它当的是表语，要靠系动词 is 连接——不是名词自己当谓语。' },
+  ];
+  const tokHTML = t => `<div class="tok"><span class="word ${t.cls}">${t.w}</span><span class="tag ${t.cls}">${t.tag}</span></div>`;
+  const rowHTML = r => {
+    let h = '';
+    r.t.forEach((t, i) => {
+      if (r.g && i === r.g[0]) h += '<div class="grp"><div class="inner">';
+      h += tokHTML(t);
+      if (r.g && i === r.g[1]) h += `</div><div class="brace"></div><div class="glab">${r.g[2]}</div></div>`;
+    });
+    return h;
+  };
+  stepper(root, STEPS.length, i => {
+    const s = STEPS[i];
+    [s.A, s.B].forEach((r, k) => {
+      rows[k].querySelector('.sent').innerHTML = rowHTML(r);
+      rows[k].querySelector('.verdict').innerHTML = r.v || '';
+    });
+    cap.textContent = `第 ${i + 1} 步：${s.text}`;
+  }, 3200);
+}
+
+/* ---------- 模块 2：分类小游戏 ---------- */
+{
+  const root = document.getElementById('game');
+  const box = root.querySelector('.game'), score = root.querySelector('.gscore');
+  const P = 0, G = 1, LABELS = ['现在分词（进行时）', '动名词（作表语/主语）'];
+  const ITEMS = [
+    { s: 'The baby is <b>sleeping</b>.', a: P, why: '宝宝自己在睡 → 进行时。换成名词 The baby is sleep. 不通。' },
+    { s: 'The best medicine is <b>sleeping</b>.', a: G, why: '「药」不会睡觉；最好的药 ＝ 睡觉这件事。换成 The best medicine is rest. 通 → 动名词作表语。' },
+    { s: 'Mr Li is <b>teaching</b> English now.', a: P, why: '李老师自己正在教，而且有 now → 现在进行时。' },
+    { s: 'My mother\'s job is <b>teaching</b> English.', a: G, why: '「工作」不会教书；工作 ＝ 教英语这件事。可对调成 Teaching English is my mother\'s job.' },
+    { s: 'What I hate most is <b>waiting</b>.', a: G, why: '主语是「我最讨厌的东西」，它 ＝ 等待这件事。换成 What I hate most is homework. 通。' },
+    { s: 'We are <b>waiting</b> for the bus.', a: P, why: '我们自己在等 → 进行时，are waiting 整体是谓语。' },
+    { s: '<b>Collecting</b> stamps is fun.', a: G, why: '-ing 在句首当主语，「集邮这件事」很有趣 → 动名词作主语。' },
+  ];
+  const INIT = () => ITEMS.map(() => null);
+  let picks = INIT();
+  const paintScore = () => {
+    const done = picks.filter(x => x !== null).length;
+    const right = picks.filter((x, i) => x === ITEMS[i].a).length;
+    score.textContent = `已判断 ${done} / ${ITEMS.length} · 判断对 ${right}`;
+  };
+  const render = () => {
+    box.innerHTML = '';
+    ITEMS.forEach((it, i) => {
+      const el = document.createElement('div');
+      el.className = 'gi';
+      el.innerHTML = `<div class="gs">${it.s}</div><div class="gbtns"></div><div class="gwhy"></div>`;
+      const bs = el.querySelector('.gbtns'), why = el.querySelector('.gwhy');
+      LABELS.forEach((lab, j) => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'gbtn ' + (j === P ? 'bp' : 'bg'); b.textContent = lab;
+        b.onclick = () => {
+          picks[i] = j;
+          bs.querySelectorAll('button').forEach(x => x.disabled = true);
+          bs.children[it.a].classList.add('right');
+          if (j !== it.a) b.classList.add('wrong');
+          el.classList.add(j === it.a ? 'is-ok' : 'is-bad');
+          why.textContent = (j === it.a ? '✓ ' : '✗ ') + it.why;
+          paintScore();
+        };
+        bs.append(b);
+      });
+      box.append(el);
+    });
+    paintScore();
+  };
+  const reset = () => { picks = INIT(); render(); };
+  root.querySelector('[data-act="reset"]').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+/* ---------- 模块 3：历史合流 ---------- */
+{
+  const root = document.getElementById('hist');
+  const eras = [...root.querySelectorAll('.era')], cap = root.querySelector('.caption');
+  const STEPS = [
+    { on: [0], text: '古英语里，分词和动名词是两个不同的词尾：分词用 -ende（huntiende 正在打猎的），动名词用 -ung（huntung 打猎这件事）。一眼就能分清。' },
+    { on: [0, 1], text: '到了中古英语，词尾读音弱化：名词的 -ung 变成 -ing，分词的 -ende 在不少地方变成 -inde，两者听起来越来越像。' },
+    { on: [0, 1, 2], text: '大约 14、15 世纪以后，分词也统一写成 -ing。两个来源不同的东西从此「撞脸」，只能靠句子里的作用来区分。' },
+    { on: [2], text: '有趣的是：一种说法认为，进行时的来源之一是 he is on hunting（他在打猎中）→ he is a-hunting → he is hunting。所以你的直觉有历史影子，但在现代英语里，be doing 中的 doing 按分词分析。' },
+  ];
+  stepper(root, STEPS.length, i => {
+    eras.forEach((e, k) => e.classList.toggle('on', STEPS[i].on.includes(k)));
+    cap.textContent = `第 ${i + 1} 步：${STEPS[i].text}`;
+  }, 3600);
+}
+
+/* ---------- 练习题 ---------- */
+window.LQ_ITEMS = [
+  { type: '选择', q: '<i>She is cooking dinner.</i> 里的 cooking 是？', opts: ['现在分词', '动名词'], ans: 0,
+    why: '主语 she 自己正在做饭，is cooking 整体是谓语，现在进行时。' },
+  { type: '选择', q: '<i>Her favourite activity is cooking.</i> 里的 cooking 是？', opts: ['现在分词', '动名词'], ans: 1,
+    why: '「活动」不会做饭；活动 ＝ 做饭这件事。换成 Her favourite activity is music. 也通 → 动名词作表语。' },
+  { type: '判断', q: '名词绝对不能出现在句子的谓语部分。', opts: ['对', '错'], ans: 1,
+    why: '错。名词可以在系动词后作表语，如 He is a teacher. / My hobby is swimming.，系动词 + 表语一起构成谓语。名词只是不能自己当谓语动词。' },
+  { type: '判断', q: '在 <i>I am swimming.</i> 中，am 意思是「是」，swimming 是名词作表语。', opts: ['对', '错'], ans: 1,
+    why: '错，这正是最常见的混淆。进行时里 am 是助动词，不当「是」讲；swimming 是现在分词，am swimming 整体作谓语（见拆解动画第 5、6 步）。' },
+  { type: '选择', q: '要区分 <i>Tom is drawing.</i> 和 <i>Tom\'s job is drawing.</i>，哪个检测最直接？', opts: ['看 -ing 的拼写', '把 -ing 换成名词（如 art），看句子通不通', '看句子是否以句号结尾'], ans: 1,
+    why: 'Tom\'s job is art. 通 → 动名词；Tom is art. 不通 → 现在分词（进行时）。拼写完全一样，看拼写没用。' },
+  { type: '选择', q: '下面哪句的 -ing 是动名词？', opts: ['They are playing football.', 'Look! The kids are playing football.', 'What I enjoy most is playing football.'], ans: 2,
+    why: '第三句主语是「我最喜欢的事」，它 ＝ 踢足球这件事，playing 是动名词作表语。前两句都是主语自己在踢，是进行时。' },
+  { type: '选择', q: '<i>Seeing is believing.</i>（眼见为实）里两个 -ing 是？', opts: ['都是现在分词', '都是动名词', '前一个动名词，后一个现在分词'], ans: 1,
+    why: 'Seeing 作主语，believing 作表语，都是「……这件事」，都是动名词。is 是系动词：看见 ＝ 相信。主语 seeing 不会「相信」，所以不是进行时。' },
+  { type: '填空', q: 'Listen! Someone ______ (sing) in the next room.（填两个词）', ans: ['is singing'], placeholder: '例如 is doing',
+    why: 'Listen! 提示此刻正在发生，someone 自己在唱 → 现在进行时 is singing，be + 现在分词整体作谓语。' },
+  { type: '选择', q: '<i>They are flying planes.</i> 有两种理解，下面说法正确的是？', opts: ['只能理解为「他们正在开飞机」', '既可以是「他们正在开飞机」（进行时），也可以是「它们是正在飞的飞机」（are 是系动词）', '这里的 flying 只能是动名词'], ans: 1,
+    why: '同一串词，身份取决于理解：若 they 指飞行员，are flying 是进行时；若 they 指天上那些东西，are 是系动词，flying 修饰 planes（像 flying birds），flying planes 一起作表语。这说明判断 -ing 必须看它在句中的作用。' },
+];
+</script>
+<script>
+/* ---------- 练习题（learn 通用组件） ----------
+   题目来自 window.LQ_ITEMS：{type, q, opts, ans: 选项下标, why} 或填空题 {type, q, ans: [可接受答案…], why}
+   定义 window.resetPage()（导航条「重置」按钮调用）：先调用页面自己的 window.pageReset()，再清空练习 */
+(() => {
+  const box = document.getElementById('lq');
+  const items = window.LQ_ITEMS || [];
+  const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let answered = 0, right = 0;
+
+  function update() {
+    const all = answered === items.length;
+    score.textContent = `已答 ${answered} / ${items.length} · 答对 ${right}` +
+      (all ? (right === items.length ? ' · 全对！' : ' · 看看解析，再重做一次') : '');
+  }
+
+  function render() {
+    answered = 0; right = 0; list.innerHTML = '';
+    items.forEach((it, i) => {
+      const el = document.createElement('div');
+      el.className = 'lq-item';
+      el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
+      const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
+      const judge = (ok, answer) => {
+        answered++; if (ok) right++;
+        el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
+        why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
+        update();
+      };
+      if (it.opts) {
+        a.classList.add('lq-opts');
+        it.opts.forEach((o, j) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'lq-opt'; b.innerHTML = o;
+          b.onclick = () => {
+            a.querySelectorAll('button').forEach(x => x.disabled = true);
+            a.children[it.ans].classList.add('lq-right');
+            if (j !== it.ans) b.classList.add('lq-wrong');
+            judge(j === it.ans, it.opts[it.ans]);
+          };
+          a.append(b);
+        });
+      } else {
+        a.classList.add('lq-fill');
+        a.innerHTML = `<input type="text" autocomplete="off" spellcheck="false" placeholder="${it.placeholder || '输入答案'}" aria-label="第 ${i + 1} 题答案"><button type="button" class="lq-opt">确定</button>`;
+        const inp = a.querySelector('input'), go = a.querySelector('button');
+        const submit = () => {
+          if (!inp.value.trim()) { inp.focus(); return; }
+          inp.disabled = go.disabled = true;
+          const ok = it.ans.some(x => norm(x) === norm(inp.value));
+          inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
+          judge(ok, it.ans[0]);
+        };
+        go.onclick = submit;
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      }
+      list.append(el);
+    });
+    update();
+  }
+
+  box.querySelector('.lq-redo').addEventListener('click', render);
+  // 导航条的「重置」按钮调用它：页面各模块 + 练习题一起恢复初始状态
+  window.resetPage = () => {
+    if (typeof window.pageReset === 'function') window.pageReset();
+    render();
+  };
+  render();
+})();
+</script>
+</body>
+</html>
