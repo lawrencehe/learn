@@ -4,6 +4,7 @@
 //   npm run cf -- secret put AUTH_PASS
 // 登录成功后发一个签名 Cookie，15 天有效；改密码后所有已登录设备都会失效。
 import { tokens } from '../scripts/shell.mjs';
+export { VocabStore } from './vocab-store.js';
 
 const COOKIE = 'up_session';
 const MAX_AGE = 15 * 24 * 3600; // 15 天（秒）
@@ -94,6 +95,13 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   return new Response(html, { status, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' } });
 }
 
+async function vocabApi(req, env) {
+  const res = await env.VOCAB.get(env.VOCAB.idFromName('main')).fetch(req);
+  const out = new Response(res.body, res);
+  out.headers.set('Cache-Control', 'no-store');
+  return out;
+}
+
 const redirect = (to, cookie) => {
   const h = new Headers({ Location: to, 'Cache-Control': 'no-store' });
   if (cookie) h.append('Set-Cookie', cookie);
@@ -133,12 +141,19 @@ export default {
       return redirect('/login', `${COOKIE}=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Lax`);
     }
 
+    // 中考词汇的学习记录 API（见 worker/vocab-store.js）。带管理口令的请求（scripts/vocab-admin.py 批改纸质卷用）不需要登录 Cookie
+    const isApi = path.startsWith('/api/vocab/');
+    const admin = isApi && env.VOCAB_ADMIN && await same(req.headers.get('Authorization') || '', `Bearer ${env.VOCAB_ADMIN}`);
+    if (admin) return vocabApi(req, env);
+
     if (!(await validToken(env, getCookie(req, COOKIE)))) {
       if (req.method === 'GET' || req.method === 'HEAD') {
         return redirect(`/login?next=${encodeURIComponent(path + url.search)}`);
       }
       return new Response('需要登录', { status: 401 });
     }
+
+    if (isApi) return vocabApi(req, env);
 
     // 已登录：返回静态页面，并禁止浏览器/代理之间共享缓存
     const res = await env.ASSETS.fetch(req);

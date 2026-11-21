@@ -68,6 +68,16 @@ input[type=date]{font:inherit;font-size:14px;padding:4px 8px;border:1.5px solid 
 .bt input{accent-color:var(--accent);width:17px;height:17px}
 .bt .st{font-size:.85rem;color:var(--muted)}
 .bt.due .st{color:var(--accent);font-weight:600}
+.bt.paper{border-style:dashed}
+.sync{font-size:.85rem;color:var(--muted);margin-top:8px}
+.rday{border-top:1px solid var(--line);padding:10px 0}
+.rday:first-child{border-top:0}
+.rday h3{margin:0 0 4px;font-size:1rem}
+.rday ul{margin:0;padding-left:1.2em}
+.rday li{margin:4px 0}
+.rday details{font-size:.9rem;color:var(--muted)}
+.rday summary{cursor:pointer;color:var(--bad)}
+.rsum{font-size:.95rem;padding-bottom:8px}
 .empty{color:var(--muted);font-size:.92rem;padding:6px 0}
 
 /* 自测 */
@@ -126,13 +136,22 @@ u{text-decoration-color:var(--accent);text-decoration-thickness:2px;text-underli
 
 /* 默写单（打印） */
 #sheet{display:none}
+@page{margin:14mm 12mm}
 @media print{
-  body.printing *{visibility:hidden}
-  body.printing #sheet,body.printing #sheet *{visibility:visible}
-  body.printing #sheet{display:block;position:absolute;left:0;top:0;width:100%;color:#000;background:#fff;font-size:12pt}
-  #sheet table{width:100%;border-collapse:collapse}
-  #sheet td{border-bottom:1px solid #999;padding:6px 4px;vertical-align:bottom}
-  #sheet .key{break-before:page}
+  body.printing>*:not(#sheet){display:none!important}
+  body.printing{padding:0;background:#fff}
+  body.printing #sheet{display:block;color:#000;background:#fff;font:11.5pt/1.55 var(--up-font)}
+  #sheet h2{font-size:15pt;margin:0 0 4px}
+  #sheet .ph div{margin:2px 0}
+  #sheet .id{font-family:var(--up-mono);font-size:13pt;border:1.5px solid #000;padding:0 6px}
+  #sheet .tip{font-size:9.5pt;color:#444;margin:4px 0 8px}
+  #sheet ol{margin:0;padding-left:2.2em}
+  #sheet li{margin:0 0 9px;break-inside:avoid}
+  #sheet .tg{font-size:8.5pt;border:1px solid #999;border-radius:3px;padding:0 3px;color:#444}
+  #sheet .op{margin-top:2px}
+  #sheet .ln{border-bottom:1px solid #999;height:1.7em;margin-top:2px;width:70%}
+  #sheet .key{break-before:page;font-size:10.5pt}
+  #sheet .key li{margin:0 0 2px}
 }
 
 :root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:var(--ok);--lq-bad:var(--bad)}
@@ -232,7 +251,7 @@ document.getElementById('up-reset').addEventListener('click', function () {
 
 <section id="review">
   <h2>今日复习</h2>
-  <p class="lead small">复习时间是学完后的第 1、2、4、7、15、30、60、120 天，到期的批次会自动勾上。晚了一两天也没关系：没做的批次会一直显示「到期」，做完后下一次从实际完成那天往后排。复习记录和易错本保存在这台设备的浏览器里。</p>
+  <p class="lead small">复习时间是学完后的第 1、2、4、7、15、30、60、120 天，到期的批次会自动勾上。晚了一两天也没关系：没做的批次会一直显示「到期」，做完后下一次从实际完成那天往后排。也可以「打印复习卷」在纸上做，做完拍照发给 Claude 批改，错题照样进易错本。</p>
   <div class="card" style="margin-top:10px">
     <div class="field"><span class="lbl">发音</span>
       <span class="seg" id="accent"><button type="button" data-v="us">美音</button><button type="button" data-v="gb">英音</button></span>
@@ -245,10 +264,21 @@ document.getElementById('up-reset').addEventListener('click', function () {
     <div class="ctrl">
       <button type="button" class="btn primary" id="start">开始复习</button>
       <button type="button" class="btn" id="wrongStart">易错本专练</button>
-      <button type="button" class="btn" id="print">🖨 打印默写单</button>
+      <button type="button" class="btn" id="print">🖨 打印复习卷</button>
+      <button type="button" class="btn" id="printWrong">🖨 打印易错本</button>
       <span class="muted small" id="count"></span>
     </div>
+    <p class="sync" id="sync"></p>
     <div class="quiz" id="quiz" hidden></div>
+  </div>
+</section>
+
+<section id="report">
+  <h2>学习报告</h2>
+  <p class="lead small">孩子在任何设备上做完的复习、易错本、练习，以及批改过的纸质卷，都汇总在这里。家长用自己的手机打开就能看。</p>
+  <div class="card" style="margin-top:10px">
+    <div id="repSum"></div><div id="rep"></div>
+    <div class="ctrl"><button type="button" class="btn" id="repRefresh">↻ 刷新</button><button type="button" class="btn" id="repMore">看更早的</button></div>
   </div>
 </section>
 
@@ -263,7 +293,7 @@ document.getElementById('up-reset').addEventListener('click', function () {
 <section class="lq" id="lq" aria-label="练习">
   <div class="lq-head"><h2>练习</h2><span class="lq-score"></span></div>
   <p class="lq-sub">每学一批新词，这里就多一组中考风格的题：固定搭配、词形转换、易混词。默认练最新一批，也可以选以前的批次，或从所有已学的批次里随机抽题。答错的题会进上面的「易错本」。</p>
-  <div class="ctrl" style="margin-top:0"><select id="lqSel" class="search" style="width:auto;max-width:100%"></select></div>
+  <div class="ctrl" style="margin-top:0"><select id="lqSel" class="search" style="width:auto;max-width:100%"></select><button type="button" class="btn" id="lqPrint">🖨 打印这组练习</button></div>
   <div class="lq-list"></div>
   <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
 </section>
@@ -427,28 +457,90 @@ document.addEventListener('click', e => {
   reset();
 }
 
-/* ---------- 易错本（存在本机浏览器里，答对两次后移出） ---------- */
+/* ---------- 学习记录：存在网站服务器上，所有设备共用一份（worker/vocab-store.js）；本机缓存一份，没网时先记在本机，联网后补传 ---------- */
+const API = /^https?:$/.test(location.protocol) ? '/api/vocab' : null;
+const ls = {
+  get(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+};
+const CACHE = 'zk-vocab-cache', PEND = 'zk-vocab-pending';
+let STORE = { log: {}, wrong: {}, open: {}, ...ls.get(CACHE, { log: ls.get('zk-vocab-log', {}), wrong: ls.get('zk-vocab-wrong', {}) }) };
+const SYNC = { state: API ? 'loading' : 'local' };
+function applyOp(st, op) {                             // 与服务器同样的规则，先在本机生效
+  if (op.op === 'miss') st.wrong[op.id] = 2;
+  else if (op.op === 'hit') { if (st.wrong[op.id] && --st.wrong[op.id] <= 0) delete st.wrong[op.id]; }
+  else if (op.op === 'log') { const a = st.log[op.batch] || op.base || []; if (a[a.length - 1] !== op.day) a.push(op.day); st.log[op.batch] = a; }
+  else if (op.op === 'merge') {
+    for (const [b, a] of Object.entries(op.log || {})) if (!st.log[b] || a.length > st.log[b].length) st.log[b] = a;
+    for (const [id, n] of Object.entries(op.wrong || {})) st.wrong[id] = Math.max(st.wrong[id] || 0, n);
+  }
+}
+function adopt(server) {                               // 用服务器的最新记录，再叠上还没传上去的操作
+  STORE = { log: {}, wrong: {}, open: {}, ...server };
+  ls.get(PEND, []).forEach(op => applyOp(STORE, op));
+  ls.set(CACHE, STORE);
+}
+function send(...ops) {
+  ops.forEach(op => applyOp(STORE, op)); ls.set(CACHE, STORE);
+  if (!API) return;
+  ls.set(PEND, [...ls.get(PEND, []), ...ops]);
+  flush();
+}
+let flushing = null;
+function flush() {
+  if (!API || flushing) return flushing;
+  const p = ls.get(PEND, []);
+  if (!p.length) return null;
+  flushing = (async () => {
+    try {
+      const r = await fetch(API + '/ops', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ops: p }) });
+      if (!r.ok) throw new Error(r.status);
+      const j = await r.json();
+      ls.set(PEND, ls.get(PEND, []).slice(p.length));
+      adopt(j.state); SYNC.state = 'ok';
+    } catch { SYNC.state = 'offline'; }
+    flushing = null; drawSync();
+    if (ls.get(PEND, []).length && SYNC.state === 'ok') flush();
+  })();
+  return flushing;
+}
+async function syncLoad() {
+  if (!API) return drawSync();
+  try {
+    const r = await fetch(API + '/state', { cache: 'no-store' });
+    if (!r.ok || !(r.headers.get('Content-Type') || '').includes('json')) throw new Error(r.status);
+    adopt(await r.json()); SYNC.state = 'ok';
+    if (!ls.get('zk-vocab-merged', false)) {          // 这台设备第一次联网：把以前只存在本机的记录合并上去
+      const log = ls.get('zk-vocab-log', {}), wrong = ls.get('zk-vocab-wrong', {});
+      if (Object.keys(log).length || Object.keys(wrong).length) send({ op: 'merge', log, wrong });
+      ls.set('zk-vocab-merged', true);
+    }
+    flush();
+  } catch { SYNC.state = 'offline'; }
+  drawSync(); drawReview(); loadReport();
+}
+function drawSync() {
+  const el = $('sync'); if (!el) return;
+  el.textContent = { ok: '☁ 记录已同步到网站，所有设备共用', loading: '正在读取网站上的记录…',
+    offline: '⚠ 没连上网站，记录先存在这台设备上，联网后自动上传', local: '本地文件打开，记录只存在这台设备上' }[SYNC.state];
+}
+window.addEventListener('online', flush);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && API) syncLoad(); });
+
+/* ---------- 易错本：答错进来，答对两次移出 ---------- */
 const WB = {
-  key: 'zk-vocab-wrong',
-  get() { try { return JSON.parse(localStorage.getItem(this.key)) || {}; } catch { return {}; } },
-  set(o) { try { localStorage.setItem(this.key, JSON.stringify(o)); } catch {} },
-  miss(id) { const o = this.get(); o[id] = 2; this.set(o); },
-  hit(id) { const o = this.get(); if (o[id]) { if (--o[id] <= 0) delete o[id]; this.set(o); } },
+  get: () => STORE.wrong,
+  miss: id => send({ op: 'miss', id }),
+  hit: id => { if (STORE.wrong[id]) send({ op: 'hit', id }); },
 };
 
-/* ---------- 复习记录（存在本机浏览器里）：每批每轮实际完成的日期，下一轮从实际完成那天往后排 ---------- */
+/* ---------- 复习记录：每批每轮实际完成的日期，下一轮从实际完成那天往后排 ---------- */
 // 开始记录之前的轮次，默认按原计划完成了
 const TRACK_START = '2026-11-19';
+const inferred = b => INTERVALS.map(n => addDays(b.date, n)).filter(d => d < TRACK_START);
 const LOG = {
-  key: 'zk-vocab-log',
-  get() { try { return JSON.parse(localStorage.getItem(this.key)) || {}; } catch { return {}; } },
-  set(o) { try { localStorage.setItem(this.key, JSON.stringify(o)); } catch {} },
-  done(b) {                                            // 这批已完成的各轮日期
-    const o = this.get();
-    if (o[b.date]) return o[b.date];
-    return INTERVALS.map(n => addDays(b.date, n)).filter(d => d < TRACK_START);
-  },
-  add(b, day) { const o = this.get(); o[b.date] = [...this.done(b), day]; this.set(o); },
+  done: b => STORE.log[b.date] || inferred(b),
+  add: (b, day) => send({ op: 'log', batch: b.date, day, base: STORE.log[b.date] ? undefined : inferred(b) }),
 };
 function nextDue(b) {                                  // 下一轮的轮次和日期
   const done = LOG.done(b), n = done.length;
@@ -489,6 +581,7 @@ const QUIZ_ITEMS = BATCHES.flatMap(b => (b.quiz || []).map((q, i) => {
 const ALL_ITEMS = [...WORDS.flatMap(w => itemsFor(w, { word: 1, der: 1, ph: 1, nph: 1, ex: 1, recall: 1 })), ...QUIZ_ITEMS];
 const qzAns = q => q.opts ? q.opts[q.ans] : q.ans[0];
 const stripTags = h => h.replace(/<[^>]+>/g, '');
+const htmlText = h => { const d = document.createElement('div'); d.innerHTML = h; return d.textContent.replace(/\s+/g, ' ').trim(); };
 
 /* ---------- 今日复习：选批次 + 题型 ---------- */
 // 按复习轮次自动出题：第 1 次全面复习，越往后越集中在核心（拼写 + 词组），保证每天的量做得完
@@ -510,6 +603,8 @@ function status(b) {
   const done = LOG.done(b), nx = nextDue(b);
   if (done[done.length - 1] === R.day) return { txt: `✓ 这天已完成第 ${done.length} 次复习${nx ? `，下次 ${md(nx.date)}` : ''}`, due: false, round: done.length };
   if (!nx) return { txt: '8 轮复习已完成，按需抽查', due: false, round: INTERVALS.length };
+  const paper = Object.entries(STORE.open || {}).find(([, o]) => o.batches.includes(b.date));
+  if (paper && nx.date <= R.day) return { txt: `📄 纸质复习卷 ${paper[0]} 已打印，等批改（第 ${nx.round} 次）`, due: false, round: nx.round, paper: true };
   if (nx.date <= R.day) {
     const late = dayDiff(R.day, nx.date);
     return { txt: `到期：第 ${nx.round} 次复习${late ? `（比计划晚 ${late} 天，没关系，后面会顺延）` : ''}`, due: true, round: nx.round };
@@ -521,7 +616,7 @@ function drawReview() {
   if (!R.sel) R.sel = new Set(BATCHES.filter(b => status(b).due).map(b => b.date));
   const rows = BATCHES.map(b => {
     const st = status(b), n = R.sel.has(b.date) ? batchItems(b).length : 0;
-    return `<label class="bt${st.due ? ' due' : ''}"><input type="checkbox" data-date="${b.date}"${R.sel.has(b.date) ? ' checked' : ''}>
+    return `<label class="bt${st.due ? ' due' : ''}${st.paper ? ' paper' : ''}"><input type="checkbox" data-date="${b.date}"${R.sel.has(b.date) ? ' checked' : ''}>
       <b>${md(b.date)}</b><span>第 ${b.idx} 批 · ${range(b)} · ${b.words.length} 词</span><span class="st">${st.txt}</span>${n ? `<span class="muted small">· ${n} 题</span>` : ''}</label>`;
   });
   const none = !BATCHES.some(b => status(b).due), doneToday = BATCHES.some(b => LOG.done(b).at(-1) === R.day);
@@ -552,15 +647,27 @@ resets.push(() => { R = R_INIT(); drawReview(); });
 const QZ_INIT = () => ({ on: false, queue: [], i: 0, first: 0, right: 0, wrong: [], answered: false, ok: false, hint: false, shown: false, pick: -1, mark: [], logged: '' });
 let QZ = QZ_INIT();
 const quiz = $('quiz');
-function startQuiz(items, mark = []) {
+function startQuiz(items, mark = [], kind = 'review', title = '') {
   if (!items.length) return;
   QZ = QZ_INIT(); QZ.on = true; QZ.queue = shuffle(items.map(it => ({ ...it }))); QZ.mark = mark;
+  QZ.kind = kind; QZ.title = title; QZ.t0 = Date.now();
   const hasEx = items.some(it => it.say && EXKEYS.has(speech(it.say)));
   [...new Set(items.filter(it => it.say).map(it => it.w.date))].forEach(d => { loadAudio(d); if (hasEx) loadAudio(d, SET.accent, 'ex'); });
   drawQuiz(); quiz.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
-$('start').onclick = () => startQuiz(sessionItems(), BATCHES.filter(b => R.sel.has(b.date) && status(b).due));
-$('wrongStart').onclick = () => { const wb = WB.get(); startQuiz(ALL_ITEMS.filter(it => wb[it.id])); };
+const reviewTitle = () => BATCHES.filter(b => R.sel.has(b.date)).map(b => { const st = status(b); return `第 ${b.idx} 批${st.due || st.paper ? `第 ${st.round} 次` : '（加练）'}`; }).join(' + ');
+$('start').onclick = () => startQuiz(sessionItems(), BATCHES.filter(b => R.sel.has(b.date) && status(b).due), 'review', reviewTitle());
+$('wrongStart').onclick = () => { const wb = WB.get(); startQuiz(ALL_ITEMS.filter(it => wb[it.id]), [], 'wrong', '易错本'); };
+// 一条答错记录（报告里显示）
+const wrongInfo = it => ({ id: it.id, label: it.qz ? `练习题：${htmlText(it.qz.q)}` : `#${it.w.no} ${it.w.w} · ${it.tag}`,
+  ans: it.qz ? htmlText(qzAns(it.qz)) : (it.recall ? it.w.w : (it.full && it.full !== it.ans ? `${it.ans}（${it.full}）` : it.ans)), typed: it.given || '' });
+function report(finished) {
+  if (QZ.reported || !QZ.first) return;
+  QZ.reported = true;
+  send({ op: 'event', event: { kind: QZ.kind, src: 'screen', day: todayStr(), title: QZ.title, total: QZ.first, right: QZ.right,
+    wrong: QZ.wrong.map(wrongInfo), t0: QZ.t0, t1: Date.now(), finished } });
+  setTimeout(loadReport, 1500);
+}
 const hintOf = s => s.split(' ').map(t => t[0] + t.slice(1).replace(/[a-z]/gi, '_')).join('   ').split('').join(' ');
 function drawQuiz() {
   if (!QZ.on) { quiz.hidden = true; quiz.innerHTML = ''; return; }
@@ -610,7 +717,8 @@ function drawQuiz() {
 function judge(ok) {
   const it = QZ.queue[QZ.i];
   QZ.answered = true; QZ.ok = ok;
-  if (!it.retry) { QZ.first++; if (ok) QZ.right++; else QZ.wrong.push(it); }
+  const given = it.qz?.opts ? htmlText(it.qz.opts[QZ.pick] ?? '') : it.recall ? '没想起来' : (QZ.typed || '（空）');
+  if (!it.retry) { QZ.first++; if (ok) QZ.right++; else QZ.wrong.push({ ...it, given }); }
   if (ok) WB.hit(it.id);
   else { WB.miss(it.id); if (!it.retry) QZ.queue.push({ ...it, retry: true }); }
   drawQuiz(); drawReview();
@@ -621,9 +729,10 @@ function drawDone() {
     QZ.mark.forEach(b => LOG.add(b, R.day));
     QZ.logged = QZ.mark.map(b => { const nx = nextDue(b); return `第 ${b.idx} 批完成第 ${LOG.done(b).length} 次复习${nx ? `，下次 ${md(nx.date)}` : '，8 轮全部完成'}`; }).join('；') + '。';
   }
+  report(true);
   const pct = QZ.first ? Math.round(QZ.right / QZ.first * 100) : 0;
   quiz.innerHTML = `<h3>本次复习完成 🎉</h3><p>首次就答对 <b>${QZ.right} / ${QZ.first}</b>（${pct}%）。${QZ.logged ? `<br>已记录：${QZ.logged}` : ''}${QZ.wrong.length ? '答错的题已经在本次后面重做过，也记进了易错本，之后点「易错本专练」再练，连续答对两次才移出。' : ''}</p>
-    ${QZ.wrong.length ? `<div class="done-list">${QZ.wrong.map(it => it.qz ? `<div>· <b>${qzAns(it.qz)}</b> <span class="muted small">练习题 · ${esc(stripTags(it.qz.q))}</span></div>` : `<div>· <b>${esc(it.recall ? it.w.w : (it.full || it.ans))}</b> ${spk(it.say, it.w.date)} <span class="muted small">${esc(it.recall ? it.ans : it.tag + ' · #' + it.w.no + ' ' + it.w.w)}</span></div>`).join('')}</div>` : '<p class="muted">一题没错，太棒了！</p>'}
+    ${QZ.wrong.length ? `<div class="done-list">${QZ.wrong.map(it => it.qz ? `<div>· <b>${qzAns(it.qz)}</b> <span class="muted small">练习题 · ${esc(htmlText(it.qz.q))}</span></div>` : `<div>· <b>${esc(it.recall ? it.w.w : (it.full || it.ans))}</b> ${spk(it.say, it.w.date)} <span class="muted small">${esc(it.recall ? it.ans : it.tag + ' · #' + it.w.no + ' ' + it.w.w)}</span></div>`).join('')}</div>` : '<p class="muted">一题没错，太棒了！</p>'}
     <div class="ctrl">${QZ.wrong.length ? '<button type="button" class="btn primary" data-q="again">只练这些错题</button>' : ''}<button type="button" class="btn" data-q="quit">关闭</button></div>`;
   drawReview();
 }
@@ -641,7 +750,7 @@ quiz.addEventListener('click', e => {
   else if (a === 'next') { QZ.i++; QZ.answered = QZ.hint = QZ.shown = false; QZ.typed = ''; QZ.pick = -1; drawQuiz(); }
   else if (a === 'again') startQuiz(QZ.wrong.map(x => ({ ...x, retry: false })));
   else if (a === 'wbStart') $('wrongStart').click();
-  else if (a === 'quit') { QZ = QZ_INIT(); drawQuiz(); drawReview(); }
+  else if (a === 'quit') { if (QZ.i < QZ.queue.length) report(false); QZ = QZ_INIT(); drawQuiz(); drawReview(); }
 });
 quiz.addEventListener('keydown', e => {
   if (e.key !== 'Enter' || e.isComposing) return;
@@ -651,21 +760,78 @@ quiz.addEventListener('keydown', e => {
 });
 resets.push(() => { QZ = QZ_INIT(); drawQuiz(); });
 
-/* ---------- 默写单 ---------- */
-$('print').onclick = () => {
-  const items = sessionItems().filter(it => !it.recall);
-  const dates = [...R.sel].sort().map(md).join('、');
-  const rows = items.map((it, i) => {
-    const q = it.prompt.replace(/<div class="from">写出整个(词组|单词)<\/div>/, '').replace(/<\/div><div[^>]*>/g, '　').replace(/<span class="blank">____<\/span>/g, '______').replace(/<[^>]+>/g, '');
-    return `<tr><td style="width:2.2em">${i + 1}.</td><td>${q}</td><td style="width:38%"></td></tr>`;
-  }).join('');
-  const key = items.map((it, i) => `${i + 1}. ${esc(it.full || it.ans)}${it.full && it.full !== it.ans ? `（${esc(it.ans)}）` : ''}`).join('　');
-  $('sheet').innerHTML = `<h2>中考词汇默写单 · ${dates}</h2><p>姓名：________　日期：________　得分：____ / ${items.length}</p>
-    <table>${rows}</table><div class="key"><h3>答案</h3><p>${key}</p></div>`;
+/* ---------- 纸质卷：打印前先在网站登记卷号和答案，做完拍照给 Claude 批改，错题进易错本、复习卷记一轮 ---------- */
+const LETTERS = 'ABCDEF';
+function paperItem(it) {
+  if (it.qz) {
+    const q = it.qz;
+    return { id: it.id, tag: '练习', label: `练习题（${md(it.w.date)}学的那批）`, q: htmlText(q.q), opts: q.opts?.map(htmlText),
+      ans: q.opts ? `${LETTERS[q.ans]}. ${htmlText(q.opts[q.ans])}` : q.ans[0] };
+  }
+  const q = htmlText(it.prompt.replace(/<div class="from">写出整个(词组|单词)<\/div>/, '').replace(/<\/div><div[^>]*>/g, '　').replace(/<span class="blank">____<\/span>/g, '______'));
+  return { id: it.id, tag: it.tag, label: `#${it.w.no} ${it.w.w} · ${it.tag}`, q, ans: it.ans, full: it.full && it.full !== it.ans ? it.full : '' };
+}
+async function makeSheet(kind, title, items, mark = []) {
+  items = items.filter(it => !it.recall);
+  if (!items.length) return;
+  if (!API || SYNC.state !== 'ok') { alert('打印纸质卷要先连上网站（需要登录），这样才能登记卷号，之后批改的错题才能进易错本。请联网后再试。'); return; }
+  const sheet = { kind, title, day: todayStr(), mark: mark.map(b => ({ batch: b.date, round: status(b).round, base: STORE.log[b.date] ? undefined : inferred(b) })), items: items.map(paperItem) };
+  try {
+    const r = await fetch(API + '/ops', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ops: [{ op: 'sheet', sheet }] }) });
+    if (!r.ok) throw new Error(r.status);
+    const j = await r.json(); sheet.id = j.id; adopt(j.state);
+  } catch { alert('没连上网站，暂时不能登记卷号，请稍后再试。'); return; }
+  drawReview(); loadReport();
+  printSheet(sheet);
+}
+function printSheet(sh) {
+  const li = (it, i) => `<li><span class="tg">${esc(it.tag)}</span> ${esc(it.q)}${it.opts ? `<div class="op">${it.opts.map((o, j) => `${LETTERS[j]}. ${esc(o)}`).join('　　')}</div><div class="ln">答：（　　）</div>` : '<div class="ln">答：</div>'}</li>`;
+  $('sheet').innerHTML = `<div class="ph"><h2>中考词汇 · ${esc(sh.title)}</h2>
+    <div>卷号 <b class="id">${sh.id}</b>　打印日期 ${md(sh.day)}　共 ${sh.items.length} 题</div>
+    <div>完成日期 ________　用时 ______ 分钟　得分 ______ / ${sh.items.length}</div>
+    <p class="tip">拼写题写英文，选择题在括号里写字母。做完后请家长把整张卷拍照发给 Claude 批改（要拍到卷号 ${sh.id}）。</p></div>
+    <ol>${sh.items.map(li).join('')}</ol>
+    <div class="key"><h3>答案 · 卷号 ${sh.id}（家长保留，先别给孩子看）</h3><ol>${sh.items.map(it => `<li>${esc(it.ans)}${it.full ? `　（${esc(it.full)}）` : ''}</li>`).join('')}</ol></div>`;
   document.body.classList.add('printing');
-  window.print();
-};
+  setTimeout(() => window.print(), 50);
+}
 window.addEventListener('afterprint', () => document.body.classList.remove('printing'));
+$('print').onclick = () => makeSheet('review', `复习卷：${reviewTitle()}`, sessionItems(), BATCHES.filter(b => R.sel.has(b.date) && status(b).due));
+$('printWrong').onclick = () => { const wb = WB.get(); makeSheet('wrong', '易错本专练卷', ALL_ITEMS.filter(it => wb[it.id])); };
+
+/* ---------- 学习报告：所有设备的做题结果，家长在自己的手机上看 ---------- */
+const REP = { days: 7 };
+const WEEK = '日一二三四五六';
+async function loadReport() {
+  const box = $('rep'), sum = $('repSum');
+  if (!API) { sum.textContent = '在网站上打开（登录后）才能看到报告。'; box.innerHTML = ''; return; }
+  let ev;
+  try { const r = await fetch(`${API}/events?days=${REP.days}`, { cache: 'no-store' }); if (!r.ok) throw 0; ev = await r.json(); }
+  catch { sum.textContent = '暂时没连上网站，看不到报告。'; return; }
+  const open = Object.entries(STORE.open || {});
+  sum.innerHTML = `<div class="rsum">易错本现有 <b>${Object.keys(STORE.wrong).length}</b> 题${open.length ? `　·　等批改的纸质复习卷：${open.map(([id, o]) => `<b>${id}</b>（${md(o.day)}打印）`).join('、')}` : ''}</div>`;
+  const days = Object.keys(ev).sort().reverse();
+  if (!days.length) { box.innerHTML = '<p class="muted">还没有做题记录。孩子做完一次复习或练习后，这里就会出现结果。</p>'; return; }
+  const wl = list => list.length ? `<details><summary>错了 ${list.length} 题</summary>${list.map(w => `<div>· ${w.no ? `第 ${w.no} 题 ` : ''}${esc(w.label)}：答案 <b>${esc(w.ans)}</b>${w.typed ? `，写了 ${esc(w.typed)}` : ''}</div>`).join('')}</details>` : '';
+  box.innerHTML = days.map(day => {
+    const evs = ev[day], d = new Date(day + 'T00:00:00');
+    const mins = evs.reduce((m, e) => m + (e.t0 && e.t1 ? (e.t1 - e.t0) / 60000 : 0), 0);
+    const rows = evs.filter(e => !(e.kind === 'practice' && e.src === 'screen')).map(e => {
+      const pct = e.total ? Math.round(e.right / e.total * 100) : 0;
+      const name = { review: '复习', wrong: '易错本', practice: '练习' }[e.kind] || e.kind;
+      return `<li>${e.src === 'paper' ? `📄 纸质卷 ${e.sheet}` : '📱'} <b>${esc(e.title || name)}</b>　${e.src === 'paper' ? '' : '首次'}答对 ${e.right} / ${e.total}（${pct}%）${e.t0 && e.t1 ? `　${Math.max(1, Math.round((e.t1 - e.t0) / 60000))} 分钟` : ''}${e.finished === false ? '　<span class="muted">没做完</span>' : ''}${wl(e.wrong || [])}</li>`;
+    });
+    const prac = {};
+    evs.filter(e => e.kind === 'practice' && e.src === 'screen').forEach(e => { (prac[e.title] ||= []).push(e); });
+    Object.entries(prac).forEach(([t, list]) => {
+      const bad = list.filter(e => !e.ok);
+      rows.push(`<li>📱 <b>${esc(t)}</b>　答了 ${list.length} 题，对 ${list.length - bad.length} 题${wl(bad.map(e => ({ label: e.label, ans: e.ans, typed: e.typed })))}</li>`);
+    });
+    return `<div class="rday"><h3>${md(day)}（周${WEEK[d.getDay()]}）${mins >= 1 ? `<span class="muted small">　屏幕上共 ${Math.round(mins)} 分钟</span>` : ''}</h3><ul>${rows.join('')}</ul></div>`;
+  }).join('');
+}
+$('repRefresh').onclick = () => syncLoad();
+$('repMore').onclick = () => { REP.days += 7; loadReport(); };
 
 /* ---------- 词库 ---------- */
 function wordHTML(w) {
@@ -699,6 +865,7 @@ $('closeAll').onclick = () => document.querySelectorAll('#list .word').forEach(d
 resets.push(() => { BK = { ...BK_INIT }; $('q').value = ''; document.querySelectorAll('#list .word').forEach(d => { d.open = false; }); filterBank(); });
 
 window.pageReset();
+syncLoad();
 
 /* ---------- 练习题：每批都带一组中考风格的题（数据里的 quiz），默认练最新一批 ---------- */
 {
@@ -713,7 +880,17 @@ window.pageReset();
     window.LQ_ITEMS = v === MIX ? shuffle(withQ.flatMap(b => b.quiz)).slice(0, MIX_N) : (withQ.find(b => b.date === v)?.quiz || []);
   };
   // 练习答错 → 进易错本；之后答对两次移出（和复习题同一个易错本）
-  window.lqOnAnswer = (q, ok) => { if (!q.id) return; ok ? WB.hit(q.id) : WB.miss(q.id); drawReview(); };
+  const titleOf = q => { const b = BATCHES.find(x => x.date === q.id.split(':')[1]); return `第 ${b.idx} 批练习`; };
+  window.lqOnAnswer = (q, ok, given) => {
+    if (!q.id) return;
+    send(ok ? { op: 'hit', id: q.id } : { op: 'miss', id: q.id },
+      { op: 'event', event: { kind: 'practice', src: 'screen', day: todayStr(), title: titleOf(q), id: q.id, label: htmlText(q.q), ans: htmlText(qzAns(q)), ok, typed: given } });
+    drawReview();
+  };
+  $('lqPrint').onclick = () => {
+    const items = window.LQ_ITEMS.map(q => QUIZ_ITEMS.find(it => it.id === q.id));
+    makeSheet('practice', sel.value === MIX ? '练习卷：已学批次混合' : `练习卷：${titleOf(window.LQ_ITEMS[0])}`, items);
+  };
   sel.onchange = () => { pick(sel.value); window.lqRender?.(); };
   resets.push(() => pick(INIT));
   pick(INIT);
@@ -742,9 +919,9 @@ window.pageReset();
       el.className = 'lq-item';
       el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
       const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
-      const judge = (ok, answer) => {
+      const judge = (ok, answer, given) => {
         answered++; if (ok) right++;
-        if (typeof window.lqOnAnswer === 'function') window.lqOnAnswer(it, ok);
+        if (typeof window.lqOnAnswer === 'function') window.lqOnAnswer(it, ok, given);
         el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
         why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
         update();
@@ -758,7 +935,7 @@ window.pageReset();
             a.querySelectorAll('button').forEach(x => x.disabled = true);
             a.children[it.ans].classList.add('lq-right');
             if (j !== it.ans) b.classList.add('lq-wrong');
-            judge(j === it.ans, it.opts[it.ans]);
+            judge(j === it.ans, it.opts[it.ans], o);
           };
           a.append(b);
         });
@@ -771,7 +948,7 @@ window.pageReset();
           inp.disabled = go.disabled = true;
           const ok = it.ans.some(x => norm(x) === norm(inp.value));
           inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
-          judge(ok, it.ans[0]);
+          judge(ok, it.ans[0], inp.value);
         };
         go.onclick = submit;
         inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
