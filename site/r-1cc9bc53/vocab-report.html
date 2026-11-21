@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>词汇学习记录</title>
+<!-- 家长专用的中考词汇学习记录页：不在任何目录里列出，只有知道链接的人能打开（仍需登录）。数据来自 /api/vocab/（worker/vocab-store.js）。 -->
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--ink:#1f2328;--muted:#6b7280;--line:#e5e7eb;--accent:#2b8a3e;--bad:#e03131;--ok:#2b8a3e}
+@media (prefers-color-scheme:dark){:root{--bg:#16181c;--card:#1f2228;--ink:#e6e7ea;--muted:#9aa0a8;--line:#30343b;--accent:#69db7c;--bad:#ff8787;--ok:#69db7c}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.65 -apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif;padding:20px 16px 60px}
+main{max-width:820px;margin:0 auto;display:grid;gap:16px}
+h1{font-size:1.5rem;margin:0}
+h2{font-size:1.1rem;margin:0 0 6px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.muted{color:var(--muted)}.small{font-size:.88rem}
+.btn{font:inherit;font-size:14px;padding:5px 14px;border-radius:8px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.rday{border-top:1px solid var(--line);padding:10px 0}
+.rday:first-child{border-top:0;padding-top:0}
+.rday h3{margin:0 0 4px;font-size:1rem}
+ul{margin:0;padding-left:1.2em} li{margin:4px 0}
+details{font-size:.9rem;color:var(--muted)} summary{cursor:pointer;color:var(--bad)}
+.wb{columns:2 260px;font-size:.9rem}
+.wb div{break-inside:avoid;margin:2px 0}
+b.n{font-size:1.2rem}
+</style>
+</head>
+<body>
+<main>
+  <div class="row" style="justify-content:space-between"><h1>中考词汇 · 学习记录</h1><div class="row"><button class="btn" id="refresh">↻ 刷新</button><a class="btn" href="/english/zhongkao-vocab" style="text-decoration:none">打开词汇页</a></div></div>
+  <section class="card"><h2>现在</h2><div id="sum" class="muted">读取中…</div></section>
+  <section class="card"><h2>每天做了什么</h2><div id="days" class="muted">读取中…</div><div class="row" style="margin-top:8px"><button class="btn" id="more">看更早的</button></div></section>
+  <section class="card"><h2>易错本里的题</h2><div id="wb" class="muted">读取中…</div></section>
+</main>
+<script>
+const API = '/api/vocab';
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const md = s => `${+s.slice(5, 7)}月${+s.slice(8)}日`;
+const text = h => { const d = document.createElement('div'); d.innerHTML = h; return d.textContent.replace(/\s+/g, ' ').trim(); };
+const plain = s => s.replace(/[\[\]]/g, '');
+const WEEK = '日一二三四五六';
+let DAYS = 7, VOCAB = null;
+
+async function vocab() {                       // 从词汇页里取词库，用来显示易错本每题是什么
+  if (VOCAB) return VOCAB;
+  const h = await (await fetch('/english/zhongkao-vocab', { cache: 'no-store' })).text();
+  const m = h.match(/<script type="application\/json" id="vocab-data">([\s\S]*?)<\/script>/);
+  VOCAB = m ? JSON.parse(m[1]) : { batches: [] };
+  return VOCAB;
+}
+function describe(id, V) {
+  const q = id.match(/^q:(.+):(\d+)$/);
+  if (q) { const b = V.batches.find(x => x.date === q[1]); const it = b?.quiz?.[+q[2]]; return it ? `练习题：${text(it.q)}　→ ${text(it.opts ? it.opts[it.ans] : it.ans[0])}` : id; }
+  const m = id.match(/^(\d+)([wrdpne])(\d*)$/);
+  if (!m) return id;
+  const w = V.batches.flatMap(b => b.words).find(x => x.no === +m[1]);
+  if (!w) return id;
+  const i = +m[3], k = m[2];
+  const sense = w.senses.map(s => `${s.pos} ${s.zh}`).join('；');
+  if (k === 'w') return `#${w.no} <b>${esc(w.w)}</b>（拼写）${esc(sense)}`;
+  if (k === 'r') return `#${w.no} <b>${esc(w.w)}</b>（说意思）`;
+  if (k === 'd') return `#${w.no} ${esc(w.w)} → <b>${esc(w.der[i].w)}</b>（衍生词）${esc(w.der[i].zh)}`;
+  if (k === 'p') return `#${w.no} ${esc(w.w)} · <b>${esc(plain(w.ph[i].en))}</b>（词组）${esc(w.ph[i].zh)}`;
+  if (k === 'n') return `#${w.no} ${esc(w.w)} · <b>${esc(plain(w.nph[i].en))}</b>（课堂笔记）${esc(w.nph[i].zh)}`;
+  if (k === 'e') return `#${w.no} ${esc(w.w)} · 例句：${esc(plain(w.ex[i].en))}`;
+  return id;
+}
+async function load() {
+  let st, ev, V;
+  try {
+    const [a, b] = await Promise.all([fetch(API + '/state', { cache: 'no-store' }), fetch(`${API}/events?days=${DAYS}`, { cache: 'no-store' })]);
+    if (!a.ok || !b.ok) throw 0;
+    st = await a.json(); ev = await b.json(); V = await vocab();
+  } catch { $('sum').textContent = '没读到数据，请确认已登录，稍后点刷新。'; return; }
+  const open = Object.entries(st.open || {}), wb = Object.keys(st.wrong);
+  $('sum').innerHTML = `易错本 <b class="n">${wb.length}</b> 题${open.length ? `　·　打印了还没批改的复习卷：${open.map(([id, o]) => `<b>${id}</b>（${md(o.day)}打印）`).join('、')}` : ''}`;
+  $('wb').innerHTML = wb.length ? `<div class="wb">${wb.map(id => `<div>· ${describe(id, V)}</div>`).join('')}</div>` : '易错本是空的。';
+  const wl = list => list.length ? `<details><summary>错了 ${list.length} 题</summary>${list.map(w => `<div>· ${w.no ? `第 ${w.no} 题 ` : ''}${esc(w.label)}：答案 <b>${esc(w.ans)}</b>${w.typed ? `，写了 ${esc(w.typed)}` : ''}</div>`).join('')}</details>` : '';
+  const days = Object.keys(ev).sort().reverse();
+  if (!days.length) { $('days').innerHTML = '还没有做题记录。'; return; }
+  $('days').innerHTML = days.map(day => {
+    const evs = ev[day], d = new Date(day + 'T00:00:00');
+    const mins = evs.reduce((m, e) => m + (e.t0 && e.t1 ? (e.t1 - e.t0) / 60000 : 0), 0);
+    const rows = evs.filter(e => !(e.kind === 'practice' && e.src === 'screen')).map(e => {
+      const pct = e.total ? Math.round(e.right / e.total * 100) : 0;
+      const t = e.t0 && e.t1 ? `　${Math.max(1, Math.round((e.t1 - e.t0) / 60000))} 分钟` : '';
+      return `<li>${e.src === 'paper' ? `📄 纸质卷 ${esc(e.sheet)}` : '📱'} <b>${esc(e.title || e.kind)}</b>　${e.src === 'paper' ? '' : '首次'}答对 ${e.right} / ${e.total}（${pct}%）${t}${e.finished === false ? '　<span class="muted">没做完</span>' : ''}${wl(e.wrong || [])}</li>`;
+    });
+    const prac = {};
+    evs.filter(e => e.kind === 'practice' && e.src === 'screen').forEach(e => { (prac[e.title] ||= []).push(e); });
+    Object.entries(prac).forEach(([t, list]) => {
+      const bad = list.filter(e => !e.ok);
+      rows.push(`<li>📱 <b>${esc(t)}</b>　答了 ${list.length} 题，对 ${list.length - bad.length} 题${wl(bad.map(e => ({ label: e.label, ans: e.ans, typed: e.typed })))}</li>`);
+    });
+    return `<div class="rday"><h3>${md(day)}（周${WEEK[d.getDay()]}）${mins >= 1 ? `<span class="muted small">　屏幕上共 ${Math.round(mins)} 分钟</span>` : ''}</h3><ul>${rows.join('')}</ul></div>`;
+  }).join('');
+}
+$('refresh').onclick = load;
+$('more').onclick = () => { DAYS += 7; load(); };
+load();
+</script>
+</body>
+</html>

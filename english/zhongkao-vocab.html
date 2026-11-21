@@ -251,7 +251,7 @@ document.getElementById('up-reset').addEventListener('click', function () {
 
 <section id="review">
   <h2>今日复习</h2>
-  <p class="lead small">复习时间是学完后的第 1、2、4、7、15、30、60、120 天，到期的批次会自动勾上。晚了一两天也没关系：没做的批次会一直显示「到期」，做完后下一次从实际完成那天往后排。也可以「打印复习卷」在纸上做，做完拍照发给 Claude 批改，错题照样进易错本。</p>
+  <p class="lead small">复习时间是学完后的第 1、2、4、7、15、30、60、120 天，到期的批次会自动勾上。晚了一两天也没关系：没做的批次会一直显示「到期」，做完后下一次从实际完成那天往后排。也可以「打印复习卷」在纸上做，做完交给家长批改。</p>
   <div class="card" style="margin-top:10px">
     <div class="field"><span class="lbl">发音</span>
       <span class="seg" id="accent"><button type="button" data-v="us">美音</button><button type="button" data-v="gb">英音</button></span>
@@ -273,14 +273,6 @@ document.getElementById('up-reset').addEventListener('click', function () {
   </div>
 </section>
 
-<section id="report">
-  <h2>学习报告</h2>
-  <p class="lead small">孩子在任何设备上做完的复习、易错本、练习，以及批改过的纸质卷，都汇总在这里。家长用自己的手机打开就能看。</p>
-  <div class="card" style="margin-top:10px">
-    <div id="repSum"></div><div id="rep"></div>
-    <div class="ctrl"><button type="button" class="btn" id="repRefresh">↻ 刷新</button><button type="button" class="btn" id="repMore">看更早的</button></div>
-  </div>
-</section>
 
 <section id="bank">
   <h2>词库</h2>
@@ -457,7 +449,7 @@ document.addEventListener('click', e => {
   reset();
 }
 
-/* ---------- 学习记录：存在网站服务器上，所有设备共用一份（worker/vocab-store.js）；本机缓存一份，没网时先记在本机，联网后补传 ---------- */
+/* ---------- 进度保存（worker/vocab-store.js）；本机缓存一份，没网时先存本机，联网后补传 ---------- */
 const API = /^https?:$/.test(location.protocol) ? '/api/vocab' : null;
 const ls = {
   get(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? d; } catch { return d; } },
@@ -517,12 +509,12 @@ async function syncLoad() {
     }
     flush();
   } catch { SYNC.state = 'offline'; }
-  drawSync(); drawReview(); loadReport();
+  if (!R.touched && !QZ.on) R.sel = null;              // 读到最新进度后重新算今天到期的批次
+  drawSync(); drawReview();
 }
 function drawSync() {
   const el = $('sync'); if (!el) return;
-  el.textContent = { ok: '☁ 记录已同步到网站，所有设备共用', loading: '正在读取网站上的记录…',
-    offline: '⚠ 没连上网站，记录先存在这台设备上，联网后自动上传', local: '本地文件打开，记录只存在这台设备上' }[SYNC.state];
+  el.textContent = { ok: '', loading: '', offline: '⚠ 网络不太好，进度先保存在这台设备上，联网后会自动保存。', local: '' }[SYNC.state];
 }
 window.addEventListener('online', flush);
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && API) syncLoad(); });
@@ -584,16 +576,17 @@ const stripTags = h => h.replace(/<[^>]+>/g, '');
 const htmlText = h => { const d = document.createElement('div'); d.innerHTML = h; return d.textContent.replace(/\s+/g, ' ').trim(); };
 
 /* ---------- 今日复习：选批次 + 题型 ---------- */
-// 按复习轮次自动出题：第 1 次全面复习，越往后越集中在核心（拼写 + 词组），保证每天的量做得完
+// 按复习轮次自动出题，每批每次最多 CAP 题：单词每次都考；衍生词、词组、课堂笔记轮流抽，第 1、2 次合起来尽量覆盖全部
+const CAP = 30;
 const PLAN = [
   null,
   { word: true, der: true, ph: true, nph: true },  // 第 1 次（学后第 1 天）
-  { word: true, der: true, ph: true },             // 第 2 次（第 2 天）
+  { word: true, der: true, ph: true, nph: true },  // 第 2 次（接着第 1 次没抽到的往下抽）
   { word: true, ph: true },                        // 第 3 次（第 4 天）
   { word: true, ph: true },                        // 第 4 次（第 7 天）
   { word: true },                                  // 第 5 次起（第 15、30、60、120 天）
 ];
-const PLAN_TEXT = '第 1 次：单词 + 衍生词 + 词组 + 课堂笔记；第 2 次：单词 + 衍生词 + 词组；第 3、4 次：单词 + 词组；第 5 次起：只考单词。答错的都进易错本。';
+const PLAN_TEXT = `每批每次最多 ${CAP} 题。单词每次都考；第 1、2 次再轮流抽衍生词、词组和课堂笔记（两次合起来尽量都考到）；第 3、4 次：单词 + 词组；第 5 次起：只考单词。答错的都进易错本。`;
 const R_INIT = () => ({ day: todayStr(), sel: null, auto: true, types: { ...TYPES_INIT } });
 let R = R_INIT();
 function status(b) {
@@ -632,11 +625,20 @@ function drawReview() {
   $('print').disabled = !n;
 }
 const batchItems = b => {
-  const T = R.auto ? PLAN[Math.min(Math.max(status(b).round || 1, 1), 5)] : R.types;
-  return b.words.flatMap(w => itemsFor(w, T));
+  if (!R.auto) return b.words.flatMap(w => itemsFor(w, R.types));
+  const round = Math.min(Math.max(status(b).round || 1, 1), 5), T = PLAN[round];
+  const core = b.words.flatMap(w => itemsFor(w, { word: true }));
+  // 词组、衍生词、课堂笔记轮流排队，每次从上次停下的地方接着抽
+  const lists = ['ph', 'der', 'nph'].filter(k => T[k]).map(k => b.words.flatMap(w => itemsFor(w, { [k]: true })));
+  const extras = [];
+  for (let i = 0; lists.some(l => i < l.length); i++) lists.forEach(l => { if (i < l.length) extras.push(l[i]); });
+  const slots = Math.max(0, CAP - core.length);
+  if (extras.length <= slots) return [...core, ...extras].slice(0, CAP);
+  const start = ((round - 1) * slots) % extras.length;
+  return [...core, ...Array.from({ length: slots }, (_, i) => extras[(start + i) % extras.length])].slice(0, CAP);
 };
 const sessionItems = () => BATCHES.filter(b => R.sel.has(b.date)).flatMap(batchItems);
-$('batches').onchange = e => { const d = e.target.dataset.date; if (d) { e.target.checked ? R.sel.add(d) : R.sel.delete(d); drawReview(); } };
+$('batches').onchange = e => { const d = e.target.dataset.date; if (d) { R.touched = true; e.target.checked ? R.sel.add(d) : R.sel.delete(d); drawReview(); } };
 $('types').onclick = e => { const b = e.target.closest('#mode button'); if (b) { R.auto = b.dataset.v === 'auto'; drawReview(); } };
 $('types').onchange = e => { const k = e.target.dataset.type; if (k) { R.types[k] = e.target.checked; drawReview(); } };
 $('day').onchange = e => { if (e.target.value) { R.day = e.target.value; R.sel = null; drawReview(); } };
@@ -666,7 +668,6 @@ function report(finished) {
   QZ.reported = true;
   send({ op: 'event', event: { kind: QZ.kind, src: 'screen', day: todayStr(), title: QZ.title, total: QZ.first, right: QZ.right,
     wrong: QZ.wrong.map(wrongInfo), t0: QZ.t0, t1: Date.now(), finished } });
-  setTimeout(loadReport, 1500);
 }
 const hintOf = s => s.split(' ').map(t => t[0] + t.slice(1).replace(/[a-z]/gi, '_')).join('   ').split('').join(' ');
 function drawQuiz() {
@@ -760,7 +761,7 @@ quiz.addEventListener('keydown', e => {
 });
 resets.push(() => { QZ = QZ_INIT(); drawQuiz(); });
 
-/* ---------- 纸质卷：打印前先在网站登记卷号和答案，做完拍照给 Claude 批改，错题进易错本、复习卷记一轮 ---------- */
+/* ---------- 纸质卷：打印前先登记卷号和答案，批改后错题进易错本、复习卷记一轮 ---------- */
 const LETTERS = 'ABCDEF';
 function paperItem(it) {
   if (it.qz) {
@@ -781,7 +782,7 @@ async function makeSheet(kind, title, items, mark = []) {
     if (!r.ok) throw new Error(r.status);
     const j = await r.json(); sheet.id = j.id; adopt(j.state);
   } catch { alert('没连上网站，暂时不能登记卷号，请稍后再试。'); return; }
-  drawReview(); loadReport();
+  drawReview();
   printSheet(sheet);
 }
 function printSheet(sh) {
@@ -789,7 +790,7 @@ function printSheet(sh) {
   $('sheet').innerHTML = `<div class="ph"><h2>中考词汇 · ${esc(sh.title)}</h2>
     <div>卷号 <b class="id">${sh.id}</b>　打印日期 ${md(sh.day)}　共 ${sh.items.length} 题</div>
     <div>完成日期 ________　用时 ______ 分钟　得分 ______ / ${sh.items.length}</div>
-    <p class="tip">拼写题写英文，选择题在括号里写字母。做完后请家长把整张卷拍照发给 Claude 批改（要拍到卷号 ${sh.id}）。</p></div>
+    <p class="tip">拼写题写英文，选择题在括号里写字母。做完后交给家长批改。</p></div>
     <ol>${sh.items.map(li).join('')}</ol>
     <div class="key"><h3>答案 · 卷号 ${sh.id}（家长保留，先别给孩子看）</h3><ol>${sh.items.map(it => `<li>${esc(it.ans)}${it.full ? `　（${esc(it.full)}）` : ''}</li>`).join('')}</ol></div>`;
   document.body.classList.add('printing');
@@ -799,39 +800,7 @@ window.addEventListener('afterprint', () => document.body.classList.remove('prin
 $('print').onclick = () => makeSheet('review', `复习卷：${reviewTitle()}`, sessionItems(), BATCHES.filter(b => R.sel.has(b.date) && status(b).due));
 $('printWrong').onclick = () => { const wb = WB.get(); makeSheet('wrong', '易错本专练卷', ALL_ITEMS.filter(it => wb[it.id])); };
 
-/* ---------- 学习报告：所有设备的做题结果，家长在自己的手机上看 ---------- */
-const REP = { days: 7 };
-const WEEK = '日一二三四五六';
-async function loadReport() {
-  const box = $('rep'), sum = $('repSum');
-  if (!API) { sum.textContent = '在网站上打开（登录后）才能看到报告。'; box.innerHTML = ''; return; }
-  let ev;
-  try { const r = await fetch(`${API}/events?days=${REP.days}`, { cache: 'no-store' }); if (!r.ok) throw 0; ev = await r.json(); }
-  catch { sum.textContent = '暂时没连上网站，看不到报告。'; return; }
-  const open = Object.entries(STORE.open || {});
-  sum.innerHTML = `<div class="rsum">易错本现有 <b>${Object.keys(STORE.wrong).length}</b> 题${open.length ? `　·　等批改的纸质复习卷：${open.map(([id, o]) => `<b>${id}</b>（${md(o.day)}打印）`).join('、')}` : ''}</div>`;
-  const days = Object.keys(ev).sort().reverse();
-  if (!days.length) { box.innerHTML = '<p class="muted">还没有做题记录。孩子做完一次复习或练习后，这里就会出现结果。</p>'; return; }
-  const wl = list => list.length ? `<details><summary>错了 ${list.length} 题</summary>${list.map(w => `<div>· ${w.no ? `第 ${w.no} 题 ` : ''}${esc(w.label)}：答案 <b>${esc(w.ans)}</b>${w.typed ? `，写了 ${esc(w.typed)}` : ''}</div>`).join('')}</details>` : '';
-  box.innerHTML = days.map(day => {
-    const evs = ev[day], d = new Date(day + 'T00:00:00');
-    const mins = evs.reduce((m, e) => m + (e.t0 && e.t1 ? (e.t1 - e.t0) / 60000 : 0), 0);
-    const rows = evs.filter(e => !(e.kind === 'practice' && e.src === 'screen')).map(e => {
-      const pct = e.total ? Math.round(e.right / e.total * 100) : 0;
-      const name = { review: '复习', wrong: '易错本', practice: '练习' }[e.kind] || e.kind;
-      return `<li>${e.src === 'paper' ? `📄 纸质卷 ${e.sheet}` : '📱'} <b>${esc(e.title || name)}</b>　${e.src === 'paper' ? '' : '首次'}答对 ${e.right} / ${e.total}（${pct}%）${e.t0 && e.t1 ? `　${Math.max(1, Math.round((e.t1 - e.t0) / 60000))} 分钟` : ''}${e.finished === false ? '　<span class="muted">没做完</span>' : ''}${wl(e.wrong || [])}</li>`;
-    });
-    const prac = {};
-    evs.filter(e => e.kind === 'practice' && e.src === 'screen').forEach(e => { (prac[e.title] ||= []).push(e); });
-    Object.entries(prac).forEach(([t, list]) => {
-      const bad = list.filter(e => !e.ok);
-      rows.push(`<li>📱 <b>${esc(t)}</b>　答了 ${list.length} 题，对 ${list.length - bad.length} 题${wl(bad.map(e => ({ label: e.label, ans: e.ans, typed: e.typed })))}</li>`);
-    });
-    return `<div class="rday"><h3>${md(day)}（周${WEEK[d.getDay()]}）${mins >= 1 ? `<span class="muted small">　屏幕上共 ${Math.round(mins)} 分钟</span>` : ''}</h3><ul>${rows.join('')}</ul></div>`;
-  }).join('');
-}
-$('repRefresh').onclick = () => syncLoad();
-$('repMore').onclick = () => { REP.days += 7; loadReport(); };
+
 
 /* ---------- 词库 ---------- */
 function wordHTML(w) {
