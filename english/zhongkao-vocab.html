@@ -790,7 +790,7 @@ function printSheet(sh) {
   $('sheet').innerHTML = `<div class="ph"><h2>中考词汇 · ${esc(sh.title)}</h2>
     <div>卷号 <b class="id">${sh.id}</b>　打印日期 ${md(sh.day)}　共 ${sh.items.length} 题</div>
     <div>完成日期 ________　用时 ______ 分钟　得分 ______ / ${sh.items.length}</div>
-    <p class="tip">拼写题写英文，选择题在括号里写字母。做完后交给家长批改。</p></div>
+    <p class="tip">拼写题写英文，选择题在括号里写字母。做完后拍照发给 Claude 批改（要拍到卷号 ${sh.id}）。</p></div>
     <ol>${sh.items.map(li).join('')}</ol>
     <div class="key"><h3>答案 · 卷号 ${sh.id}（家长保留，先别给孩子看）</h3><ol>${sh.items.map(it => `<li>${esc(it.ans)}${it.full ? `　（${esc(it.full)}）` : ''}</li>`).join('')}</ol></div>`;
   document.body.classList.add('printing');
