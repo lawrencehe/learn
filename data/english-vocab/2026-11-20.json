@@ -1,0 +1,772 @@
+{
+ "date": "2026-11-20",
+ "pages": "p39-41",
+ "quiz": [
+  {
+   "type": "选择",
+   "q": "Could you give me a ______ when you arrive at the airport?",
+   "opts": [
+    "call",
+    "calling",
+    "calls"
+   ],
+   "ans": 0,
+   "why": "give sb. a call 给某人打电话，这里 call 是名词，a 后面用单数 call（#233 call 的课堂笔记：give me a call = call me）。"
+  },
+  {
+   "type": "选择",
+   "q": "______ terrible news it is!",
+   "opts": [
+    "What a",
+    "What",
+    "How"
+   ],
+   "ans": 1,
+   "why": "常见误区。news 是不可数名词，前面不能加 a，所以用 What + 形容词 + 不可数名词（#243 car 的例句：What terrible news it is!）。"
+  },
+  {
+   "type": "选择",
+   "q": "We had to stay at home. The football match ______ because of the heavy rain.",
+   "opts": [
+    "cancelled",
+    "was cancelled",
+    "is cancelled"
+   ],
+   "ans": 1,
+   "why": "比赛是“被”取消的，又发生在过去，用一般过去时的被动语态 was cancelled（#240 cancel 的例句：the flight was cancelled）。"
+  },
+  {
+   "type": "填空",
+   "q": "Please be ______ (care)! The floor is wet.",
+   "ans": [
+    "careful"
+   ],
+   "placeholder": "用 care 的适当形式",
+   "why": "be 后面接形容词：care → careful 小心的（#245 care 的词形拓展，课堂笔记 Be careful!）。"
+  },
+  {
+   "type": "填空",
+   "q": "Tom is a ______ (care) boy. He often makes mistakes in his homework.",
+   "ans": [
+    "careless"
+   ],
+   "placeholder": "用 care 的适当形式",
+   "why": "经常出错，说明他“粗心”：careless 粗心的，-less 表示“没有”（#248 careless）。careful 的反义词就是 careless。"
+  },
+  {
+   "type": "选择",
+   "q": "Who will ______ your cat when you travel to Canada?",
+   "opts": [
+    "take care of",
+    "care about",
+    "be careful with"
+   ],
+   "ans": 0,
+   "why": "旅行时有人“照顾”猫，用 take care of（= care for）。care about 是“关心、在乎”，be careful with 是“小心对待”（#245 care 的常用词组）。"
+  },
+  {
+   "type": "填空",
+   "q": "Lucy was born in Toronto. She is a ______ (Canada) girl.",
+   "ans": [
+    "Canadian"
+   ],
+   "placeholder": "用 Canada 的适当形式",
+   "why": "修饰 girl 要用形容词 Canadian 加拿大的（#238 Canada 的词形拓展），首字母大写。Canadian 也可以作名词“加拿大人”。"
+  },
+  {
+   "type": "选择",
+   "q": "Please keep ______. The doctor will be here soon.",
+   "opts": [
+    "calm",
+    "calmly",
+    "calming"
+   ],
+   "ans": 0,
+   "why": "keep + 形容词，表示“保持某种状态”：keep calm 保持冷静（#234 calm 的课堂笔记）。同理 keep active and healthy（第 1 批 #13）。"
+  },
+  {
+   "type": "判断",
+   "q": "Little Tom was sleeping while everybody else was listening carefully. 这句可以省略成 … while listening carefully。",
+   "opts": [
+    "对",
+    "错"
+   ],
+   "ans": 1,
+   "why": "迁移 + 误区。while 后面只有在主语和主句相同时，才能省略“主语 + be”：Be careful while (you're) getting off the train（#246）。这句里睡觉的是 Tom，听讲的是 everybody else，主语不同，不能省（#247 carefully）。"
+  },
+  {
+   "type": "填空",
+   "q": "Read the questions ______ (careful) before you answer them.",
+   "ans": [
+    "carefully"
+   ],
+   "placeholder": "用 careful 的适当形式",
+   "why": "修饰动词 read 要用副词：careful（adj.）→ carefully（adv.）仔细地（#247 carefully）。反义词 carelessly。"
+  },
+  {
+   "type": "选择",
+   "q": "The weather is fine. Shall we go ______ in the forest this weekend?",
+   "opts": [
+    "camp",
+    "camping",
+    "to camp"
+   ],
+   "ans": 1,
+   "why": "go camping 去露营（#236 camp 的课堂笔记），同类的还有 go swimming、go shopping。"
+  },
+  {
+   "type": "填空",
+   "q": "This sofa is soft and very ______ (comfort). I like sitting on it.",
+   "ans": [
+    "comfortable"
+   ],
+   "placeholder": "用 comfort 的适当形式",
+   "why": "very 后面要形容词：comfort（n. & v.）→ comfortable（adj.）舒适的（#236 camp 的课堂笔记）。"
+  }
+ ],
+ "words": [
+  {
+   "no": 230,
+   "w": "cabbage",
+   "ipa": "/ˈkæbɪdʒ/",
+   "star": false,
+   "unit": "G6上U3",
+   "senses": [
+    {
+     "pos": "n.",
+     "zh": "卷心菜"
+    }
+   ],
+   "ex": [
+    {
+     "en": "He grows [cabbages] on his farm.",
+     "zh": "他在自家农场里种卷心菜。"
+    }
+   ],
+   "ntip": [
+    "on his farm：“在农场”用介词 on"
+   ]
+  },
+  {
+   "no": 231,
+   "w": "café",
+   "ipa": "/ˈkæfeɪ/",
+   "star": false,
+   "unit": "",
+   "senses": [
+    {
+     "pos": "n.",
+     "zh": "咖啡馆"
+    }
+   ],
+   "ex": [
+    {
+     "en": "We went into the [café] for coffee and dessert yesterday.",
+     "zh": "昨天我们到咖啡馆喝了咖啡，吃了点心。"
+    }
+   ],
+   "ntip": [
+    "café 来自法语，e 上面有一撇；默写时写 cafe 也算对"
+   ]
+  },
+  {
+   "no": 232,
+   "w": "cake",
+   "ipa": "/keɪk/",
+   "star": false,
+   "unit": "",
+   "senses": [
+    {
+     "pos": "n.",
+     "zh": "蛋糕；糕点；饼"
+    }
+   ],
+   "ex": [
+    {
+     "en": "Mike's mother bought him a big [cake] on his birthday.",
+     "zh": "迈克生日那天，他妈妈给他买了一个大蛋糕。"
+    }
+   ],
+   "nph": [
+    {
+     "en": "moon [cake]",
+     "zh": "月饼（也写作 mooncake）"
+    }
+   ]
+  },
+  {
+   "no": 233,
+   "w": "call",
+   "ipa": "/kɔːl/",
+   "star": true,
+   "unit": "",
+   "senses": [
+    {
+     "pos": "v.",
+     "zh": "打电话给……；称呼；取名；呼唤；喊；叫"
+    },
+    {
+     "pos": "n.",
+     "zh": "喊；叫；电话；通话"
+    }
+   ],
+   "ex": [
+    {
+     "en": "Please [call] me when you get home.",
+     "zh": "你到家时请给我打个电话。"
+    },
+    {
+     "en": "Computers are super calculators; we usually [call] them electronic brains.",
+     "zh": "电脑是超级计算器，我们通常称它们为电子大脑。"
+    },
+    {
+     "en": "Rafe Esquith is [called] the most interesting classroom teacher in the U.S.A.",
+     "zh": "雷夫·艾斯奎斯被称为美国最有趣的课堂老师。"
+    },
+    {
+     "en": "The charity [called] for immediate action to help homeless pets.",
+     "zh": "该慈善机构呼吁立即采取行动帮助无家可归的宠物。"
+    },
+    {
+     "en": "I gave him a phone [call] yesterday.",
+     "zh": "我昨天给他打电话了。"
+    }
+   ],
+   "nph": [
+    {
+     "en": "give me a [call]",
+     "zh": "给我打电话（call 是名词，= call me）"
+    },
+    {
+     "en": "be [called] …",
+     "zh": "被称为……（后面接名词或名词词组）"
+    },
+    {
+     "en": "call [for]",
+     "zh": "呼吁"
+    },
+    {
+     "en": "[calculator]",
+     "zh": "n. 计算器"
+    }
+   ]
+  },
+  {
+   "no": 234,
+   "w": "calm",
+   "ipa": "/kɑːm/",
+   "star": true,
+   "unit": "",
+   "senses": [
+    {
+     "pos": "adj.",
+     "zh": "镇静的；沉着的"
+    },
+    {
+     "pos": "v.",
+     "zh": "使平静；安静；使镇静"
+    }
+   ],
+   "ex": [
+    {
+     "en": "The sea is now [calm].",
+     "zh": "海现在平静了。"
+    },
+    {
+     "en": "I think everybody should just [calm] down.",
+     "zh": "我想每个人都应该冷静下来。"
+    }
+   ],
+   "der": [
+    {
+     "w": "calmly",
+     "pos": "adv.",
+     "zh": "沉着地"
+    }
+   ],
+   "ph": [
+    {
+     "en": "calm [down]",
+     "zh": "使……平静"
+    }
+   ],
+   "ant": [
+    "rough"
+   ],
+   "nph": [
+    {
+     "en": "keep [calm]",
+     "zh": "保持冷静（keep + 形容词）"
+    },
+    {
+     "en": "[rough]",
+     "zh": "adj. 不平静的（读 /rʌf/）"
+    }
+   ],
+   "ntip": [
+    "calm 里的 l 不发音",
+    "I think (that) everybody should …：think 后面省略了 that"
+   ]
+  },
+  {
+   "no": 235,
+   "w": "camera",
+   "ipa": "/ˈkæmərə/",
+   "star": true,
+   "unit": "G7上U4",
+   "senses": [
+    {
+     "pos": "n.",
+     "zh": "照相机；摄影机"
+    }
+   ],
+   "ex": [
+    {
+     "en": "Now a [camera] does not cost much and most young people are certainly able to pay for it.",
+     "zh": "现在照相机花费不多，所以绝大多数年轻人都能买得起。"
+    }
+   ]
+  },
+  {
+   "no": 236,
+   "w": "camp",
+   "ipa": "/kæmp/",
+   "star": false,
+   "unit": "G7上U1",
+   "senses": [
+    {
+     "pos": "n.",
+     "zh": "（夏令）营；野营；营地"
+    },
+    {
+     "pos": "v.",
+     "zh": "露营"
+    }
+   ],
+   "ex": [
+    {
+     "en": "Shall we join in the Green World Summer [Camp]?",
+     "zh": "我们参加绿色世界夏令营好吗？"
+    },
+    {
+     "en": "They brought all the necessary supplies to [camp] comfortably in the wilderness.",
+     "zh": "他们带了必要的物资，以便在野外能舒适地露营。"
+    }
+   ],
+   "nph": [
+    {
+     "en": "go [camping]",
+     "zh": "去露营"
+    },
+    {
+     "en": "[supply]",
+     "zh": "n. 供应；supplies 生活物资"
+    },
+    {
+     "en": "[comfort]",
+     "zh": "n. & v. 安慰；舒适"
+    },
+    {
+     "en": "[comfortable]",
+     "zh": "adj. 舒适的（comfortably adv. 舒适地）"
+    }
+   ]
+  },
+  {
+   "no": 237,
+   "w": "can",
+   "ipa": "/kæn/",
+   "star": true,
+   "unit": "",
+   "forms": "could /kʊd/，can't /kɑːnt/ = can not /ˈkænɒt/",
+   "senses": [
+    {
+     "pos": "aux. v.",
+     "zh": "可能；能够；可以；会"
+    },
+    {
+     "pos": "n.",
+     "zh": "〈美〉罐头；罐子"
+    }
+   ],
+   "ex": [
+    {
+     "en": "My son likes reading stories. Now he [can] tell a story as well as his sister.",
+     "zh": "我儿子喜欢阅读故事。现在，他的故事可以讲得和他姐姐一样好。"
+    },
+    {
+     "en": "This [can] holds five litres of water.",
+     "zh": "这个容器可装 5 升水。"
+    }
+   ],
+   "nph": [
+    {
+     "en": "fruit [can]",
+     "zh": "水果罐头"
+    },
+    {
+     "en": "as [well] as",
+     "zh": "和……一样好"
+    }
+   ],
+   "ntip": [
+    "This can holds …：这里 can 是名词“罐子”，所以动词 holds 要加 -s"
+   ]
+  },
+  {
+   "no": 238,
+   "w": "Canada",
+   "ipa": "/ˈkænədə/",
+   "star": false,
+   "unit": "",
+   "senses": [
+    {
+     "pos": "n.",
+     "zh": "加拿大"
+    }
+   ],
+   "ex": [
+    {
+     "en": "[Canada] has ten provinces.",
+     "zh": "加拿大有 10 个省。"
+    },
+    {
+     "en": "My brother has studied in a university in [Canada] for three years. He will come back to China next week.",
+     "zh": "我哥哥在加拿大一所大学学习了 3 年。他将于下周回中国。"
+    }
+   ],
+   "der": [
+    {
+     "w": "Canadian",
+     "pos": "adj. / n.",
+     "zh": "adj. 加拿大的；加拿大人的；n. 加拿大人"
+    }
+   ]
+  },
+  {
+   "no": 239,
+   "w": "Canadian",
+   "ipa": "/kəˈneɪdiən/",
+   "star": true,
+   "unit": "",
+   "senses": [
+    {
+     "pos": "adj.",
+     "zh": "加拿大的；加拿大人的"
+    },
+    {
+     "pos": "n.",
+     "zh": "加拿大人"
+    }
+   ],
+   "ex": [
+    {
+     "en": "He went to Canada several years ago. Now he is a [Canadian] citizen.",
+     "zh": "几年前他去了加拿大。他现在是加拿大公民。"
+    },
+    {
+     "en": "The [Canadian] won the championship in this event at the Olympics.",
+     "zh": "那位加拿大人赢得了奥运会这个项目的冠军。"
+    }
+   ],
+   "nph": [
+    {
+     "en": "win / [won] / won",
+     "zh": "赢（过去式和过去分词都是 won）"
+    },
+    {
+     "en": "[event]",
+     "zh": "n. （比赛）项目；事件"
+    },
+    {
+     "en": "the [Olympics]",
+     "zh": "奥运会"
+    }
+   ]
+  },
+  {
+   "no": 240,
+   "w": "cancel",
+   "ipa": "/ˈkænsl/",
+   "star": true,
+   "unit": "G8下U5",
+   "senses": [
+    {
+     "pos": "v.",
+     "zh": "取消；终止"
+    }
+   ],
+   "ex": [
+    {
+     "en": "We needn't hurry all the way to the airport; the flight was [cancelled] because of the foggy weather.",
+     "zh": "我们不必急着去机场，因为有雾，航班被取消了。"
+    }
+   ],
+   "syn": [
+    "give up"
+   ],
+   "nph": [
+    {
+     "en": "give [up]",
+     "zh": "放弃"
+    },
+    {
+     "en": "foggy",
+     "zh": "adj. 有雾的（fog n. 雾，双写 g 加 -y）"
+    }
+   ]
+  },
+  {
+   "no": 241,
+   "w": "capital",
+   "ipa": "/ˈkæpɪtl/",
+   "star": true,
+   "unit": "G6下U4",
+   "senses": [
+    {
+     "pos": "n.",
+     "zh": "首都；国都；省会"
+    }
+   ],
+   "ex": [
+    {
+     "en": "Beijing is the [capital] of China.",
+     "zh": "北京是中国的首都。"
+    },
+    {
+     "en": "The [capital] of Hainan Province is Haikou.",
+     "zh": "海南省的省会是海口。"
+    }
+   ]
+  },
+  {
+   "no": 242,
+   "w": "captain",
+   "ipa": "/ˈkæptɪn/",
+   "star": false,
+   "unit": "G8上U5",
+   "senses": [
+    {
+     "pos": "n.",
+     "zh": "船长；（尤指运动队的）队长"
+    }
+   ],
+   "ex": [
+    {
+     "en": "Tom Zhu is a [captain].",
+     "zh": "汤姆·朱是一位船长。"
+    }
+   ],
+   "nph": [
+    {
+     "en": "Captain [America]",
+     "zh": "美国队长（电影角色名，captain 放在前面）"
+    }
+   ]
+  },
+  {
+   "no": 243,
+   "w": "car",
+   "ipa": "/kɑː(r)/",
+   "star": true,
+   "unit": "",
+   "senses": [
+    {
+     "pos": "n.",
+     "zh": "小汽车"
+    }
+   ],
+   "ex": [
+    {
+     "en": "What terrible news it is! Three people died in the [car] accident.",
+     "zh": "多么可怕的消息！有 3 人在车祸中丧生。"
+    }
+   ]
+  },
+  {
+   "no": 244,
+   "w": "card",
+   "ipa": "/kɑːd/",
+   "star": false,
+   "unit": "",
+   "senses": [
+    {
+     "pos": "n.",
+     "zh": "卡片"
+    }
+   ],
+   "ex": [
+    {
+     "en": "A nice [card] was chosen for his mother by John on Mother's Day.",
+     "zh": "在母亲节，约翰为妈妈选了一张漂亮的贺卡。"
+    }
+   ],
+   "ntip": [
+    "也指“牌”：play cards 打牌"
+   ]
+  },
+  {
+   "no": 245,
+   "w": "care",
+   "ipa": "/keə(r)/",
+   "star": true,
+   "unit": "G6上U5",
+   "senses": [
+    {
+     "pos": "n.",
+     "zh": "照料，保护；小心"
+    },
+    {
+     "pos": "v.",
+     "zh": "介意；在乎；关心"
+    }
+   ],
+   "ex": [
+    {
+     "en": "Without great [care], the old man's condition may become even worse.",
+     "zh": "如果不多加照料，这位老人的状况可能会变得更糟。"
+    },
+    {
+     "en": "I don't [care] whether he comes or not.",
+     "zh": "我不介意他来不来。"
+    }
+   ],
+   "der": [
+    {
+     "w": "careful",
+     "pos": "adj.",
+     "zh": "小心的；仔细的"
+    },
+    {
+     "w": "carefully",
+     "pos": "adv.",
+     "zh": "小心地；仔细地"
+    },
+    {
+     "w": "careless",
+     "pos": "adj.",
+     "zh": "粗心的；不小心的；不仔细的"
+    },
+    {
+     "w": "caring",
+     "pos": "adj.",
+     "zh": "关心他人的；体贴的"
+    }
+   ],
+   "ph": [
+    {
+     "en": "care [about]",
+     "zh": "关心"
+    },
+    {
+     "en": "care [for]",
+     "zh": "照顾；喜欢"
+    },
+    {
+     "en": "take [care] of",
+     "zh": "照料"
+    },
+    {
+     "en": "with great [care]",
+     "zh": "非常小心"
+    }
+   ],
+   "nph": [
+    {
+     "en": "Be [careful]!",
+     "zh": "小心！"
+    }
+   ],
+   "ntip": [
+    "care for（照顾）= take care of",
+    "even + 比较级：even worse 更糟",
+    "I don't care …：笔记里把“介意”改成了“在乎”，意思更贴切"
+   ]
+  },
+  {
+   "no": 246,
+   "w": "careful",
+   "ipa": "/ˈkeəfl/",
+   "star": true,
+   "unit": "",
+   "senses": [
+    {
+     "pos": "adj.",
+     "zh": "小心的；仔细的"
+    }
+   ],
+   "ex": [
+    {
+     "en": "Be [careful] while getting off the train. The ground is wet.",
+     "zh": "下车时要小心，地面是湿的。"
+    }
+   ],
+   "ph": [
+    {
+     "en": "be careful [with]",
+     "zh": "小心"
+    }
+   ],
+   "ant": [
+    "careless"
+   ],
+   "ntip": [
+    "while getting off = while (you're) getting off：主语相同，省略了“主语 + be”（同第 2 批 #131）"
+   ]
+  },
+  {
+   "no": 247,
+   "w": "carefully",
+   "ipa": "/ˈkeəfəli/",
+   "star": true,
+   "unit": "",
+   "senses": [
+    {
+     "pos": "adv.",
+     "zh": "小心地；仔细地"
+    }
+   ],
+   "ex": [
+    {
+     "en": "Little Tom was sleeping while everybody else was listening to the teacher [carefully].",
+     "zh": "小汤姆在睡觉，而其他人都在认真听老师讲课。"
+    }
+   ],
+   "ant": [
+    "carelessly"
+   ],
+   "ntip": [
+    "while 后面的主语 everybody else 和主句的 Tom 不同，所以 everybody else was 不能省略"
+   ]
+  },
+  {
+   "no": 248,
+   "w": "careless",
+   "ipa": "/ˈkeələs/",
+   "star": true,
+   "unit": "G7下U4",
+   "senses": [
+    {
+     "pos": "adj.",
+     "zh": "粗心的；不小心的；不仔细的"
+    }
+   ],
+   "ex": [
+    {
+     "en": "It's known to all that [careless] drivers are a danger to both themselves and others.",
+     "zh": "大家都知道，粗心的司机对自己和他人都是危险的。"
+    }
+   ],
+   "nph": [
+    {
+     "en": "It's [known] to all that …",
+     "zh": "众所周知……"
+    },
+    {
+     "en": "[dangerous]",
+     "zh": "adj. 危险的（danger n. 危险）"
+    }
+   ]
+  }
+ ]
+}
