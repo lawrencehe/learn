@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>记住「璨」字</title>
+<meta name="description" content="「璀璨」的「璨」怎么记：从熟字「餐」出发，把「食」换成「米」得到「粲」，再配上玉字旁「王」——拆字动画、拼字台、易错辨析（璀璨≠璀灿）和练习。">
+<style>
+:root{
+  --bg:var(--up-bg); --surface:var(--up-surface); --surface2:var(--up-surface-2); --ink:var(--up-ink); --muted:var(--up-muted); --line:var(--up-line);
+  --accent:var(--up-accent); --ok:var(--up-ok); --bad:var(--up-bad);
+  --yu:#0b7285;    /* 王（玉） */
+  --top:#6741d9;   /* 上半部分 歺 + 又 */
+  --mi:#b7791f;    /* 米 */
+  --shi:#868e96;   /* 食 */
+  --huo:#e8590c;   /* 火 */
+  --kai:"KaiTi","STKaiti","Kaiti SC","AR PL UKai CN","Noto Serif CJK SC","Songti SC",serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --yu:#66d9e8; --top:#b197fc; --mi:#ffd43b; --shi:#adb5bd; --huo:#ffa94d; }
+}
+:root[data-theme="dark"]{ --yu:#66d9e8; --top:#b197fc; --mi:#ffd43b; --shi:#adb5bd; --huo:#ffa94d; }
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 var(--up-font);padding:24px 16px 96px}
+main{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:48px}
+h1{font-size:clamp(1.7rem,4.5vw,2.4rem);line-height:1.25;margin:0 0 8px}
+h2{font-size:1.4rem;margin:0 0 8px}
+p{margin:0}
+.lead{color:var(--muted)}
+.muted{color:var(--muted);font-size:.92rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--up-radius);box-shadow:var(--up-shadow);padding:16px}
+.analogy{border-left:4px solid var(--accent)}
+.btn{font:inherit;font-size:14px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--up-surface)}
+.btn.on{border-color:var(--accent);background:var(--up-accent-soft);color:var(--accent);font-weight:700}
+.btn:disabled{opacity:.45;cursor:default}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.stepno{font-family:var(--up-mono);color:var(--muted);font-size:.9rem;min-width:56px;text-align:center}
+.caption{min-height:3.4em;margin-top:10px}
+.kai{font-family:var(--kai)}
+.yu{color:var(--yu)} .top{color:var(--top)} .mi{color:var(--mi)} .shi{color:var(--shi)} .huo{color:var(--huo)}
+
+/* 头图 */
+.hero{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.hero .big{font-family:var(--kai);font-size:96px;line-height:1;padding:10px 18px;border:2px dashed var(--line);border-radius:12px;background:var(--surface2)}
+.hero .py{font-family:var(--up-mono);color:var(--muted)}
+
+/* 拆字舞台 */
+.stagewrap{display:flex;gap:16px;flex-wrap:wrap;align-items:center;justify-content:center;margin-top:12px}
+.box{position:relative;width:220px;height:220px;border-radius:10px;background:var(--surface2);overflow:hidden;flex:none;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:110px 110px;background-position:-1px -1px}
+.pc{position:absolute;font-family:var(--kai);line-height:1;transition:left .8s ease,top .8s ease,font-size .8s ease,opacity .8s ease,filter .8s;white-space:nowrap}
+.pc.dim{opacity:.25 !important}
+.arrow{font-size:28px;color:var(--muted)}
+.result{min-width:180px;text-align:center}
+.result .ch{font-family:var(--kai);font-size:88px;line-height:1.1;transition:opacity .4s}
+.result .eq{font-size:15px;margin-top:4px}
+.result .py{font-family:var(--up-mono);color:var(--muted);font-size:14px}
+
+/* 拼字台 */
+.picker{display:grid;gap:10px}
+.picker .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.picker .lab{min-width:5.5em;color:var(--muted);font-size:14px}
+.forge{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:12px}
+.forge .ch{font-family:var(--kai);font-size:84px;line-height:1;min-width:1.1em;text-align:center}
+.forge .ch.none{color:var(--bad);font-size:56px}
+.forge .info{flex:1;min-width:200px}
+
+/* 对照表 */
+.pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-top:10px}
+.pair .card h3{margin:0 0 6px;font-size:1.05rem}
+.pair .w{font-family:var(--kai);font-size:40px;line-height:1.2}
+.bad-x{color:var(--bad);font-weight:700}
+.ok-v{color:var(--ok);font-weight:700}
+ul.mis{margin:8px 0 0;padding-left:1.2em;display:grid;gap:8px}
+.tally{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px;font-size:15px}
+.tally span.t{font-family:var(--kai);font-size:26px}
+.tally b{font-family:var(--up-mono)}
+.rhyme{font-family:var(--kai);font-size:1.25rem;line-height:1.9}
+@media (prefers-reduced-motion: reduce){.pc,.result .ch{transition:none}}
+
+:root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:var(--ok);--lq-bad:var(--bad)}
+/* ---------- 练习题（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+.lq{display:grid;gap:12px;margin-bottom:56px}
+.lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+.lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
+.lq-sub{margin:0;color:var(--lq-muted);font-size:14px}
+.lq-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--lq-muted);font-variant-numeric:tabular-nums}
+.lq-list{display:grid;gap:10px}
+.lq-item{background:var(--lq-surface);border:1.5px solid var(--lq-line);border-radius:10px;padding:12px 16px;display:grid;gap:10px;min-width:0;color:var(--lq-ink);text-align:left}
+.lq-item.lq-is-ok{border-color:var(--lq-ok)}
+.lq-item.lq-is-bad{border-color:var(--lq-bad)}
+.lq-q{font-size:15px;font-weight:600;line-height:1.6}
+.lq-tag{display:inline-block;font-size:11px;font-weight:500;line-height:1.6;color:var(--lq-muted);border:1px solid var(--lq-line);border-radius:999px;padding:0 8px;margin-right:8px;vertical-align:1px}
+.lq-opts,.lq-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lq .lq-opt,.lq .lq-redo{font:inherit;font-size:14px;line-height:1.4;padding:6px 14px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);cursor:pointer;text-align:left;opacity:1}
+.lq .lq-opt:hover:not(:disabled),.lq .lq-redo:hover{border-color:var(--lq-accent)}
+.lq .lq-opt:disabled{cursor:default;opacity:1}
+.lq .lq-opt.lq-right{border-color:var(--lq-ok);color:var(--lq-ok);font-weight:700}
+.lq .lq-opt.lq-wrong{border-color:var(--lq-bad);color:var(--lq-bad);text-decoration:line-through}
+.lq-fill input{font:inherit;font-size:14px;padding:6px 10px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);width:min(100%,200px)}
+.lq-fill input.lq-right{border-color:var(--lq-ok)}
+.lq-fill input.lq-wrong{border-color:var(--lq-bad)}
+.lq-why{font-size:14px;line-height:1.65;color:var(--lq-muted)}
+.lq-why:empty{display:none}
+.lq-why .lq-ok{color:var(--lq-ok)}
+.lq-why .lq-bad{color:var(--lq-bad)}
+</style>
+</head>
+<body>
+<!-- up-shell:begin（由 scripts/shell.mjs 自动生成，勿手改） -->
+<nav id="up-nav" aria-label="网站导航">
+<a class="up-home" href="/" title="Up 学习站首页"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="up-nav-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c6ef5"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#up-nav-g)"/><path d="M12 52V42a2 2 0 0 1 2-2h10V32a2 2 0 0 1 2-2h10v-8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v30z" fill="#fff"/><circle cx="43" cy="13" r="5.5" fill="#ffa94d"/></svg><span>Up 学习站</span></a>
+<span class="up-sep" aria-hidden="true">›</span><a class="up-cat" href="/chinese">语文</a>
+<span class="up-sep" aria-hidden="true">›</span><span class="up-title">记住「璨」字</span>
+<button id="up-reset" type="button" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+</nav>
+<style>
+:root{--up-bg:#f5f6f8;--up-surface:#ffffff;--up-surface-2:#eef0f4;--up-ink:#1d2127;--up-muted:#626b78;--up-line:#dfe2e8;--up-ok:#2b8a3e;--up-bad:#d6336c;--up-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);--up-font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif;--up-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;--up-radius:12px;--up-accent:#a33a2e;--up-accent-soft:#f8ece8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#f0a08f;--up-accent-soft:#3a2220;color-scheme:dark}}
+:root[data-theme="dark"]{--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#f0a08f;--up-accent-soft:#3a2220;color-scheme:dark}
+html{padding-top:52px;scroll-padding-top:64px}
+#up-nav{position:fixed;top:0;left:0;right:0;z-index:2147483000;height:52px;box-sizing:border-box;display:flex;align-items:center;gap:8px;
+padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));border-top:3px solid var(--up-accent);
+border-bottom:1px solid var(--up-line);background:color-mix(in srgb,var(--up-surface) 88%,transparent);
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:500 14px/1.2 var(--up-font);color:var(--up-ink);text-align:left}
+#up-nav a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none}
+#up-nav a:hover{color:var(--up-accent)}
+#up-nav svg{width:24px;height:24px;flex:none;display:block}
+#up-nav .up-home span{font-weight:700}
+#up-nav .up-cat{color:var(--up-accent);font-weight:600}
+#up-nav .up-sep{color:var(--up-muted);flex:none}
+#up-nav .up-title{color:var(--up-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#up-reset{margin:0 0 0 auto;flex:none;font:600 14px/1 var(--up-font);padding:8px 14px;border-radius:999px;cursor:pointer;
+border:1.5px solid var(--up-accent);background:transparent;color:var(--up-accent);transition:background .2s,color .2s}
+#up-reset:hover,#up-reset:focus-visible{background:var(--up-accent);color:var(--up-surface)}
+#up-reset:focus-visible,#up-nav a:focus-visible{outline:2px solid var(--up-accent);outline-offset:2px}
+@media (max-width:560px){#up-nav .up-home span{display:none}}
+@media print{#up-nav{display:none}html{padding-top:0}}
+</style>
+<script>
+document.getElementById('up-reset').addEventListener('click', function () {
+  if (typeof window.resetPage === 'function') window.resetPage();
+  else console.warn('本页没有定义 window.resetPage()，重置按钮无效');
+  window.scrollTo({ top: 0, behavior: 'auto' });
+});
+</script>
+<!-- up-shell:end -->
+<main>
+
+<section class="hero">
+  <div class="big">璨</div>
+  <div style="flex:1;min-width:240px">
+    <h1>记住「璨」字</h1>
+    <p class="py">càn · 17 画 · 璀璨</p>
+    <p class="lead">右边那一大坨总记不住？其实你早就会写它的大半——它藏在「晚餐」的「餐」里。</p>
+  </div>
+</section>
+
+<section class="card analogy">
+  <b>生活比喻：给一碗饭「换菜加宝石」</b><br>
+  端来一碗「<span class="kai">餐</span>」→ 把下面的「<span class="shi">食</span>」换成白亮的「<span class="mi">米</span>」→ 旁边再放一块「<span class="yu">玉</span>」。<br>
+  白米 + 美玉，亮闪闪的——这就是「<span class="kai">璨</span>」。
+</section>
+
+<!-- 模块 1：拆字动画 -->
+<section>
+  <h2>一步一步拼出来</h2>
+  <p class="muted">颜色对应：<span class="yu">■ 王（玉）</span>　<span class="top">■ 上半部分 歺＋又</span>　<span class="mi">■ 米</span>　<span class="shi">■ 食</span>　<span class="huo">■ 火</span></p>
+  <div class="card" id="build">
+    <div class="stagewrap">
+      <div class="box" aria-hidden="true">
+        <span class="pc yu"  data-k="yu">王</span>
+        <span class="pc huo" data-k="huo">火</span>
+        <span class="pc top" data-k="dai">歺</span>
+        <span class="pc top" data-k="you">又</span>
+        <span class="pc shi" data-k="shi">食</span>
+        <span class="pc mi"  data-k="mi">米</span>
+      </div>
+      <div class="arrow">→</div>
+      <div class="result"><div class="ch"></div><div class="py"></div><div class="eq"></div></div>
+    </div>
+    <p class="caption" aria-live="polite"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+</section>
+
+<!-- 模块 2：拼字台 -->
+<section>
+  <h2>自己试试：拼字台</h2>
+  <p class="muted">上半部分「歺＋又」固定不动，你来选左边和下边，看看能拼出什么字。</p>
+  <div class="card" id="forge">
+    <div class="picker">
+      <div class="row"><span class="lab">左边加：</span>
+        <button type="button" class="btn" data-l="">不加</button>
+        <button type="button" class="btn" data-l="王"><span class="yu">王</span>（玉）</button>
+        <button type="button" class="btn" data-l="火"><span class="huo">火</span></button>
+      </div>
+      <div class="row"><span class="lab">下边放：</span>
+        <button type="button" class="btn" data-b="食"><span class="shi">食</span></button>
+        <button type="button" class="btn" data-b="米"><span class="mi">米</span></button>
+      </div>
+    </div>
+    <div class="forge">
+      <div class="ch"></div>
+      <div class="info"><div class="f-eq"></div><div class="f-mean muted"></div></div>
+    </div>
+    <div class="ctrl"><button type="button" class="btn" data-act="reset">↺ 重置本模块</button></div>
+  </div>
+</section>
+
+<!-- 常见误区 -->
+<section>
+  <h2>常见误区</h2>
+  <div class="pair">
+    <div class="card">
+      <h3>① 璀璨 还是 璀灿？</h3>
+      <div class="w"><span class="ok-v">璀璨</span>　<span class="bad-x" style="text-decoration:line-through">璀灿</span></div>
+      <p class="muted">「璀璨」说的是<b>珠玉</b>的光，两个字都带<span class="yu">王（玉）</span>；「灿烂」说的是<b>火</b>光，两个字都带<span class="huo">火</span>。<br>口诀：<b>玉配玉，火配火</b>。</p>
+    </div>
+    <div class="card">
+      <h3>② 左上角是「卜」不是「一」</h3>
+      <div class="w"><span class="ok-v">歺</span>　<span class="bad-x" style="text-decoration:line-through">歹</span></div>
+      <p class="muted">左上是「歺」：上面一个小「卜」（先竖后横），下面一个「夕」。别写成「歹」（上面一横）。</p>
+    </div>
+    <div class="card">
+      <h3>③ 下面是「米」</h3>
+      <div class="w"><span class="ok-v">粲</span>　<span class="bad-x" style="text-decoration:line-through">餐</span></div>
+      <p class="muted">借「餐」来记上半部分，但写「璨」时下面一定要换成「米」，别顺手写成「食」，也别写成「木」。</p>
+    </div>
+  </div>
+</section>
+
+<!-- 笔画账本 + 总结 -->
+<section class="card">
+  <h2>笔画账本</h2>
+  <div class="tally">
+    <span class="t yu">王</span><b>4</b> ＋ <span class="t top">歺</span><b>5</b> ＋ <span class="t top">又</span><b>2</b> ＋ <span class="t mi">米</span><b>6</b> ＝ <span class="t">璨</span><b>17 画</b>
+  </div>
+  <p class="muted" style="margin-top:8px">书写顺序：先写左边「王」（最后一笔是提），再写右上「歺」「又」，最后写下面的「米」。</p>
+</section>
+
+<section class="card analogy">
+  <b>一句话总结</b>
+  <p class="rhyme">晚餐换白米，旁边放块玉——<br>餐 → 粲 → 璨，璀璨两个都是玉。</p>
+</section>
+
+<section class="lq" id="lq" aria-label="练习">
+  <div class="lq-head"><h2>练习</h2><span class="lq-score"></span></div>
+  <p class="lq-sub">学完上面的内容，来检验一下。每题作答后马上看到解析；点「重做练习」清空重来。</p>
+  <div class="lq-list"></div>
+  <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+</section>
+
+</main>
+
+<script>
+const resets = [];
+window.pageReset = () => resets.forEach(f => f());
+
+/* ---------- 模块 1：拆字动画 ---------- */
+{
+  const root = document.getElementById('build');
+  const pcs = {}; root.querySelectorAll('.pc').forEach(e => pcs[e.dataset.k] = e);
+  const ch = root.querySelector('.result .ch'), py = root.querySelector('.result .py'), eq = root.querySelector('.result .eq');
+  const cap = root.querySelector('.caption'), no = root.querySelector('.stepno');
+  const btn = a => root.querySelector(`[data-act="${a}"]`);
+  // 隐藏位置
+  const HIDE = {
+    yu: { x: -100, y: 62, s: 92, op: 0 }, huo: { x: -100, y: 62, s: 92, op: 0 },
+    dai: { x: 28, y: 12, s: 78, op: 1 }, you: { x: 114, y: 12, s: 78, op: 1 },
+    shi: { x: 240, y: 100, s: 104, op: 0 }, mi: { x: 58, y: 240, s: 104, op: 0 },
+  };
+  const CAN_SHI = { shi: { x: 58, y: 100, s: 104, op: 1 } };
+  const CAN_MI = { mi: { x: 58, y: 100, s: 104, op: 1 } };
+  const RIGHT = { dai: { x: 94, y: 16, s: 62, op: 1 }, you: { x: 152, y: 16, s: 62, op: 1 }, mi: { x: 100, y: 96, s: 96, op: 1 } };
+  const STEPS = [
+    { L: CAN_SHI, ch: '餐', py: 'cān · 晚餐', eq: '<span class="top">歺＋又</span> ＋ <span class="shi">食</span>',
+      text: '先看一个你一定会写的字：「餐」（晚餐的餐）。它分上下两层。' },
+    { L: CAN_SHI, dim: ['shi'], ch: '餐', py: '只看上半部分', eq: '<span class="top">歺（卜＋夕）＋ 又</span>',
+      text: '上面这一层就是难点：左边「歺」＝小「卜」＋「夕」，右边「又」。它在「餐」里你早就会写了。' },
+    { L: CAN_MI, ch: '粲', py: 'càn · 粲然一笑', eq: '<span class="top">歺＋又</span> ＋ <span class="mi">米</span>',
+      text: '把下面的「食」换成「米」→「粲」(càn)。本义是精选的上等白米，白得发亮，所以引申为「鲜明、明亮」。' },
+    { L: { yu: { x: 4, y: 62, s: 92, op: 1 }, ...RIGHT }, ch: '璨', py: 'càn · 璀璨', eq: '<span class="yu">王</span> ＋ <span class="top">歺＋又</span> ＋ <span class="mi">米</span>',
+      text: '左边再配一块玉：「王」作偏旁时其实是「玉」（叫斜玉旁）。玉 ＋ 明亮 →「璨」：美玉的光彩。' },
+    { L: { yu: { x: 4, y: 62, s: 92, op: 1 }, ...RIGHT }, ch: '璀璨', py: 'cuǐ càn', eq: '<span class="yu">王</span>＋崔　<span class="yu">王</span>＋粲',
+      text: '搭档「璀」也是王字旁。两块玉一起闪光＝「璀璨」，形容珠玉、星光等光彩夺目。' },
+    { L: { huo: { x: 4, y: 62, s: 92, op: 1 }, ...RIGHT }, ch: '燦→灿', py: 'càn · 灿烂', eq: '<span class="huo">火</span> ＋ 粲 ＝ 燦（繁体）',
+      text: '把「王」换成「火」，就是繁体「燦」，简化后写作「灿」（灿烂）。玉光用玉旁，火光用火旁——所以是「璀璨」不是「璀灿」。' },
+  ];
+  const INIT = { step: 0, playing: false };
+  let S = { ...INIT }, timer = null;
+  const draw = () => {
+    const st = STEPS[S.step];
+    for (const k in pcs) {
+      const p = { ...HIDE[k], ...(st.L[k] || {}) }, e = pcs[k];
+      e.style.left = p.x + 'px'; e.style.top = p.y + 'px'; e.style.fontSize = p.s + 'px'; e.style.opacity = p.op;
+      e.classList.toggle('dim', !!(st.dim && st.dim.includes(k)));
+    }
+    ch.textContent = st.ch; ch.style.fontSize = st.ch.length > 1 ? '60px' : '';
+    py.textContent = st.py; eq.innerHTML = st.eq; cap.textContent = st.text;
+    no.textContent = `${S.step + 1} / ${STEPS.length}`;
+    btn('prev').disabled = S.step === 0; btn('next').disabled = S.step === STEPS.length - 1;
+    btn('play').textContent = S.playing ? '⏸ 暂停' : '▶ 播放';
+  };
+  const stop = () => { clearInterval(timer); timer = null; S.playing = false; };
+  const go = d => { S.step = Math.max(0, Math.min(STEPS.length - 1, S.step + d)); draw(); };
+  btn('prev').onclick = () => { stop(); go(-1); };
+  btn('next').onclick = () => { stop(); go(1); };
+  btn('play').onclick = () => {
+    if (S.playing) { stop(); draw(); return; }
+    if (S.step === STEPS.length - 1) S.step = 0;
+    S.playing = true; draw();
+    timer = setInterval(() => { go(1); if (S.step === STEPS.length - 1) { stop(); draw(); } }, 2600);
+  };
+  const reset = () => { stop(); S = { ...INIT }; draw(); };
+  btn('reset').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+/* ---------- 模块 2：拼字台 ---------- */
+{
+  const root = document.getElementById('forge');
+  const chEl = root.querySelector('.ch'), eqEl = root.querySelector('.f-eq'), mEl = root.querySelector('.f-mean');
+  const COLOR = { '王': 'yu', '火': 'huo', '食': 'shi', '米': 'mi' };
+  const TABLE = {
+    '|食': ['餐', 'cān：吃饭。晚餐、午餐、聚餐。'],
+    '|米': ['粲', 'càn：本义上等白米 → 鲜明、明亮。「粲然一笑」＝露出牙齿笑。'],
+    '王|米': ['璨', 'càn：美玉的光彩。「璀璨」形容珠玉、星光光彩夺目。✨ 就是你要记的字！'],
+    '火|米': ['燦', 'càn：繁体字，简化后写作「灿」。灿烂、灿若星辰。'],
+    '王|食': [null, '没有这个字——玉不能吃饭 😄 记住：璨的下面是「米」。'],
+    '火|食': [null, '没有这个字。火旁的是「燦（灿）」，下面也是「米」。'],
+  };
+  const INIT = { l: '', b: '食' };
+  let S = { ...INIT };
+  const draw = () => {
+    root.querySelectorAll('[data-l]').forEach(b => b.classList.toggle('on', b.dataset.l === S.l));
+    root.querySelectorAll('[data-b]').forEach(b => b.classList.toggle('on', b.dataset.b === S.b));
+    const [c, m] = TABLE[S.l + '|' + S.b];
+    chEl.textContent = c || '✗'; chEl.classList.toggle('none', !c);
+    const part = x => `<span class="${COLOR[x]}">${x}</span>`;
+    eqEl.innerHTML = (S.l ? part(S.l) + ' ＋ ' : '') + '<span class="top">歺＋又</span> ＋ ' + part(S.b) + (c ? ` ＝ <b class="kai" style="font-size:1.3em">${c}</b>` : '');
+    mEl.textContent = m;
+  };
+  root.querySelectorAll('[data-l]').forEach(b => b.onclick = () => { S.l = b.dataset.l; draw(); });
+  root.querySelectorAll('[data-b]').forEach(b => b.onclick = () => { S.b = b.dataset.b; draw(); });
+  const reset = () => { S = { ...INIT }; draw(); };
+  root.querySelector('[data-act="reset"]').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+/* ---------- 练习题 ---------- */
+window.LQ_ITEMS = [
+  { type: '选择', q: '「璨」左边的「王」，其实代表什么？', opts: ['国王', '玉', '金子'], ans: 1,
+    why: '「王」作偏旁时是「玉」变来的，叫斜玉旁（最后一笔是提）。珠、玲、珍、璀、璨都和玉有关。' },
+  { type: '选择', q: '「璨」的右上部分，和哪个常用字的上半部分一模一样？', opts: ['祭', '餐', '然'], ans: 1,
+    why: '「餐」的上半部分就是「歺＋又」。「祭」上面左边是「月」的变形，不一样；「然」也不同。见动画第 1～2 步。' },
+  { type: '判断', q: '「夜空中的星星璀灿夺目」这句话没有错别字。', opts: ['对', '错'], ans: 1,
+    why: '应为「璀璨」。璀璨说珠玉的光，两个字都是王（玉）旁；「灿」是火旁，属于「灿烂」。口诀：玉配玉，火配火。' },
+  { type: '选择', q: '下面哪个是「璨」的正确拆分？', opts: ['王 ＋ 歹 ＋ 又 ＋ 米', '王 ＋ 歺 ＋ 又 ＋ 木', '王 ＋ 歺 ＋ 又 ＋ 米', '王 ＋ 夕 ＋ 又 ＋ 米'], ans: 2,
+    why: '左上是「歺」（小卜＋夕），不是「歹」，也不是光一个「夕」；下面是「米」不是「木」。' },
+  { type: '选择', q: '哪一组词全部写对了？', opts: ['璀璨　灿烂　晚餐', '璀灿　灿烂　晚餐', '璀璨　璨烂　晚餐', '璀璨　灿烂　晚粲'], ans: 0,
+    why: '璀璨（玉旁）、灿烂（火旁）、晚餐（下面是食）。B 把璨写成灿；C 把灿写成璨；D 把餐的「食」换成了「米」。' },
+  { type: '填空', q: '「璨」一共几画？（王 4 ＋ 歺 5 ＋ 又 2 ＋ 米 6）', ans: ['17', '十七'], placeholder: '填数字',
+    why: '4 ＋ 5 ＋ 2 ＋ 6 ＝ 17 画。' },
+  { type: '填空', q: '迁移：形容露出牙齿笑，有个成语叫「___然一笑」，空里填的字正是「璨」去掉王字旁。', ans: ['粲'], placeholder: '填一个字',
+    why: '「粲」本义是又白又亮的上等米，笑时露出白白的牙齿就叫「粲然」。璨 ＝ 王 ＋ 粲。' },
+  { type: '选择', q: '迁移：繁体字「燦」简化以后写成哪个字？', opts: ['璨', '灿', '餐'], ans: 1,
+    why: '燦 ＝ 火 ＋ 粲，简化为「灿」。所以「灿」和「璨」读音相同（càn）、都表示明亮，但一个是火光，一个是玉光。' },
+];
+</script>
+<script>
+/* ---------- 练习题（learn 通用组件） ----------
+   题目来自 window.LQ_ITEMS：{type, q, opts, ans: 选项下标, why} 或填空题 {type, q, ans: [可接受答案…], why}
+   定义 window.resetPage()（导航条「重置」按钮调用）：先调用页面自己的 window.pageReset()，再清空练习 */
+(() => {
+  const box = document.getElementById('lq');
+  const items = window.LQ_ITEMS || [];
+  const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let answered = 0, right = 0;
+
+  function update() {
+    const all = answered === items.length;
+    score.textContent = `已答 ${answered} / ${items.length} · 答对 ${right}` +
+      (all ? (right === items.length ? ' · 全对！' : ' · 看看解析，再重做一次') : '');
+  }
+
+  function render() {
+    answered = 0; right = 0; list.innerHTML = '';
+    items.forEach((it, i) => {
+      const el = document.createElement('div');
+      el.className = 'lq-item';
+      el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
+      const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
+      const judge = (ok, answer) => {
+        answered++; if (ok) right++;
+        el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
+        why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
+        update();
+      };
+      if (it.opts) {
+        a.classList.add('lq-opts');
+        it.opts.forEach((o, j) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'lq-opt'; b.innerHTML = o;
+          b.onclick = () => {
+            a.querySelectorAll('button').forEach(x => x.disabled = true);
+            a.children[it.ans].classList.add('lq-right');
+            if (j !== it.ans) b.classList.add('lq-wrong');
+            judge(j === it.ans, it.opts[it.ans]);
+          };
+          a.append(b);
+        });
+      } else {
+        a.classList.add('lq-fill');
+        a.innerHTML = `<input type="text" autocomplete="off" spellcheck="false" placeholder="${it.placeholder || '输入答案'}" aria-label="第 ${i + 1} 题答案"><button type="button" class="lq-opt">确定</button>`;
+        const inp = a.querySelector('input'), go = a.querySelector('button');
+        const submit = () => {
+          if (!inp.value.trim()) { inp.focus(); return; }
+          inp.disabled = go.disabled = true;
+          const ok = it.ans.some(x => norm(x) === norm(inp.value));
+          inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
+          judge(ok, it.ans[0]);
+        };
+        go.onclick = submit;
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      }
+      list.append(el);
+    });
+    update();
+  }
+
+  box.querySelector('.lq-redo').addEventListener('click', render);
+  // 导航条的「重置」按钮调用它：页面各模块 + 练习题一起恢复初始状态
+  window.resetPage = () => {
+    if (typeof window.pageReset === 'function') window.pageReset();
+    render();
+  };
+  render();
+})();
+</script>
+</body>
+</html>
