@@ -1,0 +1,703 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Linux 文件与 I/O</title>
+<meta name="description" content="一切皆文件；write() 的数据怎样经过应用缓冲区、Page Cache、文件系统、块层、驱动落到磁盘；阻塞、非阻塞、epoll、io_uring 的区别">
+<style>
+:root{
+  --bg:var(--up-bg); --surface:var(--up-surface); --ink:var(--up-ink); --muted:var(--up-muted); --line:var(--up-line);
+  --accent:var(--up-accent); --ok:var(--up-ok); --bad:var(--up-bad);
+  --user:#7048e8; --kern:#0c8599; --hw:#a0522d;           /* 用户态 / 内核态 / 硬件 */
+  --work:#0c8599; --sleep:#adb5bd; --spin:#e8590c; --wait:#f59f00; --arr:#7048e8;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --user:#b197fc; --kern:#3bc9db; --hw:#e8a87c; --work:#3bc9db; --sleep:#5c636a; --spin:#ff8a4c; --wait:#ffd43b; --arr:#b197fc; }
+}
+:root[data-theme="dark"]{ --user:#b197fc; --kern:#3bc9db; --hw:#e8a87c; --work:#3bc9db; --sleep:#5c636a; --spin:#ff8a4c; --wait:#ffd43b; --arr:#b197fc; }
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 var(--up-font);padding:24px 16px 96px}
+main{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:48px}
+h1{font-size:clamp(1.7rem,4.5vw,2.4rem);line-height:1.25;margin:0 0 8px}
+h2{font-size:1.4rem;margin:0 0 8px}
+h3{font-size:1.05rem;margin:0 0 6px}
+p{margin:0}
+p+p{margin-top:8px}
+code,.mono{font-family:var(--up-mono);font-size:.92em}
+code{background:var(--up-surface-2);padding:1px 5px;border-radius:5px}
+.lead{color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--up-radius);box-shadow:var(--up-shadow);padding:16px}
+.analogy{border-left:4px solid var(--accent)}
+.btn{font:inherit;font-size:14px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--up-surface)}
+.btn.on{border-color:var(--accent);background:var(--up-accent-soft);color:var(--accent);font-weight:600}
+.btn:disabled{opacity:.45;cursor:default}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.stepno{font-family:var(--up-mono);color:var(--muted);font-size:.9rem;min-width:56px;text-align:center}
+.caption{min-height:3.4em;margin-top:10px}
+.sub{color:var(--muted);font-size:.92rem}
+.pill{display:inline-block;font-size:12px;border:1px solid var(--line);border-radius:999px;padding:0 8px;color:var(--muted)}
+.analogy-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:10px}
+.analogy-row div{background:var(--up-surface-2);border-radius:8px;padding:8px 10px;font-size:.9rem}
+.analogy-row b{display:block}
+
+/* ---------- 模块 1：一切皆文件 ---------- */
+.things{display:flex;flex-wrap:wrap;gap:8px}
+.fdview{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1.3fr) auto minmax(0,1.2fr);gap:8px;align-items:center;margin-top:14px}
+.fdtable{font-family:var(--up-mono);font-size:13px;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.fdtable div{padding:4px 8px;border-top:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fdtable div:first-child{border-top:0;background:var(--up-surface-2);color:var(--muted);font-family:var(--up-font)}
+.fdtable .new{background:var(--up-accent-soft);color:var(--accent);font-weight:700;animation:pop .7s ease}
+.arrow{color:var(--muted);font-size:20px}
+.vfsbox{border:2px solid var(--kern);border-radius:10px;padding:8px 10px;text-align:center}
+.vfsbox .ops{font-family:var(--up-mono);font-size:13px;color:var(--kern);font-weight:700}
+.backend{border:2px dashed var(--hw);border-radius:10px;padding:8px 10px;min-height:76px;transition:opacity .6s}
+.backend b{color:var(--hw)}
+.fade{opacity:.15}
+.shell{margin-top:12px;background:var(--up-surface-2);border-radius:8px;padding:8px 12px;font-family:var(--up-mono);font-size:13px;overflow-x:auto;white-space:pre}
+@keyframes pop{from{transform:scale(.9);opacity:.3}to{transform:none;opacity:1}}
+@media (max-width:640px){
+  .fdview{grid-template-columns:1fr}
+  .arrow{transform:rotate(90deg);justify-self:center;line-height:1}
+}
+
+/* ---------- 模块 2：写入之旅 ---------- */
+.journey{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:16px;margin-top:12px}
+@media (max-width:700px){.journey{grid-template-columns:1fr}}
+.layers{display:flex;flex-direction:column;gap:6px}
+.layer{position:relative;border:1.5px solid var(--line);border-left:6px solid var(--c);border-radius:8px;padding:6px 96px 6px 12px;background:var(--surface);transition:background .6s,border-color .6s,opacity .6s}
+.layer .nm{font-weight:700;font-size:.95rem}
+.layer .ds{font-size:.82rem;color:var(--muted);line-height:1.45}
+.layer.done{opacity:.6}
+.layer.cur{background:var(--up-accent-soft);border-color:var(--accent);border-left-color:var(--c)}
+.layer .pkt{position:absolute;right:10px;top:50%;transform:translateY(-50%) scale(.6);opacity:0;transition:opacity .6s,transform .6s;font-family:var(--up-mono);font-size:12px;background:var(--accent);color:var(--up-surface);border-radius:6px;padding:2px 8px}
+.layer.cur .pkt{opacity:1;transform:translateY(-50%) scale(1)}
+.layer.dirty .pkt::after{content:" · 脏页"}
+.divider{font-size:12px;color:var(--muted);text-align:center;border-top:1px dashed var(--line);padding-top:2px;margin-top:2px}
+.side{display:flex;flex-direction:column;gap:10px}
+.stat{background:var(--up-surface-2);border-radius:8px;padding:8px 12px}
+.stat .k{font-size:12px;color:var(--muted)}
+.stat .v{font-weight:600}
+.v.good{color:var(--ok)} .v.badc{color:var(--bad)} .v.warn{color:var(--spin)}
+.power{margin-top:4px;padding:10px 12px;border-radius:8px;border:1.5px solid var(--line);font-size:.92rem;display:none}
+.power.show{display:block;animation:pop .6s ease}
+.power.lost{border-color:var(--bad)} .power.kept{border-color:var(--ok)}
+
+/* ---------- 模块 3：I/O 模型时间线 ---------- */
+.tabs{display:flex;flex-wrap:wrap;gap:8px}
+.tl{display:grid;grid-template-columns:52px repeat(10,minmax(0,1fr));gap:3px;margin-top:14px;font-size:12px}
+.tl .lab{color:var(--muted);display:flex;align-items:center;font-weight:600}
+.tl .hd{text-align:center;color:var(--muted);font-family:var(--up-mono)}
+.tl .hd.now{color:var(--accent);font-weight:700}
+.cell{height:30px;border-radius:5px;background:var(--up-surface-2);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;transition:background .5s,opacity .5s;color:var(--up-surface)}
+.cell.work{background:var(--work)}
+.cell.sleep{background:repeating-linear-gradient(45deg,var(--sleep) 0 4px,transparent 4px 8px);color:var(--ink)}
+.cell.spin{background:var(--spin)}
+.cell.sys{background:var(--user)}
+.cell.idle{background:transparent;border:1px dashed var(--line)}
+.cell.arr{background:var(--arr)}
+.cell.waiting{background:var(--wait);color:#3b2a00}
+.cell.got{background:var(--work)}
+.cell.now{outline:2px solid var(--accent);outline-offset:1px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted);margin-top:10px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:4px}
+.meters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:12px}
+.kline{color:var(--kern);font-size:.92rem;margin-top:4px}
+.model-intro{margin-top:12px;font-size:.95rem}
+@media (max-width:520px){.tl{grid-template-columns:40px repeat(10,minmax(0,1fr));gap:2px}.cell{height:26px;font-size:10px}}
+
+table.cmp{width:100%;min-width:600px;border-collapse:collapse;font-size:.9rem}
+table.cmp th,table.cmp td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:top}
+table.cmp th{color:var(--muted);font-weight:600;font-size:.85rem}
+.tablewrap{overflow-x:auto}
+.myth{display:grid;gap:10px}
+.myth div{border-left:4px solid var(--bad);padding:4px 12px}
+.myth b{color:var(--bad)}
+.sum{border:2px solid var(--accent);font-size:1.05rem}
+@media (prefers-reduced-motion: reduce){
+  .layer,.layer .pkt,.cell,.backend{transition:none}
+  .fdtable .new,.power.show{animation:none}
+}
+:root{--lq-surface:var(--surface);--lq-ink:var(--ink);--lq-muted:var(--muted);--lq-line:var(--line);--lq-accent:var(--accent);--lq-ok:var(--ok);--lq-bad:var(--bad)}
+/* ---------- 练习题（learn 通用组件，颜色由上方 --lq-* 映射） ---------- */
+.lq{display:grid;gap:12px;margin-bottom:56px}
+.lq-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 16px}
+.lq-head h2{margin:0;font-size:var(--lq-h2,22px);letter-spacing:normal;color:var(--lq-ink);text-transform:none}
+.lq-sub{margin:0;color:var(--lq-muted);font-size:14px}
+.lq-score{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--lq-muted);font-variant-numeric:tabular-nums}
+.lq-list{display:grid;gap:10px}
+.lq-item{background:var(--lq-surface);border:1.5px solid var(--lq-line);border-radius:10px;padding:12px 16px;display:grid;gap:10px;min-width:0;color:var(--lq-ink);text-align:left}
+.lq-item.lq-is-ok{border-color:var(--lq-ok)}
+.lq-item.lq-is-bad{border-color:var(--lq-bad)}
+.lq-q{font-size:15px;font-weight:600;line-height:1.6}
+.lq-tag{display:inline-block;font-size:11px;font-weight:500;line-height:1.6;color:var(--lq-muted);border:1px solid var(--lq-line);border-radius:999px;padding:0 8px;margin-right:8px;vertical-align:1px}
+.lq-opts,.lq-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lq .lq-opt,.lq .lq-redo{font:inherit;font-size:14px;line-height:1.4;padding:6px 14px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);cursor:pointer;text-align:left;opacity:1}
+.lq .lq-opt:hover:not(:disabled),.lq .lq-redo:hover{border-color:var(--lq-accent)}
+.lq .lq-opt:disabled{cursor:default;opacity:1}
+.lq .lq-opt.lq-right{border-color:var(--lq-ok);color:var(--lq-ok);font-weight:700}
+.lq .lq-opt.lq-wrong{border-color:var(--lq-bad);color:var(--lq-bad);text-decoration:line-through}
+.lq-fill input{font:inherit;font-size:14px;padding:6px 10px;margin:0;border-radius:8px;border:1.5px solid var(--lq-line);background:transparent;color:var(--lq-ink);width:min(100%,200px)}
+.lq-fill input.lq-right{border-color:var(--lq-ok)}
+.lq-fill input.lq-wrong{border-color:var(--lq-bad)}
+.lq-why{font-size:14px;line-height:1.65;color:var(--lq-muted)}
+.lq-why:empty{display:none}
+.lq-why .lq-ok{color:var(--lq-ok)}
+.lq-why .lq-bad{color:var(--lq-bad)}
+</style>
+</head>
+<body>
+<!-- up-shell:begin（由 scripts/shell.mjs 自动生成，勿手改） -->
+<nav id="up-nav" aria-label="网站导航">
+<a class="up-home" href="/" title="Up 学习站首页"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="up-nav-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c6ef5"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#up-nav-g)"/><path d="M12 52V42a2 2 0 0 1 2-2h10V32a2 2 0 0 1 2-2h10v-8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v30z" fill="#fff"/><circle cx="43" cy="13" r="5.5" fill="#ffa94d"/></svg><span>Up 学习站</span></a>
+<span class="up-sep" aria-hidden="true">›</span><a class="up-cat" href="/tech">计算机技术</a>
+<span class="up-sep" aria-hidden="true">›</span><span class="up-title">Linux 文件与 I/O</span>
+<button id="up-reset" type="button" title="把整页恢复到刚打开时的样子">↺ 重置</button>
+</nav>
+<style>
+:root{--up-bg:#f5f6f8;--up-surface:#ffffff;--up-surface-2:#eef0f4;--up-ink:#1d2127;--up-muted:#626b78;--up-line:#dfe2e8;--up-ok:#2b8a3e;--up-bad:#d6336c;--up-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);--up-font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif;--up-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;--up-radius:12px;--up-accent:#1c7ed6;--up-accent-soft:#e7f5ff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#74c0fc;--up-accent-soft:#17304a;color-scheme:dark}}
+:root[data-theme="dark"]{--up-bg:#121418;--up-surface:#1b1e24;--up-surface-2:#23272f;--up-ink:#e7e9ec;--up-muted:#9aa3af;--up-line:#2e333c;--up-ok:#69db7c;--up-bad:#ff6b9a;--up-shadow:0 1px 2px rgba(0,0,0,.3);--up-accent:#74c0fc;--up-accent-soft:#17304a;color-scheme:dark}
+html{padding-top:52px;scroll-padding-top:64px}
+#up-nav{position:fixed;top:0;left:0;right:0;z-index:2147483000;height:52px;box-sizing:border-box;display:flex;align-items:center;gap:8px;
+padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));border-top:3px solid var(--up-accent);
+border-bottom:1px solid var(--up-line);background:color-mix(in srgb,var(--up-surface) 88%,transparent);
+-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:500 14px/1.2 var(--up-font);color:var(--up-ink);text-align:left}
+#up-nav a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none}
+#up-nav a:hover{color:var(--up-accent)}
+#up-nav svg{width:24px;height:24px;flex:none;display:block}
+#up-nav .up-home span{font-weight:700}
+#up-nav .up-cat{color:var(--up-accent);font-weight:600}
+#up-nav .up-sep{color:var(--up-muted);flex:none}
+#up-nav .up-title{color:var(--up-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#up-reset{margin:0 0 0 auto;flex:none;font:600 14px/1 var(--up-font);padding:8px 14px;border-radius:999px;cursor:pointer;
+border:1.5px solid var(--up-accent);background:transparent;color:var(--up-accent);transition:background .2s,color .2s}
+#up-reset:hover,#up-reset:focus-visible{background:var(--up-accent);color:var(--up-surface)}
+#up-reset:focus-visible,#up-nav a:focus-visible{outline:2px solid var(--up-accent);outline-offset:2px}
+@media (max-width:560px){#up-nav .up-home span{display:none}}
+@media print{#up-nav{display:none}html{padding-top:0}}
+</style>
+<script>
+document.getElementById('up-reset').addEventListener('click', function () {
+  if (typeof window.resetPage === 'function') window.resetPage();
+  else console.warn('本页没有定义 window.resetPage()，重置按钮无效');
+  window.scrollTo({ top: 0, behavior: 'auto' });
+});
+</script>
+<!-- up-shell:end -->
+<main>
+
+<section>
+  <h1>Linux 文件与 I/O</h1>
+  <p class="lead">三个问题：为什么说「一切皆文件」？一次 <code>write()</code> 的数据要走过哪几层才真正到磁盘？阻塞、非阻塞、epoll、io_uring 到底差在哪？</p>
+</section>
+
+<section class="card analogy">
+  <b>生活比喻：寄快递</b>
+  <p>写数据就像寄包裹。你把东西交出去的那一刻（<code>write()</code> 返回），包裹只是放进了小区快递柜，离收件人（磁盘）还远着呢。</p>
+  <div class="analogy-row">
+    <div><b>草稿箱</b>应用缓冲区</div>
+    <div><b>小区快递柜</b>Page Cache</div>
+    <div><b>写运单、定路线</b>文件系统</div>
+    <div><b>分拣中心</b>块层</div>
+    <div><b>货车司机</b>设备驱动</div>
+    <div><b>收件人</b>磁盘</div>
+  </div>
+</section>
+
+<!-- ============ 1. 一切皆文件 ============ -->
+<section>
+  <h2>① 一切皆文件：一套接口，什么都能读写</h2>
+  <p>「文件」在 Linux 里不只是硬盘上的文档，而是<b>一个能 open / read / write / close 的东西</b>。打开后内核给你一个小整数叫<b>文件描述符 fd</b>（大白话：取件号），之后都凭号办事。</p>
+  <p class="sub">点下面任意一样东西，看它怎样变成 fd 3，以及 <code>read()</code> 背后真正干活的是谁。</p>
+  <div class="card" id="everything">
+    <div class="things"></div>
+    <div class="fdview">
+      <div class="fdtable"></div>
+      <div class="arrow">→</div>
+      <div class="vfsbox"><div class="sub">VFS 虚拟文件系统<br>（统一的门面）</div><div class="ops">open · read · write · close</div></div>
+      <div class="arrow">→</div>
+      <div class="backend"></div>
+    </div>
+    <div class="shell"></div>
+    <div class="ctrl"><button type="button" class="btn" data-act="reset">↺ 重置本模块</button></div>
+  </div>
+  <p class="sub" style="margin-top:10px">好处：<code>cat</code>、<code>&gt;</code> 重定向、<code>|</code> 管道这些工具不必知道对面是磁盘、终端还是网络——同一套四个调用全搞定。但也别当真「一切」：网卡 <code>eth0</code> 就没有设备文件，要用 socket / netlink 去配置。</p>
+</section>
+
+<!-- ============ 2. 写入之旅 ============ -->
+<section>
+  <h2>② 一段数据写入磁盘的旅程</h2>
+  <p>应用写下 <code>"hello"</code>，跟着包裹 📦 一层层往下走。右边随时看：应用此刻在干嘛、数据安全了没有，还可以按「⚡ 此刻断电」试试。</p>
+  <div class="card" id="journey">
+    <div class="tabs">
+      <button type="button" class="btn" data-mode="write">只调 write()</button>
+      <button type="button" class="btn" data-mode="fsync">write() + fsync()</button>
+    </div>
+    <div class="journey">
+      <div class="layers"></div>
+      <div class="side">
+        <div class="stat"><div class="k">应用程序此刻</div><div class="v" data-k="app"></div></div>
+        <div class="stat"><div class="k">数据在哪 / 断电会怎样</div><div class="v" data-k="safe"></div></div>
+        <button type="button" class="btn" data-act="power">⚡ 此刻断电</button>
+        <div class="power"></div>
+      </div>
+    </div>
+    <p class="caption"></p>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <h3>顺便记住两件事</h3>
+    <p><b>读是反过来的</b>：<code>read()</code> 先查 Page Cache，命中就直接从内存拷给你（所以同一个文件第二次读飞快）；没命中才一路向下发请求，读回来顺便留一份在 Page Cache。</p>
+    <p><b>O_DIRECT</b>：打开文件时加这个标志，会绕过 Page Cache 直接走文件系统→块层。数据库常这么做，因为它们自己管缓存，不想多存一份。</p>
+  </div>
+</section>
+
+<!-- ============ 3. 四种 I/O 模型 ============ -->
+<section>
+  <h2>③ 阻塞、非阻塞、epoll、io_uring</h2>
+  <p>场景：<b>一个线程</b>要服务 4 个网络连接 A、B、C、D，它们的数据在不同时刻到达（B 第 2 格、C 第 3 格、A 第 6 格、D 第 9 格）。看四种做法下，这个线程每一格时间在干什么。</p>
+  <div class="card analogy" style="margin-top:12px">
+    <b>餐厅取餐比喻</b>
+    <div class="analogy-row">
+      <div><b>阻塞</b>站在 1 号窗口死等，别的窗口好了也不管</div>
+      <div><b>非阻塞</b>不停挨个窗口问「好了没？」腿都跑断</div>
+      <div><b>epoll</b>领个取餐器，响了告诉你哪几份好了，你自己去端</div>
+      <div><b>io_uring</b>下单时留好餐盘，做好了直接送到桌上</div>
+    </div>
+  </div>
+  <div class="card" id="models" style="margin-top:12px">
+    <div class="tabs"></div>
+    <p class="model-intro"></p>
+    <div class="tl"></div>
+    <div class="legend">
+      <span><i style="background:var(--work)"></i>线程在处理数据</span>
+      <span><i style="background:repeating-linear-gradient(45deg,var(--sleep) 0 3px,transparent 3px 6px);border:1px solid var(--line)"></i>睡着等（不占 CPU）</span>
+      <span><i style="background:var(--spin)"></i>空转（白烧 CPU）</span>
+      <span><i style="background:var(--user)"></i>提交请求</span>
+      <span><i style="background:var(--arr)"></i>数据到达</span>
+      <span><i style="background:var(--wait)"></i>数据到了却没人管</span>
+    </div>
+    <p class="caption"></p>
+    <p class="kline"></p>
+    <div class="meters">
+      <div class="stat"><div class="k">系统调用次数</div><div class="v" data-k="sc"></div></div>
+      <div class="stat"><div class="k">数据干等的格数（越少响应越快）</div><div class="v" data-k="lat"></div></div>
+      <div class="stat"><div class="k">空转白烧 CPU 的格数</div><div class="v" data-k="spin"></div></div>
+      <div class="stat"><div class="k">谁把数据拷进你的缓冲区</div><div class="v" data-k="copy"></div></div>
+    </div>
+    <div class="ctrl">
+      <button type="button" class="btn" data-act="prev">◀ 上一步</button>
+      <span class="stepno"></span>
+      <button type="button" class="btn" data-act="next">下一步 ▶</button>
+      <button type="button" class="btn primary" data-act="play">▶ 播放</button>
+      <button type="button" class="btn" data-act="reset">↺ 重置本模块</button>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <h3>关键分水岭：「就绪通知」vs「完成通知」</h3>
+    <p><b>epoll 说的是「可以读了」</b>——你还得自己调 <code>read()</code>，由你的线程把数据从内核拷出来。所以 epoll 仍属于<b>同步 I/O</b>，只是把「等」集中到一处。</p>
+    <p><b>io_uring 说的是「读好了」</b>——你事先把请求和缓冲区放进提交队列 SQ，内核做完后把结果放进完成队列 CQ。两个队列是用户态和内核共享的内存环，取结果不用系统调用。这才是真正的<b>异步 I/O</b>。</p>
+  </div>
+
+  <div class="card tablewrap" style="margin-top:12px">
+    <table class="cmp">
+      <thead><tr><th>模型</th><th>没数据时线程</th><th>内核告诉你</th><th>一个线程管多少连接</th><th>能用于普通磁盘文件？</th></tr></thead>
+      <tbody>
+        <tr><td><b>阻塞</b></td><td>睡在 read 上</td><td>（直接返回数据）</td><td>1 个，要多开线程</td><td>能，但会卡住</td></tr>
+        <tr><td><b>非阻塞</b></td><td>立刻得到 EAGAIN，自己反复问</td><td>没好 / 好了</td><td>多个，但空转费 CPU</td><td>没效果，磁盘文件总被当成「就绪」</td></tr>
+        <tr><td><b>epoll</b></td><td>睡在 epoll_wait 上</td><td>哪些 fd 就绪</td><td>成千上万</td><td>不支持（epoll_ctl 返回 EPERM）</td></tr>
+        <tr><td><b>io_uring</b></td><td>睡在 io_uring_enter 上（或完全不睡）</td><td>哪些请求已完成 + 结果</td><td>成千上万</td><td>能，真正异步读写文件</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2>常见误区</h2>
+  <div class="myth">
+    <div><b>✗ write() 成功 = 数据在磁盘上了</b><br>只是进了 Page Cache（内存）。要确保落盘得调 <code>fsync()</code>/<code>fdatasync()</code>。</div>
+    <div><b>✗ fflush() 就是刷到磁盘</b><br><code>fflush</code> 只把 libc 用户缓冲区交给内核（调 write），到 Page Cache 为止。</div>
+    <div><b>✗ 非阻塞 = 异步</b><br>非阻塞只是「不睡」，数据还是你自己 read 拷；epoll 也是同步的。只有 io_uring（以及老的 Linux AIO）是完成通知式异步。</div>
+  </div>
+</section>
+
+<section class="card sum">
+  <b>一句话总结：</b>Linux 用 fd 把万物统一成「文件」；写入先停在 Page Cache，靠回写或 fsync 才穿过文件系统、块层、驱动落盘；阻塞是干等，非阻塞是瞎问，epoll 是「好了叫你自己来拿」，io_uring 是「做好了送上门」。
+</section>
+
+<section class="lq" id="lq" aria-label="练习">
+  <div class="lq-head"><h2>练习</h2><span class="lq-score"></span></div>
+  <p class="lq-sub">学完上面的内容，来检验一下。每题作答后马上看到解析；点「重做练习」清空重来。</p>
+  <div class="lq-list"></div>
+  <div><button type="button" class="lq-redo">↻ 重做练习</button></div>
+</section>
+
+</main>
+
+<script>
+const resets = [];
+window.pageReset = () => resets.forEach(f => f());
+const $ = (root, sel) => root.querySelector(sel);
+
+/* ---------- 模块 1：一切皆文件 ---------- */
+{
+  const root = document.getElementById('everything');
+  const THINGS = [
+    { n: '普通文件', path: '/home/me/notes.txt', be: 'ext4 文件系统 → 块层 → 磁盘', note: '最「正宗」的文件：内容存在磁盘块里。', sh: '$ cat /home/me/notes.txt' },
+    { n: '目录', path: '/home/me', be: '文件系统：目录本身也是文件', note: '它的内容是一张「文件名 → inode 号」的清单。', sh: '$ ls /home/me      # 底层用 getdents() 读这张清单' },
+    { n: '终端', path: '/dev/tty', be: 'tty 驱动 → 你的屏幕和键盘', note: 'write 就是显示到屏幕，read 就是等你敲键盘。', sh: '$ echo hi > /dev/tty' },
+    { n: '整块磁盘', path: '/dev/nvme0n1', be: '块设备驱动 → 裸扇区', note: '不经过文件系统，直接按字节偏移读写整个盘。', sh: '$ sudo head -c 512 /dev/nvme0n1 | xxd   # 读第一个扇区' },
+    { n: '黑洞', path: '/dev/null', be: '一段内核代码：写入即丢弃', note: '没有任何真实设备，读永远立刻读到「文件结尾」。', sh: '$ make > /dev/null   # 不想看输出' },
+    { n: '随机数', path: '/dev/urandom', be: '内核随机数生成器', note: '每次 read 都现场生成新随机字节。', sh: '$ head -c 8 /dev/urandom | xxd' },
+    { n: '进程信息', path: '/proc/self/status', be: 'procfs：内核现场生成文本', note: '磁盘上根本没有这个文件，读的瞬间内核才把数据「编」出来。', sh: '$ cat /proc/cpuinfo' },
+    { n: '管道', path: 'pipe()（ls | wc 中间那根）', be: '内核里的一块环形缓冲区', note: '一端 write 进去，另一端 read 出来，没碰磁盘。', sh: '$ ls | wc -l' },
+    { n: '网络连接', path: 'socket(AF_INET, …)', be: 'TCP/IP 协议栈 → 网卡驱动', note: 'connect 后照样 read/write，收发的是网络数据。', sh: '$ exec 3<>/dev/tcp/example.com/80   # bash 把 TCP 连接当 fd 3' },
+  ];
+  const INIT = { pick: -1 };
+  let S = { ...INIT };
+  const things = $(root, '.things'), fdt = $(root, '.fdtable'), be = $(root, '.backend'), sh = $(root, '.shell');
+  THINGS.forEach((t, i) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'btn'; b.textContent = t.n;
+    b.onclick = () => { S.pick = i; draw(); };
+    things.append(b);
+  });
+  const draw = () => {
+    [...things.children].forEach((b, i) => b.classList.toggle('on', i === S.pick));
+    const t = THINGS[S.pick];
+    fdt.innerHTML = '<div>进程的 fd 表</div><div>0 → 标准输入</div><div>1 → 标准输出</div><div>2 → 标准错误</div>' +
+      (t ? `<div class="new">3 → ${t.path}</div>` : '<div>3 → （空）</div>');
+    be.classList.toggle('fade', !t);
+    be.innerHTML = t ? `<b>${t.be}</b><div class="sub">${t.note}</div>` : '<span class="sub">真正干活的后端会出现在这里</span>';
+    sh.textContent = t ? t.sh : '# 先点上面的一样东西';
+  };
+  const reset = () => { S = { ...INIT }; draw(); };
+  $(root, '[data-act="reset"]').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+/* ---------- 模块 2：写入之旅 ---------- */
+{
+  const root = document.getElementById('journey');
+  const LAYERS = [
+    { nm: '应用缓冲区', ds: '进程自己的内存：libc 的 stdio 缓冲，或你自己的 char buf[]', c: 'var(--user)', div: '用户态' },
+    { nm: '系统调用 + VFS', ds: 'write(fd,…) 陷入内核；VFS 凭 fd 找到文件和它所属的文件系统', c: 'var(--kern)', div: '内核态' },
+    { nm: 'Page Cache 页缓存', ds: '内存里的文件副本，按 4KB 一页管理', c: 'var(--kern)' },
+    { nm: '文件系统 ext4 / xfs', ds: '把「文件第几字节」换算成「磁盘第几块」，记日志', c: 'var(--kern)' },
+    { nm: '通用块层', ds: '请求包装成 bio → request，合并、排队、调度', c: 'var(--kern)' },
+    { nm: '设备驱动', ds: 'NVMe / SCSI 驱动，翻译成硬件命令，用 DMA 搬数据', c: 'var(--kern)' },
+    { nm: '磁盘', ds: '控制器（带自己的缓存）→ 闪存颗粒 / 磁片', c: 'var(--hw)', div: '硬件' },
+  ];
+  const STEPS = [
+    { L: 0, t: '应用调用 fwrite("hello")。数据只是拷进了进程自己的缓冲区（libc 默认几 KB），内核还完全不知道。', safe: ['只在进程内存里：进程崩溃都会丢', 'badc'] },
+    { L: 1, t: '缓冲区满了、或调了 fflush()，libc 才发起 write() 系统调用：CPU 切到内核态，VFS 根据 fd 找到 struct file → inode，发现它属于 ext4。', safe: ['正从用户内存拷向内核', 'badc'] },
+    { L: 2, t: '内核把数据拷进 Page Cache 对应的页，把这页标记为「脏页」（内存比磁盘新）。write() 到这里就返回成功了！', safe: ['在 Page Cache 里：进程崩溃不丢，断电会丢', 'badc'], dirty: true },
+    { L: 3, t: null, safe: ['在 Page Cache，正被回写', 'badc'], dirty: true },
+    { L: 4, t: '数据被包装成 bio（「把内存这几页写到磁盘第 N 扇区」）。块层把相邻的小请求合并成大请求，排队，按调度策略派发。', safe: ['在路上，还没到盘', 'badc'], dirty: true },
+    { L: 5, t: 'NVMe 驱动把命令写进硬件的提交队列并「按门铃」。磁盘用 DMA 直接从内存搬走数据，不用 CPU 一个字节一个字节地拷。', safe: ['正在传给磁盘', 'badc'], dirty: true },
+    { L: 6, t: null, safe: null },
+  ];
+  const INIT = { step: 0, playing: false, mode: 'write', power: false };
+  let S = { ...INIT }, timer = null;
+  const lay = $(root, '.layers');
+  LAYERS.forEach(l => {
+    if (l.div) { const d = document.createElement('div'); d.className = 'divider'; d.textContent = '—— ' + l.div + ' ——'; lay.append(d); }
+    const el = document.createElement('div');
+    el.className = 'layer'; el.style.setProperty('--c', l.c);
+    el.innerHTML = `<div class="nm">${l.nm}</div><div class="ds">${l.ds}</div><span class="pkt">📦 hello</span>`;
+    lay.append(el);
+  });
+  const layerEls = [...lay.querySelectorAll('.layer')];
+  const cap = $(root, '.caption'), no = $(root, '.stepno'), pw = $(root, '.power');
+  const btn = a => $(root, `[data-act="${a}"]`);
+  const text = (i) => {
+    const st = STEPS[i], f = S.mode === 'fsync';
+    if (i === 3) return (f ? '应用接着调 fsync()，强制立刻回写这个文件。' : '应用什么都没做。过一阵（脏页停留约 30 秒，或脏页太多、内存紧张），内核后台回写线程才出手。') +
+      'ext4 现在才决定数据放到磁盘哪些块（延迟分配），并把元数据的改动先记进日志 journal。';
+    if (i === 6) return '磁盘写完，发中断报告完成，这页变回「干净」。' + (f ? '但磁盘控制器自己也有易失缓存，所以 fsync 还会发一条 FLUSH 命令，等盘确认真正写进闪存，fsync() 才返回。' : '不过数据可能还躺在磁盘控制器的易失缓存里——没人发 FLUSH 命令，就没有「一定持久」的保证。');
+    return st.t;
+  };
+  const appTxt = i => {
+    if (i === 0) return ['在 fwrite()，几乎瞬间返回', ''];
+    if (i === 1) return ['在 write() 系统调用里', ''];
+    if (i === 2) return ['write() 已返回 ✓ 继续干别的', 'good'];
+    if (S.mode === 'fsync') return i === 6 ? ['fsync() 返回 ✓ 现在可以放心说「已保存」', 'good'] : ['卡在 fsync() 里，等底层全部完成', 'warn'];
+    return ['早已返回，在干别的——回写是内核在后台做的', ''];
+  };
+  const safeTxt = i => i < 6 ? STEPS[i].safe : (S.mode === 'fsync' ? ['已持久化到磁盘 ✓', 'good'] : ['到盘了，但可能还在盘的缓存里', 'warn']);
+  const powerTxt = i => {
+    if (i === 0) return ['✗ 丢了。数据还在进程内存里——就连进程自己崩溃都会丢。', 'lost'];
+    if (i <= 2) return ['✗ 丢了。数据在 Page Cache（内存）里。注意：此时进程崩溃不会丢，因为内核还活着会帮你写；但断电内存全清空。', 'lost'];
+    if (i <= 5) return ['✗ 这份数据不保证。文件系统日志能保证「目录结构不坏」，但不保证你刚写的内容已到盘。', 'lost'];
+    return S.mode === 'fsync' ? ['✓ 安全。fsync 返回就代表数据已持久化，断电重启后还在。', 'kept'] : ['△ 大概率还在，但没有保证：如果数据仍在磁盘的易失缓存里，断电会丢。想要保证就调 fsync。', 'lost'];
+  };
+  const draw = () => {
+    const i = S.step, L = STEPS[i].L;
+    layerEls.forEach((el, k) => { el.classList.toggle('cur', k === L); el.classList.toggle('done', k < L); el.classList.toggle('dirty', k === L && !!STEPS[i].dirty); });
+    cap.textContent = `第 ${i + 1} 步：` + text(i);
+    no.textContent = `${i + 1} / ${STEPS.length}`;
+    const [a, ac] = appTxt(i), [s, sc] = safeTxt(i);
+    const av = $(root, '[data-k="app"]'), sv = $(root, '[data-k="safe"]');
+    av.textContent = a; av.className = 'v ' + ac; sv.textContent = s; sv.className = 'v ' + sc;
+    root.querySelectorAll('[data-mode]').forEach(b => b.classList.toggle('on', b.dataset.mode === S.mode));
+    if (S.power) { const [m, c] = powerTxt(i); pw.textContent = '⚡ 断电重启后：' + m; pw.className = 'power show ' + c; }
+    else pw.className = 'power';
+    btn('prev').disabled = i === 0; btn('next').disabled = i === STEPS.length - 1;
+    btn('play').textContent = S.playing ? '⏸ 暂停' : '▶ 播放';
+  };
+  const stop = () => { clearInterval(timer); timer = null; S.playing = false; };
+  const go = d => { S.step = Math.max(0, Math.min(STEPS.length - 1, S.step + d)); S.power = false; draw(); };
+  btn('prev').onclick = () => { stop(); go(-1); };
+  btn('next').onclick = () => { stop(); go(1); };
+  btn('power').onclick = () => { stop(); S.power = true; draw(); };
+  btn('play').onclick = () => {
+    if (S.playing) { stop(); draw(); return; }
+    if (S.step === STEPS.length - 1) S.step = 0;
+    S.playing = true; S.power = false; draw();
+    timer = setInterval(() => { go(1); if (S.step === STEPS.length - 1) { stop(); draw(); } }, 2600);
+  };
+  root.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => { S.mode = b.dataset.mode; S.power = false; draw(); });
+  const reset = () => { stop(); S = { ...INIT }; draw(); };
+  btn('reset').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+/* ---------- 模块 3：四种 I/O 模型时间线 ---------- */
+{
+  const root = document.getElementById('models');
+  const N = ['A', 'B', 'C', 'D'], ARR = { A: 6, B: 2, C: 3, D: 9 }, T = 10, SPIN = 1000;
+  const MODELS = {
+    block: { name: '阻塞 I/O', copy: '你的线程（read 里）', intro: '依次 read(A)、read(B)…。数据没到，read 就让线程睡着，直到数据到达才返回。' },
+    nonblock: { name: '非阻塞 I/O', copy: '你的线程（read 里）', intro: 'fd 设成 O_NONBLOCK：没数据时 read 立刻返回 -1、errno = EAGAIN。线程只好挨个反复问。' },
+    epoll: { name: 'epoll', copy: '你的线程（read 里）', intro: '把 4 个 fd 交给 epoll 盯着，线程睡在 epoll_wait 上；谁就绪了内核就叫醒它并告诉它是谁，它再去 read。' },
+    uring: { name: 'io_uring', copy: '内核（提前拷好）', intro: '一开始就把 4 个读请求连同缓冲区放进提交队列 SQ。内核做完一个，就把数据拷进你的缓冲区，往完成队列 CQ 放一条结果。' },
+  };
+  const ready = (done, t) => N.filter(n => done[n] === undefined && ARR[n] <= t);
+  function simulate(m) {
+    const th = [], kern = [], scs = [], done = {}; let sc = 0, spin = 0;
+    let i = 0, started = false, sleeping = false, list = [];
+    for (let t = 0; t < T; t++) {
+      const arrived = N.filter(n => ARR[n] === t);
+      kern[t] = arrived.length ? (m === 'block' ? `内核：${arrived} 的数据到了` + (arrived[0] === N[i] ? '，唤醒睡在 read 上的线程。' : '，可线程在等别人，没人来取。')
+        : m === 'nonblock' ? `内核：${arrived} 的数据到了，放在 socket 缓冲区，等下次有人来问。`
+        : m === 'epoll' ? `内核：${arrived} 的数据到了 → 标记就绪，唤醒 epoll_wait。`
+        : `内核：${arrived} 的数据到了 → 直接拷进你提前给的缓冲区，往 CQ 放一条完成记录。`) : '';
+      const left = N.filter(n => done[n] === undefined);
+      if (!left.length) { th[t] = { s: 'idle', x: '4 个连接全部处理完。' }; scs[t] = sc; continue; }
+      if (m === 'block') {
+        const n = N[i];
+        if (!started) { sc++; started = true; }
+        if (ARR[n] <= t) { th[t] = { s: 'work', x: `read(${n}) 返回 → 处理 ${n}。` }; done[n] = t; i++; started = false; }
+        else {
+          const r = ready(done, t).filter(k => k !== n);
+          th[t] = { s: 'sleep', x: `线程睡在 read(${n}) 上。` + (r.length ? `${r.join('、')} 早就到了，却只能干等！` : '') };
+        }
+      } else if (m === 'nonblock') {
+        let got = null, tries = 0;
+        for (const n of left) { tries++; if (ARR[n] <= t) { got = n; break; } }
+        if (got) { sc += tries; th[t] = { s: 'work', x: (tries > 1 ? `问了 ${left.slice(0, tries - 1).join('、')} 得到 EAGAIN，` : '') + `read(${got}) 拿到数据 → 处理 ${got}。` }; done[got] = t; }
+        else { sc += SPIN; spin++; th[t] = { s: 'spin', x: `read(${left.join('、')}) 全是 EAGAIN……马上再问一轮。这一格里其实转了成百上千圈，CPU 100% 却啥也没干成。` }; }
+      } else if (m === 'epoll') {
+        if (!list.length) {
+          const r = ready(done, t);
+          if (!r.length) {
+            if (!sleeping) { sc++; sleeping = true; th[t] = { s: 'sleep', x: '调用 epoll_wait()，没人就绪 → 线程睡下，不占 CPU。' }; }
+            else th[t] = { s: 'sleep', x: '还睡在 epoll_wait() 里。' };
+            scs[t] = sc; continue;
+          }
+          if (!sleeping) sc++;
+          sleeping = false; list = [...r];
+          const n = list.shift(); sc++; done[n] = t;
+          th[t] = { s: 'work', x: `epoll_wait() 返回「${r.join('、')} 就绪」→ read(${n}) → 处理 ${n}。` };
+        } else { const n = list.shift(); sc++; done[n] = t; th[t] = { s: 'work', x: `接着处理上次返回的就绪列表：read(${n}) → 处理 ${n}。` }; }
+      } else {
+        if (t === 0) { sc++; th[t] = { s: 'sys', x: '一次 io_uring_enter() 把 A、B、C、D 四个读请求（连同各自的缓冲区）一起提交。' }; scs[t] = sc; continue; }
+        const r = ready(done, t);
+        if (r.length) { sleeping = false; done[r[0]] = t; th[t] = { s: 'work', x: `从完成队列 CQ 取出 ${r[0]} 的结果——数据已经在缓冲区里，直接处理，不用再 read。（取 CQ 是读共享内存，不算系统调用）` }; }
+        else if (!sleeping) { sc++; sleeping = true; th[t] = { s: 'sleep', x: 'CQ 空了 → 调 io_uring_enter() 等至少 1 个完成，线程睡下。' }; }
+        else th[t] = { s: 'sleep', x: '还在等完成。' };
+      }
+      scs[t] = sc;
+    }
+    return { th, kern, scs, done, spinTicks: th.map((x, t) => th.slice(0, t + 1).filter(y => y.s === 'spin').length) };
+  }
+  const SIMS = {}; Object.keys(MODELS).forEach(k => SIMS[k] = simulate(k));
+  const INIT = { model: 'block', t: 0, playing: false };
+  let S = { ...INIT }, timer = null;
+  const tabs = $(root, '.tabs'), tl = $(root, '.tl'), cap = $(root, '.caption'), kl = $(root, '.kline'), no = $(root, '.stepno');
+  const btn = a => $(root, `[data-act="${a}"]`);
+  Object.entries(MODELS).forEach(([k, v]) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'btn'; b.dataset.m = k; b.textContent = v.name;
+    b.onclick = () => { stop(); S.model = k; S.t = 0; draw(); };
+    tabs.append(b);
+  });
+  // 网格：表头 + 线程行 + A~D 行
+  let html = '<div></div>';
+  for (let t = 0; t < T; t++) html += `<div class="hd" data-h="${t}">${t}</div>`;
+  ['线程', ...N].forEach((r, ri) => { html += `<div class="lab">${r}</div>`; for (let t = 0; t < T; t++) html += `<div class="cell" data-r="${ri}" data-t="${t}"></div>`; });
+  tl.innerHTML = html;
+  const cell = (r, t) => $(tl, `[data-r="${r}"][data-t="${t}"]`);
+  const ICON = { work: '处理', sleep: 'zz', spin: '转', sys: '提交', idle: '' };
+  const draw = () => {
+    const sim = SIMS[S.model], t = S.t;
+    tabs.querySelectorAll('.btn').forEach(b => b.classList.toggle('on', b.dataset.m === S.model));
+    $(root, '.model-intro').innerHTML = `<b>${MODELS[S.model].name}：</b>` + MODELS[S.model].intro;
+    tl.querySelectorAll('.hd').forEach(h => h.classList.toggle('now', +h.dataset.h === t));
+    for (let k = 0; k < T; k++) {
+      const c = cell(0, k), st = sim.th[k].s;
+      c.className = 'cell' + (k <= t ? ' ' + st : '') + (k === t ? ' now' : '');
+      c.textContent = k <= t ? ICON[st] : '';
+      N.forEach((n, ri) => {
+        const e = cell(ri + 1, k), d = sim.done[n];
+        let cls = '', tx = '';
+        if (k <= t) {
+          if (d === k) { cls = 'got'; tx = '✓'; }
+          else if (k === ARR[n]) { cls = 'arr'; tx = '到'; }
+          else if (k > ARR[n] && (d === undefined || k < d)) { cls = 'waiting'; tx = '等'; }
+        }
+        e.className = 'cell ' + cls; e.textContent = tx;
+      });
+    }
+    cap.textContent = `第 ${t} 格：` + sim.th[t].x;
+    kl.textContent = sim.kern[t];
+    no.textContent = `${t} / ${T - 1}`;
+    const sc = sim.scs[t], sp = sim.spinTicks[t];
+    $(root, '[data-k="sc"]').textContent = sp ? `≈ ${sc.toLocaleString()}` : String(sc);
+    $(root, '[data-k="sc"]').className = 'v' + (sc > 100 ? ' warn' : '');
+    let lat = 0;
+    N.forEach(n => { if (ARR[n] <= t) lat += Math.min(t, sim.done[n] ?? t) - ARR[n]; });
+    $(root, '[data-k="lat"]').textContent = lat + ' 格';
+    $(root, '[data-k="lat"]').className = 'v' + (lat ? ' badc' : '');
+    $(root, '[data-k="spin"]').textContent = sp + ' 格';
+    $(root, '[data-k="spin"]').className = 'v' + (sp ? ' warn' : '');
+    $(root, '[data-k="copy"]').textContent = MODELS[S.model].copy;
+    btn('prev').disabled = t === 0; btn('next').disabled = t === T - 1;
+    btn('play').textContent = S.playing ? '⏸ 暂停' : '▶ 播放';
+  };
+  const stop = () => { clearInterval(timer); timer = null; S.playing = false; };
+  const go = d => { S.t = Math.max(0, Math.min(T - 1, S.t + d)); draw(); };
+  btn('prev').onclick = () => { stop(); go(-1); };
+  btn('next').onclick = () => { stop(); go(1); };
+  btn('play').onclick = () => {
+    if (S.playing) { stop(); draw(); return; }
+    if (S.t === T - 1) S.t = 0;
+    S.playing = true; draw();
+    timer = setInterval(() => { go(1); if (S.t === T - 1) { stop(); draw(); } }, 1600);
+  };
+  const reset = () => { stop(); S = { ...INIT }; draw(); };
+  btn('reset').onclick = reset;
+  resets.push(reset);
+  reset();
+}
+
+/* ---------- 练习题 ---------- */
+window.LQ_ITEMS = [
+  { type: '选择', q: '程序调用 <code>write(fd, buf, n)</code> 返回成功时，数据<b>通常</b>在哪里？', opts: ['已经写进磁盘', '在内核的 Page Cache（内存）里', '还在进程自己的 libc 缓冲区里'], ans: 1,
+    why: '见动画 ② 第 3 步：write 把数据拷进 Page Cache、标记脏页就返回了。真正落盘要等后台回写或 fsync。libc 缓冲区是 fwrite/printf 那一层，比 write 更早。' },
+  { type: '判断', q: '调用 <code>fflush(fp)</code> 之后，就算马上断电，数据也不会丢。', opts: ['对', '错'], ans: 1,
+    why: '常见误区。fflush 只是把 libc 用户缓冲区里的数据通过 write() 交给内核，到 Page Cache 为止，断电仍会丢。要保证持久化得再调 fsync(fileno(fp))。' },
+  { type: '选择', q: '数据从应用到磁盘，正确的顺序是？', opts: ['应用缓冲区 → Page Cache → 文件系统 → 块层 → 设备驱动 → 磁盘', '应用缓冲区 → 文件系统 → 块层 → Page Cache → 设备驱动 → 磁盘', '应用缓冲区 → 块层 → Page Cache → 文件系统 → 设备驱动 → 磁盘'], ans: 0,
+    why: 'Page Cache 紧挨着系统调用：先停在内存。回写时文件系统算出磁盘块号，块层合并调度请求，驱动再把命令交给硬件。' },
+  { type: '填空', q: '一个 shell 进程打开后，<code>printf</code> 的输出默认写到几号文件描述符？', ans: ['1'], placeholder: '填数字',
+    why: '0 是标准输入、1 是标准输出、2 是标准错误。所以 <code>cmd &gt; out.txt</code> 改的是 fd 1，<code>2&gt;err.txt</code> 改的是 fd 2。新 open 的文件从 3 开始编号。' },
+  { type: '选择', q: '下面哪一个在 Linux 里<b>不能</b>直接 open() 拿到 fd 读写？', opts: ['/dev/null', '/proc/cpuinfo', '网卡 eth0', '/dev/tty'], ans: 2,
+    why: '/dev/null、/proc/cpuinfo、/dev/tty 都是文件路径。网卡在 /dev 下没有对应文件，要通过 socket、ioctl、netlink 来操作——「一切皆文件」是设计倾向，不是绝对。' },
+  { type: '选择', q: '把 socket 设成 O_NONBLOCK 后调用 <code>read()</code>，而此时数据还没到，会发生什么？', opts: ['线程睡着，直到数据到达', '立刻返回 -1，errno 为 EAGAIN', '返回 0，表示连接关闭'], ans: 1,
+    why: '非阻塞的意思就是「不睡」：没数据就马上告诉你 EAGAIN（稍后再试）。返回 0 是对方关闭连接（EOF），不要搞混。' },
+  { type: '判断', q: 'epoll_wait 返回某个 fd 时，内核已经把数据拷进了你的缓冲区。', opts: ['对', '错'], ans: 1,
+    why: 'epoll 是「就绪通知」：只告诉你「可以读了」，还得你自己 read() 把数据拷出来。「已经拷好」是 io_uring 这种「完成通知」的特点（见模块 ③ 里「谁拷数据」一栏）。' },
+  { type: '选择', q: '你在写一个聊天服务器：1 万个长连接，大部分时间都没消息。用 Linux 上的经典方案，该选哪个？', opts: ['每个连接开一个线程，用阻塞 read', '单线程非阻塞，循环挨个 read 所有连接', '把所有连接交给 epoll，一个事件循环处理就绪的连接'], ans: 2,
+    why: '1 万个线程光栈内存和上下文切换就吃不消；轮询 1 万个 fd 会把 CPU 空转烧光。epoll 让线程睡到有消息才醒，且只返回就绪的那几个——nginx、Redis 都是这个思路（新项目也可以考虑 io_uring）。' },
+  { type: '选择', q: '你想在不阻塞主线程的前提下大量读取<b>普通磁盘文件</b>，哪个方案真正有效？', opts: ['把文件 fd 设为 O_NONBLOCK', '用 epoll 监听文件 fd 的可读事件', '用 io_uring 提交读请求，再从完成队列取结果'], ans: 2,
+    why: '迁移题，也是常见误区：普通文件在 Linux 看来永远「就绪」，O_NONBLOCK 对它没效果，epoll_ctl 加入普通文件会报 EPERM。真正的异步文件 I/O 要用 io_uring（或线程池）。' },
+  { type: '填空', q: '数据库提交事务后，必须保证断电也不丢日志。写完日志文件后应调用哪个系统调用？（写函数名）', ans: ['fsync', 'fsync()', 'fdatasync', 'fdatasync()'], placeholder: '函数名',
+    why: 'fsync（或只刷数据和必要元数据的 fdatasync）会把该文件的脏页一路写到底，并让磁盘 FLUSH 自己的缓存，返回后才算真正持久——见动画 ② 切到「write() + fsync()」第 7 步。' },
+];
+</script>
+<script>
+/* ---------- 练习题（learn 通用组件） ----------
+   题目来自 window.LQ_ITEMS：{type, q, opts, ans: 选项下标, why} 或填空题 {type, q, ans: [可接受答案…], why}
+   定义 window.resetPage()（导航条「重置」按钮调用）：先调用页面自己的 window.pageReset()，再清空练习 */
+(() => {
+  const box = document.getElementById('lq');
+  const items = window.LQ_ITEMS || [];
+  const list = box.querySelector('.lq-list'), score = box.querySelector('.lq-score');
+  const norm = s => String(s).trim().toLowerCase().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let answered = 0, right = 0;
+
+  function update() {
+    const all = answered === items.length;
+    score.textContent = `已答 ${answered} / ${items.length} · 答对 ${right}` +
+      (all ? (right === items.length ? ' · 全对！' : ' · 看看解析，再重做一次') : '');
+  }
+
+  function render() {
+    answered = 0; right = 0; list.innerHTML = '';
+    items.forEach((it, i) => {
+      const el = document.createElement('div');
+      el.className = 'lq-item';
+      el.innerHTML = `<div class="lq-q"><span class="lq-tag">${it.type}</span>${i + 1}. ${it.q}</div><div class="lq-a"></div><div class="lq-why"></div>`;
+      const a = el.querySelector('.lq-a'), why = el.querySelector('.lq-why');
+      const judge = (ok, answer) => {
+        answered++; if (ok) right++;
+        el.classList.add(ok ? 'lq-is-ok' : 'lq-is-bad');
+        why.innerHTML = (ok ? '<b class="lq-ok">✓ 正确。</b>' : `<b class="lq-bad">✗ 不对，正确答案：${answer}。</b>`) + it.why;
+        update();
+      };
+      if (it.opts) {
+        a.classList.add('lq-opts');
+        it.opts.forEach((o, j) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'lq-opt'; b.innerHTML = o;
+          b.onclick = () => {
+            a.querySelectorAll('button').forEach(x => x.disabled = true);
+            a.children[it.ans].classList.add('lq-right');
+            if (j !== it.ans) b.classList.add('lq-wrong');
+            judge(j === it.ans, it.opts[it.ans]);
+          };
+          a.append(b);
+        });
+      } else {
+        a.classList.add('lq-fill');
+        a.innerHTML = `<input type="text" autocomplete="off" spellcheck="false" placeholder="${it.placeholder || '输入答案'}" aria-label="第 ${i + 1} 题答案"><button type="button" class="lq-opt">确定</button>`;
+        const inp = a.querySelector('input'), go = a.querySelector('button');
+        const submit = () => {
+          if (!inp.value.trim()) { inp.focus(); return; }
+          inp.disabled = go.disabled = true;
+          const ok = it.ans.some(x => norm(x) === norm(inp.value));
+          inp.classList.add(ok ? 'lq-right' : 'lq-wrong');
+          judge(ok, it.ans[0]);
+        };
+        go.onclick = submit;
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+      }
+      list.append(el);
+    });
+    update();
+  }
+
+  box.querySelector('.lq-redo').addEventListener('click', render);
+  // 导航条的「重置」按钮调用它：页面各模块 + 练习题一起恢复初始状态
+  window.resetPage = () => {
+    if (typeof window.pageReset === 'function') window.pageReset();
+    render();
+  };
+  render();
+})();
+</script>
+</body>
+</html>
